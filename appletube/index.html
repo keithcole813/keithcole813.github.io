@@ -4,58 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AppleTube — Keith Cole</title>
-<meta name="description" content="Upload an Apple playlist, get YouTube matches, download MP3s">
+<meta name="description" content="Upload an Apple playlist, get YouTube matches, download MP3s — runs entirely in your browser">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: #0b0f1a; color: #f1f5f9;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-    padding: 2rem 1.25rem;
+    padding: 1rem 1rem 2rem;
   }
   .wrap { width: 100%; max-width: 640px; }
-  a.back { color: #f0cd6e; text-decoration: none; font-size: 0.95rem; }
-  h1 { font-size: 1.8rem; font-weight: 800; margin: 0.6rem 0 0.4rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-  .badge {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    background: #f0cd6e; color: #0b0f1a; border-radius: 999px; padding: 0.25rem 0.7rem;
+  h1 { font-size: 1.7rem; font-weight: 800; margin: 0.6rem 0 0.3rem; }
+  h1 span { color: #f0cd6e; }
+  .sub { color: #94a3b8; margin-bottom: 1.2rem; font-size: 0.95rem; line-height: 1.5; }
+  .upload-zone {
+    border: 2px dashed #334155; border-radius: 12px; padding: 1.8rem 1rem;
+    text-align: center; margin-bottom: 1rem; cursor: pointer;
   }
-  .sub { color: #94a3b8; margin-bottom: 1.4rem; line-height: 1.55; }
-  h3 { color: #f0cd6e; font-size: 1rem; margin: 1.4rem 0 0.5rem; text-transform: uppercase; letter-spacing: 0.06em; }
-  ul { margin-left: 1.2rem; color: #cbd5e1; line-height: 1.7; font-size: 0.95rem; }
-  code { background: #1c2438; padding: 0.15rem 0.45rem; border-radius: 6px; font-size: 0.88em; }
+  .upload-zone:active { border-color: #f0cd6e; }
+  .upload-zone input { display: none; }
+  .formats { font-size: 0.78rem; color: #64748b; margin-top: 0.4rem; }
+  .controls { display: flex; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
   .btn {
-    display: block; margin-top: 1.8rem; background: #f0cd6e; color: #0b0f1a;
-    font-weight: 800; padding: 0.95rem 1.6rem; border-radius: 12px; text-decoration: none;
-    text-align: center; font-size: 1rem;
+    background: #f0cd6e; color: #0b0f1a; border: none; border-radius: 10px;
+    padding: 0.75rem 1.2rem; font-weight: 700; font-size: 0.93rem; cursor: pointer;
   }
-  .btn:active { transform: scale(0.98); }
-  footer { margin-top: auto; padding-top: 3rem; color: #475569; font-size: 0.8rem; text-align: center; }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.5; }
+  .song-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .song {
+    background: #141b2e; border: 1px solid #26314d; border-radius: 12px;
+    padding: 0.9rem; display: flex; gap: 0.8rem; align-items: center;
+  }
+  .song-info { flex: 1; min-width: 0; }
+  .song-title { font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .song-artist { color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.3rem; }
+  .yt-match { font-size: 0.82rem; color: #64748b; }
+  .yt-match a { color: #38bdf8; text-decoration: none; }
+  .yt-match.found { color: #4ade80; }
+  .thumb { width: 72px; height: 54px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .icon-btn {
+    background: #1c2438; border: 1px solid #26314d; border-radius: 10px;
+    width: 42px; height: 42px; font-size: 1.1rem; cursor: pointer; color: #f1f5f9; flex-shrink: 0;
+  }
+  .icon-btn:active { background: #26314d; }
+  .icon-btn.remove { color: #f87171; }
+  .status { text-align: center; color: #64748b; padding: 1.5rem 0.5rem; font-size: 0.9rem; }
+  .progress { background: #1e293b; border-radius: 8px; height: 8px; margin: 0.8rem 0; overflow: hidden; display: none; }
+  .progress-bar { background: #f0cd6e; height: 100%; width: 0%; transition: width 0.3s; }
+  .note { background: #1c2438; border: 1px solid #26314d; border-radius: 10px; padding: 0.9rem; margin-top: 1.2rem; font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+  .note a { color: #38bdf8; }
 
   .appnav {
-    position: sticky; top: 0; z-index: 50;
+    position: sticky; top: 0; z-index: 50; width: 100%; max-width: 640px;
     display: flex; justify-content: space-between; align-items: center;
-    padding: 0.55rem 0; margin: 0 -0.25rem;
+    padding: 0.55rem 0; margin-bottom: 0.5rem;
     background: rgba(11,15,26,0.94);
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
-  .appnav a.home { color: #f0cd6e; text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 0.25rem; }
-  .appnav button.refresh {
-    background: #1c2438; color: #f0cd6e; border: 1px solid #26314d;
-    border-radius: 12px; font-size: 1.15rem; line-height: 1;
-    width: 2.6rem; height: 2.6rem; cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .appnav button.refresh:active { background: #26314d; }
+  .appnav a.home { color: #f0cd6e; text-decoration: none; font-size: 0.95rem; font-weight: 600; }
   .appnav .navbtns { display: flex; gap: 0.5rem; }
   .appnav button.iconbtn {
     background: #1c2438; color: #f0cd6e; border: 1px solid #26314d;
-    border-radius: 12px; font-size: 1.15rem; line-height: 1;
-    width: 2.6rem; height: 2.6rem; cursor: pointer;
+    border-radius: 12px; font-size: 1.15rem; width: 2.6rem; height: 2.6rem; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
-    -webkit-tap-highlight-color: transparent;
   }
-  .appnav button.iconbtn:active { background: #26314d; }
   .share-toast {
     position: fixed; left: 50%; bottom: 2rem; z-index: 100;
     transform: translateX(-50%) translateY(20px);
@@ -64,6 +77,7 @@
     opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
   }
   .share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  footer { margin-top: 2rem; color: #475569; font-size: 0.8rem; text-align: center; }
 </style>
 </head>
 <body>
@@ -71,33 +85,212 @@
   <nav class="appnav">
     <a class="home" href="../">← All Apps</a>
     <span class="navbtns">
-      <button class="iconbtn" onclick="sharePage()" aria-label="Share this page"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
-      <button class="iconbtn" onclick="location.reload()" aria-label="Refresh this page">↻</button>
+      <button class="iconbtn" onclick="sharePage()" aria-label="Share"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
+      <button class="iconbtn" onclick="location.reload()" aria-label="Refresh">↻</button>
     </span>
   </nav>
-  <h1>🍎📺 AppleTube <span class="badge">Web app</span></h1>
-  <p class="sub">Upload an Apple playlist, get YouTube links for the closest matches, remove songs you don't want, then download individual MP3s or grab everything as a ZIP.</p>
 
-  <h3>What it does</h3>
-  <ul>
-    <li>Upload <code>.txt</code>, <code>.m3u</code>, or iTunes <code>.xml</code> playlists</li>
-    <li>Auto-searches YouTube for the closest match per song</li>
-    <li>Preview matches with thumbnails before downloading</li>
-    <li>Remove songs from the list before downloading</li>
-    <li>Download individual MP3s or all as a single ZIP</li>
-  </ul>
+  <h1>🍎📺 <span>AppleTube</span></h1>
+  <p class="sub">Upload an Apple playlist → get YouTube matches → tap through to download. Runs entirely in your browser.</p>
 
-  <h3>Setup</h3>
-  <ul>
-    <li>Python 3 with <code>Flask</code> and <code>yt-dlp</code></li>
-    <li>Run <code>python app.py</code> — serves on port 5004</li>
-  </ul>
+  <div class="upload-zone" id="uploadZone">
+    <div style="font-size:1.8rem;margin-bottom:0.4rem">📁</div>
+    <div>Drop playlist file here or tap to browse</div>
+    <div class="formats">.txt, .m3u, .xml (iTunes export)</div>
+    <input type="file" id="fileInput" accept=".txt,.m3u,.m3u8,.xml,.plist">
+  </div>
 
-  <a class="btn" href="https://github.com/keithcole813/appletube">View on GitHub</a>
-  <footer>Built by Keith Cole</footer>
+  <div class="controls" id="controls" style="display:none">
+    <button class="btn" id="searchAllBtn">🔍 Find YouTube Matches</button>
+  </div>
+  <div class="progress" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="song-list" id="songList"></div>
+  <div class="status" id="status">Upload a playlist to get started</div>
+
+  <div class="note">
+    💡 <strong>How downloads work:</strong> Tap the ⬇ button on any match to open the YouTube video. Use your
+    <a href="../yt-beats-downloader/">YT Beats Downloader</a> (or any YouTube to MP3 tool) to grab the audio.
+    Everything runs in your browser — no server, no uploads.
+  </div>
+
+  <footer>Built by Keith Cole · <a href="https://github.com/keithcole813/appletube" style="color:#f0cd6e">GitHub</a></footer>
 </div>
 
 <script>
+// Invidious instances for YouTube search (no API key needed)
+const INVIDIOUS = [
+  'https://inv.nadeko.net',
+  'https://invidious.nerdvpn.de',
+  'https://iv.melmac.space'
+];
+let invIndex = 0;
+
+let songs = [];
+let matches = {};
+
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); });
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0]);
+});
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const content = e.target.result;
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.xml') || name.endsWith('.plist')) songs = parseXML(content);
+    else if (name.endsWith('.m3u') || name.endsWith('.m3u8')) songs = parseM3U(content);
+    else songs = parseTXT(content);
+    songs.forEach((s, i) => s.id = i);
+    matches = {};
+    renderSongs();
+    document.getElementById('controls').style.display = 'flex';
+    document.getElementById('status').textContent = `${songs.length} songs loaded. Hit "Find YouTube Matches".`;
+  };
+  reader.readAsText(file);
+}
+
+function parseTXT(content) {
+  const songs = [];
+  content.split('\n').forEach(line => {
+    line = line.trim();
+    if (!line || line.startsWith('#')) return;
+    if (line.includes(' - ')) {
+      const [artist, ...rest] = line.split(' - ');
+      songs.push({artist: artist.trim(), title: rest.join(' - ').trim()});
+    } else {
+      songs.push({artist: '', title: line});
+    }
+  });
+  return songs;
+}
+
+function parseM3U(content) {
+  const songs = [];
+  content.split('\n').forEach(line => {
+    line = line.trim();
+    if (!line || line.startsWith('#')) return;
+    let name = line.split('/').pop().replace(/\.(mp3|m4a|wav|flac|aac)$/i, '');
+    if (name.includes(' - ')) {
+      const [artist, ...rest] = name.split(' - ');
+      songs.push({artist: artist.trim(), title: rest.join(' - ').trim()});
+    } else {
+      songs.push({artist: '', title: name});
+    }
+  });
+  return songs;
+}
+
+function parseXML(content) {
+  const songs = [];
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/xml');
+    const dicts = doc.querySelectorAll('dict');
+    const seen = new Set();
+    dicts.forEach(d => {
+      const keys = d.querySelectorAll(':scope > key');
+      const track = {};
+      keys.forEach(k => {
+        const val = k.nextElementSibling;
+        if (val) track[k.textContent] = val.textContent;
+      });
+      if (track.Name && !seen.has(track.Name + '|' + (track.Artist||''))) {
+        seen.add(track.Name + '|' + (track.Artist||''));
+        songs.push({artist: track.Artist || '', title: track.Name});
+      }
+    });
+  } catch (e) { console.error('XML parse error', e); }
+  return songs;
+}
+
+async function searchYouTube(artist, title) {
+  const query = `${artist} ${title}`.trim();
+  // Try each Invidious instance
+  for (let attempt = 0; attempt < INVIDIOUS.length; attempt++) {
+    const base = INVIDIOUS[(invIndex + attempt) % INVIDIOUS.length];
+    try {
+      const res = await fetch(`${base}/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=1`, {signal: AbortSignal.timeout(10000)});
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const v = data[0];
+        invIndex = (invIndex + attempt) % INVIDIOUS.length; // stick with working instance
+        return {
+          videoId: v.videoId,
+          title: v.title,
+          author: v.author,
+          url: `https://youtube.com/watch?v=${v.videoId}`,
+          thumb: v.videoThumbnails ? (v.videoThumbnails.find(t => t.quality === 'medium') || v.videoThumbnails[0]).url : ''
+        };
+      }
+    } catch (e) { /* try next instance */ }
+  }
+  return null;
+}
+
+function esc(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderSongs() {
+  const list = document.getElementById('songList');
+  list.innerHTML = '';
+  songs.filter(s => !s.removed).forEach(song => {
+    const m = matches[song.id];
+    const div = document.createElement('div');
+    div.className = 'song';
+    div.innerHTML = `
+      ${m && m.thumb ? `<img class="thumb" src="${m.thumb}" alt="" loading="lazy">` : ''}
+      <div class="song-info">
+        <div class="song-title">${esc(song.title)}</div>
+        <div class="song-artist">${esc(song.artist)}</div>
+        <div class="yt-match ${m ? 'found' : ''}">${m ? `✓ <a href="${m.url}" target="_blank" rel="noopener">${esc(m.title)}</a>` : '—'}</div>
+      </div>
+      ${m ? `<button class="icon-btn" onclick="window.open('${m.url}','_blank')" title="Open on YouTube">⬇</button>` : ''}
+      <button class="icon-btn remove" onclick="removeSong(${song.id})" title="Remove">✕</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function removeSong(id) {
+  const s = songs.find(x => x.id === id);
+  if (s) { s.removed = true; delete matches[id]; renderSongs(); }
+}
+
+document.getElementById('searchAllBtn').addEventListener('click', async () => {
+  const active = songs.filter(s => !s.removed);
+  if (!active.length) return;
+  const btn = document.getElementById('searchAllBtn');
+  btn.disabled = true; btn.textContent = '🔍 Searching...';
+  const pw = document.getElementById('progressWrap');
+  pw.style.display = 'block';
+  const pb = document.getElementById('progressBar');
+
+  for (let i = 0; i < active.length; i++) {
+    const song = active[i];
+    const m = await searchYouTube(song.artist, song.title);
+    if (m) matches[song.id] = m;
+    pb.style.width = Math.round(((i+1)/active.length)*100) + '%';
+    renderSongs();
+    // Small delay to be nice to the API
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  btn.disabled = false; btn.textContent = '🔍 Find YouTube Matches';
+  pw.style.display = 'none';
+  const found = Object.keys(matches).length;
+  document.getElementById('status').textContent = `Found ${found} of ${active.length} on YouTube. Tap ⬇ to open each video.`;
+});
+
 async function sharePage(url, title) {
   const shareUrl = url || location.href;
   const shareTitle = title || document.title;
@@ -107,18 +300,14 @@ async function sharePage(url, title) {
   }
   try {
     await navigator.clipboard.writeText(shareUrl);
-    showToast('Link copied — paste it anywhere');
-  } catch (e) {
-    showToast('Copy this link: ' + shareUrl);
-  }
+    showToast('Link copied');
+  } catch (e) { showToast(shareUrl); }
 }
 function showToast(msg) {
   let t = document.querySelector('.share-toast');
   if (!t) { t = document.createElement('div'); t.className = 'share-toast'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.remove('show'), 2200);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200);
 }
 </script>
 </body>
