@@ -318,20 +318,29 @@ document.getElementById('saveMintBtn').addEventListener('click', () => {
 });
 
 async function fetchAppleMusicPlaylist(url) {
+  const statusEl = document.getElementById('status');
   // Try Mint box first (server-side fetch, no CORS issues)
-  const mintBox = getMintBoxUrl();
-  try {
-    const res = await fetch(`${mintBox}/fetch_url`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({url}),
-      signal: AbortSignal.timeout(30000)
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.songs && data.songs.length) return data.songs;
-    }
-  } catch (e) { /* fall through to proxies */ }
+  // Try LAN first, then Tailscale (for when not on home WiFi)
+  const mintBoxes = [];
+  const saved = localStorage.getItem('appletube_mintbox');
+  if (saved) mintBoxes.push(saved);
+  mintBoxes.push('http://192.168.4.113:5004', 'http://100.67.163.100:5004');
+  
+  for (const mintBox of mintBoxes) {
+    try {
+      statusEl.textContent = `Trying Mint box (${mintBox})…`;
+      const res = await fetch(`${mintBox}/fetch_url`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({url}),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.songs && data.songs.length) return data.songs;
+      }
+    } catch (e) { /* try next */ }
+  }
 
   // Fallback: Try multiple CORS proxies
   const proxies = [
