@@ -234,6 +234,31 @@ function parseXML(content) {
 }
 
 async function searchYouTube(artist, title) {
+  // Try Mint box yt-dlp search first (reliable)
+  const mintBoxes = [];
+  const saved = localStorage.getItem('appletube_mintbox');
+  if (saved) mintBoxes.push(saved);
+  mintBoxes.push(
+    'https://intense-posters-graphs-speed.trycloudflare.com',
+    'http://192.168.4.113:5004',
+    'http://100.67.163.100:5004'
+  );
+  for (const mintBox of mintBoxes) {
+    try {
+      const res = await fetch(`${mintBox}/yt_search`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({artist, title}),
+        signal: AbortSignal.timeout(25000)
+      });
+      if (res.ok) {
+        const m = await res.json();
+        if (m.videoId) return m;
+      }
+    } catch (e) { /* try next */ }
+  }
+
+  // Fallback: Invidious instances (often unreliable)
   const query = `${artist} ${title}`.trim();
   // Try each Invidious instance
   for (let attempt = 0; attempt < INVIDIOUS.length; attempt++) {
