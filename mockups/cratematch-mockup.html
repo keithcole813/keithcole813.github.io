@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a1a;color:#fff;font-family:-apple-system,sans-serif;width:440px;height:640px;overflow:hidden}
+.header{background:#111;padding:12px 16px;border-bottom:1px solid #333}
+.now-playing{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px}
+.track{font-size:15px;font-weight:700;margin-top:2px}
+.pocket{display:inline-block;background:#f0cd6e;color:#1a1a1a;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:6px}
+.controls{display:flex;gap:8px;padding:10px 16px;background:#222;align-items:center}
+.controls select,.controls button{background:#333;color:#fff;border:1px solid #444;border-radius:6px;padding:6px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#222;color:#f0cd6e;text-align:left;padding:8px 10px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;position:sticky;top:0}
+td{padding:8px 10px;border-bottom:1px solid #2a2a2a}
+tr:nth-child(even) td{background:#202020}
+tr:hover td{background:#2a2a2a}
+.score{color:#4ade80;font-weight:700}
+.key{color:#38bdf8}
+.dl{background:#38bdf8;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer}
+</style></head><body>
+<div class="header">
+<div class="now-playing">Now Playing</div>
+<div class="track">Chronixx — Skankin' Sweet</div>
+<span class="pocket">Reggae / 2010s</span>
+</div>
+<div class="controls">
+<select><option>15 tracks</option><option>10 tracks</option><option>20 tracks</option></select>
+<select><option>Camelot</option><option>Classic</option><option>Open Key</option></select>
+</div>
+<table>
+<tr><th>Title</th><th>Artist</th><th>BPM</th><th>Key</th><th>Score</th><th></th></tr>
+<tr><td>Who Knows</td><td>Protoje</td><td>84</td><td class="key">8A</td><td class="score">94</td><td></td></tr>
+<tr><td>Smile Jamaica</td><td>Chronixx</td><td>84</td><td class="key">8A</td><td class="score">91</td><td></td></tr>
+<tr><td>Eternal Light</td><td>Free Nationals</td><td>82</td><td class="key">9A</td><td class="score">87</td><td></td></tr>
+<tr><td>They Don't Know</td><td>Chronixx</td><td>86</td><td class="key">8A</td><td class="score">85</td><td></td></tr>
+<tr><td>Here Comes Trouble</td><td>Chronixx</td><td>84</td><td class="key">8B</td><td class="score">82</td><td></td></tr>
+<tr><td>Redemption Song</td><td>Bob Marley</td><td>66</td><td class="key">—</td><td class="score">—</td><td><button class="dl">⬇</button></td></tr>
+<tr><td>Three Little Birds</td><td>Bob Marley</td><td>74</td><td class="key">—</td><td class="score">—</td><td><button class="dl">⬇</button></td></tr>
+<tr><td>Is This Love</td><td>Bob Marley</td><td>96</td><td class="key">—</td><td class="score">—</td><td><button class="dl">⬇</button></td></tr>
+</table>
+</body></html>
