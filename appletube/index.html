@@ -122,6 +122,7 @@
 
   <div class="controls" id="controls" style="display:none">
     <button class="btn" id="searchAllBtn">🔍 Find YouTube Matches</button>
+    <button class="btn" id="downloadZipBtn" style="display:none;background:#38bdf8">⬇ Download All (ZIP)</button>
   </div>
   <div class="progress" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
 
@@ -535,6 +536,67 @@ document.getElementById('searchAllBtn').addEventListener('click', async () => {
   pw.style.display = 'none';
   const found = Object.keys(matches).length;
   document.getElementById('status').textContent = `Found ${found} of ${active.length} on YouTube. Tap ⬇ to open each video.`;
+  // Show ZIP button if we have matches
+  if (found > 0) document.getElementById('downloadZipBtn').style.display = '';
+});
+
+document.getElementById('downloadZipBtn').addEventListener('click', async () => {
+  const videoIds = Object.values(matches).map(m => m.videoId).filter(Boolean);
+  if (!videoIds.length) return;
+  const btn = document.getElementById('downloadZipBtn');
+  const statusEl = document.getElementById('status');
+  btn.disabled = true;
+
+  const mintBoxes = [];
+  const saved = localStorage.getItem('appletube_mintbox');
+  if (saved) mintBoxes.push(saved);
+  mintBoxes.push(
+    'https://intense-posters-graphs-speed.trycloudflare.com',
+    'http://192.168.4.113:5004',
+    'http://100.67.163.100:5004'
+  );
+
+  for (const mintBox of mintBoxes) {
+    try {
+      statusEl.textContent = `Starting ZIP download of ${videoIds.length} songs…`;
+      btn.textContent = '⏳ Starting…';
+      const startRes = await fetch(`${mintBox}/zip_start`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({video_ids: videoIds}),
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!startRes.ok) continue;
+      const {job_id, total} = await startRes.json();
+
+      // Poll for progress
+      while (true) {
+        await new Promise(r => setTimeout(r, 5000));
+        const stRes = await fetch(`${mintBox}/zip_status/${job_id}`, {signal: AbortSignal.timeout(10000)});
+        if (!stRes.ok) break;
+        const st = await stRes.json();
+        btn.textContent = `⏳ ${st.done}/${st.total}`;
+        statusEl.textContent = `Downloading… ${st.done} of ${st.total} songs`;
+        if (st.status === 'done') {
+          statusEl.textContent = 'Zipping…';
+          // Trigger download
+          const a = document.createElement('a');
+          a.href = `${mintBox}/zip_result/${job_id}`;
+          a.download = 'appletube_playlist.zip';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          statusEl.textContent = `Done! Downloaded ${st.total} songs as ZIP.`;
+          break;
+        }
+        if (st.status === 'error') { statusEl.textContent = 'Download failed.'; break; }
+      }
+      btn.disabled = false; btn.textContent = '⬇ Download All (ZIP)';
+      return;
+    } catch (e) { /* try next mintbox */ }
+  }
+  statusEl.textContent = 'Mint box unreachable for ZIP download.';
+  btn.disabled = false; btn.textContent = '⬇ Download All (ZIP)';
 });
 
 async function sharePage(url, title) {
