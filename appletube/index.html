@@ -452,15 +452,53 @@ document.getElementById('searchAllBtn').addEventListener('click', async () => {
   const pw = document.getElementById('progressWrap');
   pw.style.display = 'block';
   const pb = document.getElementById('progressBar');
+  const statusEl = document.getElementById('status');
 
-  for (let i = 0; i < active.length; i++) {
-    const song = active[i];
-    const m = await searchYouTube(song.artist, song.title);
-    if (m) matches[song.id] = m;
-    pb.style.width = Math.round(((i+1)/active.length)*100) + '%';
-    renderSongs();
-    // Small delay to be nice to the API
-    await new Promise(r => setTimeout(r, 300));
+  // Try batch search via Mint box (8 parallel yt-dlp on server)
+  const mintBoxes = [];
+  const saved = localStorage.getItem('appletube_mintbox');
+  if (saved) mintBoxes.push(saved);
+  mintBoxes.push(
+    'https://intense-posters-graphs-speed.trycloudflare.com',
+    'http://192.168.4.113:5004',
+    'http://100.67.163.100:5004'
+  );
+
+  let batchDone = false;
+  for (const mintBox of mintBoxes) {
+    try {
+      statusEl.textContent = `Searching ${active.length} songs (8 at a time via Mint box)…`;
+      pb.style.width = '10%';
+      const res = await fetch(`${mintBox}/yt_search_batch`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({songs: active.map(s => ({id: s.id, artist: s.artist, title: s.title}))}),
+        signal: AbortSignal.timeout(300000) // 5 min for large playlists
+      });
+      if (res.ok) {
+        const data = await res.json();
+        (data.results || []).forEach(r => {
+          if (r.videoId) matches[r.id] = r;
+        });
+        pb.style.width = '100%';
+        renderSongs();
+        batchDone = true;
+        break;
+      }
+    } catch (e) { /* try next mintbox */ }
+  }
+
+  // Fallback: sequential individual search (slow)
+  if (!batchDone) {
+    statusEl.textContent = 'Mint box unavailable, searching one by one…';
+    for (let i = 0; i < active.length; i++) {
+      const song = active[i];
+      const m = await searchYouTube(song.artist, song.title);
+      if (m) matches[song.id] = m;
+      pb.style.width = Math.round(((i+1)/active.length)*100) + '%';
+      renderSongs();
+      await new Promise(r => setTimeout(r, 300));
+    }
   }
 
   btn.disabled = false; btn.textContent = '🔍 Find YouTube Matches';
