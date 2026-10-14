@@ -320,11 +320,15 @@ document.getElementById('saveMintBtn').addEventListener('click', () => {
 async function fetchAppleMusicPlaylist(url) {
   const statusEl = document.getElementById('status');
   // Try Mint box first (server-side fetch, no CORS issues)
-  // Try LAN first, then Tailscale (for when not on home WiFi)
+  // HTTPS tunnel first (works from HTTPS pages), then LAN, then Tailscale
   const mintBoxes = [];
   const saved = localStorage.getItem('appletube_mintbox');
   if (saved) mintBoxes.push(saved);
-  mintBoxes.push('http://192.168.4.113:5004', 'http://100.67.163.100:5004');
+  mintBoxes.push(
+    'https://intense-posters-graphs-speed.trycloudflare.com',
+    'http://192.168.4.113:5004',
+    'http://100.67.163.100:5004'
+  );
   
   for (const mintBox of mintBoxes) {
     try {
