@@ -105,6 +105,12 @@
     <button class="btn" id="loadUrlBtn" style="white-space:nowrap">Load</button>
   </div>
 
+  <details style="margin-bottom:1rem">
+    <summary style="color:#94a3b8;font-size:0.9rem;cursor:pointer">Or paste track list as text</summary>
+    <textarea id="pasteInput" rows="6" placeholder="Paste songs here, one per line:&#10;Artist - Title&#10;or copy from Apple Music (Title&#9;Artist&#9;Album…)" style="width:100%;margin-top:0.6rem;background:#141b2e;border:1px solid #26314d;border-radius:10px;padding:0.75rem;color:#f1f5f9;font-size:0.9rem;outline:none;resize:vertical"></textarea>
+    <button class="btn" id="loadPasteBtn" style="margin-top:0.6rem">Load from Text</button>
+  </details>
+
   <div class="controls" id="controls" style="display:none">
     <button class="btn" id="searchAllBtn">🔍 Find YouTube Matches</button>
   </div>
@@ -330,6 +336,39 @@ async function fetchAppleMusicPlaylist(url) {
   if (songs.length) return songs;
   throw new Error('no tracks found in page');
 }
+
+document.getElementById('loadPasteBtn').addEventListener('click', () => {
+  const text = document.getElementById('pasteInput').value.trim();
+  if (!text) return;
+  songs = parsePastedText(text);
+  songs.forEach((s, i) => s.id = i);
+  matches = {};
+  renderSongs();
+  document.getElementById('controls').style.display = 'flex';
+  document.getElementById('status').textContent = `${songs.length} songs loaded. Hit "Find YouTube Matches".`;
+});
+
+function parsePastedText(text) {
+  const songs = [];
+  text.split('\n').forEach(line => {
+    line = line.trim();
+    if (!line) return;
+    // Apple Music copy gives tab-separated: Title  Artist  Album ...
+    if (line.includes('\t')) {
+      const parts = line.split('\t');
+      // Usually: Title, Artist, Album, ...
+      const title = (parts[0] || '').trim();
+      const artist = (parts[1] || '').trim();
+      if (title) songs.push({artist, title});
+    } else if (line.includes(' - ')) {
+      const [artist, ...rest] = line.split(' - ');
+      songs.push({artist: artist.trim(), title: rest.join(' - ').trim()});
+    } else {
+      songs.push({artist: '', title: line});
+    }
+  });
+  return songs;
+});
 
 document.getElementById('searchAllBtn').addEventListener('click', async () => {
   const active = songs.filter(s => !s.removed);
