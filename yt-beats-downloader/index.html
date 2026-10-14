@@ -85,25 +85,32 @@
     </span>
   </nav>
   <h1>🎛️ YT Beats Downloader <span class="badge">Self-hosted</span></h1>
-  <p class="sub">Grab YouTube audio as best-quality MP3 for sampling. Hear a DJ play a rare cut, save the whole set, chop it later. Desktop GUI plus a phone-friendly web version that runs on your home server.</p>
+  <p class="sub">I'm a producer. I hear a DJ play a rare cut, I want that audio. This grabs it from YouTube as a clean MP3 — straight to my phone.</p>
 
   <figure class="shot"><img src="preview.png" alt="YT Beats Downloader web app"><figcaption>The phone web app — paste a link, MP3 downloads straight to your phone</figcaption></figure>
 
+  <h3>The story</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">As a beatmaker I'm always sampling — a DJ drops an obscure set on YouTube, I want to chop it up later. The sketchy converter sites are full of ads and capped quality. So I built my own: paste a YouTube link, get the best-quality MP3. There's a phone web version for grabbing sets on the go, and a desktop app for the studio. It uses my battle-tested yt-dlp settings with Chrome cookies, so even age-restricted stuff works.</p>
+
   <h3>What it does</h3>
   <ul>
-    <li>Paste a YouTube URL → best-quality MP3, straight to your phone</li>
-    <li>Built for grabbing full DJ sets on the go — listen through, find the sweet spots, chop later</li>
-    <li>Your proven yt-dlp settings under the hood (Chrome cookies, best audio)</li>
-    <li>Desktop tkinter GUI too, for the studio machine</li>
-    <li>Downloads auto-clean after 24 hours</li>
+    <li>Paste any YouTube URL → best-quality MP3 download</li>
+    <li>Phone-friendly web app — grab DJ sets while you're out, chop them later</li>
+    <li>Desktop GUI for the studio machine</li>
+    <li>Chrome cookie support for restricted videos</li>
+    <li>Server auto-cleans downloads after 24 hours</li>
   </ul>
 
-  <h3>Setup</h3>
+  <h3>How to use it</h3>
   <ul>
-    <li>Runs on your Linux Mint home server, port 5001</li>
-    <li>Optional password lock via <code>YT_BEATS_PASSWORD</code></li>
-    <li>Cloudflare Tunnel for access away from home</li>
+    <li>Open the web app on your phone</li>
+    <li>Paste a YouTube link</li>
+    <li>Hit download — the MP3 saves straight to your phone</li>
+    <li>Self-host option: Python + Flask on any server, set a password via <code>YT_BEATS_PASSWORD</code></li>
   </ul>
+
+  <h3>Got feedback?</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">If a download fails or you want format options I haven't added, <a href="https://github.com/keithcole813/yt-beats-downloader/issues" style="color:#38bdf8">open an issue on GitHub</a>.</p>
 
   <a class="btn" href="https://github.com/keithcole813/yt-beats-downloader">View on GitHub</a>
   <footer>Built by Keith Cole</footer>

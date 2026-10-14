@@ -85,24 +85,34 @@
     </span>
   </nav>
   <h1>🎯 CrateMatch <span class="badge">Mac app</span></h1>
-  <p class="sub">Your own version of djay's Match feature — for the Serato offline library. Pick a track, get ranked similar songs by BPM, key and energy, preview them, and export the picks as a Serato crate.</p>
+  <p class="sub">I'm a DJ. I got tired of staring at a library of 10,000 tracks mid-set trying to figure out what plays next. So I built the tool I always wanted — it watches what you're playing in Serato and tells you what to play next.</p>
 
-  
+  <figure class="shot"><img src="preview.png" alt="CrateMatch Live window"><figcaption>The live window — follows your Serato set, drag suggestions to the deck</figcaption></figure>
+
+  <h3>The story</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">I used to DJ on Algoriddim djay, and their Match feature was magic — play classic rock, get more classic rock. Play old school hip-hop, stay in that pocket. When I switched to Serato, nothing came close. So I built CrateMatch to do it better: it doesn't just match BPM and key, it understands genre pockets, learns from your past sets, and even finds tracks you don't own yet.</p>
 
   <h3>What it does</h3>
   <ul>
-    <li>Scans your music folder and analyzes every track: BPM, musical key (Camelot code), energy, and spectral character</li>
-    <li>Results cached in SQLite — first scan takes a while, every scan after is fast</li>
-    <li>Pick any song → ranked list of similar tracks from your own library</li>
-    <li>One-tap preview, then export your picks as a real Serato .crate</li>
+    <li><strong>Live window</strong> — small always-on-top panel that follows your Serato set in real time</li>
+    <li><strong>Three-layer matching</strong> — audio compatibility (BPM, key, energy) + genre pocket + your own past transition patterns</li>
+    <li><strong>Drag to deck</strong> — drag any suggestion straight onto a Serato deck, mid-set, no switching windows</li>
+    <li><strong>One-click download</strong> — don't own a suggested track? Hit ⬇, it grabs it from YouTube to your folder</li>
+    <li><strong>Never repeats</strong> — tracks you've already played tonight are filtered out automatically</li>
+    <li><strong>Sortable columns</strong> — click BPM, Key, Energy, Artist to sort. Switch key display between Camelot, Classic, and Open Key</li>
   </ul>
 
-  <h3>Setup</h3>
+  <h3>How to use it</h3>
   <ul>
-    <li>MacBook with Python 3</li>
-    <li><code>pip install librosa mutagen</code> plus <code>ffmpeg</code></li>
-    <li>Point it at your music folder and let the first scan run</li>
+    <li>Download the DMG below, drag to Applications, right-click → Open on first launch</li>
+    <li>Point it at your music folder — first scan analyzes every track (takes a while, grab coffee)</li>
+    <li>Open Serato, start DJing — the CrateMatch window follows along automatically</li>
+    <li>Drag suggestions to your deck, or hit ⬇ to download tracks you don't have yet</li>
+    <li>Optional: run the genre tagger overnight for smarter pocket matching</li>
   </ul>
+
+  <h3>Got feedback?</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">I'm building this for working DJs — if something's off, if a suggestion was terrible, or if you want a feature, <a href="https://github.com/keithcole813/crate-match/issues" style="color:#38bdf8">open an issue on GitHub</a>. I read everything.</p>
 
   <a class="btn" href="https://github.com/keithcole813/crate-match/releases/download/v1.1/CrateMatch-Live-macOS.dmg" style="margin-bottom:0.8rem">⬇ Download CrateMatch Live v1.1 (Mac)</a>
   <a class="btn" href="https://github.com/keithcole813/crate-match" style="background:#1c2438;color:#f0cd6e;border:1px solid #26314d">View on GitHub</a>

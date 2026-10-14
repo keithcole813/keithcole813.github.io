@@ -85,24 +85,32 @@
     </span>
   </nav>
   <h1>🧹 Noise Remover <span class="badge">Self-hosted</span></h1>
-  <p class="sub">AI background noise removal for video — no more CapCut paywall. Upload from your phone, get the same video back with clean audio.</p>
+  <p class="sub">I was paying for CapCut just to clean background noise from family videos. So I built my own — free, runs on my home server, works from my phone.</p>
 
   <figure class="shot"><img src="preview.png" alt="Noise Remover web app"><figcaption>The phone web app — upload a video, get it back with AI-cleaned audio</figcaption></figure>
 
+  <h3>The story</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">I visited my grandma and recorded a bunch of videos. Wind noise, AC hum, the works. CapCut wanted a subscription just to clean the audio. That felt wrong for a one-time job, so I built Noise Remover with DeepFilterNet — open-source AI that strips background noise and keeps the voices. Upload from your phone's browser, download the cleaned video. No account, no paywall, no watermarks.</p>
+
   <h3>What it does</h3>
   <ul>
-    <li>Upload a video from your phone's browser</li>
-    <li>DeepFilterNet AI strips the background noise from the audio</li>
-    <li>Clean audio muxed back onto your video, ready to download</li>
-    <li>Built after one CapCut payment too many (grandma-visit videos)</li>
+    <li>Upload a video from any phone or desktop browser</li>
+    <li>DeepFilterNet AI separates voices from background noise</li>
+    <li>Clean audio muxed back onto your original video</li>
+    <li>Download the result — same video, dramatically cleaner sound</li>
   </ul>
 
-  <h3>Setup</h3>
+  <h3>How to use it</h3>
   <ul>
-    <li>Runs on your Linux Mint home server, port 5002</li>
-    <li>Needs the Rust toolchain once (DeepFilterNet compiles extensions)</li>
-    <li>Optional password lock via <code>DENOISE_PASSWORD</code></li>
+    <li>Open the web app on your phone or computer</li>
+    <li>Upload your noisy video</li>
+    <li>Wait for processing (a few minutes depending on length)</li>
+    <li>Download the cleaned version</li>
+    <li>Self-host option: runs on Python + Flask, needs Rust toolchain once for DeepFilterNet</li>
   </ul>
+
+  <h3>Got feedback?</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">If the noise removal misses something or you want it to handle a specific situation better, <a href="https://github.com/keithcole813/noise-remover/issues" style="color:#38bdf8">open an issue on GitHub</a>.</p>
 
   <a class="btn" href="https://github.com/keithcole813/noise-remover">View on GitHub</a>
   <footer>Built by Keith Cole</footer>

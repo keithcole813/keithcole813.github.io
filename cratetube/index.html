@@ -85,23 +85,32 @@
     </span>
   </nav>
   <h1>📺 CrateTube <span class="badge">Mac app</span></h1>
-  <p class="sub">For the DJ booth with internet. Load a Serato crate (or just type artist names), get 10 matching songs on YouTube, and download MP3s straight to your MacBook.</p>
+  <p class="sub">You're in the DJ booth. Someone requests a song you don't have. CrateTube gets it for you in under a minute.</p>
 
-  
+  <figure class="shot"><img src="preview.png" alt="CrateTube app"><figcaption>Search YouTube, one tap to download the MP3</figcaption></figure>
+
+  <h3>The story</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">Every DJ knows the moment — a request comes in, you don't have the track, and the crowd is waiting. I built CrateTube for exactly that: load your current crate (or just type the artist), get YouTube matches, one tap to download the MP3 straight to your MacBook. No browser tab juggling, no sketchy converter sites.</p>
 
   <h3>What it does</h3>
   <ul>
-    <li>Load any .crate — artists are parsed straight from the filenames</li>
+    <li>Load any Serato <code>.crate</code> — artists parsed straight from the filenames</li>
     <li>Or skip the crate and just type artist names</li>
     <li>10 YouTube candidates per search with one-tap MP3 download</li>
-    <li>Downloads land in <code>~/Music/crate-tube</code>, best quality via your proven yt-dlp settings</li>
+    <li>Downloads land in <code>~/Music/crate-tube</code> at the best available quality</li>
+    <li>Uses your Chrome YouTube cookies so age-restricted and login-walled tracks work too</li>
   </ul>
 
-  <h3>Setup</h3>
+  <h3>How to use it</h3>
   <ul>
-    <li>MacBook with Python 3 and <code>yt-dlp</code></li>
-    <li>Chrome installed and logged into YouTube (cookies do the work)</li>
+    <li>MacBook with Python 3 and <code>yt-dlp</code> installed</li>
+    <li>Chrome installed and logged into YouTube (one time — cookies handle the rest)</li>
+    <li>Run it, load a crate or type an artist, hit download on the track you want</li>
+    <li>Drag the MP3 from <code>~/Music/crate-tube</code> into Serato and you're playing it</li>
   </ul>
+
+  <h3>Got feedback?</h3>
+  <p style="color:#cbd5e1;line-height:1.7;font-size:0.95rem;margin-bottom:1rem">Built this for the booth — if downloads fail, if the search misses, or if you want it to do more, <a href="https://github.com/keithcole813/crate-tube/issues" style="color:#38bdf8">open an issue on GitHub</a>.</p>
 
   <a class="btn" href="https://github.com/keithcole813/crate-tube">View on GitHub</a>
   <footer>Built by Keith Cole</footer>
