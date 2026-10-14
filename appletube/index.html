@@ -100,6 +100,11 @@
     <input type="file" id="fileInput" accept=".txt,.m3u,.m3u8,.xml,.plist">
   </div>
 
+  <div style="display:flex;gap:0.6rem;margin-bottom:1rem">
+    <input type="url" id="urlInput" placeholder="Or paste Apple Music playlist link…" style="flex:1;background:#141b2e;border:1px solid #26314d;border-radius:10px;padding:0.75rem 1rem;color:#f1f5f9;font-size:0.93rem;outline:none">
+    <button class="btn" id="loadUrlBtn" style="white-space:nowrap">Load</button>
+  </div>
+
   <div class="controls" id="controls" style="display:none">
     <button class="btn" id="searchAllBtn">🔍 Find YouTube Matches</button>
   </div>
@@ -264,6 +269,67 @@ function renderSongs() {
 function removeSong(id) {
   const s = songs.find(x => x.id === id);
   if (s) { s.removed = true; delete matches[id]; renderSongs(); }
+}
+
+document.getElementById('loadUrlBtn').addEventListener('click', async () => {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  const btn = document.getElementById('loadUrlBtn');
+  btn.disabled = true; btn.textContent = 'Loading…';
+  document.getElementById('status').textContent = 'Fetching playlist from Apple Music…';
+  try {
+    songs = await fetchAppleMusicPlaylist(url);
+    songs.forEach((s, i) => s.id = i);
+    matches = {};
+    renderSongs();
+    document.getElementById('controls').style.display = 'flex';
+    document.getElementById('status').textContent = `${songs.length} songs loaded from link. Hit "Find YouTube Matches".`;
+  } catch (e) {
+    document.getElementById('status').textContent = 'Could not load playlist: ' + e.message + '. Try uploading a file instead.';
+  }
+  btn.disabled = false; btn.textContent = 'Load';
+});
+
+async function fetchAppleMusicPlaylist(url) {
+  // Use CORS proxy to fetch Apple Music page HTML
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  const res = await fetch(proxy);
+  if (!res.ok) throw new Error('fetch failed');
+  const data = await res.json();
+  const html = data.contents;
+  if (!html) throw new Error('empty response');
+
+  const songs = [];
+  // Apple Music embeds track data in JSON-LD and in fastboot shoebox data
+  // Try JSON-LD first
+  const ldMatches = html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g);
+  for (const m of ldMatches) {
+    try {
+      const ld = JSON.parse(m[1]);
+      const items = ld.track || ld.tracks || (ld['@graph'] || []).flatMap(g => g.track || []);
+      if (Array.isArray(items)) {
+        items.forEach(t => {
+          const title = t.name || '';
+          let artist = '';
+          if (t.byArtist) artist = Array.isArray(t.byArtist) ? t.byArtist.map(a => a.name).join(', ') : t.byArtist.name || '';
+          else if (t.artist) artist = t.artist;
+          if (title) songs.push({artist, title});
+        });
+      }
+      if (songs.length) return songs;
+    } catch (e) { /* try next */ }
+  }
+  // Fallback: look for "songName" / trackName patterns in embedded JSON
+  const trackPattern = /"(?:songName|trackName|name)"\s*:\s*"([^"]+)"[\s\S]{0,300}?"(?:artistName|artist)"\s*:\s*"([^"]+)"/g;
+  let tm;
+  const seen = new Set();
+  while ((tm = trackPattern.exec(html)) !== null && songs.length < 500) {
+    const title = tm[1], artist = tm[2];
+    const key = artist + '|' + title;
+    if (!seen.has(key)) { seen.add(key); songs.push({artist, title}); }
+  }
+  if (songs.length) return songs;
+  throw new Error('no tracks found in page');
 }
 
 document.getElementById('searchAllBtn').addEventListener('click', async () => {
