@@ -111,6 +111,15 @@
     <button class="btn" id="loadPasteBtn" style="margin-top:0.6rem">Load from Text</button>
   </details>
 
+  <details style="margin-bottom:1rem">
+    <summary style="color:#64748b;font-size:0.85rem;cursor:pointer">⚙️ Mint box settings</summary>
+    <div style="margin-top:0.6rem;display:flex;gap:0.6rem">
+      <input type="text" id="mintBoxUrl" placeholder="http://192.168.4.113:5004" style="flex:1;background:#141b2e;border:1px solid #26314d;border-radius:10px;padding:0.7rem;color:#f1f5f9;font-size:0.9rem;outline:none">
+      <button class="btn" id="saveMintBtn" style="padding:0.7rem 1rem">Save</button>
+    </div>
+    <div style="font-size:0.78rem;color:#64748b;margin-top:0.4rem">Apple Music links are fetched via your Mint box (no CORS issues). Leave blank to use public proxies.</div>
+  </details>
+
   <div class="controls" id="controls" style="display:none">
     <button class="btn" id="searchAllBtn">🔍 Find YouTube Matches</button>
   </div>
@@ -296,8 +305,35 @@ document.getElementById('loadUrlBtn').addEventListener('click', async () => {
   btn.disabled = false; btn.textContent = 'Load';
 });
 
+// Mint box URL for server-side fetching (saved in localStorage)
+function getMintBoxUrl() {
+  return localStorage.getItem('appletube_mintbox') || 'http://192.168.4.113:5004';
+}
+document.getElementById('mintBoxUrl').value = localStorage.getItem('appletube_mintbox') || '';
+document.getElementById('saveMintBtn').addEventListener('click', () => {
+  const v = document.getElementById('mintBoxUrl').value.trim();
+  if (v) localStorage.setItem('appletube_mintbox', v);
+  else localStorage.removeItem('appletube_mintbox');
+  showToast('Mint box address saved');
+});
+
 async function fetchAppleMusicPlaylist(url) {
-  // Try multiple CORS proxies (allorigins is flaky)
+  // Try Mint box first (server-side fetch, no CORS issues)
+  const mintBox = getMintBoxUrl();
+  try {
+    const res = await fetch(`${mintBox}/fetch_url`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url}),
+      signal: AbortSignal.timeout(30000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.songs && data.songs.length) return data.songs;
+    }
+  } catch (e) { /* fall through to proxies */ }
+
+  // Fallback: Try multiple CORS proxies
   const proxies = [
     u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
     u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
