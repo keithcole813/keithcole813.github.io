@@ -291,40 +291,39 @@ document.getElementById('loadUrlBtn').addEventListener('click', async () => {
 });
 
 async function fetchAppleMusicPlaylist(url) {
-  // Use CORS proxy to fetch Apple Music page HTML
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const res = await fetch(proxy);
-  if (!res.ok) throw new Error('fetch failed');
-  const data = await res.json();
-  const html = data.contents;
-  if (!html) throw new Error('empty response');
+  // Try multiple CORS proxies (allorigins is flaky)
+  const proxies = [
+    u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+    u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+    u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+  ];
+  let html = null;
+  for (const mkProxy of proxies) {
+    try {
+      const res = await fetch(mkProxy(url), {signal: AbortSignal.timeout(15000)});
+      if (!res.ok) continue;
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const data = await res.json();
+        html = data.contents || data;
+      } else {
+        html = await res.text();
+      }
+      if (html && html.length > 10000 && html.includes('artistName')) break;
+      html = null;
+    } catch (e) { /* try next proxy */ }
+  }
+  if (!html) throw new Error('could not fetch page (try file upload)');
 
   const songs = [];
-  // Apple Music embeds track data in JSON-LD and in fastboot shoebox data
-  // Try JSON-LD first
-  const ldMatches = html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g);
-  for (const m of ldMatches) {
-    try {
-      const ld = JSON.parse(m[1]);
-      const items = ld.track || ld.tracks || (ld['@graph'] || []).flatMap(g => g.track || []);
-      if (Array.isArray(items)) {
-        items.forEach(t => {
-          const title = t.name || '';
-          let artist = '';
-          if (t.byArtist) artist = Array.isArray(t.byArtist) ? t.byArtist.map(a => a.name).join(', ') : t.byArtist.name || '';
-          else if (t.artist) artist = t.artist;
-          if (title) songs.push({artist, title});
-        });
-      }
-      if (songs.length) return songs;
-    } catch (e) { /* try next */ }
-  }
-  // Fallback: look for "songName" / trackName patterns in embedded JSON
-  const trackPattern = /"(?:songName|trackName|name)"\s*:\s*"([^"]+)"[\s\S]{0,300}?"(?:artistName|artist)"\s*:\s*"([^"]+)"/g;
-  let tm;
   const seen = new Set();
-  while ((tm = trackPattern.exec(html)) !== null && songs.length < 500) {
-    const title = tm[1], artist = tm[2];
+  // Apple Music embeds: "artistName":"Chronixx",...,"name":"Skankin' Sweet"
+  const pat = /"artistName"\s*:\s*"([^"]+)"[\s\S]{0,500}?"name"\s*:\s*"([^"]+)"/g;
+  let m;
+  while ((m = pat.exec(html)) !== null && songs.length < 1000) {
+    const artist = m[1], title = m[2];
+    // Skip non-song entries (playlist title, etc.)
+    if (title.length > 100) continue;
     const key = artist + '|' + title;
     if (!seen.has(key)) { seen.add(key); songs.push({artist, title}); }
   }
