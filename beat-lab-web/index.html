@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0f1a">
+<title>Beat Lab — Keith Cole</title>
+<meta name="description" content="Beat Lab — my own beat-making lab in the browser: my samples, MPC-style sequences, waves, and stems. No install.">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0b0f1a; color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 1rem 1rem 2rem;
+  }
+  .wrap { width: 100%; max-width: 640px; }
+  h1 { font-size: 1.7rem; font-weight: 800; margin: 0.6rem 0 0.3rem; }
+  h1 span { color: #f0cd6e; }
+  .sub { color: #94a3b8; margin-bottom: 1.2rem; font-size: 0.95rem; line-height: 1.5; }
+  .badge {
+    display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    background: #f0cd6e; color: #0b0f1a; border-radius: 999px; padding: 0.25rem 0.7rem; margin-left: 0.5rem; vertical-align: middle;
+  }
+  .appnav {
+    position: sticky; top: 0; z-index: 50; width: 100%; max-width: 640px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.55rem 0; margin-bottom: 0.5rem;
+    background: rgba(11,15,26,0.94);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .appnav a.home { color: #f0cd6e; text-decoration: none; font-size: 0.95rem; font-weight: 600; }
+  .appnav .navbtns { display: flex; gap: 0.5rem; }
+  .appnav button.iconbtn {
+    background: #1c2438; color: #f0cd6e; border: 1px solid #26314d;
+    border-radius: 12px; font-size: 1.15rem; width: 2.6rem; height: 2.6rem; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .panel {
+    background: #141b2e; border: 1px solid #26314d; border-radius: 12px;
+    padding: 1rem 1.1rem; margin-bottom: 1rem; line-height: 1.65; font-size: 0.95rem; color: #cbd5e1;
+  }
+  .panel h2 { color: #f1f5f9; font-size: 1.05rem; margin-bottom: 0.5rem; }
+  .panel ul { margin: 0.2rem 0 0.2rem 1.1rem; }
+  .panel li { margin-bottom: 0.35rem; }
+  .panel strong { color: #f1f5f9; }
+  details.panel summary { cursor: pointer; color: #f0cd6e; font-weight: 700; }
+  details.panel .inner { margin-top: 0.8rem; }
+  .launch {
+    border: 1px solid #f0cd6e; border-radius: 12px; padding: 1.1rem;
+    background: #141b2e; text-align: center; margin-bottom: 1rem;
+  }
+  .launch .big { font-size: 1.1rem; font-weight: 800; color: #f1f5f9; margin-bottom: 0.3rem; }
+  .launch p { color: #94a3b8; font-size: 0.92rem; line-height: 1.55; }
+  .share-toast {
+    position: fixed; left: 50%; bottom: 2rem; z-index: 100;
+    transform: translateX(-50%) translateY(20px);
+    background: #1c2438; color: #f1f5f9; border: 1px solid #f0cd6e;
+    padding: 0.7rem 1.2rem; border-radius: 999px; font-size: 0.9rem; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
+  }
+  .share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  footer { margin-top: 2rem; color: #475569; font-size: 0.8rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="appnav">
+    <a class="home" href="../">← All Apps</a>
+    <span class="navbtns">
+      <button class="iconbtn" onclick="sharePage()" aria-label="Share"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
+      <button class="iconbtn" onclick="location.reload()" aria-label="Refresh">↻</button>
+    </span>
+  </nav>
+
+  <h1>🎚️ <span>Beat Lab</span><span class="badge">Beta</span></h1>
+  <p class="sub">My own beat lab, running in the browser — my samples, MPC-style sequences, waves laid out beside the sequencing, and clean stems out the other end. No install, nothing taking up space on the MacBook.</p>
+
+  <div class="launch" id="launch">
+    <div class="big">🎧 Now in live beta</div>
+    <p>I'm testing Beat Lab live on the Tuesday Cook-Up. The public launch button lands on this page the moment the link is ready — check back after the show.</p>
+  </div>
+
+  <details class="panel" open>
+    <summary>What is this? How do I use it?</summary>
+    <div class="inner">
+      <p style="margin-bottom:0.8rem"><strong>The story:</strong> I've made beats on everything — open-source tools on Ubuntu Studio, an MPC2000XL in my hardware-only years (tracked out into Pro Tools), and FL Studio today. Beat Lab is my own take: FL's hands, the MPC's brain, a Pro Tools finish — in a web page. Start a beat on one machine, finish it on the other.</p>
+      <p style="margin-bottom:0.8rem"><strong>How it works:</strong> Open it in Chrome or Edge. Point the sound browser at your sample folder — on Windows that's the Google Drive folder, on the MacBook it's the external drive — click sounds to preview them, load them into channels, and build. Everything saves as one small project file; the sounds stay in your library.</p>
+      <p><strong>Feedback?</strong> Catch me live — I test it on the Tuesday Cook-Up, Tuesdays 8–10 PM ET on YouTube.</p>
+    </div>
+  </details>
+
+  <div class="panel">
+    <h2>Inside the lab</h2>
+    <ul>
+      <li><strong>Your sounds, your library</strong> — preview before you load, FL browser style, with hot swapping: change the kick mid-loop and the beat never stops</li>
+      <li><strong>Sequences &amp; song mode</strong> — MPC-style sequences strung into a playlist; duplicate a sequence for variations</li>
+      <li><strong>Waves up top</strong> — drop in a sound effect or a DJ drop, see its wave, shift it off-grid against the sequencing; even snap a kick in as a wave when you want timing the grid can't give you. Convert any sequence to a wave and keep working it as audio</li>
+      <li><strong>Piano roll with your own sounds</strong> — pitched samples, 808s, and chops; chord and progression generators; a key finder that follows your flip and tunes the 808 to it</li>
+      <li><strong>An MPK brain</strong> — full MIDI mapping with a ready map for the MPK mini mk3; record all pad channels at once, Add or Overwrite, quantized or raw, then quantize after the fact with strength</li>
+      <li><strong>Real mixer</strong> — per-sound gain plus channel faders with VU meters, your names, your colors</li>
+      <li><strong>The finish</strong> — aligned WAV stems per channel and a 320 kbps master MP3, rendered from the whole song chain</li>
+    </ul>
+  </div>
+
+  <footer>Built by Keith Cole · Dabbling in code since BASIC in the early 90s.</footer>
+</div>
+
+<script>
+async function sharePage() {
+  if (navigator.share) {
+    try { await navigator.share({ title: document.title, url: location.href }); } catch (e) {}
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(location.href);
+    showToast('Link copied — paste it anywhere');
+  } catch (e) {
+    showToast('Copy this link: ' + location.href);
+  }
+}
+function showToast(msg) {
+  let t = document.querySelector('.share-toast');
+  if (!t) { t = document.createElement('div'); t.className = 'share-toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
