@@ -6,481 +6,764 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0f1a">
-<title>Shinobi Brawl — Keith Cole</title>
-<meta name="description" content="Shinobi Brawl — a hand-drawn ninja fighting game from Ninja Music Records. LaShmoove & 6lade Cypher take back the streets. Story mode, VS ladder, finishers, and a soundtrack of 100% Keith Cole beats. Coming soon.">
+<meta name="theme-color" content="#070708">
+<title>Shinobi Brawl — Ninja Music Records</title>
+<meta name="description" content="Shinobi Brawl — a ninja fighting game from Ninja Music Records. 17 sealed fighters, 9 classified arenas, finishers, and every cheat code published. Premium release — no ads, no pay-to-win. Coming soon.">
+<link rel="icon" type="image/png" href="img/icon.png">
+<link rel="apple-touch-icon" href="img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
+  :root{
+    --black:#070708; --coal:#0d0d10; --panel:#121216; --panel2:#17171c;
+    --line:#26262e; --line-gold:#8a6a1f;
+    --red:#e0231c; --red-deep:#8f130f; --gold:#ffb52e; --gold-hi:#ffd94d; --gold-pale:#f0cd6e;
+    --ink:#f4f1ea; --dim:#b9b4a8; --mute:#7e7a70;
+    --disp:"Oswald","Arial Narrow","Helvetica Neue Condensed",Impact,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--black);color:var(--ink);font-family:var(--body);-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+  ::selection{background:var(--red);color:#fff}
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+
+  /* ---------- NAV (MK: slim black bar, logo left, links, red CTA right) ---------- */
+  nav{
+    position:fixed;inset:0 0 auto 0;z-index:100;height:64px;
+    background:rgba(5,5,6,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border-bottom:1px solid #1d1d23;
+  }
+  nav .in{max-width:1240px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;gap:26px}
+  .brand{display:flex;align-items:center;gap:11px;text-decoration:none;flex:0 0 auto}
+  .brand img{width:38px;height:38px;border-radius:8px}
+  .brand .bt{font-family:var(--disp);font-weight:700;font-size:1.22rem;letter-spacing:.14em;text-transform:uppercase;line-height:1}
+  .brand .bt span{color:var(--red)}
+  .nlinks{display:flex;gap:24px;margin-left:auto}
+  .nlinks a{
+    font-family:var(--disp);font-weight:600;font-size:.86rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--dim);text-decoration:none;padding:6px 0;border-bottom:2px solid transparent;
+  }
+  .nlinks a:hover{color:var(--ink);border-bottom-color:var(--red)}
+  .ncta{
+    flex:0 0 auto;font-family:var(--disp);font-weight:700;letter-spacing:.16em;font-size:.85rem;text-transform:uppercase;
+    background:linear-gradient(180deg,#f03428,var(--red-deep));color:#fff;text-decoration:none;
+    padding:10px 18px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+  }
+  @media (max-width:900px){ .nlinks{display:none} }
+  @media (max-width:560px){
+    nav .in{gap:12px;padding:0 12px}
+    .brand{gap:8px}
+    .brand img{width:32px;height:32px}
+    .brand .bt{font-size:1rem;letter-spacing:.1em}
+    .ncta{padding:9px 12px;font-size:.74rem;margin-left:auto}
+  }
+
+  /* ---------- HERO (MK: full-bleed cinematic, giant condensed type, dual CTA) ---------- */
+  .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;overflow:hidden;background:#000}
+  .hero video,.hero .poster{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;
     background:
-      radial-gradient(ellipse 75% 40% at 50% -6%, rgba(240,205,110,0.13), rgba(240,205,110,0) 70%),
-      radial-gradient(ellipse 55% 32% at 88% 108%, rgba(160,30,40,0.10), rgba(160,30,40,0) 70%),
-      #0b0f1a;
-    color: #f1f5f9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-    padding: 1rem 1rem 2rem;
-    -webkit-tap-highlight-color: transparent;
+      linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 26%,rgba(0,0,0,.08) 52%,rgba(7,7,8,.88) 82%,var(--black) 100%),
+      radial-gradient(ellipse 90% 55% at 50% 88%,rgba(0,0,0,.55),rgba(0,0,0,0) 70%);
   }
-  .wrap { width: 100%; max-width: 880px; }
-  .appnav {
-    position: sticky; top: 0; z-index: 50; width: 100%;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0.55rem 0; margin-bottom: 0.5rem;
-    background: rgba(11,15,26,0.94);
-    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  .hero .in{position:relative;z-index:2;width:100%;max-width:1240px;margin:0 auto;padding:120px 20px 56px;text-align:center}
+  .kicker{
+    font-family:var(--disp);font-weight:600;letter-spacing:.42em;font-size:.78rem;text-transform:uppercase;color:var(--gold-pale);
   }
-  .appnav a.home { color: #f0cd6e; text-decoration: none; font-size: 0.95rem; font-weight: 600; }
-  .appnav .navbtns { display: flex; gap: 0.5rem; }
-  .appnav button.iconbtn {
-    background: #1c2438; color: #f0cd6e; border: 1px solid #26314d;
-    border-radius: 12px; font-size: 1.15rem; width: 2.6rem; height: 2.6rem; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center;
+  .kicker b{color:var(--red);font-weight:700}
+  h1.mega{
+    font-family:var(--disp);font-weight:700;text-transform:uppercase;line-height:.92;
+    font-size:clamp(4rem,13.5vw,10.5rem);letter-spacing:.015em;margin:.12em 0 .05em;
+    background:linear-gradient(180deg,#fff6d8 8%,var(--gold-hi) 34%,var(--gold) 58%,#b87a14 92%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 0 rgba(0,0,0,.65)) drop-shadow(0 14px 34px rgba(0,0,0,.7));
   }
-  .badge {
-    display: inline-block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-    background: #f0cd6e; color: #0b0f1a; border-radius: 999px; padding: 0.28rem 0.75rem; vertical-align: middle;
+  .statement{
+    font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:.3em;
+    font-size:clamp(1rem,3vw,1.6rem);color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.95),0 0 38px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.9);
   }
-  .badge.red { background: #ff5252; color: #fff; }
+  .statement span{color:var(--red)}
+  .hero .sub{max-width:680px;margin:18px auto 0;color:#e8e2d4;font-size:1.02rem;line-height:1.65;text-shadow:0 1px 10px rgba(0,0,0,.95)}
+  .hero .sub strong{color:var(--gold-hi)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+  .chip{
+    font-family:var(--disp);font-weight:600;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;
+    border:1px solid rgba(240,205,110,.45);color:var(--gold-pale);padding:7px 13px;background:rgba(0,0,0,.55);
+    clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
+  }
+  .chip.red{border-color:rgba(224,35,28,.7);color:#ff9d97}
+  .ctas{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:28px}
+  .btn{
+    font-family:var(--disp);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:.95rem;
+    text-decoration:none;padding:15px 30px;cursor:pointer;border:0;
+    clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);
+  }
+  .btn.red{background:linear-gradient(180deg,#f03428,var(--red-deep));color:#fff;box-shadow:0 10px 30px rgba(224,35,28,.35)}
+  .btn.ghost{background:rgba(10,10,12,.72);color:var(--gold-pale);box-shadow:inset 0 0 0 1px rgba(240,205,110,.55)}
+  .hero .scrollhint{margin-top:34px;color:var(--mute);font-size:.75rem;letter-spacing:.3em;text-transform:uppercase;font-family:var(--disp)}
 
-  /* HERO */
-  .hero { text-align: center; padding: 1.2rem 0 0.4rem; }
-  .hero .seal { height: 92px; width: auto; opacity: 0.96; }
-  .hero .presents { color: #f0cd6e; letter-spacing: 0.35em; font-size: 0.72rem; text-transform: uppercase; margin: 0.7rem 0 0.4rem; }
-  h1.title {
-    font-size: clamp(2.6rem, 9vw, 4.6rem); font-weight: 900; line-height: 0.98; letter-spacing: 0.01em;
-    background: linear-gradient(180deg, #ffe9a8 15%, #ffb52e 55%, #c47f17);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    text-shadow: none; filter: drop-shadow(0 3px 0 rgba(0,0,0,0.55));
-    text-transform: uppercase;
+  /* ---------- SECTION SCAFFOLD ---------- */
+  section{padding:88px 0 8px;scroll-margin-top:70px}
+  .shead{text-align:center;margin-bottom:38px}
+  .shead .no{font-family:var(--disp);color:var(--red);font-weight:700;letter-spacing:.4em;font-size:.8rem;text-transform:uppercase}
+  .shead h2{
+    font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    font-size:clamp(2.1rem,5.4vw,3.4rem);line-height:1.02;margin-top:8px;
   }
-  .hero .tag { font-size: clamp(1rem, 3.4vw, 1.25rem); color: #e2e8f0; font-weight: 700; margin-top: 0.65rem; }
-  .hero .sub { color: #94a3b8; max-width: 620px; margin: 0.6rem auto 0; line-height: 1.6; font-size: 0.97rem; }
-  .heroimg {
-    margin: 1.3rem auto 0; max-width: 760px; border: 1px solid #c9962e; border-radius: 16px; overflow: hidden;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.6), 0 0 0 4px rgba(201,150,46,0.12);
-    background: #fff;
-  }
-  .heroimg img { display: block; width: 100%; height: auto; }
-  .heroimg .cap { background: #10182b; color: #94a3b8; font-size: 0.78rem; padding: 0.5rem 0.8rem; text-align: center; }
-  .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; justify-content: center; margin: 1.1rem 0 0.2rem; }
-  .chip {
-    background: #141b2e; border: 1px solid #26314d; color: #cbd5e1; border-radius: 999px;
-    font-size: 0.8rem; font-weight: 600; padding: 0.4rem 0.8rem;
-  }
-  .chip b { color: #ffb52e; }
-  .cta { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1.1rem; }
-  .btn {
-    display: inline-block; text-decoration: none; font-weight: 800; font-size: 0.95rem;
-    border-radius: 12px; padding: 0.8rem 1.3rem; cursor: pointer; border: 1px solid #f0cd6e;
-    background: linear-gradient(180deg, #ffd94d, #f0a92e); color: #0b0f1a;
-    box-shadow: 0 6px 20px rgba(240,169,46,0.25);
-  }
-  .btn.ghost { background: #141b2e; color: #f0cd6e; box-shadow: none; }
+  .shead h2 em{font-style:normal;color:var(--gold)}
+  .shead h2 .rd{color:var(--red)}
+  .shead p{color:var(--dim);max-width:720px;margin:14px auto 0;line-height:1.7;font-size:.99rem}
+  .rule{width:74px;height:3px;background:linear-gradient(90deg,var(--red),var(--gold));margin:18px auto 0}
 
-  /* PANELS */
-  .panel {
-    background: #141b2e; border: 1px solid #26314d; border-radius: 14px;
-    padding: 1.15rem 1.25rem; margin-top: 1rem; line-height: 1.65; font-size: 0.95rem; color: #cbd5e1;
+  /* ---------- MODE CARDS ---------- */
+  .modes{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media (max-width:980px){.modes{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.modes{grid-template-columns:1fr}}
+  .mode{
+    background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    padding:26px 22px 22px;position:relative;overflow:hidden;
   }
-  .panel h2 {
-    color: #f1f5f9; font-size: 1.3rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em;
-    margin-bottom: 0.55rem; display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;
+  .mode::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--red),transparent 75%)}
+  .mode .ic{font-size:1.7rem}
+  .mode h3{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:1.28rem;margin:10px 0 8px}
+  .mode p{color:var(--dim);font-size:.9rem;line-height:1.6}
+  .mode .tag{
+    display:inline-block;margin-top:14px;font-family:var(--disp);font-size:.7rem;font-weight:700;letter-spacing:.22em;
+    color:var(--gold-pale);border:1px solid var(--line-gold);padding:5px 9px;text-transform:uppercase;
   }
-  .panel h2 .no { color: #ffb52e; }
-  .panel h3 { color: #ffb52e; font-size: 1.02rem; margin: 0.9rem 0 0.35rem; }
-  .panel p { margin-bottom: 0.55rem; }
-  .panel ul { margin: 0.2rem 0 0.4rem 1.15rem; }
-  .panel li { margin-bottom: 0.35rem; }
-  .panel strong { color: #f1f5f9; }
-  .panel .fine { color: #7d8aa5; font-size: 0.85rem; }
+  .mode.locked{opacity:.92}
+  .mode.locked .tag{color:#ff9d97;border-color:rgba(224,35,28,.55)}
 
-  /* STORY RUNS */
-  .runs { display: grid; gap: 0.55rem; margin-top: 0.6rem; }
-  .run {
-    display: flex; gap: 0.8rem; align-items: flex-start;
-    background: #10182b; border: 1px solid #22304f; border-radius: 10px; padding: 0.7rem 0.85rem;
-  }
-  .run .n {
-    flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 50%;
-    background: #ffb52e; color: #0b0f1a; font-weight: 900; display: flex; align-items: center; justify-content: center;
-  }
-  .run .t { font-weight: 800; color: #f1f5f9; }
-  .run .d { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
-  .run .boss { color: #ff8080; font-weight: 700; }
+  .pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}
+  @media (max-width:760px){.pillars{grid-template-columns:1fr}}
+  .pillar{background:var(--panel);border:1px solid var(--line);padding:20px 22px}
+  .pillar h4{font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:1.02rem;color:var(--gold-hi);margin-bottom:6px}
+  .pillar p{color:var(--dim);font-size:.9rem;line-height:1.6}
+  .pillar p strong{color:var(--ink)}
 
-  /* FIGHTERS */
-  .fighters { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 0.4rem; }
-  @media (min-width: 700px) { .fighters { grid-template-columns: 1fr 1fr; } }
-  .fighter { background: #10182b; border: 1px solid #22304f; border-radius: 12px; overflow: hidden; }
-  .fighter .art { background: #f4f1ea; }
-  .fighter .art img { display: block; width: 100%; height: 300px; object-fit: cover; object-position: top center; }
-  .fighter .body { padding: 0.9rem 1rem 1rem; }
-  .fighter .nm { font-size: 1.25rem; font-weight: 900; color: #f1f5f9; text-transform: uppercase; }
-  .fighter .role { color: #ffb52e; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; margin: 0.15rem 0 0.5rem; }
-  .fighter .bio { color: #aeb9cc; font-size: 0.9rem; line-height: 1.55; }
-  .stat { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; font-size: 0.75rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; }
-  .stat .bar { flex: 1; height: 8px; background: #1c2438; border-radius: 99px; overflow: hidden; }
-  .stat .bar i { display: block; height: 100%; background: linear-gradient(90deg, #c47f17, #ffb52e); border-radius: 99px; }
-  .stat.blue .bar i { background: linear-gradient(90deg, #2563eb, #4db2ff); }
-  .roster { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.5rem; }
-  .slot {
-    background: #10182b; border: 1px solid #22304f; border-radius: 10px; padding: 0.5rem 0.7rem;
-    font-size: 0.85rem; font-weight: 700; color: #e2e8f0;
+  /* ---------- FIGHTERS ---------- */
+  #fighters{background:
+    linear-gradient(180deg,rgba(7,7,8,0) 0,#0a0a0c 120px),
+    radial-gradient(ellipse 70% 34% at 50% 0%,rgba(224,35,28,.07),rgba(0,0,0,0) 70%)}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:820px){.duo{grid-template-columns:1fr}}
+  .feat{position:relative;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+  .feat .art{height:430px;overflow:hidden;position:relative}
+  .feat .art img{width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+  .feat .art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 46%,rgba(10,10,12,.92) 96%)}
+  .feat .art .fname{
+    position:absolute;left:20px;bottom:12px;z-index:2;font-family:var(--disp);font-weight:700;text-transform:uppercase;
+    font-size:2rem;letter-spacing:.04em;line-height:1;text-shadow:0 3px 12px rgba(0,0,0,.8);
   }
-  .slot small { display: block; color: #7d8aa5; font-weight: 600; font-size: 0.72rem; margin-top: 0.1rem; }
-  .slot.lock { color: #94a3b8; border-style: dashed; }
-
-  /* SYSTEMS GRID */
-  .sys { display: grid; grid-template-columns: 1fr; gap: 0.7rem; margin-top: 0.5rem; }
-  @media (min-width: 700px) { .sys { grid-template-columns: 1fr 1fr; } }
-  .sys .card { background: #10182b; border: 1px solid #22304f; border-radius: 10px; padding: 0.85rem 0.95rem; }
-  .sys .card .t { font-weight: 800; color: #f1f5f9; margin-bottom: 0.3rem; }
-  .sys .card .d { color: #94a3b8; font-size: 0.9rem; line-height: 1.55; }
-
-  /* MOVES */
-  table.ctl { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
-  table.ctl th, table.ctl td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #22304f; vertical-align: top; }
-  table.ctl th { color: #ffb52e; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
-  table.ctl td:first-child { color: #f1f5f9; font-weight: 700; white-space: nowrap; }
-  .key {
-    display: inline-block; background: #1c2438; border: 1px solid #334155; border-bottom-width: 3px; border-radius: 6px;
-    color: #f1f5f9; font-weight: 800; font-size: 0.8rem; padding: 0.08rem 0.45rem; margin: 0.05rem 0.1rem 0.05rem 0;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  .feat .art .fname small{display:block;font-size:.78rem;letter-spacing:.3em;color:var(--gold-pale);margin-top:6px;font-weight:600}
+  .feat.blue .art .fname small{color:#9fd0ff}
+  .feat .body{padding:18px 22px 22px}
+  .feat .bio{color:var(--dim);font-size:.93rem;line-height:1.65}
+  .feat .bio strong{color:var(--ink)}
+  .stat{display:flex;align-items:center;gap:10px;margin-top:9px;font-family:var(--disp);font-size:.72rem;letter-spacing:.2em;color:var(--mute);font-weight:600}
+  .stat .bar{flex:1;height:7px;background:#232329;overflow:hidden}
+  .stat .bar i{display:block;height:100%;background:linear-gradient(90deg,#a8740f,var(--gold))}
+  .feat.blue .stat .bar i{background:linear-gradient(90deg,#1d4ed8,#4db2ff)}
+  .feat .spec{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;color:var(--dim);font-size:.88rem;line-height:1.65}
+  .feat .spec b{color:var(--gold-hi);font-family:var(--disp);letter-spacing:.06em;text-transform:uppercase;font-size:.8rem}
+  .feat.blue .spec b{color:#9fd0ff}
+  .outfit{
+    margin-top:12px;display:flex;gap:10px;align-items:center;background:#0c0c0f;border:1px dashed #3a3a44;
+    padding:10px 13px;font-size:.85rem;color:var(--dim);line-height:1.5;
   }
-  .move {
-    display: flex; gap: 0.7rem; align-items: flex-start;
-    background: #10182b; border: 1px solid #22304f; border-radius: 10px; padding: 0.7rem 0.85rem; margin-top: 0.5rem;
+  .outfit b{color:var(--ink);font-family:var(--disp);letter-spacing:.08em;text-transform:uppercase}
+  .outfit .lock{color:#ff9d97;font-family:var(--disp);font-size:.68rem;letter-spacing:.2em;border:1px solid rgba(224,35,28,.5);padding:3px 7px;flex:0 0 auto}
+
+  .gridhead{
+    display:flex;align-items:baseline;gap:14px;margin:44px 0 16px;flex-wrap:wrap;
   }
-  .move .seq { flex: 0 0 auto; padding-top: 0.1rem; }
-  .move .nm { font-weight: 900; color: #f1f5f9; text-transform: uppercase; letter-spacing: 0.02em; }
-  .move .d { color: #94a3b8; font-size: 0.9rem; line-height: 1.55; }
-  .move .tag { color: #ffb52e; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
-
-  /* CODES */
-  .codes { display: grid; grid-template-columns: 1fr; gap: 0.55rem; margin-top: 0.5rem; }
-  @media (min-width: 700px) { .codes { grid-template-columns: 1fr 1fr; } }
-  .code {
-    display: flex; justify-content: space-between; align-items: center; gap: 0.7rem;
-    background: #10182b; border: 1px solid #22304f; border-radius: 10px; padding: 0.65rem 0.8rem;
-    cursor: pointer; text-align: left; width: 100%; color: inherit; font: inherit;
+  .gridhead h3{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:1.35rem}
+  .gridhead span{color:var(--mute);font-size:.86rem}
+  .rgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  @media (max-width:980px){.rgrid{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:560px){.rgrid{grid-template-columns:repeat(2,1fr)}}
+  .rcard{background:var(--panel);border:1px solid var(--line);overflow:hidden;position:relative}
+  .rcard .port{aspect-ratio:3/3.4;position:relative;overflow:hidden;background:#0a0a0d}
+  .rcard .port img{width:100%;height:100%;object-fit:cover;object-position:top center}
+  .rcard .rname{
+    font-family:var(--disp);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.98rem;
+    padding:11px 12px 2px;line-height:1.15;
   }
-  .code:active { border-color: #ffb52e; }
-  .code .c { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; color: #ffd94d; letter-spacing: 0.04em; font-size: 0.95rem; }
-  .code .u { color: #94a3b8; font-size: 0.82rem; line-height: 1.4; }
-  .code .cp { flex: 0 0 auto; color: #7d8aa5; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
-
-  /* STAGES + GALLERY */
-  .stageimg { border: 1px solid #22304f; border-radius: 12px; overflow: hidden; margin-top: 0.6rem; }
-  .stageimg img { display: block; width: 100%; height: auto; }
-  .stageimg .cap { background: #10182b; color: #94a3b8; font-size: 0.8rem; padding: 0.5rem 0.8rem; }
-  .gal { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; margin-top: 0.6rem; }
-  @media (min-width: 700px) { .gal { grid-template-columns: repeat(3, 1fr); } }
-  .gal figure { background: #10182b; border: 1px solid #22304f; border-radius: 10px; overflow: hidden; }
-  .gal img { display: block; width: 100%; height: 170px; object-fit: cover; }
-  .gal figcaption { padding: 0.5rem 0.65rem; font-size: 0.8rem; color: #94a3b8; line-height: 1.45; }
-  .gal figcaption b { color: #f1f5f9; display: block; }
-
-  .tracks { display: grid; grid-template-columns: 1fr; gap: 0.45rem; margin-top: 0.5rem; }
-  @media (min-width: 700px) { .tracks { grid-template-columns: 1fr 1fr; } }
-  .track { background: #10182b; border: 1px solid #22304f; border-radius: 10px; padding: 0.6rem 0.8rem; font-size: 0.9rem; }
-  .track b { color: #f1f5f9; }
-  .track span { color: #7d8aa5; }
-
-  footer { margin-top: 2.2rem; text-align: center; color: #475569; font-size: 0.82rem; line-height: 1.8; }
-  footer .logos { display: flex; gap: 1.6rem; justify-content: center; align-items: center; margin-bottom: 0.8rem; }
-  footer .logos img.seal { height: 74px; width: auto; }
-  footer .logos img.badgelogo { height: 74px; width: auto; }
-  footer .story { color: #64748b; }
-  .share-toast {
-    position: fixed; left: 50%; bottom: 2rem; z-index: 100;
-    transform: translateX(-50%) translateY(20px);
-    background: #1c2438; color: #f1f5f9; border: 1px solid #f0cd6e;
-    padding: 0.7rem 1.2rem; border-radius: 999px; font-size: 0.9rem; white-space: nowrap;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s;
+  .rcard .rtag{padding:0 12px 12px;color:var(--mute);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;font-family:var(--disp);font-weight:600}
+  .rcard .rtag.on{color:var(--gold-pale)}
+  /* mystery slot — the classic ? card */
+  .rcard.mystery .port{
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 108%,rgba(224,35,28,.16),rgba(0,0,0,0) 62%),
+      radial-gradient(ellipse 65% 46% at 50% 30%,rgba(185,180,168,.10),rgba(0,0,0,0) 70%),
+      linear-gradient(180deg,#101014,#08080a);
+    display:flex;align-items:center;justify-content:center;
   }
-  .share-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .rcard.mystery .q{
+    position:relative;font-family:var(--disp);font-weight:700;font-size:5.2rem;line-height:1;
+    background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,#9c6d10);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 16px rgba(0,0,0,.85));
+  }
+  .rcard.mystery{border-color:#2c2c33}
+  .rcard.mystery .rtag{color:#8f6f24}
+  .rcard.secret{border-color:rgba(224,35,28,.45)}
+  .rcard.secret .port{
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 108%,rgba(224,35,28,.28),rgba(0,0,0,0) 62%),
+      linear-gradient(180deg,#120d0d,#070708);
+  }
+  .rcard.secret .q{
+    background:linear-gradient(180deg,#ffb3ae,var(--red) 55%,#6d0d09);
+    -webkit-background-clip:text;background-clip:text;
+  }
+  .lck{
+    position:absolute;top:10px;right:10px;z-index:3;font-family:var(--disp);font-weight:700;font-size:.62rem;
+    letter-spacing:.22em;color:#ffb3ae;background:rgba(10,4,4,.72);border:1px solid rgba(224,35,28,.55);padding:4px 7px;
+  }
+
+  /* dogs */
+  .dogs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media (max-width:760px){.dogs{grid-template-columns:1fr}}
+  .dog{display:flex;background:var(--panel);border:1px solid var(--line);overflow:hidden;min-height:132px}
+  .dog .dimg{flex:0 0 42%;position:relative;overflow:hidden}
+  .dog .dimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .dog .dbody{padding:16px 18px}
+  .dog h4{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:1.12rem}
+  .dog h4 span{color:var(--gold);font-size:.72rem;letter-spacing:.24em;display:block;margin-bottom:3px}
+  .dog p{color:var(--dim);font-size:.87rem;line-height:1.6;margin-top:5px}
+  .dog.mysterydog .dimg{
+    background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(224,35,28,.14),rgba(0,0,0,0) 65%),linear-gradient(180deg,#101014,#08080a);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .dog.mysterydog .q{font-family:var(--disp);font-weight:700;font-size:3.4rem;background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,#9c6d10);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ---------- ARENAS ---------- */
+  .agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:980px){.agrid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:600px){.agrid{grid-template-columns:1fr}}
+  .arena{position:relative;border:1px solid var(--line);overflow:hidden;background:var(--panel)}
+  .arena .ph{aspect-ratio:16/6.4;overflow:hidden}
+  .arena .ph img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+  .arena:hover .ph img{transform:scale(1.045)}
+  .arena .cap{padding:13px 16px 15px;border-top:2px solid var(--red-deep)}
+  .arena h3{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:1.12rem}
+  .arena p{color:var(--dim);font-size:.86rem;line-height:1.55;margin-top:3px}
+
+  /* ---------- STORY ---------- */
+  #story .lockband{
+    border:1px solid rgba(224,35,28,.4);background:linear-gradient(180deg,rgba(224,35,28,.07),rgba(0,0,0,0) 60%),var(--panel);
+    padding:26px 26px 8px;
+  }
+  .storycards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media (max-width:900px){.storycards{grid-template-columns:1fr}}
+  .scard{border:1px solid var(--line);background:var(--panel);overflow:hidden}
+  .scard .ph{aspect-ratio:16/7;overflow:hidden}
+  .scard .ph img{width:100%;height:100%;object-fit:cover}
+  .scard .cap{padding:14px 17px 17px}
+  .scard .k{font-family:var(--disp);font-size:.68rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase}
+  .scard .k.fic{color:#9fd0ff}.scard .k.real{color:#ff9d97}.scard .k.mid{color:var(--gold-pale)}
+  .scard h3{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:1.18rem;margin:5px 0 5px}
+  .scard p{color:var(--dim);font-size:.88rem;line-height:1.6}
+
+  /* ---------- MOVES ---------- */
+  .key{
+    display:inline-block;background:#1b1b21;border:1px solid #3a3a44;border-bottom-width:3px;border-radius:6px;
+    color:var(--ink);font-weight:700;font-size:.78rem;padding:.1rem .45rem;margin:.04rem .08rem .04rem 0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  table.ctl{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+  table.ctl th,table.ctl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.ctl th{font-family:var(--disp);color:var(--gold-pale);font-size:.74rem;text-transform:uppercase;letter-spacing:.18em;font-weight:600}
+  table.ctl td:first-child{color:var(--ink);font-weight:700;white-space:nowrap;font-family:var(--disp);letter-spacing:.05em;text-transform:uppercase;font-size:.84rem}
+  table.ctl td{color:var(--dim)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+  .moves{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  @media (max-width:820px){.moves{grid-template-columns:1fr}}
+  .move{background:var(--panel);border:1px solid var(--line);padding:15px 17px;display:flex;gap:13px;align-items:flex-start}
+  .move .seq{flex:0 0 auto;padding-top:2px;min-width:86px}
+  .move .nm{font-family:var(--disp);font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.05em;font-size:1rem}
+  .move .d{color:var(--dim);font-size:.88rem;line-height:1.58;margin-top:2px}
+  .move .d strong{color:var(--ink)}
+  .mtag{color:var(--red);font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-family:var(--disp)}
+  .subh{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:1.15rem;margin:30px 0 4px;color:var(--ink)}
+  .subh span{color:var(--gold)}
+
+  /* ---------- MEDIA ---------- */
+  .tattooband{
+    margin-top:8px;position:relative;border:1px solid var(--line);overflow:hidden;
+  }
+  .tattooband img{width:100%;height:340px;object-fit:cover;object-position:center 38%}
+  .tattooband .cap{
+    position:absolute;inset:auto 0 0 0;padding:44px 22px 16px;color:#fff;
+    background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.88));
+    font-size:.92rem;line-height:1.6;
+  }
+  .tattooband .cap b{font-family:var(--disp);text-transform:uppercase;letter-spacing:.1em;display:block;font-size:1.05rem}
+  .gal{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+  @media (max-width:900px){.gal{grid-template-columns:repeat(2,1fr)}}
+  .gal figure{background:var(--panel);border:1px solid var(--line);overflow:hidden}
+  .gal img{width:100%;height:180px;object-fit:cover}
+  .gal figcaption{padding:10px 12px;font-size:.8rem;color:var(--dim);line-height:1.5}
+  .gal figcaption b{color:var(--ink);display:block;font-family:var(--disp);text-transform:uppercase;letter-spacing:.07em;font-size:.84rem}
+  .gal.covers{grid-template-columns:repeat(5,1fr)}
+  @media (max-width:1000px){.gal.covers{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:640px){.gal.covers{grid-template-columns:repeat(2,1fr)}}
+  .gal.covers img{height:auto;aspect-ratio:1/1;display:block}
+
+  /* ---------- STATUS ---------- */
+  .tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:900px){.tracks{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.tracks{grid-template-columns:1fr}}
+  .track{background:var(--panel);border:1px solid var(--line);padding:13px 15px;font-size:.9rem}
+  .track b{font-family:var(--disp);letter-spacing:.05em;text-transform:uppercase}
+  .track span{color:var(--mute);display:block;font-size:.8rem;margin-top:2px}
+  .statusband{
+    margin-top:70px;border:1px solid var(--line-gold);background:
+      radial-gradient(ellipse 60% 90% at 50% 0%,rgba(255,181,46,.09),rgba(0,0,0,0) 70%),var(--panel);
+    text-align:center;padding:44px 24px 40px;
+  }
+  .statusband h2{font-family:var(--disp);font-weight:700;text-transform:uppercase;font-size:clamp(1.7rem,4.4vw,2.6rem);letter-spacing:.05em}
+  .statusband p{color:var(--dim);max-width:640px;margin:12px auto 0;line-height:1.7;font-size:.96rem}
+  .statusband p strong{color:var(--ink)}
+
+  /* ---------- CODES ---------- */
+  .codes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+  @media (max-width:900px){.codes{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.codes{grid-template-columns:1fr}}
+  .code{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);padding:12px 14px;color:inherit;font:inherit;
+  }
+  .code:active{border-color:var(--gold)}
+  .code .c{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;color:var(--gold-hi);letter-spacing:.05em;font-size:.92rem}
+  .code .u{color:var(--mute);font-size:.79rem;line-height:1.45;display:block;margin-top:2px}
+  .code .cp{flex:0 0 auto;color:#5d5a52;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-family:var(--disp)}
+
+  /* sealed arena cards */
+  .arena.sealed .ph{
+    aspect-ratio:16/6.4;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 108%,rgba(224,35,28,.16),rgba(0,0,0,0) 62%),
+      radial-gradient(ellipse 65% 46% at 50% 30%,rgba(185,180,168,.10),rgba(0,0,0,0) 70%),
+      linear-gradient(180deg,#101014,#08080a);
+  }
+  .arena.sealed .q{
+    font-family:var(--disp);font-weight:700;font-size:3.4rem;line-height:1;
+    background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,#9c6d10);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 14px rgba(0,0,0,.8));
+  }
+  /* classified kit band */
+  .kitlock{background:var(--panel);border:1px dashed #3a3a44;padding:18px 20px;margin-top:16px}
+  .kitlock p{color:var(--dim);font-size:.92rem;line-height:1.65}
+  .kitlock p + p{margin-top:10px}
+  .kitlock p strong{color:var(--ink)}
+  /* story teaser lock */
+  #story .lockband p{margin-bottom:14px}
+  .storylock{
+    font-family:var(--disp);font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:#ff9d97;font-size:.82rem;margin-bottom:18px !important;
+  }
+  /* sealed vault band */
+  .vaultband{
+    border:1px dashed #3a3a44;text-align:center;padding:40px 24px 36px;
+    background:radial-gradient(ellipse 60% 90% at 50% 0%,rgba(255,181,46,.07),rgba(0,0,0,0) 70%),var(--panel);
+  }
+  .vaultband .vq{
+    font-family:var(--disp);font-weight:700;font-size:4rem;line-height:1;
+    background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,#9c6d10);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .vaultband h3{font-family:var(--disp);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:1.3rem;margin-top:10px}
+  .vaultband p{color:var(--dim);max-width:560px;margin:10px auto 0;line-height:1.7;font-size:.94rem}
+
+  /* ---------- TBD BAND ---------- */
+  .tbdband{
+    border:1px dashed #3a3a44;text-align:center;padding:44px 24px 40px;
+    background:radial-gradient(ellipse 60% 90% at 50% 0%,rgba(255,181,46,.07),rgba(0,0,0,0) 70%),var(--panel);
+  }
+  .tbdband .tbd{
+    font-family:var(--disp);font-weight:700;font-size:clamp(3rem,8vw,4.6rem);line-height:1;letter-spacing:.3em;text-indent:.3em;
+    background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,#9c6d10);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 14px rgba(0,0,0,.8));
+  }
+  .tbdband p{color:var(--dim);max-width:560px;margin:14px auto 0;line-height:1.7;font-size:.94rem}
+
+  /* ---------- FOOTER ---------- */
+  footer{margin-top:90px;border-top:1px solid #1d1d23;background:#050506;padding:52px 0 40px;text-align:center}
+  footer .logos{display:flex;gap:26px;justify-content:center;align-items:center;margin-bottom:18px}
+  footer .logos img{height:76px;width:auto}
+  footer .fbrand{font-family:var(--disp);font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:.95rem}
+  footer .fbrand span{color:var(--red)}
+  footer .tag2{color:var(--gold-pale);font-family:var(--disp);letter-spacing:.24em;text-transform:uppercase;font-size:.74rem;margin-top:8px}
+  footer .fine{color:#55534d;font-size:.8rem;line-height:1.9;margin-top:14px}
+  footer .fine a{color:#8b887e}
+  .share-toast{
+    position:fixed;left:50%;bottom:2rem;z-index:200;transform:translateX(-50%) translateY(20px);
+    background:#17171c;color:var(--ink);border:1px solid var(--gold);padding:.7rem 1.2rem;border-radius:999px;
+    font-size:.9rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+  }
+  .share-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <nav class="appnav">
-    <a class="home" href="../">← All Apps</a>
-    <span class="navbtns">
-      <button class="iconbtn" onclick="sharePage()" aria-label="Share"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
-      <button class="iconbtn" onclick="location.reload()" aria-label="Refresh">↻</button>
-    </span>
-  </nav>
 
-  <!-- HERO -->
-  <header class="hero">
-    <img class="seal" src="img/nmr-seal.png" alt="Ninja Music Records seal">
-    <div class="presents">Ninja Music Records presents</div>
-    <h1 class="title">Shinobi<br>Brawl</h1>
-    <p class="tag">Two shinobi. One city. Every beat is a weapon. <span class="badge red">Coming Soon</span></p>
-    <p class="sub">A hand-drawn arcade fighting game built from the Ninja Music Records universe — part street brawler, part Street Fighter duel, with Mortal Kombat finishers and a soundtrack that is <strong style="color:#f1f5f9">100% original Keith Cole beats</strong>. LaShmoove &amp; 6lade Cypher take back the streets, one boss at a time.</p>
-    <figure class="heroimg">
-      <img src="img/concept.jpg" alt="The original commissioned painting — 6lade Cypher and LaShmoove">
-      <figcaption class="cap">The original commission — 6lade Cypher (left) &amp; LaShmoove (right). Every fighter in the game is drawn, not rendered.</figcaption>
-    </figure>
+<!-- ================= NAV ================= -->
+<nav>
+  <div class="in">
+    <a class="brand" href="#top"><img src="img/icon.png" alt="Shinobi Brawl icon"><span class="bt">Shinobi <span>Brawl</span></span></a>
+    <div class="nlinks">
+      <a href="#game">The Game</a>
+      <a href="#fighters">Fighters</a>
+      <a href="#arenas">Arenas</a>
+      <a href="#story">Story</a>
+      <a href="#moves">Moves</a>
+      <a href="#codes">Codes</a>
+    </div>
+    <a class="ncta" href="#status">Coming Soon</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <img class="poster" src="img/hero-poster.jpg" alt="" aria-hidden="true">
+  <video autoplay muted loop playsinline preload="metadata" poster="img/hero-poster.jpg" aria-label="Shinobi Brawl animated title">
+    <source src="title-bg.mp4" type="video/mp4">
+  </video>
+  <div class="in">
+    <div class="kicker">Ninja Music Records <b>·</b> Presents</div>
+    <h1 class="mega">Shinobi Brawl</h1>
+    <div class="statement">Every beat <span>is a weapon</span></div>
+    <p class="sub">Two shinobi take back the stages in an arcade fighting game built the cabinet way — best of 3, a charge that sets you on fire, and finishers that end arguments. The fighters, the stages, and the story stay classified until launch. <strong>The system is the trailer.</strong></p>
     <div class="chips">
-      <span class="chip"><b>16</b> fighters + a secret 17th</span>
-      <span class="chip"><b>10</b> arenas</span>
-      <span class="chip"><b>2</b> ways to play — Story &amp; VS Ladder</span>
-      <span class="chip"><b>24</b> cheat codes — all listed below</span>
-      <span class="chip">Soundtrack: <b>Keith Cole beats only</b></span>
+      <span class="chip red">Premium release</span>
+      <span class="chip">No ads</span>
+      <span class="chip">No pay-to-win</span>
+      <span class="chip">16 fighters + a secret 17th</span>
+      <span class="chip">9 arenas</span>
     </div>
-    <div class="cta">
-      <a class="btn" href="#moves">🥋 Learn the Moves</a>
-      <a class="btn ghost" href="#codes">🔓 Cheat Codes</a>
-      <button class="btn ghost" onclick="sharePage()">↗ Share / Wishlist</button>
+    <div class="ctas">
+      <a class="btn red" href="#fighters">Meet the Fighters</a>
+      <a class="btn ghost" href="#story">Story Mode 🔒</a>
     </div>
-  </header>
+    <div class="scrollhint">▼ &nbsp;Scroll&nbsp; ▼</div>
+  </div>
+</header>
 
-  <!-- STORY -->
-  <section class="panel" id="story">
-    <h2><span class="no">01</span> The Story</h2>
-    <p>The streets run on somebody else's music now. A shadow promoter has bought up every stage, every club door and every patty shop corner from the Gaslamp to St. Croix — and the city's own sound is getting squeezed out. <strong>LaShmoove</strong> (the producer, MPC on his back, sword on his hip) and <strong>6lade Cypher</strong> (the faster blade, a real black belt) fight a five-run war to take the stages back — brawling through waves of thugs in the streets, then facing the boss of every territory in a one-on-one duel.</p>
-    <div class="runs">
-      <div class="run"><span class="n">1</span><div><span class="t">Patty Shop Strip → The Bakery</span><div class="d">Where it starts. Clear the strip, go through the bakery door, and face <span class="boss">Patty Thief Prime</span>.</div></div></div>
-      <div class="run"><span class="n">2</span><div><span class="t">Gaslamp Club Doors → Inside the Club</span><div class="d">The old stomping grounds. The queue outside, the floor inside — <span class="boss">Bouncer King</span> holds the door.</div></div></div>
-      <div class="run"><span class="n">3</span><div><span class="t">St. Croix Beach → The Rooftops</span><div class="d">Island run. Sand to skyline, ending above the streets against the <span class="boss">Shadow Promoter</span> himself.</div></div></div>
-      <div class="run"><span class="n">4</span><div><span class="t">Jamaican Street Dance → Carnival → Concert Stage</span><div class="d">The sound-system run — three stages, one long night, the crowd getting bigger every stop.</div></div></div>
-      <div class="run"><span class="n">5</span><div><span class="t">Japanese Forest → The Dojo → Nighttime Tokyo</span><div class="d">Home turf, then the finale: a 13-foot machine called <span class="boss">UNIT-13</span> — and the robot dog it commands.</div></div></div>
+<!-- ================= THE GAME ================= -->
+<section id="game">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">01 — The Game</div>
+      <h2>Four ways <em>in</em></h2>
+      <p>Street Fighter's duel, Mortal Kombat's endings, and a story told like a comic book you can hear. Every mode runs on the same combat system.</p>
+      <div class="rule"></div>
     </div>
-    <p style="margin-top:0.7rem">Between the fights: <strong>bonus rounds</strong> (smash the dojo, outrun the gorilla waves in the forest, wreck the studio, survive the Tokyo robot rush), a <strong>cheat chest</strong> hidden in the dojo, and damage that <em>stays</em> on your fighter — clothes rip in match one, blood shows by match two.</p>
-  </section>
+    <div class="modes">
+      <div class="mode">
+        <div class="ic">🥋</div>
+        <h3>Arcade</h3>
+        <p>The pure duel. Pick your fighter, pick your opponent, pick the stage — best of 3, winner stays sharp. The fastest way to a rematch.</p>
+        <span class="tag">1 v 1 · Your call</span>
+      </div>
+      <div class="mode">
+        <div class="ic">🪜</div>
+        <h3>Ladder</h3>
+        <p>Five rungs, each one meaner than the last, against the other finished fighters. Clear the ladder and the locked door at the top finally opens.</p>
+        <span class="tag">5 rungs · Unlocks Story</span>
+      </div>
+      <div class="mode locked">
+        <div class="ic">📖</div>
+        <h3>Story 🔒</h3>
+        <p>A full campaign told in motion comics — static panels, slow zooms, one narrator. Its stages, its cast, and its ending stay classified. No ladder clear, no story.</p>
+        <span class="tag">Locked · Earn it</span>
+      </div>
+      <div class="mode">
+        <div class="ic">🥊</div>
+        <h3>Practice</h3>
+        <p>The lab. Set the dummy to stand, block, or take the hit — and yes, even the final boss is pickable here. Learn every super in private.</p>
+        <span class="tag">Training · No timer</span>
+      </div>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <h4>🔥 Charge — fight on fire</h4>
+        <p>Your hits build the meter. Chord <strong>L2 + R2</strong> and you ignite: bonus damage on everything while the meter drains, until you chord off or burn out. <strong>Getting hit doesn't kill it anymore</strong> — the fire is yours until it's spent. At full glow, specials become SUPERS.</p>
+      </div>
+      <div class="pillar">
+        <h4>🛡️ The blocking law</h4>
+        <p>Blocking takes <strong>zero chip damage</strong> — but you must match the height: stand for jump-ins, crouch for sweeps. Guess wrong and you eat it clean. Even blades can be blocked… but block a sword enough times in a round and <strong>it breaks</strong>.</p>
+      </div>
+      <div class="pillar">
+        <h4>💀 Finishers</h4>
+        <p>Only the very last hit of a match can end it ugly. Kill with an uppercut or a blade — <strong>decapitation</strong>. Kill with a wave or a super — they drop <strong>limp</strong>. Kill by star or mic — they fall backwards, shot-style. The head that comes off can be kicked. It does no damage. It's the principle.</p>
+      </div>
+      <div class="pillar">
+        <h4>🚪 Knock-throughs</h4>
+        <p>Certain walls are suggestions. A heavy hit at the edge smashes your opponent <strong>through the wall into the next area</strong>. Same fight, bigger stage, health and timer carried over.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <!-- FIGHTERS -->
-  <section class="panel" id="fighters">
-    <h2><span class="no">02</span> The Fighters</h2>
-    <div class="fighters">
-      <article class="fighter">
-        <div class="art"><img src="img/lash.jpg" alt="LaShmoove — concept art"></div>
-        <div class="body">
-          <div class="nm">LaShmoove</div>
-          <div class="role">The Producer · Power · Motion Inputs</div>
-          <p class="bio">Keith Cole's shinobi. Dreads, a microphone in one hand and an MPC on his chest — his projectile is a literal sound wave, and his super drops the bass on you. Stronger, heavier, hits like a kick drum.</p>
-          <div class="stat">POWER <span class="bar"><i style="width:92%"></i></span></div>
-          <div class="stat">SPEED <span class="bar"><i style="width:64%"></i></span></div>
-          <div class="stat">HEALTH <span class="bar"><i style="width:95%"></i></span></div>
-          <p class="bio" style="margin-top:0.55rem">Specials: <strong>Sound Wave</strong> ↓↘→ + Punch · <strong>Golden Rise</strong> →↓↘ + Punch · Super: <strong>Bass Drop Barrage</strong></p>
+<!-- ================= FIGHTERS ================= -->
+<section id="fighters">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">02 — Fighters</div>
+      <h2>Choose your <span class="rd">fighter</span></h2>
+      <p>Seventeen slots on the board — and every one of them sealed. The cast is still subject to change, so names, faces, and kits stay classified until each fighter is finished. What is public: every career clear unlocks one more fighter, and beating the game earns the winner a new outfit.</p>
+      <div class="rule"></div>
+    </div>
+
+    <div class="gridhead">
+      <h3>The Roster</h3>
+      <span>17 fighters · 0 names · Portraits declassify the day each fighter is finished.</span>
+    </div>
+    <div class="rgrid">
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+      <article class="rcard mystery">
+        <div class="port"><span class="q">?</span></div>
+        <div class="rname">Classified</div>
+        <div class="rtag">Identity sealed</div>
+      </article>
+    </div>
+
+    <div class="gridhead">
+      <h3>Corner Dogs</h3>
+      <span>Called in by combo. Unblockable. Autonomous. Counter them with a timed low kick — kick one too often and it won't come back.</span>
+    </div>
+    <div class="dogs">
+      <article class="dog mysterydog">
+        <div class="dimg"><span class="q">?</span></div>
+        <div class="dbody">
+          <h4><span>The Doberman</span>Zeus</h4>
+          <p>A cream albino Doberman in a camo service vest. Answers to one command: <em>"Zeus, get him."</em> A charged Zeus doesn't just bite — he holds you there while his owner walks up.</p>
         </div>
       </article>
-      <article class="fighter">
-        <div class="art"><img src="img/blade.jpg" alt="6lade Cypher — concept art"></div>
-        <div class="body">
-          <div class="nm">6lade Cypher</div>
-          <div class="role">The Blade · Speed · Charge Inputs</div>
-          <p class="bio">Mic's shinobi. Taller, faster, three sword handles on his back and the mic tattoo on his arm. A real black belt — his home stage is the dojo, and his charge moves reward patience, then explode.</p>
-          <div class="stat blue">POWER <span class="bar"><i style="width:76%"></i></span></div>
-          <div class="stat blue">SPEED <span class="bar"><i style="width:94%"></i></span></div>
-          <div class="stat blue">HEALTH <span class="bar"><i style="width:82%"></i></span></div>
-          <p class="bio" style="margin-top:0.55rem">Specials: <strong>Blue Arc Blades</strong> hold ◀, then ▶ + Punch · <strong>Twin Sky Slash</strong> hold ↓, then ↑ + Kick · Super: <strong>Cypher Storm</strong></p>
+      <article class="dog mysterydog">
+        <div class="dimg"><span class="q">?</span></div>
+        <div class="dbody">
+          <h4><span>The Pitbull</span>Sai</h4>
+          <p>A brown pitbull with a street fighter's timing. Sai's portrait stays sealed — the teeth are not. Wiggle the stick to break a charged dog's hold.</p>
         </div>
       </article>
     </div>
-    <h3>The full roster — every career clear unlocks one more</h3>
-    <div class="roster">
-      <span class="slot">LaShmoove<small>Starter</small></span>
-      <span class="slot">6lade Cypher<small>Starter</small></span>
-      <span class="slot">Kage-Zero<small>Starter · Sub-Zero × Naruto</small></span>
-      <span class="slot">Skorch<small>Starter · Scorpion × DBZ</small></span>
-      <span class="slot">Stormfist<small>Starter · Raiden × Ryu</small></span>
-      <span class="slot">Son Shaolin<small>Starter · Goku × Liu Kang</small></span>
-      <span class="slot">Fang Blossom<small>Starter · Mileena/Kitana × Sakura</small></span>
-      <span class="slot">KU-9<small>Starter · Kano × android</small></span>
-      <span class="slot lock">🔒 Beethoven<small>Locked</small></span>
-      <span class="slot lock">🔒 Bach<small>Locked</small></span>
-      <span class="slot lock">🔒 Stevie Wonder<small>Locked</small></span>
-      <span class="slot lock">🔒 Bob Marley<small>Locked</small></span>
-      <span class="slot lock">🔒 Terror 3<small>Three brothers, one slot</small></span>
-      <span class="slot lock">🔒 Trap Diesel<small>Clear career as LaShmoove</small></span>
-      <span class="slot lock">🔒 Gangsta Slim<small>Clear career as 6lade</small></span>
-      <span class="slot lock">🔒 UNIT-13<small>The final boss</small></span>
-      <span class="slot lock">❓ Shizaru<small>Secret — beat it as Terror 3</small></span>
+  </div>
+</section>
+
+<!-- ================= ARENAS ================= -->
+<section id="arenas">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">03 — Arenas</div>
+      <h2>Nine <em>arenas</em></h2>
+      <p>Nine arenas ship with the game, and every one of them is a real place from the music's world. None of them are on this page. Names and first looks declassify at launch — for now, count them. That's all you get.</p>
+      <div class="rule"></div>
     </div>
-    <p class="fine" style="margin-top:0.6rem">Plus code-only guest fighters — see the cheat codes. Three color variations per fighter, and beating the game earns the winner a brand-new outfit.</p>
-  </section>
-
-  <!-- SYSTEMS -->
-  <section class="panel" id="systems">
-    <h2><span class="no">03</span> How It Plays</h2>
-    <p><strong>Story Mode</strong> is a Streets-of-Rage-style brawler that keeps stopping for Street Fighter boss duels. <strong>VS Ladder</strong> is pure duels — eight rungs, ending with the three territory bosses. Both run on the same combat system:</p>
-    <div class="sys">
-      <div class="card"><div class="t">🔥 CHARGE — fight on fire</div><div class="d">Landing hits builds your charge meter; combos build it fastest. Spend it to catch fire: a glowing fighter deals bonus damage on every hit while the meter drains — combos keep it alive, but <strong>one clean hit knocks the fire out</strong> (you keep the meter). While glowing, your motion special becomes a screen-shaking SUPER.</div></div>
-      <div class="card"><div class="t">🛡️ The blocking law</div><div class="d">Blocking takes <strong>zero chip damage</strong> — but you must match the height. Block high for jump-ins and overheads, low for sweeps and crouch kicks. Block the wrong height and you eat it. Even weapons can be blocked — but block a blade too many times and <strong>it breaks</strong> until the next round.</div></div>
-      <div class="card"><div class="t">💀 Finishers</div><div class="d">On match point, the last hit decides how it ends: kill with an uppercut or a blade and it's a <strong>decapitation</strong>. Kill with a projectile and they fall limp. Anything else is a clean KO. The announcer (Keith himself) has opinions about all of it.</div></div>
-      <div class="card"><div class="t">🐕 Companion dogs</div><div class="d">Trap Diesel calls <strong>Zeus</strong>, a white albino Doberman in a camo service vest; Gangsta Slim's brown pitbull answers to him. Dogs attack on their own and <strong>can't be blocked</strong> — counter with a timed low kick. Kick one too often and it won't come back. A charged dog grabs and <em>holds</em> — wiggle the stick to break free before its owner tees off.</div></div>
-      <div class="card"><div class="t">🚪 Stage knock-throughs</div><div class="d">A heavy hit at the edge of an arena can smash your opponent <strong>through the wall into the next area</strong> — patty shop into the bakery, club doors into the club, rooftops down to the street. Health, charge and timer carry over. It's still the same fight, just a bigger stage.</div></div>
-      <div class="card"><div class="t">🎁 The dojo cheat chest</div><div class="d">After stage select, hold ↑ for 5 seconds on the matchup screen: chime, fade, and you're in the dojo facing one chest. Punch to stop the cycling icons and claim a cheat for 2 rounds — 1.5× life, speed, moon jumps, instant charge, invincibility, double jump, giant size, heavy hands. In a match, a button combo drops your cheat as a pickup… and yes, your opponent can steal it.</div></div>
+    <div class="agrid">
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 01</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 02</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 03</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 04</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 05</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 06</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 07</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 08</h3><p>Location classified.</p></div></article>
+      <article class="arena sealed"><div class="ph"><span class="q">?</span></div><div class="cap"><h3>Arena 09</h3><p>Location classified.</p></div></article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- MOVES -->
-  <section class="panel" id="moves">
-    <h2><span class="no">04</span> The Moves List</h2>
-    <p>Classic Street Fighter layout — three punches, three kicks — on every control scheme. Print this page out and tape it to the fridge; everybody else has to learn the hard way.</p>
-    <h3>Controls</h3>
-    <div style="overflow-x:auto">
-    <table class="ctl">
-      <tr><th>Action</th><th>Keyboard</th><th>DualShock / Pad</th><th>Touch</th></tr>
-      <tr><td>Move</td><td><span class="key">←</span><span class="key">→</span><span class="key">↑</span><span class="key">↓</span> or <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span></td><td>D-pad / left stick</td><td>Virtual stick</td></tr>
-      <tr><td>Jump</td><td><span class="key">↑</span> or <span class="key">Space</span></td><td>D-pad ↑</td><td>Stick up</td></tr>
-      <tr><td>Light / Med / Heavy Punch</td><td><span class="key">U</span><span class="key">I</span><span class="key">O</span></td><td>□ / △ / R1</td><td>LP · MP · HP</td></tr>
-      <tr><td>Light / Med / Heavy Kick</td><td><span class="key">J</span><span class="key">K</span><span class="key">L</span></td><td>× / ○ / R2</td><td>LK · MK · HK</td></tr>
-      <tr><td>CHARGE (catch fire)</td><td><span class="key">P</span></td><td>L2 or L3</td><td>CHARGE pill</td></tr>
-      <tr><td>Select / Pause</td><td><span class="key">Shift</span> / <span class="key">Esc</span></td><td>Share / Options</td><td>SELECT / START pills</td></tr>
-      <tr><td>Tag swap (Terror 3)</td><td colspan="3">R1 + R2 on pad — call the next brother in, mid-fight</td></tr>
-    </table>
+<!-- ================= STORY ================= -->
+<section id="story">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">04 — Story Mode</div>
+      <h2>Story mode <span class="rd">🔒</span></h2>
+      <p>Locked until you clear the Ladder. A full campaign told as <strong style="color:var(--ink)">motion comics</strong> — painted panels, slow zooms, a single voice narrating every run.</p>
+      <div class="rule"></div>
     </div>
-    <h3>Universal techniques — every fighter</h3>
-    <div class="move"><div class="seq"><span class="key">↓</span>+<span class="key">HP</span></div><div><div class="nm">Uppercut</div><div class="d">Knocks down, every time. On match point, this is a finisher — heads come off.</div></div></div>
-    <div class="move"><div class="seq"><span class="key">↓</span>+<span class="key">HK</span></div><div><div class="nm">Leg Sweep</div><div class="d">Knocks down, every time. Hits low — must be blocked crouching.</div></div></div>
-    <div class="move"><div class="seq"><span class="key">↓</span>+<span class="key">P</span>/<span class="key">K</span></div><div><div class="nm">Crouching set</div><div class="d">Crouching light/medium punches and kicks — the kicks hit low. Your fastest way to check a blocker.</div></div></div>
-    <div class="move"><div class="seq"><span class="key">◀</span> hold</div><div><div class="nm">Block</div><div class="d">Hold away from your opponent (crouch + away for low). Zero chip damage if you match the height. Blocking a special still eats the full hit if you guess wrong.</div></div></div>
-    <div class="move"><div class="seq"><span class="key">↑</span> over them</div><div><div class="nm">Crossover flip</div><div class="d">Jump clean over your opponent and you somersault across — land behind them and make them re-face you. Jump attacks work on the way over.</div></div></div>
-    <div class="move"><div class="seq">in the air</div><div><div class="nm">Jump attacks</div><div class="d">Any punch or kick in the air. Heavy buttons hit at full heavy damage — the classic jump-in opener.</div></div></div>
-    <div class="move"><div class="seq"><span class="key">P</span><span class="key">K</span> strings</div><div><div class="nm">Punch chains</div><div class="d">Light → medium → heavy punches chain into a 3-hit string. Five clean hits on a fighter (blocked hits don't count) leaves them <strong>dizzy</strong> — stars out, wide open.</div></div></div>
-
-    <h3>LaShmoove — motion specials</h3>
-    <div class="move"><div class="seq"><span class="key">↓</span><span class="key">↘</span><span class="key">→</span>+<span class="key">P</span></div><div><div class="nm">Sound Wave</div><div class="d">A quarter-circle of pure low end. Costs a little charge meter. On match point, a kill with this drops them limp. <span class="tag">Projectile</span></div></div></div>
-    <div class="move"><div class="seq"><span class="key">→</span><span class="key">↓</span><span class="key">↘</span>+<span class="key">P</span></div><div><div class="nm">Golden Rise</div><div class="d">The dragon-punch motion — a rising anti-air that owns the sky above him. Free to throw, hard to punish if you whiff it smart. <span class="tag">Anti-air</span></div></div></div>
-    <div class="move"><div class="seq">🔥 + <span class="key">↓</span><span class="key">↘</span><span class="key">→</span>+<span class="key">P</span></div><div><div class="nm">Bass Drop Barrage</div><div class="d">While glowing, the Sound Wave motion fires the SUPER — a bigger, faster wave that shakes the floor on impact. His 808 special: you feel this one in the walls. <span class="tag">Super · glowing only</span></div></div></div>
-    <p class="fine">LaShmoove also throws his MPC. Yes, the whole sampler. It comes back… usually.</p>
-
-    <h3>6lade Cypher — charge specials</h3>
-    <div class="move"><div class="seq"><span class="key">◀</span> hold, <span class="key">▶</span>+<span class="key">P</span></div><div><div class="nm">Blue Arc Blades</div><div class="d">Hold away for about two-thirds of a second to charge, then snap forward + punch — twin arcs of blue steel. Walk backwards to charge without giving up your block. <span class="tag">Projectile · charge</span></div></div></div>
-    <div class="move"><div class="seq"><span class="key">↓</span> hold, <span class="key">↑</span>+<span class="key">K</span></div><div><div class="nm">Twin Sky Slash</div><div class="d">Charge down, then up + kick for the flash rise — a vertical blade launch. Beats jump-ins cold if your timing's honest. <span class="tag">Anti-air · charge</span></div></div></div>
-    <div class="move"><div class="seq">🔥 + <span class="key">◀</span> hold, <span class="key">▶</span>+<span class="key">P</span></div><div><div class="nm">Cypher Storm</div><div class="d">Glowing + the charge motion = the SUPER version — a storm of arcs that crosses the whole screen. <span class="tag">Super · glowing only</span></div></div></div>
-    <p class="fine">6lade's blades are weapons, and weapons follow the blocking law: get them blocked too many times in a round and they break.</p>
-
-    <h3>More kits — arriving with the full roster</h3>
-    <div class="move"><div class="seq">rush</div><div><div class="nm">Trap Diesel — no projectile, all pressure</div><div class="d">LaShmoove's street alter ego (Jordans + jeans). The only fighter with <strong>no projectile at all</strong> — instead he rushes like Balrog and grabs like Zangief, and he can <strong>deflect</strong> projectiles back. Calls Zeus with <em>"Zeus, get him."</em> Sounds exactly like LaShmoove — same man, different taunt.</div></div></div>
-    <div class="move"><div class="seq">guns</div><div><div class="nm">Gangsta Slim — the firestick</div><div class="d">6lade's street persona: bucket hat, shades, crown chain. A street brawler who brought guns to a sword fight, with a brown pitbull for backup. Same voice as 6lade, one very different taunt.</div></div></div>
-    <div class="move"><div class="seq"><span class="key">R1</span>+<span class="key">R2</span></div><div><div class="nm">Terror 3 — three brothers, one life bar</div><div class="d">Tag-swap between <strong>Kikazaru</strong> (hear no evil — Scorpion-style, the spear and the fire), <strong>Iwazaru</strong> (speak no evil — Sub-Zero-style ice, and completely mute), and <strong>Mizaru</strong> (see no evil — Raiden-style lightning). Each brother's health is small; together they're one full bar. Their secret fourth brother, <strong>Shizaru</strong> (do no evil, Rain-style), unlocks by beating the game as Terror 3.</div></div></div>
-    <div class="move"><div class="seq">boss</div><div><div class="nm">UNIT-13 &amp; Spot — the final exam</div><div class="d">UNIT-13 is 13 feet of machine — too heavy to launch, and it doesn't wear damage like flesh does. Knock its head off below 25% health and it <em>keeps fighting headless</em>; the head stays on the floor and can be picked up and thrown. Its robot dog <strong>Spot</strong> (yellow, headless, backwards knees, laser on top) runs a six-second summon cycle and fires a tracking laser you <strong>cannot jump</strong> — the only answer is to block it. Beat them and UNIT-13 goes down the way machines should: it blows up.</div></div></div>
-  </section>
-
-  <!-- CODES -->
-  <section class="panel" id="codes">
-    <h2><span class="no">05</span> Cheat Codes</h2>
-    <p>Straight from the source — every code, published here first. Enter them on the game's <strong>Options screen</strong>. One catch, and it's a fair one: code entry stays locked until you've <strong>beaten the game once</strong> the honest way. (Resetting the game wipes your codes along with your save.) Tap any code to copy it.</p>
-    <h3>Fighters</h3>
-    <div class="codes">
-      <button class="code" onclick="copyCode(this)"><span><span class="c">BEATSBYKEITH</span><br><span class="u">Unlocks Beethoven + Bach</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">SOULBROTHERS</span><br><span class="u">Unlocks Stevie Wonder + Bob Marley</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">WISEMONKEYS</span><br><span class="u">Unlocks Terror 3 — Mizaru, Kikazaru, Iwazaru</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">TRAPDIESEL</span><br><span class="u">Unlocks Trap Diesel</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">FIRESTICK</span><br><span class="u">Unlocks Gangsta Slim</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">NEO1</span><br><span class="u">UNIT-13, playable</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">DONOEVIL</span><br><span class="u">Unlocks Shizaru, the 4th brother</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">OLDSCHOOL</span><br><span class="u">Playable Silverback (the gorilla!)</span></span><span class="cp">Copy</span></button>
+    <div class="lockband">
+      <p style="color:var(--dim);line-height:1.7;font-size:.97rem">Five runs. One war for the city's stages. Somewhere in it, two of the most important locations sit a neighborhood apart — one of them is <strong style="color:#9fd0ff">a story somebody told</strong>, and the other one <strong style="color:#ff9d97">actually happened</strong>. Which is which, who you meet on the road, and what waits at the end of it: all of it stays behind this door.</p>
+      <p style="color:var(--dim);line-height:1.7;font-size:.97rem">No screenshots. No location names. No cast list. The teaser declassifies when the mode does.</p>
+      <p class="storylock">🔒 Story Mode — clear the Ladder to unlock</p>
     </div>
-    <h3>Arenas &amp; extras</h3>
-    <div class="codes">
-      <button class="code" onclick="copyCode(this)"><span><span class="c">GASLAMP</span><br><span class="u">Arenas: Club Interior + Concert Stage</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">ISLANDTIME</span><br><span class="u">Arenas: Street Dance + Beach + Carnival</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">TOKYONIGHTS</span><br><span class="u">Arenas: Tokyo + Japanese Forest</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">FRESHFITS</span><br><span class="u">All alt outfits</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">FULLPALETTE</span><br><span class="u">All color variations</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">SERVICEDOGS</span><br><span class="u">Dog service vests</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">EVERYBODY</span><br><span class="u">ALL standard unlocks at once</span></span><span class="cp">Copy</span></button>
-    </div>
-    <h3>Guest fighters</h3>
-    <div class="codes">
-      <button class="code" onclick="copyCode(this)"><span><span class="c">ITSAME</span><br><span class="u">Guest fighter: Mario</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">BLUEBLUR</span><br><span class="u">Guest fighter: Sonic</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">JUSTSAYORI</span><br><span class="u">Guest fighter: Sayori</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">NINELIVES</span><br><span class="u">Guest fighter: A Cat</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">GOODBOYS</span><br><span class="u">Guest fighters: The Dogs — Zeus, Pitbull, Spot</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">BUDDYHOLLY</span><br><span class="u">Guest fighter: Weezer</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">IAMIRONMAN</span><br><span class="u">Guest fighter: Iron Man</span></span><span class="cp">Copy</span></button>
-      <button class="code" onclick="copyCode(this)"><span><span class="c">NUMBERONE</span><br><span class="u">Guest fighter: Afro Samurai</span></span><span class="cp">Copy</span></button>
-    </div>
-    <h3>The master code</h3>
-    <div class="codes">
-      <button class="code" onclick="copyCode(this)"><span><span class="c">FULLROSTER</span><br><span class="u">EVERYTHING — standard unlocks + all guests</span></span><span class="cp">Copy</span></button>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <!-- STAGES -->
-  <section class="panel" id="stages">
-    <h2><span class="no">06</span> The Arenas</h2>
-    <p>Ten arenas, every one painted for the game — and every crowd is alive in two layers: painted faces deep in the scene, and animated bystanders up front who dance, flinch and cheer. Watch for the chickens on the patty shop strip. They scatter.</p>
-    <figure class="stageimg"><img src="img/stage-patty.jpg" alt="Patty Shop Strip stage art"><figcaption class="cap"><b style="color:#f1f5f9">Patty Shop Strip</b> — where every story starts. (That's a real mixtape cover framed on the wall — go find it in-game.)</figcaption></figure>
-    <figure class="stageimg"><img src="img/stage-club.jpg" alt="Gaslamp Club Doors stage art"><figcaption class="cap"><b style="color:#f1f5f9">Gaslamp Club Doors</b> — the queue is painted in; the bouncers are not your friends.</figcaption></figure>
-    <ul style="margin-top:0.8rem">
-      <li><strong>Patty Shop Strip</strong> &amp; the bakery inside — knock-through pair</li>
-      <li><strong>Gaslamp Club Doors</strong> &amp; <strong>Inside the Club</strong> — knock-through pair</li>
-      <li><strong>Jamaican Street Dance</strong> — flag flying, sound system stacked</li>
-      <li><strong>St. Croix Beach</strong> &amp; the rooftops above it — USVI flag mandatory</li>
-      <li><strong>Carnival</strong> and the <strong>Concert Stage</strong> — the big-night arenas</li>
-      <li><strong>Japanese Forest</strong> — gorilla country</li>
-      <li><strong>The Dojo</strong> — 6lade's home, the cheat-chest room, and a full VS arena</li>
-      <li><strong>Nighttime Tokyo</strong> — UNIT-13's arena. Bring everything.</li>
-    </ul>
-  </section>
-
-  <!-- GALLERY -->
-  <section class="panel" id="gallery">
-    <h2><span class="no">07</span> From the Vault — the real art</h2>
-    <p>This game's world comes from a real catalog: commissioned paintings, album covers and studio photos from Keith &amp; Mic's years making music. The art shows up in the game too — on the ladder screens, between story stages, and framed on stage walls.</p>
-    <div class="gal">
-      <figure><img src="img/concept.jpg" alt="Original concept painting"><figcaption><b>The First Commission</b>6lade Cypher × LaShmoove — the painting that started the game.</figcaption></figure>
-      <figure><img src="img/soundboy.jpg" alt="Lo-Fi Soundboy album cover"><figcaption><b>Lo-Fi Soundboy</b>DJ LaShmoove — the album cover. Boombox, Chucks, Jamaica flag on the toe.</figcaption></figure>
-      <figure><img src="img/okasaan.jpg" alt="Okasaan cover art"><figcaption><b>Okasaan</b>The mother tape — hand-inked cover.</figcaption></figure>
-      <figure><img src="img/holiday.jpg" alt="2019 Holiday Beat Tape studio photo"><figcaption><b>2019 Holiday Beat Tape</b>6lade at the MPC — a real studio photo, fisheye and all.</figcaption></figure>
-      <figure><img src="img/pattypanel.jpg" alt="The Beef Patty Skit panel"><figcaption><b>The Beef Patty Skit</b>Shinobi Chronicles — charged LaShmoove, straight from the comic.</figcaption></figure>
-      <figure><img src="img/mission.jpg" alt="The Mission mixtape cover"><figcaption><b>The Mission</b>LaShmoove — the mixtape cover. In-game, it hangs on the patty shop wall.</figcaption></figure>
+<!-- ================= MOVES ================= -->
+<section id="moves">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">05 — How It Plays</div>
+      <h2>The <em>moves</em> list</h2>
+      <div class="rule"></div>
     </div>
-  </section>
-
-  <!-- SOUNDTRACK -->
-  <section class="panel" id="soundtrack">
-    <h2><span class="no">08</span> The Soundtrack</h2>
-    <p>No licensed music, no stock loops — <strong>every track in Shinobi Brawl is an original Keith Cole beat</strong>, mastered for the game (low end tucked, loud and clean). The voices are real too: Keith announces and plays LaShmoove; Mic voices 6lade; the crowd is a crowd.</p>
-    <div class="tracks">
-      <div class="track"><b>ssssss</b> <span>— title screen · 94 BPM</span></div>
-      <div class="track"><b>video games</b> <span>— stage 1 · 86 BPM</span></div>
-      <div class="track"><b>HMS130</b> <span>— stage 2 · 130 BPM</span></div>
-      <div class="track"><b>THE SCRATCH 2</b> <span>— stage 3 · 107 BPM</span></div>
-      <div class="track"><b>beat battle 2</b> <span>— boss fights · 100 BPM</span></div>
-      <div class="track"><b>foot loose 2</b> <span>— bonus rounds · 127 BPM</span></div>
+    <div class="tbdband">
+      <div class="tbd">TBD</div>
+      <p>To be determined — the full moves list declassifies closer to launch.</p>
     </div>
-    <p class="fine" style="margin-top:0.6rem">From the same catalog as the beat tapes — Storm Season, Okasaan, Chemical Kumite — and a new 2015–2018 beats release landing before the end of 2026.</p>
-  </section>
+  </div>
+</section>
 
-  <!-- STATUS -->
-  <section class="panel" id="status">
-    <h2><span class="no">09</span> Release Status</h2>
-    <p><strong>Shinobi Brawl is in active development.</strong> The full game is being built in Godot for browser and Android TV (Firestick / Onn) — the mechanics test build already runs: real sprites, the full 6-button system, motion + charge specials, the ladder, finishers and all. What you see on this page is the real design, not a pitch deck.</p>
-    <ul>
-      <li><strong>Release date &amp; price:</strong> announced on this page first. The finished game will be a premium release — no ads, no pay-to-win, the cheat codes above stay free for everybody.</li>
-      <li><strong>Wishlist it:</strong> tap Share and send it to one person who grew up on arcade fighters. That's the whole marketing department right now.</li>
-      <li><strong>Watch it get built:</strong> the Tuesday Cook-Up streams the process live — beat-making, game talk, call-ins.</li>
-    </ul>
-    <div class="cta" style="justify-content:flex-start">
-      <button class="btn" onclick="sharePage()">↗ Share Shinobi Brawl</button>
-      <a class="btn ghost" href="#moves">Back to the moves ↑</a>
+<!-- ================= MEDIA ================= -->
+<section id="media">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">06 — Media</div>
+      <h2>From the <em>vault</em></h2>
+      <p>The game's world comes from a real catalog — a chest tattoo, and the official releases that built the Ninja Music Records sound. The covers are the public record.</p>
+      <div class="rule"></div>
     </div>
-  </section>
+    <figure class="tattooband">
+      <img src="img/tattoo.jpg" alt="The character select backdrop — Keith's chest tattoo as a painting">
+      <figcaption class="cap"><b>The Select Screen Is a Tattoo</b>The character select backdrop is Keith's own chest piece — red sun, pagoda, samurai under the sakura — painted into the game.</figcaption>
+    </figure>
+    <div class="gal covers">
+      <figure><img src="release-storm-season.jpg" alt="Storm Season album cover"><figcaption><b>Storm Season · 2013</b>A masked samurai works the turntables through a hurricane of flying vinyl.</figcaption></figure>
+      <figure><img src="release-chemical-kumite.jpg" alt="Chemical Kumite album cover"><figcaption><b>Chemical Kumite · 2018</b>An erupting lab flask over a turntable — science wired into the sound system.</figcaption></figure>
+      <figure><img src="release-okasaan.jpg" alt="Okasaan, Vols. 1 and 2 album cover"><figcaption><b>Okasaan, Vols. 1 and 2 · 2013</b>Two volumes under one seal — a masked face pressed in indigo halftone.</figcaption></figure>
+      <figure><img src="release-wind-ep.jpg" alt="The Wind EP cover"><figcaption><b>The Wind EP · 2014</b>Two masked figures under the wind kanji, weathered and halftone-pressed.</figcaption></figure>
+      <figure><img src="release-fire-ep.jpg" alt="The Fire EP cover"><figcaption><b>The Fire EP · 2013</b>The fire kanji burning over a silhouetted crowd.</figcaption></figure>
+    </div>
+  </div>
+</section>
 
-  <footer>
+<!-- ================= CODES ================= -->
+<section id="codes">
+  <div class="wrap">
+    <div class="shead">
+      <div class="no">07 — Cheat Codes</div>
+      <h2>Every code. <em>Published.</em></h2>
+      <div class="rule"></div>
+    </div>
+    <div class="tbdband">
+      <div class="tbd">TBD</div>
+      <p>To be determined — every code publishes here, closer to launch.</p>
+    </div>
+
+    <div class="statusband" id="status">
+      <h2>In active development</h2>
+      <p>The full game is being built in <strong>Godot</strong> for browser and Android TV — and the mechanics test build already runs: real fighters, the full 6-button system, charge specials, the ladder, finishers, all of it. What you see on this page is the real design, not a pitch deck.</p>
+      <p><strong>Release date &amp; price announced here first.</strong> The finished game is a premium release — no ads, no pay-to-win, and the cheat codes stay free for everybody. Wishlist it the only way that exists right now: send it to one person who grew up on arcade fighters. And watch it get built live on the Tuesday Cook-Up.</p>
+      <div class="ctas">
+        <button class="btn red" onclick="sharePage()">↗ Share Shinobi Brawl</button>
+        <a class="btn ghost" href="#fighters">Back to the fighters ↑</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
     <div class="logos">
-      <img class="seal" src="img/nmr-seal.png" alt="Ninja Music Records">
-      <img class="badgelogo" src="img/cbk-badge.png" alt="Curated by Keith">
+      <img src="img/nmr-seal.png" alt="Ninja Music Records seal">
+      <img src="img/cbk-badge.png" alt="Curated by Keith badge">
     </div>
-    <div>© Ninja Music Records · A Curated by Keith production</div>
-    <div class="story">Dabbling in code since BASIC in the early 90s.</div>
-    <div>Built by Keith Cole</div>
-  </footer>
-</div>
+    <div class="fbrand">Shinobi <span>Brawl</span></div>
+    <div class="tag2">Beats · Bricks · Blooms</div>
+    <div class="fine">
+      © 2026 Ninja Music Records · A Curated by Keith production<br>
+      Dabbling in code since BASIC in the early 90s.<br>
+      Built by Keith Cole · <a href="../">← All Apps</a>
+    </div>
+  </div>
+</footer>
 
 <div class="share-toast" id="toast">Copied</div>
 <script>
 async function sharePage() {
-  const data = { title: 'Shinobi Brawl — Keith Cole', text: 'Shinobi Brawl: a hand-drawn ninja fighting game from Ninja Music Records. Moves list, cheat codes, story — coming soon.', url: location.href };
+  const data = { title: 'Shinobi Brawl — Ninja Music Records', text: 'Shinobi Brawl: a ninja fighting game from Ninja Music Records. 16 fighters, 9 arenas, every cheat code published. Coming soon.', url: location.href };
   try {
     if (navigator.share) { await navigator.share(data); return; }
     throw 0;
@@ -493,11 +776,6 @@ function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200);
-}
-async function copyCode(btn) {
-  const code = btn.querySelector('.c').textContent.trim();
-  try { await navigator.clipboard.writeText(code); toast('Code copied: ' + code); }
-  catch (e) { toast('Code: ' + code); }
 }
 </script>
 </body>
