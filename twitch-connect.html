@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twitch Connect — Keith Cole</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+         background:#0d0d0f; color:#f2ead8; display:flex; min-height:100vh;
+         align-items:center; justify-content:center; }
+  .card { max-width:560px; width:92%; background:#16161a; border:1px solid #d9a62e;
+          border-radius:14px; padding:28px 26px; box-shadow:0 10px 40px rgba(0,0,0,.55); }
+  h1 { margin:0 0 6px; font-size:22px; color:#d9a62e; letter-spacing:.4px; }
+  p { line-height:1.55; color:#cfc7b4; }
+  .code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size:15px;
+          word-break:break-all; background:#000; border:1px dashed #d9a62e;
+          border-radius:8px; padding:14px; margin:16px 0; color:#fff; }
+  button { background:#d9a62e; color:#141414; border:0; border-radius:8px;
+           padding:11px 18px; font-weight:700; cursor:pointer; font-size:15px; }
+  button:active { transform: translateY(1px); }
+  .err { color:#ff8f7a; }
+  .small { font-size:13px; color:#9b937f; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎮 Twitch Connect</h1>
+    <div id="out"><p>Reading your authorization…</p></div>
+    <p class="small">This page belongs to Keith Cole's Twitch manager app. It only displays the
+    one-time code Twitch sends back after you approve access — it stores nothing and sends nothing anywhere.</p>
+  </div>
+<script>
+  var q = new URLSearchParams(location.search);
+  var out = document.getElementById('out');
+  var code = q.get('code'), err = q.get('error'), desc = q.get('error_description');
+  if (err) {
+    out.innerHTML = '<p class="err"><strong>Authorization didn\u2019t go through:</strong> ' +
+      (desc || err) + '</p><p>Head back to Amy and say the Twitch connect failed — she\u2019ll send a fresh link.</p>';
+  } else if (code) {
+    out.innerHTML = '<p><strong>Approved.</strong> Here is your one-time code — copy it and give it to Amy ' +
+      '(she\u2019ll ask for it in a secure card). It expires quickly and only works once.</p>' +
+      '<div class="code" id="c">' + code.replace(/</g,'&lt;') + '</div>' +
+      '<button id="b">Copy code</button> <span id="ok"></span>';
+    document.getElementById('b').onclick = function () {
+      navigator.clipboard.writeText(code).then(function(){
+        document.getElementById('ok').textContent = 'Copied ✓';
+      });
+    };
+  } else {
+    out.innerHTML = '<p>No code in this link. This page only does something at the end of the ' +
+      'Twitch approval flow — open the authorize link Amy gives you and you\u2019ll land back here with your code.</p>';
+  }
+</script>
+</body>
+</html>
