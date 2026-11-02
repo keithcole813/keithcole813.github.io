@@ -201,12 +201,18 @@ input[type=file]{display:none}
 .log{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);max-height:110px;overflow:auto;white-space:pre-wrap}
 .kbd{font-family:"JetBrains Mono",monospace;background:var(--step);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:11px}
 .footer-note{color:var(--faint);font-size:11px;text-align:center;margin-top:14px}
-.copyright{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;font-weight:700;letter-spacing:.4px;text-align:center}
-.copyright b{color:var(--gold)}
-/* ---------- Undo history + autosave bar ---------- */
-.histbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;box-shadow:var(--shadow)}
-.histbar .savestate{font-size:11px;color:var(--teal);font-weight:700}
+footer.copyright{display:block;margin-top:16px;padding:16px 12px 18px;background:var(--bg2);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;color:var(--ink);font-size:14px;font-weight:700;letter-spacing:.4px;text-align:center}
+footer.copyright b{color:var(--gold)}
+/* ---------- Undo history + autosave bar (static, directly under the transport) ---------- */
+.histbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;background:var(--panel2);border:1px solid var(--gold2);border-left:5px solid var(--gold);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow)}
+.histbar .histlabel{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#1c1503;background:var(--gold);border-radius:3px;padding:3px 6px;text-transform:uppercase}
+.histbar .btn{min-height:38px;padding:7px 14px;font-size:13px;border-color:var(--gold2);color:var(--gold);background:color-mix(in srgb,var(--gold) 12%, var(--btn))}
+.histbar .btn:hover{border-color:var(--gold);color:var(--ink)}
+.histbar .btn:disabled{opacity:.55;color:var(--dim);border-color:var(--line)}
+.histbar .savestate{font-size:12px;color:var(--teal);font-weight:700}
 .histbar .savestate.fail{color:var(--red)}
+.histbar .histnote{color:var(--dim);font-size:11px;flex:1 1 220px;min-width:180px}
+@media (max-width:640px){.histbar .btn{flex:1 1 30%;min-height:44px}.histbar .savestate{flex:1 1 100%}.histbar .histnote{flex:1 1 100%}}
 .histlog{display:none;margin-bottom:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);max-height:260px;overflow:auto}
 .histlog.open{display:block}
 .histlog h3{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
@@ -374,6 +380,18 @@ a{color:var(--teal)}
     </div>
     <div class="statusline" id="statusLine">Ready — press Play. A starter beat is loaded in Sequence 1; chain sequences together in the Song playlist under the rack.</div>
   </div>
+
+  <!-- ================= UNDO / REDO + HISTORY + AUTOSAVE (directly under the transport) ================= -->
+  <div class="histbar" id="histBar" role="region" aria-label="Undo, redo, history and autosave">
+    <span class="histlabel">History</span>
+    <button class="btn sm" id="btnUndo" title="Undo the last logged action (Ctrl+Z)">↩ Undo</button>
+    <button class="btn sm" id="btnRedo" title="Redo (Ctrl+Shift+Z or Ctrl+Y)">↪ Redo</button>
+    <button class="btn sm" id="btnHistLog" title="Show the log of every action recorded for undo — click any entry to jump back to that state">History log</button>
+    <span class="savestate" id="saveState">Autosave: starting…</span>
+    <span class="histnote">Every action is logged for undo. Your project autosaves in this browser as you work — refresh the page and it restores itself, no starting over.</span>
+    <button class="btn sm" id="btnDiscardRecovery" style="display:none" title="Undo the session recovery: go back to the fresh starter state and clear the autosaved draft">✕ Discard recovered session</button>
+  </div>
+  <div class="histlog" id="histLog"><h3>Action log — every entry is an undo point. Click one to jump to that state.</h3><div id="histItems"></div></div>
 
       <!-- ================= SONG / PLAYLIST (MPC-style) ================= -->
       <section class="panel">
@@ -814,9 +832,8 @@ a{color:var(--teal)}
     </div>
   </div>
 
-  <div class="footer-note">Beat Lab Web Beta — sampler-first: every instrument channel plays your own sounds. Synth channel is there for the rare MIDI idea. Press <span class="kbd">Space</span> to play/stop, <span class="kbd">1–9</span> audition channels, <span class="kbd">Q W E R T Y U I</span> play chops.
-    <div class="copyright">© <span id="copyYear">2026</span> <b>Keith Cole</b> · Beat Lab — All rights reserved.</div>
-  </div>
+  <div class="footer-note">Beat Lab Web Beta — sampler-first: every instrument channel plays your own sounds. Synth channel is there for the rare MIDI idea. Press <span class="kbd">Space</span> to play/stop, <span class="kbd">1–9</span> audition channels, <span class="kbd">Q W E R T Y U I</span> play chops.</div>
+  <footer class="copyright">© <span id="copyYear">2026</span> <b>Keith Cole</b> · Beat Lab — All rights reserved.</footer>
 </div>
 
 <script>
@@ -6287,20 +6304,32 @@ setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start b
   const HIST_MAX=80, HIST_KEEP_PERSIST=14, PERSIST_BUDGET=3400000;
   const cy=$("copyYear"); if(cy) cy.textContent=new Date().getFullYear();
 
-  /* ---------- UI: history bar under the transport ---------- */
+  /* ---------- UI: history bar under the transport ----------
+     The bar and its log are static markup directly under the transport
+     (so they render with the page itself, in place, before any script
+     runs). This script adopts those elements — and re-pins them
+     immediately after the transport in case anything else moved nodes —
+     instead of creating a second, script-only copy. */
   const transport=document.querySelector(".transport");
-  const bar=document.createElement("div"); bar.className="histbar"; bar.id="histBar";
-  bar.innerHTML=
-    '<button class="btn sm" id="btnUndo" title="Undo the last logged action (Ctrl+Z)">↩ Undo</button>'+
-    '<button class="btn sm" id="btnRedo" title="Redo (Ctrl+Shift+Z or Ctrl+Y)">↪ Redo</button>'+
-    '<button class="btn sm" id="btnHistLog" title="Show the log of every action recorded for undo — click any entry to jump back to that state">History log</button>'+
-    '<span class="savestate" id="saveState">Autosave: starting…</span>'+
-    '<span class="small">Every action is logged for undo. Your project autosaves in this browser as you work — refresh the page and it restores itself, no starting over.</span>'+
-    '<button class="btn sm" id="btnDiscardRecovery" style="display:none" title="Undo the session recovery: go back to the fresh starter state and clear the autosaved draft">✕ Discard recovered session</button>';
-  if(transport && transport.parentNode) transport.parentNode.insertBefore(bar, transport.nextSibling);
-  const log=document.createElement("div"); log.className="histlog"; log.id="histLog";
-  log.innerHTML='<h3>Action log — every entry is an undo point. Click one to jump to that state.</h3><div id="histItems"></div>';
-  bar.parentNode.insertBefore(log, bar.nextSibling);
+  let bar=$("histBar");
+  if(!bar){
+    bar=document.createElement("div"); bar.className="histbar"; bar.id="histBar";
+    bar.innerHTML=
+      '<span class="histlabel">History</span>'+
+      '<button class="btn sm" id="btnUndo" title="Undo the last logged action (Ctrl+Z)">↩ Undo</button>'+
+      '<button class="btn sm" id="btnRedo" title="Redo (Ctrl+Shift+Z or Ctrl+Y)">↪ Redo</button>'+
+      '<button class="btn sm" id="btnHistLog" title="Show the log of every action recorded for undo — click any entry to jump back to that state">History log</button>'+
+      '<span class="savestate" id="saveState">Autosave: starting…</span>'+
+      '<span class="histnote">Every action is logged for undo. Your project autosaves in this browser as you work — refresh the page and it restores itself, no starting over.</span>'+
+      '<button class="btn sm" id="btnDiscardRecovery" style="display:none" title="Undo the session recovery: go back to the fresh starter state and clear the autosaved draft">✕ Discard recovered session</button>';
+  }
+  if(transport && transport.parentNode && bar!==transport.nextElementSibling) transport.parentNode.insertBefore(bar, transport.nextSibling);
+  let log=$("histLog");
+  if(!log){
+    log=document.createElement("div"); log.className="histlog"; log.id="histLog";
+    log.innerHTML='<h3>Action log — every entry is an undo point. Click one to jump to that state.</h3><div id="histItems"></div>';
+  }
+  if(bar.parentNode && log!==bar.nextElementSibling) bar.parentNode.insertBefore(log, bar.nextSibling);
 
   /* ---------- History state ---------- */
   let BL_STACK=[], BL_IDX=-1, BL_LAST_SNAP=null;
