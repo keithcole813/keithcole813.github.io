@@ -201,6 +201,23 @@ input[type=file]{display:none}
 .log{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);max-height:110px;overflow:auto;white-space:pre-wrap}
 .kbd{font-family:"JetBrains Mono",monospace;background:var(--step);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:11px}
 .footer-note{color:var(--faint);font-size:11px;text-align:center;margin-top:14px}
+.copyright{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;font-weight:700;letter-spacing:.4px;text-align:center}
+.copyright b{color:var(--gold)}
+/* ---------- Undo history + autosave bar ---------- */
+.histbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;box-shadow:var(--shadow)}
+.histbar .savestate{font-size:11px;color:var(--teal);font-weight:700}
+.histbar .savestate.fail{color:var(--red)}
+.histlog{display:none;margin-bottom:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);max-height:260px;overflow:auto}
+.histlog.open{display:block}
+.histlog h3{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.histitem{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);color:var(--ink);padding:6px 4px;font-size:12px;cursor:pointer}
+.histitem:last-child{border-bottom:none}
+.histitem .htime{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);flex:none}
+.histitem .hlabel{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.histitem.now{color:var(--gold)}
+.histitem.now .hlabel{font-weight:900}
+.histitem.future{opacity:.45}
+.histitem:hover{background:var(--panel2)}
 a{color:var(--teal)}
 
 /* ---------- Left sound browser (FL-style dock) ---------- */
@@ -797,7 +814,9 @@ a{color:var(--teal)}
     </div>
   </div>
 
-  <div class="footer-note">Beat Lab Web Beta — sampler-first: every instrument channel plays your own sounds. Synth channel is there for the rare MIDI idea. Press <span class="kbd">Space</span> to play/stop, <span class="kbd">1–9</span> audition channels, <span class="kbd">Q W E R T Y U I</span> play chops.</div>
+  <div class="footer-note">Beat Lab Web Beta — sampler-first: every instrument channel plays your own sounds. Synth channel is there for the rare MIDI idea. Press <span class="kbd">Space</span> to play/stop, <span class="kbd">1–9</span> audition channels, <span class="kbd">Q W E R T Y U I</span> play chops.
+    <div class="copyright">© <span id="copyYear">2026</span> <b>Keith Cole</b> · Beat Lab — All rights reserved.</div>
+  </div>
 </div>
 
 <script>
@@ -5094,6 +5113,7 @@ function blSyncMasterUI(){
   const wsel=$("mxWarmth"); if(wsel) wsel.value=S.masterFx.warmth;
   if(blMasterKnobs.heat) blMasterKnobs.heat.set(S.masterFx.heat);
   if(blMasterKnobs.goo) blMasterKnobs.goo.set(S.masterFx.goo);
+  if(blMasterKnobs.ceil) blMasterKnobs.ceil.set(S.masterFx.ceil!=null? S.masterFx.ceil:0.3);
   document.querySelectorAll(".suitebtn").forEach(b=>b.classList.toggle("on", b.dataset.suite===S.masterFx.suite && !S.masterFx.suiteBypass));
   const byp=$("mxSuiteBypass");
   if(byp){ byp.textContent="Suite bypass: "+(S.masterFx.suiteBypass? "On":"Off"); byp.classList.toggle("on", !!S.masterFx.suiteBypass); }
@@ -6100,7 +6120,7 @@ function blBuildMasterStrip(){
   wsel.onchange=()=>{ S.masterFx.warmth=wsel.value; blApplyMaster(); markDirty();
     setStatus("Analog Warmth: "+BL_WARMTH[wsel.value].label+(wsel.value==="off"? " — master is clean digital. Per-channel HEAT does nothing until a console is picked." : " — master HEAT "+S.masterFx.heat+"%, per-channel HEAT knobs feed it.")); };
   blMasterKnobs.heat=blKnob({ label:"HEAT", min:0, max:100, value:S.masterFx.heat, def:60, size:54, fmt:fmtPct,
-    oninput:v=>{ S.masterFx.heat=Math.round(v); blApplyMaster(); } });
+    oninput:v=>{ S.masterFx.heat=Math.round(v); blApplyMaster(); markDirty(); } });
   d.querySelector("#mxHeatRow").appendChild(blMasterKnobs.heat.el);
   const sb=d.querySelector("#mxSuiteBtns");
   Object.keys(BL_SUITE).forEach(k=>{
@@ -6112,7 +6132,7 @@ function blBuildMasterStrip(){
   d.querySelector("#mxSuiteBypass").onclick=()=>{ S.masterFx.suiteBypass=!S.masterFx.suiteBypass; blApplyMaster(); blSyncMasterUI(); markDirty();
     setStatus("Master Suite "+(S.masterFx.suiteBypass? "BYPASSED — warmth and GOO still run." : "back on: "+BL_SUITE[S.masterFx.suite].label+".")); };
   blMasterKnobs.goo=blKnob({ label:"GOO", min:0, max:100, value:S.masterFx.goo, def:0, size:54, fmt:fmtPct,
-    oninput:v=>{ S.masterFx.goo=Math.round(v); blApplyMaster(); } });
+    oninput:v=>{ S.masterFx.goo=Math.round(v); blApplyMaster(); markDirty(); } });
   d.querySelector("#mxGooRow").appendChild(blMasterKnobs.goo.el);
   const gf=d.querySelector("#mxGooFlavors");
   ["A","B","C","D"].forEach(fl=>{
@@ -6244,6 +6264,299 @@ buildMixer();
 blSyncMasterUI();
 S._blDirty=false;
 setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start blank, or start from a template). Playlist sits under the transport, the Mixer under that, and MASTER is the first fader on the board with the warmth console, suite, GOO and limiter ceiling on its strip.");
+</script>
+<script>
+"use strict";
+/* ============================================================
+   UNDO HISTORY + REFRESH-PROOF AUTOSAVE + COPYRIGHT YEAR
+   Every project action is logged: any change to the project
+   (steps, notes, velocities, clips, mixer, FX, playlist, BPM…)
+   is snapshotted into an undo history — Undo / Redo buttons,
+   Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y, and a clickable History log
+   that can jump to any logged state. The current project (and
+   the recent history) autosaves to this browser on every
+   action, so a refresh, an accidental reload or a crashed tab
+   restores the session exactly where it left off — nobody
+   starts over. Samples loaded from your own files still need
+   the file itself (browsers can't store it in a project), but
+   built-in kit sounds relink themselves, and every pattern,
+   note and setting comes back.
+   ============================================================ */
+(function(){
+  const LS_KEY="beatlab.autosave.v1";
+  const HIST_MAX=80, HIST_KEEP_PERSIST=14, PERSIST_BUDGET=3400000;
+  const cy=$("copyYear"); if(cy) cy.textContent=new Date().getFullYear();
+
+  /* ---------- UI: history bar under the transport ---------- */
+  const transport=document.querySelector(".transport");
+  const bar=document.createElement("div"); bar.className="histbar"; bar.id="histBar";
+  bar.innerHTML=
+    '<button class="btn sm" id="btnUndo" title="Undo the last logged action (Ctrl+Z)">↩ Undo</button>'+
+    '<button class="btn sm" id="btnRedo" title="Redo (Ctrl+Shift+Z or Ctrl+Y)">↪ Redo</button>'+
+    '<button class="btn sm" id="btnHistLog" title="Show the log of every action recorded for undo — click any entry to jump back to that state">History log</button>'+
+    '<span class="savestate" id="saveState">Autosave: starting…</span>'+
+    '<span class="small">Every action is logged for undo. Your project autosaves in this browser as you work — refresh the page and it restores itself, no starting over.</span>'+
+    '<button class="btn sm" id="btnDiscardRecovery" style="display:none" title="Undo the session recovery: go back to the fresh starter state and clear the autosaved draft">✕ Discard recovered session</button>';
+  if(transport && transport.parentNode) transport.parentNode.insertBefore(bar, transport.nextSibling);
+  const log=document.createElement("div"); log.className="histlog"; log.id="histLog";
+  log.innerHTML='<h3>Action log — every entry is an undo point. Click one to jump to that state.</h3><div id="histItems"></div>';
+  bar.parentNode.insertBefore(log, bar.nextSibling);
+
+  /* ---------- History state ---------- */
+  let BL_STACK=[], BL_IDX=-1, BL_LAST_SNAP=null;
+  let BL_APPLYING=false, BL_READY=false, BL_PRE_RECOVERY=null, BL_PENDING=null;
+  const nowTime=()=>{ const d=new Date(); return d.toLocaleTimeString([], {hour12:false}); };
+  function snapNow(){ try{ return JSON.stringify(projectJSON()); }catch(e){ return null; } }
+
+  function blHistUI(){
+    const u=$("btnUndo"), r=$("btnRedo"), hl=$("btnHistLog");
+    if(u){ u.disabled=!(BL_IDX>0); u.textContent="↩ Undo"+(BL_IDX>0? " ("+BL_IDX+")":""); }
+    if(r){ const n=BL_STACK.length-1-BL_IDX; r.disabled=!(n>0); r.textContent="↪ Redo"+(n>0? " ("+n+")":""); }
+    if(hl) hl.textContent="History log ("+BL_STACK.length+")";
+    const wrap=$("histItems"); if(!wrap) return;
+    wrap.innerHTML="";
+    for(let i=BL_STACK.length-1;i>=0;i--){
+      const e=BL_STACK[i];
+      const b=document.createElement("button"); b.type="button";
+      b.className="histitem"+(i===BL_IDX? " now":"")+(i>BL_IDX? " future":"");
+      b.innerHTML='<span class="htime"></span><span class="hlabel"></span>'+(i===BL_IDX? '<span class="small">current</span>':"");
+      b.querySelector(".htime").textContent=e.time;
+      b.querySelector(".hlabel").textContent=(i===0? "Start — " : "")+e.label;
+      b.title="Jump to this state";
+      b.onclick=()=>blJumpTo(i);
+      wrap.appendChild(b);
+    }
+    if(!BL_STACK.length) wrap.innerHTML='<div class="small">Nothing logged yet — make an edit and it lands here.</div>';
+  }
+  function setSaveState(txt, fail){
+    const el=$("saveState"); if(!el) return;
+    el.textContent=txt; el.classList.toggle("fail", !!fail);
+  }
+
+  /* ---------- Autosave (this browser) ---------- */
+  function blPersist(){
+    if(!BL_READY || BL_IDX<0) return true;
+    try{
+      const hist=BL_STACK.slice(Math.max(0, BL_IDX-HIST_KEEP_PERSIST+1), BL_IDX+1)
+        .map(e=>({label:e.label, time:e.time, snap:e.snap}));
+      let payload={ v:1, savedAt:Date.now(), project:JSON.parse(BL_STACK[BL_IDX].snap), hist:hist };
+      let str=JSON.stringify(payload);
+      if(str.length>PERSIST_BUDGET){ payload={ v:1, savedAt:Date.now(), project:payload.project }; str=JSON.stringify(payload); }
+      localStorage.setItem(LS_KEY, str);
+      setSaveState("Autosave: on — saved "+nowTime()+" · refresh-safe");
+      return true;
+    }catch(e){
+      setSaveState("Autosave FAILED — browser storage is full or blocked. Use Save .json to keep this project.", true);
+      return false;
+    }
+  }
+
+  /* ---------- Apply a project object (same path as Load .json) ---------- */
+  function blApplyProject(p){
+    BL_APPLYING=true;
+    try{
+      $("projName").value=p.name||"Recovered Beat"; bpmSet(p.bpm||95); S.swing=p.swing||0;
+      $("swingRange").value=Math.round(S.swing*100); $("swingVal").textContent=Math.round(S.swing*100)+"%";
+      S.projectKey=p.projectKey||S.projectKey; S.customTemplates=p.customTemplates||{}; S.starterHats=p.starterHats||null; S.chopCount=p.chopCount||8;
+      if(p.order) S.order=p.order.slice();
+      Object.keys(p.channels||{}).forEach(id=>{ const src=p.channels[id], ch=S.channels[id]; if(!ch) return;
+        Object.assign(ch, {gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0, mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60, stretch:src.stretch||1, fitBars:src.fitBars||0,
+          volume:src.volume!=null?src.volume:0.8, pan:src.pan||0, mute:!!src.mute, solo:!!src.solo, sampleName:src.sampleName||null, engine:src.engine||"analog"});
+        ch.fx=Object.assign(ch.fx, src.fx||{}); ch.slicePitch=src.slicePitch||{}; ch.sliceRev=src.sliceRev||{};
+        ch.patterns=(src.patterns||[]).map(pp=>({steps:pp.steps||Array(16).fill(0), notes:pp.notes||[], sub:pp.sub||[]}));
+        ch.missing=!!src.sampleName && !ch.buffer;
+        delete revCache[id];
+      });
+      S.pattern=p.pattern||0;
+      /* Master settings + per-sequence state are saved in every snapshot
+         (projectJSON writes masterFx, seqTranspose and seqBars), so restore
+         them HERE, in the apply path itself — the same values Load .json
+         restores — instead of depending on the load-helper chain's rebuild
+         order. Without this, Undo / Redo / history jumps and refresh
+         recovery rebuilt the rack, roll and mixer from the OLD master and
+         sequence values: the warmth model, suite preset, GOO, limiter
+         ceiling, a sequence's transpose and its bar count never came back. */
+      if(p.masterFx) S.masterFx=Object.assign({}, S.masterFx, JSON.parse(JSON.stringify(p.masterFx)));
+      if(Array.isArray(p.seqTranspose)) S.seqTranspose=p.seqTranspose.map(v=>clamp(Math.round(v)||0,-24,24));
+      if(Array.isArray(p.seqBars)) S.seqBars=p.seqBars.map(v=>(v===2||v===4||v===8||v===16)? v : 1);
+      if(typeof blPadSteps==="function") blPadSteps();
+      if(typeof blApplyMaster==="function") blApplyMaster();
+      S.mode=p.mode||"pattern"; S.songLoop=p.songLoop!==false; S.songFollow=p.songFollow!==false;
+      S.seqNames=(Array.isArray(p.seqNames)&&p.seqNames.length)? p.seqNames.slice() : [];
+      while(S.seqNames.length<seqCount()) S.seqNames.push("SEQ "+(S.seqNames.length+1));
+      if(Array.isArray(p.playlist)) S.playlist=p.playlist.map(e=>({seq:clamp(e.seq||0,0,seqCount()-1), reps:clamp(e.reps||1,1,64)}));
+      if(typeof buildPatBtns==="function") buildPatBtns();
+      fillTemplateSelect(); buildRack(); buildMixer(); buildRoll();
+      try{ selectSlice(0); }catch(e){}
+      selectChannel(S.channels[S.selected]? S.selected : (S.order[0]||"kick"));
+      if(typeof renderPlaylist==="function") renderPlaylist();
+      if(typeof loadClipsFromProject==="function") loadClipsFromProject(p);
+      /* The load helpers rebuild parts of the UI while they work (and run
+         in an order set by their wrapper chain) — finish on the restored
+         master / sequence state so every control ends up showing it:
+         warmth select, HEAT / GOO / ceiling knobs, suite + flavor buttons,
+         transpose slider, bars select, and the rack / roll grids spanned
+         to the restored bar count. */
+      if(p.masterFx){
+        if(typeof blApplyMaster==="function") blApplyMaster();
+        if(typeof blSyncMasterUI==="function") blSyncMasterUI();
+        if(typeof blMasterKnobs!=="undefined" && blMasterKnobs.ceil) blMasterKnobs.ceil.set(S.masterFx.ceil!=null? S.masterFx.ceil:0.3);
+      }
+      if(Array.isArray(p.seqTranspose) || Array.isArray(p.seqBars)){
+        if(typeof buildPatBtns==="function") buildPatBtns();
+        buildRack(); buildRoll();
+        if(typeof renderPlaylist==="function") renderPlaylist();
+        if(typeof renderLayout==="function") renderLayout();
+      }
+      const pk=$("projKeyLabel"), pg=$("progKeyLabel");
+      if(pk) pk.textContent=keyLabel(S.projectKey.root,S.projectKey.mode);
+      if(pg) pg.textContent=NOTE_NAMES[S.projectKey.root]+" "+S.projectKey.mode;
+    }catch(err){ /* a partial apply still leaves a playable state */ }
+    BL_APPLYING=false;
+    BL_LAST_SNAP=snapNow();
+    S._blDirty=true;
+    blHistUI();
+  }
+  function blJumpTo(i){
+    if(i<0 || i>=BL_STACK.length || i===BL_IDX) return;
+    const e=BL_STACK[i]; BL_IDX=i;
+    blApplyProject(JSON.parse(e.snap));
+    blPersist();
+    setStatus((i<BL_STACK.length? "" : "")+("Jumped to logged state: "+e.label+" ("+e.time+")."));
+  }
+  function blUndo(){
+    if(BL_IDX<=0){ setStatus("Nothing to undo — the action log is at its start."); return; }
+    BL_IDX--; const e=BL_STACK[BL_IDX];
+    blApplyProject(JSON.parse(e.snap)); blPersist();
+    setStatus("Undid — back to: "+e.label+". "+(BL_IDX>0? BL_IDX+" more undo step(s) in the log." : "Start of the log."));
+  }
+  function blRedo(){
+    if(BL_IDX>=BL_STACK.length-1){ setStatus("Nothing to redo."); return; }
+    BL_IDX++; const e=BL_STACK[BL_IDX];
+    blApplyProject(JSON.parse(e.snap)); blPersist();
+    setStatus("Redid — now at: "+e.label+".");
+  }
+  $("btnUndo").onclick=blUndo;
+  $("btnRedo").onclick=blRedo;
+  $("btnHistLog").onclick=()=>{ $("histLog").classList.toggle("open"); };
+  $("btnDiscardRecovery").onclick=()=>{
+    if(!BL_PRE_RECOVERY) return;
+    try{ localStorage.removeItem(LS_KEY); }catch(e){}
+    const p=JSON.parse(BL_PRE_RECOVERY); BL_PRE_RECOVERY=null;
+    BL_STACK=[]; BL_IDX=-1;
+    blApplyProject(p);
+    BL_STACK=[{label:"Fresh start (recovered session discarded)", time:nowTime(), snap:snapNow()}]; BL_IDX=0; BL_LAST_SNAP=BL_STACK[0].snap;
+    $("btnDiscardRecovery").style.display="none";
+    blHistUI(); blPersist();
+    setStatus("Recovered session discarded — you're on the fresh starter state, and autosave now tracks this session.");
+  };
+
+  /* ---------- Action labels: name the next logged entry after the control used ---------- */
+  const ID_LABELS={ bpmNum:"Tempo (BPM)", bpmRange:"Tempo (BPM)", swingRange:"Swing", masterVol:"Master volume",
+    projName:"Project name", seqTpRange:"Sequence transpose", seqBarsSel:"Sequence length", rollTpRange:"Roll transpose",
+    sampGain:"Sampler gain", sampPitch:"Sampler pitch", sampFine:"Sampler fine tune", sampStretch:"Stretch",
+    sampMode:"Sampler mode", sampRoot:"Sample root note", fxRev:"Reverb send", fxDel:"Delay send", fxEqL:"EQ low",
+    fxEqM:"EQ mid", fxEqH:"EQ high", fxCut:"Filter cutoff", fxRes:"Filter resonance", fxComp:"Compressor",
+    fxRatio:"Compressor ratio", fxLofi:"Lo-Fi crush", slicePitch:"Slice pitch", rollSnap:"Piano roll snap",
+    rollChannel:"Piano roll channel", expBars:"Export bars", expRate:"Export bitrate",
+    mxWarmth:"Master warmth — console", mxSuiteBypass:"Master suite bypass", mxFader:"Master fader" };
+  function labelFor(el){
+    if(!el || !el.closest) return null;
+    if(el.closest(".rollnote")) return "Piano roll — note moved / resized";
+    if(el.closest(".velbar")) return "Piano roll — velocity";
+    if(el.closest(".wclip")) return "Wave clip — move / trim";
+    if(el.closest(".aclip")) return "Audio clip — move / trim";
+    const step=el.closest(".step");
+    if(step){ const row=el.closest(".rackrow"); const nm=row? row.querySelector(".cname") : null;
+      return "Step sequencer"+(nm? " — "+nm.textContent.trim() : ""); }
+    if(el.closest(".pad")) return "Chop pad";
+    if(el.closest("#mxHeatRow")) return "Master HEAT";
+    if(el.closest("#mxGooRow")) return "GOO";
+    if(el.closest("#mxCeilRow")) return "Limiter ceiling";
+    if(el.closest("#mxSuiteBtns")) return "Master suite preset";
+    if(el.closest("#mxGooFlavors")) return "GOO flavor";
+    if(el.id && ID_LABELS[el.id]) return ID_LABELS[el.id];
+    const b=el.closest("button");
+    if(b){ const t=(b.textContent||"").replace(/\s+/g," ").trim(); if(t) return t.slice(0,44); }
+    if(el.id) return el.id;
+    return null;
+  }
+  ["pointerdown","change"].forEach(evt=>document.addEventListener(evt, e=>{
+    const l=labelFor(e.target);
+    if(l) BL_PENDING={ label:l, t:Date.now() };
+  }, true));
+
+  /* ---------- Logging: every project change becomes an undo entry ---------- */
+  function blHistCheck(){
+    if(!BL_READY || BL_APPLYING) return;
+    const snap=snapNow(); if(!snap || snap===BL_LAST_SNAP) return;
+    const label=(BL_PENDING && (Date.now()-BL_PENDING.t<5000))? BL_PENDING.label : "Edit";
+    BL_PENDING=null;
+    BL_STACK=BL_STACK.slice(0, BL_IDX+1);
+    BL_STACK.push({ label:label, time:nowTime(), snap:snap });
+    if(BL_STACK.length>HIST_MAX) BL_STACK.shift();
+    BL_IDX=BL_STACK.length-1; BL_LAST_SNAP=snap;
+    blHistUI(); blPersist();
+  }
+  let histTimer=null;
+  const _blHistMarkPrev=markDirty;
+  markDirty=function(){ _blHistMarkPrev(); clearTimeout(histTimer); histTimer=setTimeout(blHistCheck, 350); };
+  setInterval(blHistCheck, 1200); /* catches edits that never call markDirty (sliders, drags, recording) */
+
+  /* ---------- Keyboard: Ctrl/Cmd+Z, Ctrl+Shift+Z, Ctrl+Y ---------- */
+  document.addEventListener("keydown", e=>{
+    if(!(e.ctrlKey||e.metaKey) || e.altKey) return;
+    const k=(e.key||"").toLowerCase();
+    if(k!=="z" && k!=="y") return;
+    const t=e.target, tag=(t && t.tagName||"").toLowerCase();
+    if(tag==="textarea" || tag==="select" || (tag==="input" && t.type!=="range") || (t && t.isContentEditable)) return;
+    e.preventDefault();
+    if(k==="y" || (k==="z" && e.shiftKey)) blRedo(); else blUndo();
+  });
+
+  /* ---------- Refresh protection: flush on the way out, restore on the way in ---------- */
+  function blFlush(){ blHistCheck(); return blPersist(); }
+  window.addEventListener("beforeunload", e=>{
+    const ok=blFlush();
+    if(!ok && S._blDirty){ e.preventDefault(); e.returnValue=""; }
+  });
+  window.addEventListener("pagehide", ()=>{ blFlush(); });
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") blFlush(); });
+
+  /* ---------- Init: baseline, then recover any autosaved session ---------- */
+  setTimeout(()=>{
+    const base=snapNow(); if(!base) return;
+    BL_STACK=[{label:"Session start", time:nowTime(), snap:base}]; BL_IDX=0; BL_LAST_SNAP=base; BL_READY=true;
+    blHistUI();
+    let saved=null;
+    try{ saved=JSON.parse(localStorage.getItem(LS_KEY)||"null"); }catch(e){}
+    if(saved && saved.project){
+      const savedSnap=JSON.stringify(saved.project);
+      if(savedSnap!==base){
+        BL_PRE_RECOVERY=base;
+        const when=saved.savedAt? new Date(saved.savedAt).toLocaleString() : "earlier";
+        if(Array.isArray(saved.hist) && saved.hist.length){
+          BL_STACK=saved.hist.filter(h=>h && h.snap).map(h=>({label:h.label||"Edit", time:h.time||"", snap:h.snap}));
+          BL_IDX=BL_STACK.length-1;
+        }
+        blApplyProject(saved.project);
+        /* re-baseline on the restored state (load normalizes some fields) */
+        const rs=snapNow();
+        if(BL_IDX>=0 && BL_STACK[BL_IDX]) BL_STACK[BL_IDX].snap=rs;
+        BL_LAST_SNAP=rs;
+        if(!Array.isArray(saved.hist) || !saved.hist.length){ BL_STACK=[{label:"Recovered session", time:nowTime(), snap:rs}]; BL_IDX=0; }
+        BL_STACK[BL_IDX].label="Recovered session — autosaved "+when;
+        $("btnDiscardRecovery").style.display="";
+        blHistUI(); blPersist();
+        const missing=Object.keys(S.channels||{}).filter(id=>S.channels[id].missing).length;
+        setStatus("Welcome back — your session was restored from autosave ("+when+"), exactly where you left it. Refreshing never starts you over."+
+          (missing? " "+missing+" channel(s) show a sample name that needs its audio file re-dropped from the browser — patterns and settings are all back." : ""));
+        return;
+      }
+    }
+    blPersist();
+  }, 700);
+})();
 </script>
 </body>
 </html>
