@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC2000XL Tune + Key Calculator — Keith Cole</title>
+<style>
+  :root{ --gold:#d9a62e; --ink:#f2ead8; --bg:#101010; --panel:#1a1a1a; --line:#333; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:Verdana, Geneva, sans-serif; }
+  .wrap{ max-width:520px; margin:0 auto; padding:20px 16px 32px; }
+  h1{ font-size:19px; margin:4px 0 2px; color:var(--gold); letter-spacing:.5px; }
+  h2{ font-size:14px; margin:26px 0 4px; color:var(--gold); letter-spacing:1px; text-transform:uppercase; }
+  .sub{ font-size:12px; color:#b9ac8d; margin-bottom:8px; line-height:1.5; }
+  label{ display:block; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#b9ac8d; margin:14px 0 6px; }
+  input, select{ width:100%; font-size:22px; padding:10px 12px; background:var(--panel); color:var(--ink);
+         border:1px solid var(--line); border-radius:8px; outline:none; }
+  input:focus, select:focus{ border-color:var(--gold); }
+  .row{ display:flex; gap:12px; } .row > div{ flex:1; }
+  .answer{ margin-top:22px; background:var(--panel); border:1px solid var(--gold); border-radius:12px; padding:16px; text-align:center; }
+  .answer .lbl{ font-size:12px; text-transform:uppercase; letter-spacing:2px; color:#b9ac8d; }
+  .answer .num{ font-size:64px; font-weight:bold; color:var(--gold); line-height:1.05; }
+  .answer .key{ font-size:30px; font-weight:bold; color:var(--gold); line-height:1.15; }
+  .answer .exact{ font-size:13px; color:#b9ac8d; margin-top:4px; line-height:1.5; }
+  table{ width:100%; border-collapse:collapse; margin-top:14px; font-size:14px; }
+  th, td{ padding:8px 6px; border-bottom:1px solid var(--line); text-align:right; }
+  th{ color:#b9ac8d; font-weight:normal; font-size:12px; text-transform:uppercase; letter-spacing:1px; }
+  td:first-child, th:first-child{ text-align:left; }
+  tr.best td{ color:var(--gold); font-weight:bold; }
+  .note{ font-size:12px; color:#b9ac8d; margin-top:16px; line-height:1.55; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MPC2000XL TUNE + KEY CALCULATOR</h1>
+  <div class="sub">Type the sample's BPM and your sequence BPM — get the exact Tune number to type into the program (XL Tune units are 10 cents each, −120…+120), the key you land in, and the clean-key exits if you land between keys.</div>
+
+  <label for="src">Sample BPM (as recorded)</label>
+  <input id="src" type="number" inputmode="decimal" step="0.1" value="116">
+  <label for="tgt">Your sequence BPM (the drums)</label>
+  <input id="tgt" type="number" inputmode="decimal" step="0.1" value="94">
+  <div class="row">
+    <div>
+      <label for="bars">Loop length (bars)</label>
+      <input id="bars" type="number" inputmode="numeric" step="1" value="4">
+    </div>
+    <div>
+      <label for="bpb">Beats per bar</label>
+      <input id="bpb" type="number" inputmode="numeric" step="1" value="4">
+    </div>
+  </div>
+
+  <div class="answer">
+    <div class="lbl">Type this Tune</div>
+    <div class="num" id="tuneOut">−36</div>
+    <div class="exact" id="exactOut"></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Tune</th><th>Plays at</th><th>Drift / loop</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <h2>Key</h2>
+  <div class="row">
+    <div>
+      <label for="root">Sample's original root</label>
+      <select id="root">
+        <option value="0" selected>C</option><option value="1">D♭</option><option value="2">D</option>
+        <option value="3">E♭</option><option value="4">E</option><option value="5">F</option>
+        <option value="6">G♭</option><option value="7">G</option><option value="8">A♭</option>
+        <option value="9">A</option><option value="10">B♭</option><option value="11">B</option>
+      </select>
+    </div>
+    <div>
+      <label for="mode">Mode</label>
+      <select id="mode">
+        <option value="minor" selected>minor</option><option value="major">major</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="answer">
+    <div class="lbl">At that Tune you are in</div>
+    <div class="key" id="keyOut">—</div>
+    <div class="exact" id="keyDetail"></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Clean key</th><th>Tune</th><th>Plays at</th><th>Set seq to</th></tr></thead>
+    <tbody id="keyRows"></tbody>
+  </table>
+  <div class="note">“Set seq to” is the move you made tonight: take the clean key, then move the sequence to meet the sample instead of bending the sample between keys. Triggering pads per bar or beat resets the few-ms drift every pass.</div>
+
+  <div class="note">
+    Drift is how far the loop end lands from your bar line each pass — closest to 0 wins.
+    If the sample's listed BPM is rounded, the true match can sit a click or two off; the table shows the neighbors so you can judge the trade.
+    Same Tune goes on every pad of a zoned chop — the slices all ride the one number.
+  </div>
+</div>
+<script>
+  const $ = id => document.getElementById(id);
+  const NAMES = ["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
+  const keyName = idx => NAMES[((idx % 12) + 12) % 12];
+  function calc(){
+    const src = parseFloat($("src").value), tgt = parseFloat($("tgt").value);
+    const bars = parseFloat($("bars").value) || 4, bpb = parseFloat($("bpb").value) || 4;
+    const root = parseInt($("root").value), mode = $("mode").value;
+    if (!(src > 0) || !(tgt > 0)) { $("tuneOut").textContent = "—"; $("rows").innerHTML = ""; $("exactOut").textContent = ""; $("keyOut").textContent = "—"; $("keyDetail").textContent = ""; $("keyRows").innerHTML = ""; return; }
+    const cents = 1200 * Math.log2(tgt / src);
+    const exact = cents / 10;                       // XL tune units = 10 cents
+    const best = Math.round(exact);
+    const beats = bars * bpb;
+    const loopTgt = beats * 60 / tgt;
+    $("tuneOut").textContent = (best > 0 ? "+" : "") + best;
+    $("exactOut").textContent = "exact match = " + exact.toFixed(1) + " (" + cents.toFixed(0) + " cents, " + (cents/100).toFixed(2) + " semitones)";
+    let html = "";
+    [best - 1, best, best + 1].forEach(t => {
+      const bpm = src * Math.pow(2, (t * 10) / 1200);
+      const drift = (beats * 60 / bpm - loopTgt) * 1000;
+      html += "<tr class='" + (t === best ? "best" : "") + "'><td>" + (t > 0 ? "+" : "") + t + "</td><td>" +
+              bpm.toFixed(2) + " BPM</td><td>" + (drift >= 0 ? "+" : "") + drift.toFixed(0) + " ms</td></tr>";
+    });
+    $("rows").innerHTML = html;
+
+    // --- Key at the tune you'll actually type (the rounded best) ---
+    const shiftSt = best / 10;                      // semitones: 1 tune unit = 10 cents = 0.1 st
+    const landing = root + shiftSt;
+    const nearest = Math.round(landing);
+    const off = Math.round((landing - nearest) * 100);   // cents off the nearest true key (+ sharp / − flat)
+    if (Math.abs(off) <= 15) {
+      $("keyOut").textContent = keyName(nearest) + " " + mode + " — clean";
+      $("keyDetail").textContent = "Whole-semitone landing (" + (off === 0 ? "dead on" : Math.abs(off) + " cents off") + "). Anything you add in " + keyName(nearest) + " " + mode + " locks in.";
+    } else {
+      const below = Math.floor(landing), above = Math.ceil(landing);
+      const flatOf = Math.round((above - landing) * 100), sharpOf = Math.round((landing - below) * 100);
+      $("keyOut").textContent = "Between " + keyName(below) + " and " + keyName(above) + " " + mode;
+      $("keyDetail").textContent = sharpOf + " cents sharp of " + keyName(below) + " " + mode + ", " + flatOf + " cents flat of " + keyName(above) + " " + mode +
+        ". Pitched parts in a true key will clash — go clean below, or tune everything else by the same amount.";
+    }
+
+    // --- Clean-key exits: the whole-semitone landings either side of the exact match ---
+    const exactSt = cents / 100;
+    const lo = Math.floor(exactSt), hi = Math.ceil(exactSt);
+    const shifts = (lo === hi) ? [lo] : [lo, hi];
+    let kh = "";
+    shifts.forEach(st => {
+      const tune = st * 10;
+      const bpm = src * Math.pow(2, st / 12);
+      const seq = Math.round(bpm * 10) / 10;
+      kh += "<tr><td>" + keyName(root + st) + " " + mode + "</td><td>" + (tune > 0 ? "+" : "") + tune + "</td><td>" +
+            bpm.toFixed(2) + "</td><td>" + seq.toFixed(1) + "</td></tr>";
+    });
+    $("keyRows").innerHTML = kh;
+  }
+  ["src","tgt","bars","bpb","root","mode"].forEach(id => $(id).addEventListener("input", calc));
+  calc();
+</script>
+<footer id="kc-site-footer" style="margin-top:40px;padding:18px 12px 24px;border-top:1px solid rgba(127,127,127,.35);text-align:center;font-size:13px;line-height:1.7;opacity:.85"><div>Copyright &copy; 2026 Keith Cole. All rights reserved.</div><div><a href="https://keithcole813.github.io/" style="color:inherit">&#8592; Back to the main page</a></div></footer>
+</body>
+</html>
