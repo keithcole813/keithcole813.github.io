@@ -38,6 +38,9 @@
   .note{ font-size:12px; color:var(--dim); margin-top:14px; line-height:1.55; }
   .len{ min-width:44px; text-align:center; }
   input[type=range]{ width:100%; accent-color:var(--gold); height:30px; }
+  .ytrow{ display:flex; gap:8px; margin-top:10px; }
+  .ytrow input{ flex:1; min-width:0; font-size:15px; padding:10px 11px; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px; }
+  .ytrow input:focus{ border-color:var(--gold); outline:none; }
 </style>
 </head>
 <body>
@@ -48,6 +51,9 @@
   <div class="drop" id="drop">Tap to pick an audio file — or drop one here<br><b>MP3 · WAV · M4A · anything your browser plays</b></div>
   <input type="file" id="file" accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.aif,.aiff,.opus,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/flac,audio/ogg,audio/aiff,audio/opus" style="display:none">
   <div class="stat" id="fileStat">No audio loaded yet.</div>
+  <div class="ytrow"><input type="url" id="ytUrl" placeholder="…or paste a YouTube link" autocomplete="off" autocapitalize="off"><button id="ytGo" class="gold">Fetch</button></div>
+  <div class="ytrow" id="ytPwRow" style="display:none"><input type="password" id="ytPw" placeholder="Downloader password"></div>
+  <div class="stat" id="ytStat"></div>
 
   <canvas id="wave" width="608" height="150"></canvas>
   <div class="stat" id="gridStat">The thick <b>gold bars on the wave are the loop In/Out — drag them</b>. Drag the ruler strip to slide the 1 · drag the wave to pan · tap for the playhead · pinch to zoom.</div>
@@ -685,24 +691,100 @@ function exportSlices(){
 }
 
 // ---- File loading ----
+function loadDecoded(buf, displayName){
+  state.buf = buf; state.sr = buf.sampleRate;
+  var n = buf.length, mono = new Float32Array(n);
+  var c0 = buf.getChannelData(0);
+  if (buf.numberOfChannels > 1){ var c1 = buf.getChannelData(1); for (var i = 0; i < n; i++) mono[i] = (c0[i] + c1[i]) / 2; }
+  else mono.set(c0);
+  state.mono = mono; state.shotOut = 0; state.startBar = 1; state.playhead = 0;
+  state.viewStart = 0; state.viewDur = 0; state.dragOffSec = 0;
+  state.inSec = null; state.outSec = null;
+  $("fileStat").innerHTML = "<b>" + displayName + "</b> · " + fmtT(buf.duration) + " · " +
+    (buf.sampleRate / 1000) + " kHz · " + (buf.numberOfChannels > 1 ? "stereo" : "mono");
+  analyze();
+}
+function loadArrayBuffer(ab, displayName){
+  state.name = displayName;
+  ensureCtx();
+  actx.decodeAudioData(ab).then(function(buf){ loadDecoded(buf, displayName); })
+    .catch(function(){ $("fileStat").textContent = "Couldn't decode that audio — try WAV or MP3."; });
+}
 function loadFile(file){
   if (!file) return;
-  state.name = file.name;
-  ensureCtx();
-  file.arrayBuffer().then(function(ab){ return actx.decodeAudioData(ab); }).then(function(buf){
-    state.buf = buf; state.sr = buf.sampleRate;
-    var n = buf.length, mono = new Float32Array(n);
-    var c0 = buf.getChannelData(0);
-    if (buf.numberOfChannels > 1){ var c1 = buf.getChannelData(1); for (var i = 0; i < n; i++) mono[i] = (c0[i] + c1[i]) / 2; }
-    else mono.set(c0);
-    state.mono = mono; state.shotOut = 0; state.startBar = 1; state.playhead = 0;
-    state.viewStart = 0; state.viewDur = 0; state.dragOffSec = 0;
-    state.inSec = null; state.outSec = null;
-    $("fileStat").innerHTML = "<b>" + file.name + "</b> · " + fmtT(buf.duration) + " · " +
-      (buf.sampleRate / 1000) + " kHz · " + (buf.numberOfChannels > 1 ? "stereo" : "mono");
-    analyze();
-  }).catch(function(){ $("fileStat").textContent = "Couldn't decode that file — try WAV or MP3."; });
+  file.arrayBuffer().then(function(ab){ loadArrayBuffer(ab, file.name); })
+    .catch(function(){ $("fileStat").textContent = "Couldn't read that file."; });
 }
+
+// ---- YouTube fetch — via the YouTube Sample Downloader on the Mint box ----
+var dlBase = null;
+function dlCandidates(){
+  var list = [];
+  if (location.port === "5001") list.push(location.origin);
+  try { var saved = localStorage.getItem("mpcl_dl_base"); if (saved && list.indexOf(saved) < 0) list.push(saved); } catch(e){}
+  ["https://emma-500-270.tailca8ca4.ts.net", "http://192.168.4.113:5001", "http://100.67.163.100:5001"].forEach(function(b){ if (list.indexOf(b) < 0) list.push(b); });
+  return list;
+}
+function dlTimed(ms){
+  var ctl = ("AbortController" in window) ? new AbortController() : null;
+  var to = ctl ? setTimeout(function(){ ctl.abort(); }, ms) : null;
+  return { signal: ctl ? ctl.signal : undefined, done: function(){ if (to) clearTimeout(to); } };
+}
+function dlFind(){
+  if (dlBase) return Promise.resolve(dlBase);
+  var cands = dlCandidates(), i = 0;
+  function next(){
+    if (i >= cands.length) return Promise.reject(new Error("unreachable"));
+    var b = cands[i++], t = dlTimed(3000), o = {}; if (t.signal) o.signal = t.signal;
+    return fetch(b + "/api/config", o).then(function(r){ t.done(); if (!r.ok) throw 0; return r.json(); }).then(function(cfg){
+      dlBase = b;
+      try { localStorage.setItem("mpcl_dl_base", b); } catch(e){}
+      if (cfg.password_required){ $("ytPwRow").style.display = "flex"; try { $("ytPw").value = localStorage.getItem("mpcl_dl_pw") || ""; } catch(e){} }
+      return b;
+    }).catch(function(){ t.done(); return next(); });
+  }
+  return next();
+}
+function dlCall(path, opts){
+  var t = dlTimed(90000), o = opts || {}; if (t.signal) o.signal = t.signal;
+  return fetch(dlBase + path, o).then(function(r){ t.done(); return r; }, function(e){ t.done(); throw e; });
+}
+function ytStatus(t){ $("ytStat").textContent = t; }
+function ytFetch(){
+  var url = $("ytUrl").value.trim();
+  if (!/youtube\.com|youtu\.be/.test(url)){ ytStatus("Paste a YouTube link first."); return; }
+  var btn = $("ytGo"); btn.disabled = true;
+  ytStatus("Contacting your downloader on the Mint box…");
+  dlFind().then(function(){
+    var pw = ""; try { pw = $("ytPw").value || ""; localStorage.setItem("mpcl_dl_pw", pw); } catch(e){}
+    return dlCall("/api/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: url, password: pw }) })
+      .then(function(r){ return r.json().then(function(d){ if (!r.ok) throw new Error(d.error || "The downloader refused that link."); return d.job_id; }); });
+  }).then(function(jobId){
+    ytStatus("Downloading on the box…");
+    var poll = function(){
+      dlCall("/api/status/" + jobId).then(function(r){ return r.json(); }).then(function(j){
+        if (j.state === "downloading"){ ytStatus("Downloading… " + Math.round(j.progress || 0) + "%"); setTimeout(poll, 1200); }
+        else if (j.state === "converting" || j.state === "starting"){ ytStatus("Converting to MP3…"); setTimeout(poll, 1200); }
+        else if (j.state === "done"){
+          ytStatus("Got it — loading " + (j.title || j.filename || "the audio") + "…");
+          dlCall("/api/file/" + jobId).then(function(r){ return r.arrayBuffer(); }).then(function(ab){
+            loadArrayBuffer(ab, j.filename || "youtube.mp3");
+            ytStatus("Loaded from YouTube" + (j.title ? ": " + j.title : "") + ". Find the 1, lock your bars.");
+            btn.disabled = false;
+          }).catch(function(){ ytStatus("Downloaded on the box, but MPC Loops couldn't pull the file over."); btn.disabled = false; });
+        }
+        else if (j.state === "error"){ ytStatus("Download failed on the box: " + (j.error || "unknown error")); btn.disabled = false; }
+        else setTimeout(poll, 1200);
+      }).catch(function(){ setTimeout(poll, 2000); });
+    };
+    poll();
+  }).catch(function(){
+    ytStatus("Couldn't reach the YouTube Sample Downloader — it lives on your Mint box. At home, open MPC Loops from the box instead: 192.168.4.113:5001/mpc-loops");
+    btn.disabled = false;
+  });
+}
+$("ytGo").addEventListener("click", ytFetch);
+$("ytUrl").addEventListener("keydown", function(e){ if (e.key === "Enter") ytFetch(); });
 
 // ---- Events ----
 var drop = $("drop"), fileIn = $("file");
