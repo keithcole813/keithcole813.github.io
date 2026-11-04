@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC Loops — BPM, the 1 &amp; Loop Chopper — Keith Cole</title>
+<style>
+  :root{ --gold:#d9a62e; --ink:#f2ead8; --bg:#101010; --panel:#1a1a1a; --line:#333; --dim:#b9ac8d; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:Verdana, Geneva, sans-serif; }
+  .wrap{ max-width:640px; margin:0 auto; padding:20px 16px 32px; }
+  h1{ font-size:19px; margin:4px 0 2px; color:var(--gold); letter-spacing:.5px; }
+  h2{ font-size:13px; margin:24px 0 6px; color:var(--gold); letter-spacing:1px; text-transform:uppercase; }
+  .sub{ font-size:12px; color:var(--dim); margin-bottom:8px; line-height:1.55; }
+  label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--dim); margin:12px 0 5px; }
+  input[type=number], select{ width:100%; font-size:19px; padding:9px 11px; background:var(--panel); color:var(--ink);
+         border:1px solid var(--line); border-radius:8px; outline:none; }
+  input:focus, select:focus{ border-color:var(--gold); }
+  .row{ display:flex; gap:10px; } .row > div{ flex:1; }
+  .drop{ border:2px dashed #4a4232; border-radius:12px; padding:22px 14px; text-align:center; color:var(--dim);
+         font-size:14px; line-height:1.6; cursor:pointer; margin-top:10px; }
+  .drop.over{ border-color:var(--gold); color:var(--ink); }
+  .drop b{ color:var(--gold); }
+  canvas#wave{ width:100%; height:150px; display:block; background:#0a0a0a; border:1px solid var(--line); border-radius:10px; margin-top:12px; touch-action:none; }
+  .btns{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  button{ background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px;
+          padding:10px 14px; font-size:14px; cursor:pointer; font-family:inherit; }
+  button:active{ transform:scale(.97); }
+  button.gold{ background:var(--gold); color:#141414; border-color:var(--gold); font-weight:bold; }
+  button.on{ border-color:var(--gold); color:var(--gold); }
+  button:disabled{ opacity:.4; cursor:default; }
+  .stat{ font-size:13px; color:var(--dim); line-height:1.7; margin-top:8px; }
+  .stat b{ color:var(--ink); }
+  .big{ font-size:30px; font-weight:bold; color:var(--gold); }
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:14px; }
+  .chk{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink); margin-top:10px; text-transform:none; letter-spacing:0; }
+  .chk input{ width:18px; height:18px; accent-color:var(--gold); }
+  .note{ font-size:12px; color:var(--dim); margin-top:14px; line-height:1.55; }
+  .len{ min-width:44px; text-align:center; }
+  input[type=range]{ width:100%; accent-color:var(--gold); height:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MPC LOOPS</h1>
+  <div class="sub">Feed it any audio — a stem, a song, a one-shot. It finds the tempo and <b style="color:var(--gold)">the 1</b>, locks a loop of 1–8 bars that starts and stops exactly, and plays it back with no pops. Exports start exactly on the 1 and end exactly at the loop end — ready to zone on the MPC.</div>
+
+  <div class="drop" id="drop">Tap to pick an audio file — or drop one here<br><b>MP3 · WAV · M4A · anything your browser plays</b></div>
+  <input type="file" id="file" accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.aif,.aiff,.opus,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/flac,audio/ogg,audio/aiff,audio/opus" style="display:none">
+  <div class="stat" id="fileStat">No audio loaded yet.</div>
+
+  <canvas id="wave" width="608" height="150"></canvas>
+  <div class="stat" id="gridStat">The thick <b>gold bars on the wave are the loop In/Out — drag them</b>. Drag the ruler strip to slide the 1 · drag the wave to pan · tap for the playhead · pinch to zoom.</div>
+  <div class="btns">
+    <button id="zoomOut">− Zoom out</button>
+    <button id="zoomIn">+ Zoom in</button>
+    <button id="zoomFit">Fit whole file</button>
+  </div>
+  <div class="stat" id="viewStat"></div>
+  <div class="btns">
+    <button id="playFull" disabled>▶ Play</button>
+    <button id="stopBtn" disabled>■ Stop</button>
+    <button id="playLoop" class="gold" disabled>▶ Play loop</button>
+    <button id="playOnce" disabled>▶ Play once</button>
+  </div>
+  <label class="chk" style="margin-top:8px"><input type="checkbox" id="snapGrid" checked> Snap the gold bars to the grid — In on the beat, Out on whole bars</label>
+
+  <h2>Tempo &amp; the 1</h2>
+  <div class="row">
+    <div>
+      <label for="bpm">BPM (detected — correct it if it's off)</label>
+      <input id="bpm" type="number" inputmode="decimal" step="0.1" placeholder="—">
+    </div>
+    <div>
+      <label for="bpb">Beats per bar</label>
+      <select id="bpb"><option value="4" selected>4</option><option value="3">3</option><option value="2">2</option></select>
+    </div>
+    <div>
+      <label for="gate">Silence gate (dB)</label>
+      <input id="gate" type="number" inputmode="numeric" step="1" value="-45">
+    </div>
+  </div>
+  <div class="btns">
+    <button id="halfBpm">÷2 BPM</button>
+    <button id="dblBpm">×2 BPM</button>
+    <button id="nudgeBeatL">1 ← beat</button>
+    <button id="nudgeBeatR">beat → 1</button>
+    <button id="nudgeMsL">1 −10ms</button>
+    <button id="nudgeMsR">1 +10ms</button>
+    <button id="redetect">Re-detect</button>
+  </div>
+  <div class="stat" id="tempoStat">Load a file and the tempo + downbeat land here.</div>
+
+  <h2>Key of the sample</h2>
+  <div class="panel">
+    <div class="big" id="keyOut">—</div>
+    <div class="stat" id="keyStat">Reads the locked loop region (or the whole trimmed sound). Change the loop and it re-reads.</div>
+  </div>
+
+  <h2>Lock the loop</h2>
+  <div class="btns" id="modeBtns">
+    <button id="modeLoop" class="on">Loop (bar-locked)</button>
+    <button id="modeShot">One-shot (free in/out)</button>
+  </div>
+  <div id="loopCtl">
+    <label>Start bar (counting from the 1)</label>
+    <div class="btns">
+      <button id="barMinus">−</button>
+      <span class="big len" id="startBarOut">1</span>
+      <button id="barPlus">+</button>
+    </div>
+    <label>Loop length</label>
+    <div class="btns" id="lenBtns"></div>
+  </div>
+  <div class="stat" id="loopStat">Lock a loop to see its exact length.</div>
+
+  <h2>Export</h2>
+  <div class="panel">
+    <div class="btns">
+      <button id="expLoop" class="gold" disabled>Download loop WAV</button>
+      <button id="expSlices" disabled>Download slices (16)</button>
+      <button id="sliceCountBtn">Slices: 16</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="expMono"> Export mono (saves MPC memory — good for bass)</label>
+    <label class="chk"><input type="checkbox" id="expNorm" checked> Normalize to −1 dB</label>
+    <label class="chk"><input type="checkbox" id="expFade" checked> Click-free loop (5 ms crossfade baked into the export)</label>
+    <div class="note">The loop WAV is exactly N bars at the locked BPM — drop it in the MPC, zone it, and every pad lands perfect. Slices export the same loop pre-cut into equal pads (4 / 8 / 16). One-shot mode exports your in/out region trimmed, with the dead air before the first sound removed.</div>
+  </div>
+
+  <div class="note">How the 1 is found: leading silence is trimmed by the gate, the beat grid is phase-aligned to the strongest hits, and the first full bar from there is bar 1. Sparse material — a lone bassline, horns with no drums — can fool any detector: the BPM box, ÷2/×2, and the nudge buttons are there so your ear stays the final judge. Use the ruler-drag to slide the start close, then drag the gold In/Out bars on the wave — snapped to the grid, or free with snap off — to place it exactly.</div>
+</div>
+<script>
+"use strict";
+// ==CORE==
+// Pure DSP helpers — operate on plain arrays/buffers, no DOM. (Also unit-tested outside the page.)
+function dbToLin(db){ return Math.pow(10, db/20); }
+
+// First/last index where short-window RMS rises above the gate. ch = mono Float32Array.
+function findSoundBounds(ch, sr, gateDb, winMs){
+  const win = Math.max(64, Math.round(sr * (winMs||5) / 1000));
+  const thr = dbToLin(gateDb);
+  let first = -1, last = -1;
+  for (let i = 0; i < ch.length; i += win){
+    let s = 0; const n = Math.min(win, ch.length - i);
+    for (let j = 0; j < n; j++){ const v = ch[i+j]; s += v*v; }
+    if (Math.sqrt(s/n) > thr){ if (first < 0) first = i; last = i + n - 1; }
+  }
+  if (first < 0) return { start: 0, end: ch.length - 1 };
+  return { start: first, end: last };
+}
+
+// Onset envelope: per-hop energy increase (positive spectral-flux stand-in on the time signal).
+function onsetEnvelope(ch, sr, hop){
+  hop = hop || 512;
+  const frames = Math.floor(ch.length / hop);
+  const env = new Float32Array(frames);
+  let prev = 0;
+  for (let f = 0; f < frames; f++){
+    let s = 0; const off = f * hop;
+    for (let j = 0; j < hop; j++){ const v = ch[off+j]; s += v*v; }
+    const e = Math.sqrt(s / hop);
+    env[f] = Math.max(0, e - prev);
+    prev = e;
+  }
+  return env;
+}
+
+// Tempo by autocorrelating the onset envelope, scored with a harmonic comb:
+// a candidate period earns its own correlation PLUS weighted correlation at
+// 2x and 3x its length. A real beat's multiples line up too (patterns repeat
+// every 2–4 beats), while a spurious in-between lag (a melodic rhythm, swung
+// hats) has weak multiples — raw autocorrelation alone picked 152 BPM on a
+// 92 BPM beat whose 2-beat correlation was the strongest signal in the file.
+// Returns {bpm, score} or null.
+function detectBPM(ch, sr, minBpm, maxBpm){
+  minBpm = minBpm || 55; maxBpm = maxBpm || 190;
+  const hop = 512, env = onsetEnvelope(ch, sr, hop);
+  const fps = sr / hop;
+  const minLag = Math.floor(fps * 60 / maxBpm), maxLag = Math.ceil(fps * 60 / minBpm);
+  let mean = 0; for (let i = 0; i < env.length; i++) mean += env[i];
+  mean /= env.length || 1;
+  const acMax = Math.min(Math.floor(env.length / 2), maxLag * 3 + 2);
+  const ac = new Float64Array(acMax + 1);
+  for (let lag = 1; lag <= acMax; lag++){
+    let s = 0;
+    for (let i = 0; i + lag < env.length; i++) s += (env[i] - mean) * (env[i + lag] - mean);
+    ac[lag] = s;
+  }
+  function comb(lag){
+    let num = ac[lag], den = 1;
+    if (2 * lag <= acMax){ num += 0.6 * ac[2 * lag]; den += 0.6; }
+    if (3 * lag <= acMax){ num += 0.3 * ac[3 * lag]; den += 0.3; }
+    return num / den;
+  }
+  let bestLag = 0, bestScore = -Infinity;
+  const scores = [];
+  for (let lag = minLag; lag <= maxLag && lag < env.length / 2; lag++){
+    const s = comb(lag);
+    scores.push([lag, s]);
+    if (s > bestScore){ bestScore = s; bestLag = lag; }
+  }
+  if (!bestLag) return null;
+  // Parabolic refine around the peak.
+  const idx = bestLag - minLag;
+  let frac = 0;
+  if (idx > 0 && idx < scores.length - 1){
+    const a = scores[idx-1][1], b = scores[idx][1], c = scores[idx+1][1];
+    const d = a - 2*b + c; if (d !== 0) frac = 0.5 * (a - c) / d;
+  }
+  const lagF = bestLag + frac;
+  return { bpm: 60 * fps / lagF, score: bestScore };
+}
+
+// Phase (seconds, within one beat) that best aligns a beat grid to the onsets.
+function gridPhase(ch, sr, bpm){
+  const hop = 512, env = onsetEnvelope(ch, sr, hop);
+  const fps = sr / hop, period = 60 / bpm;
+  const steps = 24; let bestPhase = 0, bestScore = -1;
+  for (let s = 0; s < steps; s++){
+    const ph = (s / steps) * period;
+    let score = 0;
+    for (let t = ph; t < ch.length / sr; t += period){
+      const f = Math.round(t * fps);
+      if (f < env.length) score += env[f];
+    }
+    if (score > bestScore){ bestScore = score; bestPhase = ph; }
+  }
+  return bestPhase;
+}
+
+function beatLenSec(bpm){ return 60 / bpm; }
+function barLenSec(bpm, bpb){ return beatLenSec(bpm) * bpb; }
+// Exact loop length in samples — the number the MPC zone math wants.
+function loopSamples(bpm, bpb, bars, sr){ return Math.round(bars * barLenSec(bpm, bpb) * sr); }
+
+function nearestZeroCross(ch, idx, maxOff){
+  if (idx <= 0 || idx >= ch.length) return idx;
+  let best = idx, bestAbs = Math.abs(ch[idx]);
+  for (let d = 1; d <= maxOff; d++){
+    if (idx - d >= 0 && Math.abs(ch[idx-d]) < bestAbs){ bestAbs = Math.abs(ch[idx-d]); best = idx - d; }
+    if (idx + d < ch.length && Math.abs(ch[idx+d]) < bestAbs){ bestAbs = Math.abs(ch[idx+d]); best = idx + d; }
+  }
+  return best;
+}
+
+// Bake a click-free wrap into channel data (in place over the given region):
+// the last fadeLen samples crossfade from the region's tail into its head,
+// so a player looping start->end (the app, or the MPC) hears no pop.
+function bakeLoopCrossfade(ch, start, len, fadeLen){
+  const f = Math.min(fadeLen, Math.floor(len / 2));
+  if (f <= 0) return;
+  for (let i = 0; i < f; i++){
+    const t = i / f;                       // 0..1 across the fade
+    const tailIdx = start + len - f + i;
+    const headVal = ch[start + i];
+    ch[tailIdx] = ch[tailIdx] * (1 - t) + headVal * t;
+  }
+}
+const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+// Krumhansl–Schmuckler key profiles.
+const KEY_MAJOR = [6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+const KEY_MINOR = [6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+
+// Iterative radix-2 FFT, in place.
+function fft(re, im){
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++){
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j){
+      const tr = re[i]; re[i] = re[j]; re[j] = tr;
+      const ti = im[i]; im[i] = im[j]; im[j] = ti;
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1){
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    const half = len >> 1;
+    for (let i = 0; i < n; i += len){
+      let cwr = 1, cwi = 0;
+      for (let j = 0; j < half; j++){
+        const a = i + j, b = i + j + half;
+        const vr = re[b] * cwr - im[b] * cwi;
+        const vi = re[b] * cwi + im[b] * cwr;
+        re[b] = re[a] - vr; im[b] = im[a] - vi;
+        re[a] += vr;        im[a] += vi;
+        const nwr = cwr * wr - cwi * wi; cwi = cwr * wi + cwi * wr; cwr = nwr;
+      }
+    }
+  }
+}
+
+// Pitch-class profile (12 bins, sums to 1) over a region; analysis capped for speed.
+function chromaFromRegion(ch, sr, startSamp, endSamp, maxSec){
+  const N = 4096;
+  const chroma = new Float64Array(12);
+  const stop = Math.min(endSamp, startSamp + Math.floor((maxSec || 60) * sr));
+  const re = new Float64Array(N), im = new Float64Array(N), win = new Float64Array(N);
+  for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+  for (let off = startSamp; off + N <= stop; off += N){
+    for (let i = 0; i < N; i++){ re[i] = ch[off + i] * win[i]; im[i] = 0; }
+    fft(re, im);
+    for (let k = 1; k < N / 2; k++){
+      const freq = k * sr / N;
+      if (freq < 55 || freq > 2000) continue;
+      const midi = Math.round(69 + 12 * Math.log2(freq / 440));
+      const pc = ((midi % 12) + 12) % 12;
+      chroma[pc] += Math.sqrt(re[k] * re[k] + im[k] * im[k]);
+    }
+  }
+  let sum = 0; for (let i = 0; i < 12; i++) sum += chroma[i];
+  if (sum > 0) for (let i = 0; i < 12; i++) chroma[i] /= sum;
+  return chroma;
+}
+
+function pearson(a, b){
+  let ma = 0, mb = 0; const n = a.length;
+  for (let i = 0; i < n; i++){ ma += a[i]; mb += b[i]; }
+  ma /= n; mb /= n;
+  let num = 0, da = 0, db = 0;
+  for (let i = 0; i < n; i++){ const x = a[i] - ma, y = b[i] - mb; num += x * y; da += x * x; db += y * y; }
+  return (da > 0 && db > 0) ? num / Math.sqrt(da * db) : 0;
+}
+
+// Estimate the key over a region. Returns {best, second, chroma} —
+// best/second are {root, mode, score}; root is a pitch class 0..11.
+function detectKey(ch, sr, startSamp, endSamp){
+  const chroma = chromaFromRegion(ch, sr, startSamp, endSamp, 60);
+  const results = [];
+  for (let root = 0; root < 12; root++){
+    const rot = new Float64Array(12);
+    for (let i = 0; i < 12; i++) rot[i] = chroma[(root + i) % 12];
+    results.push({ root: root, mode: "major", score: pearson(rot, KEY_MAJOR) });
+    results.push({ root: root, mode: "minor", score: pearson(rot, KEY_MINOR) });
+  }
+  results.sort(function(x, y){ return y.score - x.score; });
+  return { best: results[0], second: results[1], chroma: chroma };
+}
+function keyName(k){ return NOTE_NAMES[k.root] + " " + k.mode; }
+// ==/CORE==
+
+// ---------------- App wiring ----------------
+var AC = window.AudioContext || window.webkitAudioContext;
+var actx = null;
+var state = {
+  buf: null,        // decoded AudioBuffer
+  mono: null,       // mono mixdown Float32Array (analysis)
+  sr: 0,
+  name: "sample",
+  bounds: null,     // {start,end} samples — trimmed sound region
+  bpm: 0,
+  one: 0,           // downbeat position, seconds
+  playhead: 0,      // seconds
+  mode: "loop",     // "loop" | "shot"
+  startBar: 1,
+  bars: 4,
+  shotOut: 0,       // one-shot end, seconds (0 = trimmed end)
+  slices: 16,
+  key: null,        // detectKey result
+  src: null,        // current BufferSource
+  playing: false,
+  playStartCtx: 0, playStartOff: 0, playDur: 0, raf: 0,
+  dragOffSec: 0,    // live wave-slide offset while dragging (seconds)
+  viewStart: 0,     // zoom window: first visible second
+  viewDur: 0,       // zoom window length in seconds (0 = whole file)
+  inSec: null,      // slider-set region start (seconds); null = follow the grid
+  outSec: null      // slider-set region end (seconds); null = start + bars
+};
+function $(id){ return document.getElementById(id); }
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+function ensureCtx(){ if (!actx) actx = new AC(); if (actx.state === "suspended") actx.resume(); return actx; }
+function bpm(){ var v = parseFloat($("bpm").value); return (v && v > 20 && v < 400) ? v : (state.bpm || 0); }
+function bpb(){ return parseInt($("bpb").value, 10) || 4; }
+
+// Region (in samples) the current mode is pointing at.
+function regionSamples(){
+  if (!state.buf) return null;
+  var sr = state.sr, b = bpm();
+  if (state.mode === "loop" && b){
+    var startSec = (state.inSec != null) ? state.inSec
+      : state.one + (state.startBar - 1) * barLenSec(b, bpb());
+    var start = clamp(Math.round(startSec * sr), 0, state.buf.length - 1);
+    var len = (state.outSec != null && state.outSec > startSec)
+      ? Math.round((state.outSec - startSec) * sr)
+      : loopSamples(b, bpb(), state.bars, sr);
+    return { start: start, len: Math.max(1, Math.min(len, state.buf.length - start)), exact: len };
+  }
+  var s0 = (state.inSec != null) ? Math.round(state.inSec * sr)
+    : (state.bounds ? state.bounds.start : 0);
+  var s1 = (state.outSec != null) ? Math.round(state.outSec * sr)
+    : (state.bounds ? state.bounds.end : state.buf.length - 1);
+  s0 = clamp(s0, 0, state.buf.length - 1); s1 = clamp(s1, s0 + 1, state.buf.length);
+  return { start: s0, len: s1 - s0, exact: s1 - s0 };
+}
+function regionStartSec(){ var r = regionSamples(); return r ? r.start / state.sr : 0; }
+// When the grid itself moves (ruler slide, nudges), a slider-set region rides along with it.
+function shiftRegion(d){
+  if (!state.buf || !d) return;
+  if (state.inSec != null) state.inSec = clamp(state.inSec + d, 0, state.buf.duration);
+  if (state.outSec != null) state.outSec = clamp(state.outSec + d, 0, state.buf.duration);
+}
+
+function fmtT(s){ var m = Math.floor(s / 60), r = s - m * 60; return m + ":" + (r < 10 ? "0" : "") + r.toFixed(2); }
+
+function drawWave(){
+  var cv = $("wave"), ctx = cv.getContext("2d");
+  var W = cv.width, H = cv.height;
+  ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, W, H);
+  if (!state.buf) return;
+  var ch = state.buf.getChannelData(0), dur = state.buf.duration;
+  var mid = H / 2;
+  var vS = state.viewStart || 0, vD = state.viewDur || dur;
+  var offPx = (state.dragOffSec || 0) / vD * W;   // wave slides under a fixed grid while dragging
+  function X(t){ return (t - vS) / vD * W; }
+  // loop region shading
+  var reg = regionSamples();
+  if (reg){
+    var x0 = X(reg.start / state.sr), x1 = X((reg.start + reg.len) / state.sr);
+    ctx.fillStyle = "rgba(217,166,46,.16)"; ctx.fillRect(x0, 0, x1 - x0, H);
+    ctx.strokeStyle = "#d9a62e"; ctx.beginPath();
+    ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.moveTo(x1, 0); ctx.lineTo(x1, H); ctx.stroke();
+  }
+  // waveform peaks
+  ctx.fillStyle = "#8f9a7a";
+  var span = Math.floor(vD / dur * ch.length);
+  var per = Math.max(1, Math.floor(span / W));
+  var step = per > 56 ? 7 : 1;
+  for (var x = 0; x < W; x++){
+    var ax = x - offPx; if (ax < 0 || ax >= W) continue;
+    var off = Math.floor((vS + ax / W * vD) / dur * ch.length);
+    if (off < 0 || off >= ch.length) continue;
+    var mn = 1, mx = -1;
+    for (var j = 0; j < per && off + j < ch.length; j += step){ var v = ch[off + j] || 0; if (v < mn) mn = v; if (v > mx) mx = v; }
+    ctx.fillRect(x, mid - mx * (mid - 4), 1, Math.max(1, (mx - mn) * (mid - 4)));
+  }
+  // bar grid from the 1
+  var b = bpm();
+  if (b && state.one >= 0){
+    var bar = barLenSec(b, bpb());
+    ctx.font = "9px Verdana"; 
+    for (var n = 0, t = state.one; t < dur; t += bar, n++){
+      var gx = X(t);
+      if (gx < -60 || gx > W + 60) continue;
+      ctx.strokeStyle = n === 0 ? "#d9a62e" : "rgba(217,166,46,.35)";
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, 12); ctx.stroke();
+      if (n < 200){ ctx.fillStyle = "#d9a62e"; ctx.fillText(String(n + 1), gx + 2, 10); }
+    }
+    for (var t2 = state.one - bar; t2 > 0; t2 -= bar){
+      var gx2 = X(t2);
+      if (gx2 < -60 || gx2 > W + 60) continue;
+      ctx.strokeStyle = "rgba(217,166,46,.18)";
+      ctx.beginPath(); ctx.moveTo(gx2, 0); ctx.lineTo(gx2, 12); ctx.stroke();
+    }
+  }
+  // trimmed-out zones
+  if (state.bounds){
+    ctx.fillStyle = "rgba(0,0,0,.55)";
+    var bx0 = X(state.bounds.start / state.sr) + offPx, bx1 = X(state.bounds.end / state.sr) + offPx;
+    ctx.fillRect(0, 0, Math.max(0, bx0), H);
+    ctx.fillRect(Math.min(W, bx1), 0, W, H);
+  }
+  // Thick gold In/Out bars on the wave — grab and drag them (Beat Lab style).
+  if (reg){
+    ctx.fillStyle = "#d9a62e";
+    ctx.fillRect(x0 - 3, 0, 6, H);
+    ctx.fillRect(x1 - 3, 0, 6, H);
+    ctx.fillRect(x0 - 8, 13, 17, 11);
+    ctx.fillRect(x1 - 11, 13, 23, 11);
+    ctx.fillStyle = "#141414";
+    ctx.font = "bold 8px Verdana";
+    ctx.fillText("IN", x0 - 4, 21);
+    ctx.fillText("OUT", x1 - 8, 21);
+  }
+  // playhead
+  var px = X(state.playhead) + offPx;
+  ctx.strokeStyle = "#f2ead8"; ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+  var vsEl = $("viewStat");
+  if (vsEl) vsEl.textContent = (vD < dur - 0.001)
+    ? fmtT(vS) + " – " + fmtT(Math.min(dur, vS + vD)) + " of " + fmtT(dur)
+    : "Whole file in view.";
+}
+
+function refreshStats(){
+  var b = bpm(), reg = regionSamples();
+  if (state.buf && b){
+    $("tempoStat").innerHTML = "The 1 sits at <b>" + fmtT(state.one) + "</b> · grid is " +
+      bpb() + " beats/bar at <b>" + b.toFixed(1) + " BPM</b> · sound runs " +
+      fmtT((state.bounds.start) / state.sr) + " → " + fmtT(state.bounds.end / state.sr) + " after the gate trims the dead air.";
+  }
+  if (reg && state.buf){
+    var startS = reg.start / state.sr, endS = (reg.start + reg.len) / state.sr;
+    $("loopStat").innerHTML = (state.mode === "loop" ? "Loop" : "One-shot") +
+      " <b>" + fmtT(startS) + " → " + fmtT(endS) + "</b>" +
+      " = <b>" + (reg.len / state.sr).toFixed(3) + " s</b> · <b>" + reg.len.toLocaleString() + " samples</b>" +
+      (state.mode === "loop" && b ? " · ≈ " + (reg.len / state.sr / barLenSec(b, bpb())).toFixed(2) + " bars" : "") +
+      (state.key ? " · key <b>" + keyName(state.key.best) + "</b>" : "");
+    $("startBarOut").textContent = state.startBar;
+  }
+  drawWave();
+}
+
+function runKey(){
+  if (!state.buf) return;
+  var reg = regionSamples(); if (!reg) return;
+  try {
+    state.key = detectKey(state.mono, state.sr, reg.start, reg.start + reg.len);
+    var k = state.key, margin = k.best.score - k.second.score;
+    $("keyOut").textContent = keyName(k.best);
+    $("keyStat").innerHTML =
+      (margin >= 0.12 ? "Strong read." : margin >= 0.04 ? "Fairly confident." : "Close call — ear-check it.") +
+      " Next closest: <b>" + keyName(k.second) + "</b>. " +
+      (state.mode === "loop" ? "Read from the locked loop." : "Read from the one-shot region.");
+  } catch (e){ $("keyStat").textContent = "Key read failed on this file."; }
+  refreshStatsLight();
+}
+function refreshStatsLight(){
+  var reg = regionSamples(), b = bpm();
+  if (reg && b && state.key){
+    $("loopStat").innerHTML = $("loopStat").innerHTML.replace(/ · key <b>.*?<\/b>/, "") +
+      " · key <b>" + keyName(state.key.best) + "</b>";
+  }
+}
+
+var keyTimer = 0;
+function scheduleKey(){ clearTimeout(keyTimer); keyTimer = setTimeout(runKey, 250); }
+
+function analyze(){
+  if (!state.buf) return;
+  var sr = state.sr;
+  var gate = parseFloat($("gate").value); if (isNaN(gate)) gate = -45;
+  state.bounds = findSoundBounds(state.mono, sr, gate, 5);
+  var det = detectBPM(state.mono, sr, 55, 190);
+  var startS = state.bounds.start;
+  var b = det ? det.bpm : 0;
+  if (det){
+    // Majority of his material sits 70–160; fold obvious double/half reads into that pocket.
+    while (b >= 168) b /= 2;
+    while (b < 68) b *= 2;
+    state.bpm = b; $("bpm").value = b.toFixed(1);
+    var phase = gridPhase(state.mono, sr, b);
+    var firstOnset = startS / sr;
+    var beatsIn = Math.max(0, Math.round((firstOnset - phase) / beatLenSec(b)));
+    state.one = phase + beatsIn * beatLenSec(b);
+    if (state.one < firstOnset - beatLenSec(b)) state.one += beatLenSec(b);
+  }
+  state.playhead = state.one;
+  refreshStats(); scheduleKey(); enableTransport(true);
+}
+function enableTransport(on){
+  ["playFull","stopBtn","playLoop","playOnce","expLoop","expSlices"].forEach(function(id){ $(id).disabled = !on; });
+}
+
+function stopPlayback(){
+  if (state.src){ try { state.src.onended = null; state.src.stop(); } catch (e){} state.src = null; }
+  state.playing = false; cancelAnimationFrame(state.raf);
+}
+
+// Seamless loop audition: play a crossfaded render of the region, looped by the player.
+function renderRegionBuffer(forExport){
+  var reg = regionSamples(); if (!reg || !state.buf) return null;
+  var sr = state.sr, nCh = Math.min(2, state.buf.numberOfChannels);
+  var chans = [];
+  for (var c = 0; c < nCh; c++){
+    var src = state.buf.getChannelData(c);
+    var out = new Float32Array(reg.len);
+    for (var i = 0; i < reg.len; i++) out[i] = src[reg.start + i] || 0;
+    chans.push(out);
+  }
+  if (state.mode === "loop" && $("expFade").checked){
+    var f = Math.round(sr * 0.005);
+    for (var c2 = 0; c2 < nCh; c2++) bakeLoopCrossfade(chans[c2], 0, reg.len, f);
+  }
+  if (state.mode === "shot"){
+    // one-shot: 3 ms fade-out tail so the stop never clicks
+    var f2 = Math.min(Math.round(sr * 0.003), Math.floor(reg.len / 2));
+    for (var c3 = 0; c3 < nCh; c3++)
+      for (var j = 0; j < f2; j++) chans[c3][reg.len - f2 + j] *= 1 - j / f2;
+  }
+  return { chans: chans, len: reg.len, nCh: nCh };
+}
+
+function playRegion(loop){
+  ensureCtx(); stopPlayback();
+  var r = renderRegionBuffer(false); if (!r) return;
+  var buf = actx.createBuffer(r.nCh, r.len, state.sr);
+  for (var c = 0; c < r.nCh; c++) buf.getChannelData(c).set(r.chans[c]);
+  var src = actx.createBufferSource(); src.buffer = buf; src.loop = loop;
+  var g = actx.createGain(), t0 = actx.currentTime;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
+  src.connect(g); g.connect(actx.destination); src.start();
+  state.src = src; state.playing = true;
+  state.playStartCtx = actx.currentTime; state.playStartOff = 0; state.playDur = r.len / state.sr;
+  var reg = regionSamples(); state.regionStartSec = reg.start / state.sr;
+  src.onended = function(){ if (!loop){ state.playing = false; } };
+  tickPlayhead(loop);
+}
+function playFull(){
+  ensureCtx(); stopPlayback();
+  var src = actx.createBufferSource(); src.buffer = state.buf;
+  var g = actx.createGain(), t0 = actx.currentTime;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
+  src.connect(g); g.connect(actx.destination);
+  src.start(0, state.playhead % state.buf.duration);
+  state.src = src; state.playing = true;
+  state.playStartCtx = actx.currentTime; state.playStartOff = state.playhead; state.playDur = state.buf.duration - state.playhead;
+  state.regionStartSec = 0;
+  src.onended = function(){ state.playing = false; };
+  tickPlayhead(false, true);
+}
+function tickPlayhead(looping, full){
+  cancelAnimationFrame(state.raf);
+  var step = function(){
+    if (!state.playing || !actx) return;
+    var el = actx.currentTime - state.playStartCtx;
+    if (full){ state.playhead = state.playStartOff + el; if (state.playhead >= state.buf.duration){ state.playing = false; } }
+    else if (state.playDur > 0){
+      var pos = looping ? (el % state.playDur) : Math.min(el, state.playDur);
+      state.playhead = (state.regionStartSec || 0) + pos;
+      if (!looping && el >= state.playDur) state.playing = false;
+    }
+    drawWave();
+    if (state.playing) state.raf = requestAnimationFrame(step);
+  };
+  step();
+}
+
+// ---- WAV export (16-bit PCM) ----
+function encodeWAV(chans, sr){
+  var nCh = chans.length, len = chans[0].length;
+  var bytes = 44 + len * nCh * 2, ab = new ArrayBuffer(bytes), v = new DataView(ab);
+  function ws(off, s){ for (var i = 0; i < s.length; i++) v.setUint8(off + i, s.charCodeAt(i)); }
+  ws(0, "RIFF"); v.setUint32(4, bytes - 8, true); ws(8, "WAVE"); ws(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, nCh, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * nCh * 2, true); v.setUint16(32, nCh * 2, true);
+  v.setUint16(34, 16, true); ws(36, "data"); v.setUint32(40, len * nCh * 2, true);
+  var off = 44;
+  for (var i = 0; i < len; i++) for (var c = 0; c < nCh; c++){
+    var s = clamp(chans[c][i], -1, 1);
+    v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
+  }
+  return new Blob([ab], { type: "audio/wav" });
+}
+function peakOf(chans){ var p = 0; chans.forEach(function(ch){ for (var i = 0; i < ch.length; i++){ var a = Math.abs(ch[i]); if (a > p) p = a; } }); return p; }
+function download(blob, name){
+  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+function prepExportChans(r){
+  var chans = r.chans.map(function(ch){ return new Float32Array(ch); });
+  if ($("expMono").checked && chans.length > 1){
+    var m = new Float32Array(r.len);
+    for (var i = 0; i < r.len; i++) m[i] = (chans[0][i] + chans[1][i]) / 2;
+    chans = [m];
+  }
+  if ($("expNorm").checked){
+    var p = peakOf(chans); if (p > 0){ var g = dbToLin(-1) / p; chans.forEach(function(ch){ for (var i = 0; i < ch.length; i++) ch[i] *= g; }); }
+  }
+  return chans;
+}
+function slug(){ return state.name.replace(/\.[^.]+$/, "").replace(/[^a-z0-9]+/gi, "-").slice(0, 40) || "sample"; }
+function keySlug(){ return state.key ? keyName(state.key.best).replace(" ", "").replace("#", "s") : "nokey"; }
+
+function exportLoop(){
+  var r = renderRegionBuffer(true); if (!r) return;
+  var chans = prepExportChans(r);
+  var name;
+  if (state.mode === "loop") name = slug() + "_loop_" + bpm().toFixed(1) + "bpm_" + state.bars + "bars_" + keySlug() + ".wav";
+  else name = slug() + "_oneshot_" + keySlug() + ".wav";
+  download(encodeWAV(chans, state.sr), name);
+}
+function exportSlices(){
+  var r = renderRegionBuffer(true); if (!r) return;
+  var n = state.slices, per = Math.floor(r.len / n);
+  for (var s = 0; s < n; s++){
+    (function(s){
+      setTimeout(function(){
+        var chans = r.chans.map(function(ch){ return ch.slice(s * per, s === n - 1 ? r.len : (s + 1) * per); });
+        chans = prepExportChans({ chans: chans, len: chans[0].length });
+        download(encodeWAV(chans, state.sr), slug() + "_slice" + (s + 1) + "of" + n + "_" + keySlug() + ".wav");
+      }, s * 350);
+    })(s);
+  }
+}
+
+// ---- File loading ----
+function loadFile(file){
+  if (!file) return;
+  state.name = file.name;
+  ensureCtx();
+  file.arrayBuffer().then(function(ab){ return actx.decodeAudioData(ab); }).then(function(buf){
+    state.buf = buf; state.sr = buf.sampleRate;
+    var n = buf.length, mono = new Float32Array(n);
+    var c0 = buf.getChannelData(0);
+    if (buf.numberOfChannels > 1){ var c1 = buf.getChannelData(1); for (var i = 0; i < n; i++) mono[i] = (c0[i] + c1[i]) / 2; }
+    else mono.set(c0);
+    state.mono = mono; state.shotOut = 0; state.startBar = 1; state.playhead = 0;
+    state.viewStart = 0; state.viewDur = 0; state.dragOffSec = 0;
+    state.inSec = null; state.outSec = null;
+    $("fileStat").innerHTML = "<b>" + file.name + "</b> · " + fmtT(buf.duration) + " · " +
+      (buf.sampleRate / 1000) + " kHz · " + (buf.numberOfChannels > 1 ? "stereo" : "mono");
+    analyze();
+  }).catch(function(){ $("fileStat").textContent = "Couldn't decode that file — try WAV or MP3."; });
+}
+
+// ---- Events ----
+var drop = $("drop"), fileIn = $("file");
+drop.addEventListener("click", function(){ fileIn.click(); });
+fileIn.addEventListener("change", function(){ loadFile(fileIn.files[0]); });
+["dragover", "dragenter"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); }); });
+["dragleave", "drop"].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); }); });
+drop.addEventListener("drop", function(e){ loadFile(e.dataTransfer.files[0]); });
+
+var wave = $("wave");
+var pointers = new Map();
+var dragInfo = null, pinchInfo = null;
+function viewDurNow(){ return state.viewDur || (state.buf ? state.buf.duration : 0); }
+function setView(centerSec, newDur){
+  if (!state.buf) return;
+  var dur = state.buf.duration;
+  newDur = clamp(newDur, 0.1, dur);
+  state.viewDur = newDur;
+  state.viewStart = clamp(centerSec - newDur / 2, 0, Math.max(0, dur - newDur));
+  drawWave();
+}
+wave.addEventListener("pointerdown", function(e){
+  if (!state.buf) return;
+  try { wave.setPointerCapture(e.pointerId); } catch (err){}
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2){
+    var pts = Array.from(pointers.values());
+    var r = wave.getBoundingClientRect();
+    var midX = (pts[0].x + pts[1].x) / 2 - r.left;
+    pinchInfo = {
+      d0: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y),
+      midT: (state.viewStart || 0) + (midX / r.width) * viewDurNow(),
+      midFrac: midX / r.width,
+      vD0: viewDurNow()
+    };
+    dragInfo = null; state.dragOffSec = 0;   // pinch takes over from any slide in progress
+  } else if (pointers.size === 1){
+    var r2 = wave.getBoundingClientRect();
+    var y = e.clientY - r2.top, x = e.clientX - r2.left;
+    var vD = viewDurNow();
+    var phX = (state.playhead - (state.viewStart || 0)) / vD * r2.width;
+    var mode = null;
+    var reg = regionSamples();
+    if (reg){
+      var inX = (reg.start / state.sr - (state.viewStart || 0)) / vD * r2.width;
+      var outX = ((reg.start + reg.len) / state.sr - (state.viewStart || 0)) / vD * r2.width;
+      if (Math.abs(x - inX) <= 14) mode = "in";          // grabbed the gold In bar
+      else if (Math.abs(x - outX) <= 14) mode = "out";   // grabbed the gold Out bar
+    }
+    if (!mode){
+      if (y <= 34 || vD >= state.buf.duration - 0.001) mode = "slide";  // ruler strip — or full view, where there's nothing to pan
+      else if (Math.abs(x - phX) <= 18) mode = "scrub";                 // grabbed the playhead line
+      else mode = "pan";                                                // zoomed wave drag = pan the view
+    }
+    dragInfo = { x0: e.clientX, moved: false, mode: mode, vS0: state.viewStart || 0 };
+  }
+});
+wave.addEventListener("pointermove", function(e){
+  if (!state.buf || !pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  var r = wave.getBoundingClientRect();
+  if (pinchInfo && pointers.size === 2){
+    var pts = Array.from(pointers.values());
+    var d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    if (d > 0 && pinchInfo.d0 > 0){
+      var dur = state.buf.duration;
+      var newDur = clamp(pinchInfo.vD0 * pinchInfo.d0 / d, 0.1, dur);
+      state.viewDur = newDur;
+      state.viewStart = clamp(pinchInfo.midT - pinchInfo.midFrac * newDur, 0, Math.max(0, dur - newDur));
+      drawWave();
+    }
+    return;
+  }
+  if (!dragInfo) return;
+  var dx = e.clientX - dragInfo.x0;
+  if (Math.abs(dx) > 4) dragInfo.moved = true;
+  if (!dragInfo.moved) return;
+  var vD2 = viewDurNow();
+  if (dragInfo.mode === "in" || dragInfo.mode === "out"){
+    var tPos = (state.viewStart || 0) + (e.clientX - r.left) / r.width * vD2;
+    if (dragInfo.mode === "in") setInSec(tPos); else setOutSec(tPos);
+    refreshStats(); scheduleKey();
+  } else if (dragInfo.mode === "slide"){
+    // Slide the wave under the fixed grid: the audio under the gold 1 line becomes the new start.
+    // Scaled by the zoom window, so a zoomed-in slide is a fine adjustment.
+    state.dragOffSec = dx / r.width * vD2;
+    drawWave();
+  } else if (dragInfo.mode === "pan"){
+    var dur = state.buf.duration;
+    state.viewStart = clamp(dragInfo.vS0 - dx / r.width * vD2, 0, Math.max(0, dur - vD2));
+    drawWave();
+  } else if (dragInfo.mode === "scrub"){
+    var cx = e.clientX - r.left;
+    state.playhead = clamp((state.viewStart || 0) + cx / r.width * vD2, 0, state.buf.duration);
+    drawWave();
+  }
+});
+function waveEnd(e){
+  var wasPinch = !!pinchInfo;
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinchInfo = null;
+  if (wasPinch || pointers.size > 0){
+    // After a pinch, ignore the leftover finger until everything lifts — no jumps.
+    dragInfo = null; state.dragOffSec = 0;
+    if (state.buf) drawWave();
+    return;
+  }
+  if (!dragInfo || !state.buf){ dragInfo = null; return; }
+  var r = wave.getBoundingClientRect();
+  if (dragInfo.moved && dragInfo.mode === "slide"){
+    var oldOne = state.one;
+    state.one = clamp(state.one - state.dragOffSec, 0, state.buf.duration);
+    state.dragOffSec = 0;
+    shiftRegion(state.one - oldOne);
+    refreshStats(); scheduleKey();
+  } else if (dragInfo.moved){
+    drawWave();   // pan/scrub already updated live during the drag
+  } else {
+    var cx = e.clientX - r.left;
+    state.playhead = clamp((state.viewStart || 0) + (cx / r.width) * viewDurNow(), 0, state.buf.duration);
+    drawWave();
+  }
+  dragInfo = null;
+}
+wave.addEventListener("pointerup", waveEnd);
+wave.addEventListener("pointercancel", waveEnd);
+$("zoomIn").addEventListener("click", function(){ setView(state.one || state.playhead, viewDurNow() / 2); });
+$("zoomOut").addEventListener("click", function(){ setView(state.one || state.playhead, viewDurNow() * 2); });
+$("zoomFit").addEventListener("click", function(){ if (!state.buf) return; state.viewStart = 0; state.viewDur = 0; drawWave(); });
+$("playFull").addEventListener("click", playFull);
+$("stopBtn").addEventListener("click", function(){ stopPlayback(); drawWave(); });
+function snapOn(){ return $("snapGrid").checked; }
+function syncLenButtons(){
+  Array.prototype.forEach.call($("lenBtns").children, function(x, i){ x.classList.toggle("on", i + 1 === state.bars); });
+}
+// The gold In/Out bars on the wave set these (drag), with the snap rules applied.
+function setInSec(v){
+  if (!state.buf) return;
+  var b = bpm();
+  if (snapOn() && b) v = state.one + Math.round((v - state.one) / beatLenSec(b)) * beatLenSec(b);
+  v = clamp(v, 0, state.buf.duration - 0.05);
+  state.inSec = v;
+  if (state.outSec != null && state.outSec <= v + 0.05)
+    state.outSec = Math.min(state.buf.duration, v + (state.mode === "loop" && b ? barLenSec(b, bpb()) : 0.25));
+}
+function setOutSec(v){
+  if (!state.buf) return;
+  var b = bpm(), start = regionStartSec();
+  if (snapOn() && state.mode === "loop" && b){
+    var bar = barLenSec(b, bpb());
+    var nb = Math.max(1, Math.round((v - start) / bar));
+    v = start + nb * bar;
+    if (nb !== state.bars && nb >= 1 && nb <= 8){ state.bars = nb; syncLenButtons(); }
+  }
+  v = clamp(v, start + 0.05, state.buf.duration);
+  state.outSec = v;
+}
+$("playLoop").addEventListener("click", function(){ playRegion(true); });
+$("playOnce").addEventListener("click", function(){ playRegion(false); });
+$("halfBpm").addEventListener("click", function(){ var b = bpm(); if (b){ $("bpm").value = (b / 2).toFixed(1); refreshStats(); scheduleKey(); } });
+$("dblBpm").addEventListener("click", function(){ var b = bpm(); if (b){ $("bpm").value = (b * 2).toFixed(1); refreshStats(); scheduleKey(); } });
+function nudgeOne(dSec){
+  var old = state.one;
+  state.one = clamp(state.one + dSec, 0, state.buf ? state.buf.duration : 0);
+  shiftRegion(state.one - old);
+  refreshStats(); scheduleKey();
+}
+$("nudgeBeatL").addEventListener("click", function(){ if (bpm()) nudgeOne(-beatLenSec(bpm())); });
+$("nudgeBeatR").addEventListener("click", function(){ if (bpm()) nudgeOne(beatLenSec(bpm())); });
+$("nudgeMsL").addEventListener("click", function(){ nudgeOne(-0.01); });
+$("nudgeMsR").addEventListener("click", function(){ nudgeOne(0.01); });
+$("redetect").addEventListener("click", analyze);
+$("gate").addEventListener("change", analyze);
+$("bpm").addEventListener("change", function(){ state.bpm = bpm(); refreshStats(); scheduleKey(); });
+$("bpb").addEventListener("change", function(){ refreshStats(); scheduleKey(); });
+$("modeLoop").addEventListener("click", function(){ state.mode = "loop"; $("modeLoop").classList.add("on"); $("modeShot").classList.remove("on"); $("loopCtl").style.display = ""; refreshStats(); scheduleKey(); });
+$("modeShot").addEventListener("click", function(){ state.mode = "shot"; $("modeShot").classList.add("on"); $("modeLoop").classList.remove("on"); $("loopCtl").style.display = "none"; refreshStats(); scheduleKey(); });
+function jumpToBar(){
+  if (state.inSec != null && bpm()){
+    var lenSec = (state.outSec != null) ? state.outSec - state.inSec : state.bars * barLenSec(bpm(), bpb());
+    state.inSec = state.one + (state.startBar - 1) * barLenSec(bpm(), bpb());
+    if (state.outSec != null) state.outSec = state.inSec + lenSec;
+  }
+  refreshStats(); scheduleKey();
+}
+$("barMinus").addEventListener("click", function(){ state.startBar = Math.max(1, state.startBar - 1); jumpToBar(); });
+$("barPlus").addEventListener("click", function(){ state.startBar += 1; jumpToBar(); });
+var lenWrap = $("lenBtns");
+for (var L = 1; L <= 8; L++){
+  (function(L){
+    var btn = document.createElement("button"); btn.textContent = L + (L === 1 ? " bar" : " bars");
+    if (L === 4) btn.classList.add("on");
+    btn.addEventListener("click", function(){
+      state.bars = L;
+      if (state.outSec != null && bpm()) state.outSec = regionStartSec() + L * barLenSec(bpm(), bpb());
+      Array.prototype.forEach.call(lenWrap.children, function(x){ x.classList.remove("on"); });
+      btn.classList.add("on"); refreshStats(); scheduleKey();
+    });
+    lenWrap.appendChild(btn);
+  })(L);
+}
+$("sliceCountBtn").addEventListener("click", function(){
+  state.slices = state.slices === 16 ? 4 : state.slices === 4 ? 8 : 16;
+  $("sliceCountBtn").textContent = "Slices: " + state.slices;
+  $("expSlices").textContent = "Download slices (" + state.slices + ")";
+});
+$("expLoop").addEventListener("click", exportLoop);
+$("expSlices").addEventListener("click", exportSlices);
+drawWave();
+</script>
+<footer id="kc-site-footer" style="margin-top:40px;padding:18px 12px 24px;border-top:1px solid rgba(127,127,127,.35);text-align:center;font-size:13px;line-height:1.7;opacity:.85"><div>Copyright &copy; 2026 Keith Cole. All rights reserved.</div><div><a href="https://keithcole813.github.io/" style="color:inherit">&#8592; Back to the main page</a></div></footer>
+</body>
+</html>
