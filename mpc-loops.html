@@ -64,6 +64,7 @@
   </div>
   <div class="stat" id="viewStat"></div>
   <div class="btns">
+    <button id="toStart" disabled>⏮ Start</button>
     <button id="playFull" disabled>▶ Play</button>
     <button id="stopBtn" disabled>■ Stop</button>
     <button id="playLoop" class="gold" disabled>▶ Play loop</button>
@@ -365,6 +366,7 @@ var state = {
   key: null,        // detectKey result
   src: null,        // current BufferSource
   playing: false,
+  playMode: null,   // "full" | "region" while playing
   playStartCtx: 0, playStartOff: 0, playDur: 0, raf: 0,
   dragOffSec: 0,    // live wave-slide offset while dragging (seconds)
   viewStart: 0,     // zoom window: first visible second
@@ -577,12 +579,12 @@ function analyze(){
   refreshStats(); scheduleKey(); enableTransport(true);
 }
 function enableTransport(on){
-  ["playFull","stopBtn","playLoop","playOnce","expLoop","expSlices"].forEach(function(id){ $(id).disabled = !on; });
+  ["toStart","playFull","stopBtn","playLoop","playOnce","expLoop","expSlices"].forEach(function(id){ $(id).disabled = !on; });
 }
 
 function stopPlayback(){
   if (state.src){ try { state.src.onended = null; state.src.stop(); } catch (e){} state.src = null; }
-  state.playing = false; cancelAnimationFrame(state.raf);
+  state.playing = false; state.playMode = null; cancelAnimationFrame(state.raf);
 }
 
 // Seamless loop audition: play a crossfaded render of the region, looped by the player.
@@ -619,7 +621,7 @@ function playRegion(loop){
   g.gain.setValueAtTime(0, t0);
   g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
   src.connect(g); g.connect(actx.destination); src.start();
-  state.src = src; state.playing = true;
+  state.src = src; state.playing = true; state.playMode = "region";
   state.playStartCtx = actx.currentTime; state.playStartOff = 0; state.playDur = r.len / state.sr;
   var reg = regionSamples(); state.regionStartSec = reg.start / state.sr;
   src.onended = function(){ if (!loop){ state.playing = false; } };
@@ -633,10 +635,10 @@ function playFull(){
   g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
   src.connect(g); g.connect(actx.destination);
   src.start(0, state.playhead % state.buf.duration);
-  state.src = src; state.playing = true;
+  state.src = src; state.playing = true; state.playMode = "full";
   state.playStartCtx = actx.currentTime; state.playStartOff = state.playhead; state.playDur = state.buf.duration - state.playhead;
   state.regionStartSec = 0;
-  src.onended = function(){ state.playing = false; };
+  src.onended = function(){ state.playing = false; state.playMode = null; };
   tickPlayhead(false, true);
 }
 function tickPlayhead(looping, full){
@@ -947,6 +949,14 @@ wave.addEventListener("pointercancel", waveEnd);
 $("zoomIn").addEventListener("click", function(){ setView(state.one || state.playhead, viewDurNow() / 2); });
 $("zoomOut").addEventListener("click", function(){ setView(state.one || state.playhead, viewDurNow() * 2); });
 $("zoomFit").addEventListener("click", function(){ if (!state.buf) return; state.viewStart = 0; state.viewDur = 0; drawWave(); });
+$("toStart").addEventListener("click", function(){
+  if (!state.buf) return;
+  // Return the playhead to the start of the song. If the full song is
+  // playing, restart it from the top; a playing loop is left alone.
+  var restartFull = state.playing && state.playMode === "full";
+  state.playhead = 0;
+  if (restartFull) playFull(); else drawWave();
+});
 $("playFull").addEventListener("click", playFull);
 $("stopBtn").addEventListener("click", function(){ stopPlayback(); drawWave(); });
 function snapOn(){ return $("snapGrid").checked; }
