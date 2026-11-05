@@ -374,7 +374,17 @@ var state = {
 };
 function $(id){ return document.getElementById(id); }
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-function ensureCtx(){ if (!actx) actx = new AC(); if (actx.state === "suspended") actx.resume(); return actx; }
+function ensureCtx(){
+  if (!actx){
+    // "playback" latency hint = bigger audio buffers. This app never needs
+    // low latency, and the default tiny buffers underrun (audible skipping)
+    // on phones whenever the page gets busy.
+    try { actx = new AC({ latencyHint: "playback" }); }
+    catch (e){ actx = new AC(); }
+  }
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
 function bpm(){ var v = parseFloat($("bpm").value); return (v && v > 20 && v < 400) ? v : (state.bpm || 0); }
 function bpb(){ return parseInt($("bpb").value, 10) || 4; }
 
@@ -408,6 +418,10 @@ function shiftRegion(d){
 
 function fmtT(s){ var m = Math.floor(s / 60), r = s - m * 60; return m + ":" + (r < 10 ? "0" : "") + r.toFixed(2); }
 
+// Waveform peaks are computed once per buffer+view and cached: re-scanning
+// the raw samples on every animation frame pegged phone CPUs during
+// playback (worst on long, high-sample-rate files) and made audio skip.
+var peaksCache = { buf: null, vS: -1, vD: -1, W: -1, per: -1, mn: null, mx: null };
 function drawWave(){
   var cv = $("wave"), ctx = cv.getContext("2d");
   var W = cv.width, H = cv.height;
@@ -426,17 +440,26 @@ function drawWave(){
     ctx.strokeStyle = "#d9a62e"; ctx.beginPath();
     ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.moveTo(x1, 0); ctx.lineTo(x1, H); ctx.stroke();
   }
-  // waveform peaks
+  // waveform peaks — served from the cache unless the buffer or view moved
   ctx.fillStyle = "#8f9a7a";
   var span = Math.floor(vD / dur * ch.length);
   var per = Math.max(1, Math.floor(span / W));
   var step = per > 56 ? 7 : 1;
+  if (!peaksCache.mn || peaksCache.buf !== state.buf || peaksCache.vS !== vS ||
+      peaksCache.vD !== vD || peaksCache.W !== W || peaksCache.per !== per){
+    var pmn = new Float32Array(W), pmx = new Float32Array(W);
+    for (var cx = 0; cx < W; cx++){
+      var coff = Math.floor((vS + cx / W * vD) / dur * ch.length);
+      if (coff < 0 || coff >= ch.length) continue;
+      var cmn = 1, cmx = -1;
+      for (var cj = 0; cj < per && coff + cj < ch.length; cj += step){ var cvv = ch[coff + cj] || 0; if (cvv < cmn) cmn = cvv; if (cvv > cmx) cmx = cvv; }
+      pmn[cx] = cmn; pmx[cx] = cmx;
+    }
+    peaksCache = { buf: state.buf, vS: vS, vD: vD, W: W, per: per, mn: pmn, mx: pmx };
+  }
   for (var x = 0; x < W; x++){
-    var ax = x - offPx; if (ax < 0 || ax >= W) continue;
-    var off = Math.floor((vS + ax / W * vD) / dur * ch.length);
-    if (off < 0 || off >= ch.length) continue;
-    var mn = 1, mx = -1;
-    for (var j = 0; j < per && off + j < ch.length; j += step){ var v = ch[off + j] || 0; if (v < mn) mn = v; if (v > mx) mx = v; }
+    var ax = Math.round(x - offPx); if (ax < 0 || ax >= W) continue;
+    var mn = peaksCache.mn[ax], mx = peaksCache.mx[ax];
     ctx.fillRect(x, mid - mx * (mid - 4), 1, Math.max(1, (mx - mn) * (mid - 4)));
   }
   // bar grid from the 1
@@ -480,6 +503,7 @@ function drawWave(){
   // playhead
   var px = X(state.playhead) + offPx;
   ctx.strokeStyle = "#f2ead8"; ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+  state.lastDrawPx = Math.round(px);
   var vsEl = $("viewStat");
   if (vsEl) vsEl.textContent = (vD < dur - 0.001)
     ? fmtT(vS) + " – " + fmtT(Math.min(dur, vS + vD)) + " of " + fmtT(dur)
@@ -617,6 +641,7 @@ function playFull(){
 }
 function tickPlayhead(looping, full){
   cancelAnimationFrame(state.raf);
+  state.lastDrawPx = -1;
   var step = function(){
     if (!state.playing || !actx) return;
     var el = actx.currentTime - state.playStartCtx;
@@ -626,7 +651,15 @@ function tickPlayhead(looping, full){
       state.playhead = (state.regionStartSec || 0) + pos;
       if (!looping && el >= state.playDur) state.playing = false;
     }
-    drawWave();
+    // Repaint only when the playhead crosses into a new pixel (plus one
+    // final frame when playback ends). At full view of a long song the
+    // playhead moves a few pixels a second — the old code repainted the
+    // whole wave 60x a second anyway, which starved the phone.
+    var wEl = $("wave");
+    var vS2 = state.viewStart || 0, vD2 = state.viewDur || state.buf.duration;
+    var pxNow = Math.round((state.playhead - vS2) / vD2 * wEl.width) +
+      Math.round((state.dragOffSec || 0) / vD2 * wEl.width);
+    if (pxNow !== state.lastDrawPx || !state.playing) drawWave();
     if (state.playing) state.raf = requestAnimationFrame(step);
   };
   step();
