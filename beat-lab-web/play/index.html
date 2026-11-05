@@ -393,6 +393,47 @@ a{color:var(--teal)}
   </div>
   <div class="histlog" id="histLog"><h3>Action log — every entry is an undo point. Click one to jump to that state.</h3><div id="histItems"></div></div>
 
+  <!-- ================= MULTITRACK WAVE EDITOR — Pro Tools style, directly under the transport ================= -->
+  <section class="panel" id="ptEditorPanel">
+    <h2>Wave Editor — Multitrack · Pro Tools style
+      <span class="tools">
+        <button class="btn sm gold" id="ptAddTrack" title="Add a wave track — a new channel is created and wired to it automatically (rack row, mixer strip, Piano Roll, its own stem)">＋ Add track</button>
+        <button class="btn sm" id="ptSlicePlay" title="Slice the selected clip at the playhead (or at the gold cursor when stopped)">✂ Slice at playhead</button>
+        <button class="btn sm" id="ptSliceCursor" title="Slice the selected clip at the gold cursor — click the ruler to place the cursor">✂ Slice at cursor</button>
+        <button class="btn sm" id="ptCopy" title="Copy the selected clip">Copy</button>
+        <button class="btn sm" id="ptPaste" title="Paste the copied clip at the cursor, on the selected track">Paste</button>
+        <button class="btn sm" id="ptDup" title="Duplicate the selected clip right after itself">⧉ Duplicate</button>
+        <button class="btn sm" id="ptDel" title="Delete the selected clip">Delete clip</button>
+      </span>
+    </h2>
+    <div class="ptbar">
+      <button class="pill on" id="ptSnapBtn" title="Snap on/off — slicing, sliding, pasting and duplicating land on the chosen grid">Snap: On</button>
+      <label class="hlabel">Grid:
+        <select id="ptSnapGrid" title="What clips snap to when Snap is on">
+          <option value="16">Bar</option>
+          <option value="8">1/2</option>
+          <option value="4" selected>1/4</option>
+          <option value="2">1/8</option>
+          <option value="1">1/16</option>
+          <option value="0.5">1/32</option>
+          <option value="2.666667">1/8 triplet</option>
+          <option value="1.333333">1/16 triplet</option>
+          <option value="0">Off (free)</option>
+        </select>
+      </label>
+      <span class="tlabel">Zoom</span>
+      <input type="range" id="ptZoomRange" min="50" max="300" value="100" style="width:90px" title="Timeline zoom" />
+      <button class="btn sm" id="ptNudgeL" title="Nudge the selected clip left by one grid unit (10 ms when snap is off)">◀ Nudge</button>
+      <button class="btn sm" id="ptNudgeR" title="Nudge the selected clip right by one grid unit (10 ms when snap is off)">Nudge ▶</button>
+      <span class="small" id="ptInfo"></span>
+    </div>
+    <div class="small">One arrangement, both worlds: the <b>Sequences chain</b> and a <b>MIDI lane per channel</b> sit directly over the <b>wave lanes</b>, bar-for-bar under one ruler and one playhead — lay a vocal wave against the programmed drums and watch both while everything plays in sync. Sequence blocks edit exactly like wave clips: <b>drag to slide</b> them anywhere on the timeline — they land on the Snap grid (bar, 1/2, 1/4, 1/8, 1/16, 1/32, triplets, or the exact spot with Snap off) and can leave real gaps before or after, which playback and export honor; <b>double-click to slice inside the sequence</b> at the Snap grid — mid-bar, on a beat, on a single step — and the notes split cleanly across the join (a note crossing the cut is clipped on both sides, nothing lost or doubled), each piece an independent sequence; <b>Duplicate / Copy / Paste</b> make independent sequences you can edit in the Piano Roll without touching the original. Wave rules stay Pro Tools: <b>every wave track is wired to its own channel</b> — track name <i>is</i> the channel name (double-click renames both), clips play through that channel’s fader, pan, EQ, FX and crusher and export inside its stem; <b>＋ Add track</b> creates the channel, ✕ removes track + channel cleanly. <b>Every lane has Mute / Solo</b> — wave M/S is the channel’s own M/S (same as the mixer), MIDI lane M/S governs that channel’s sequence playback; any solo anywhere narrows the whole arrangement to the soloed lanes. Every edit is a History point and autosaves.</div>
+    <div class="ptViewport" id="ptViewport">
+      <div id="ptLanes"></div>
+    </div>
+    <div class="small mono" id="ptSelInfo" style="margin-top:6px;color:var(--gold)"></div>
+  </section>
+
       <!-- ================= SONG / PLAYLIST (MPC-style) ================= -->
       <section class="panel">
         <h2>Song — Playlist
@@ -2203,7 +2244,7 @@ function projectJSON(){
     channels[id]={ name:ch.name, gainDb:ch.gainDb, pitch:ch.pitch, fine:ch.fine, mode:ch.mode, reverse:ch.reverse, root:ch.root, stretch:ch.stretch||1, fitBars:ch.fitBars||0,
       volume:ch.volume, pan:ch.pan, mute:ch.mute, solo:ch.solo, fx:ch.fx, sampleName:ch.sampleName, engine:ch.engine,
       slicePitch:ch.slicePitch, sliceRev:ch.sliceRev,
-      patterns:ch.patterns.map(p=>({steps:p.steps, notes:p.notes, sub:p.sub||[]})) };
+      patterns:ch.patterns.map(p=>({steps:p.steps, notes:p.notes, sub:p.sub||[], hits:p.hits||[], rollT:p.rollT||0})) };
   });
   return { app:"Beat Lab Web", version:1, name:$("projName").value, bpm:S.bpm, swing:S.swing, pattern:S.pattern,
     mode:S.mode, playlist:S.playlist, songLoop:S.songLoop, songFollow:S.songFollow, seqNames:S.seqNames,
@@ -2230,7 +2271,9 @@ $("fileProj").onchange=async e=>{ const f=e.target.files[0]; if(!f) return;
     S.mode=p.mode||"pattern"; S.songLoop=p.songLoop!==false; S.songFollow=p.songFollow!==false;
     S.seqNames=(Array.isArray(p.seqNames)&&p.seqNames.length)? p.seqNames.slice() : [];
     while(S.seqNames.length<seqCount()) S.seqNames.push("SEQ "+(S.seqNames.length+1));
-    if(Array.isArray(p.playlist)) S.playlist=p.playlist.map(e=>({seq:clamp(e.seq||0,0,seqCount()-1), reps:clamp(e.reps||1,1,64)}));
+    if(Array.isArray(p.playlist)) S.playlist=p.playlist.map(e=>{ const o={seq:clamp(e.seq||0,0,seqCount()-1), reps:clamp(e.reps||1,1,64)};
+      if(typeof e.start==="number" && isFinite(e.start)) o.start=Math.max(0, Math.round(e.start*1000)/1000);
+      if(typeof e.len==="number" && isFinite(e.len) && e.len>0) o.len=Math.round(e.len*1000)/1000; return o; });
     if(typeof buildPatBtns==="function") buildPatBtns();
     fillTemplateSelect(); buildRack(); buildMixer(); buildRoll(); selectSlice(0); selectChannel(S.selected);
     if(typeof renderPlaylist==="function") renderPlaylist();
@@ -6323,13 +6366,14 @@ setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start b
       '<span class="histnote">Every action is logged for undo. Your project autosaves in this browser as you work — refresh the page and it restores itself, no starting over.</span>'+
       '<button class="btn sm" id="btnDiscardRecovery" style="display:none" title="Undo the session recovery: go back to the fresh starter state and clear the autosaved draft">✕ Discard recovered session</button>';
   }
-  if(transport && transport.parentNode && bar!==transport.nextElementSibling) transport.parentNode.insertBefore(bar, transport.nextSibling);
+  if(transport && transport.parentNode && bar!==transport.previousElementSibling) transport.parentNode.insertBefore(bar, transport);
   let log=$("histLog");
   if(!log){
     log=document.createElement("div"); log.className="histlog"; log.id="histLog";
     log.innerHTML='<h3>Action log — every entry is an undo point. Click one to jump to that state.</h3><div id="histItems"></div>';
   }
-  if(bar.parentNode && log!==bar.nextElementSibling) bar.parentNode.insertBefore(log, bar.nextSibling);
+  if(transport && transport.parentNode && log!==transport.nextElementSibling) transport.parentNode.insertBefore(log, transport.nextSibling);
+  else if(bar.parentNode && log!==bar.nextElementSibling) bar.parentNode.insertBefore(log, bar.nextSibling);
 
   /* ---------- History state ---------- */
   let BL_STACK=[], BL_IDX=-1, BL_LAST_SNAP=null;
@@ -6413,7 +6457,9 @@ setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start b
       S.mode=p.mode||"pattern"; S.songLoop=p.songLoop!==false; S.songFollow=p.songFollow!==false;
       S.seqNames=(Array.isArray(p.seqNames)&&p.seqNames.length)? p.seqNames.slice() : [];
       while(S.seqNames.length<seqCount()) S.seqNames.push("SEQ "+(S.seqNames.length+1));
-      if(Array.isArray(p.playlist)) S.playlist=p.playlist.map(e=>({seq:clamp(e.seq||0,0,seqCount()-1), reps:clamp(e.reps||1,1,64)}));
+      if(Array.isArray(p.playlist)) S.playlist=p.playlist.map(e=>{ const o={seq:clamp(e.seq||0,0,seqCount()-1), reps:clamp(e.reps||1,1,64)};
+        if(typeof e.start==="number" && isFinite(e.start)) o.start=Math.max(0, Math.round(e.start*1000)/1000);
+        if(typeof e.len==="number" && isFinite(e.len) && e.len>0) o.len=Math.round(e.len*1000)/1000; return o; });
       if(typeof buildPatBtns==="function") buildPatBtns();
       fillTemplateSelect(); buildRack(); buildMixer(); buildRoll();
       try{ selectSlice(0); }catch(e){}
@@ -6586,6 +6632,1974 @@ setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start b
     blPersist();
   }, 700);
 })();
+</script>
+
+<style>
+/* ---------- Add-channel + per-channel sample rate (2026-11-05) ---------- */
+.srsel{width:100%;font-size:10px;padding:3px;margin-top:2px}
+.srlabel{font-size:8.5px;letter-spacing:1px;color:var(--faint);font-weight:700;text-transform:uppercase;margin-top:5px;text-align:center}
+#btnAddChannel{white-space:nowrap}
+</style>
+<script>
+"use strict";
+/* ============================================================
+   ADD / BUILD CHANNELS + DELETE KEY + PER-CHANNEL SAMPLE RATE
+   · ＋ Add channel: a fresh empty channel joins the rack, the
+     Layout lanes, the mixer board, the Piano Roll / step grid,
+     autosave + project files, and stem export — build a beat
+     sound by sound from blank. (Delete channel already lives on
+     every rack row / the muted-cleanup pass.)
+   · Delete / Backspace removes the selected LINEAR clip
+     (audio-track clip first, then the selected wave clip) —
+     the Piano Roll note keeps its own Delete handler — and
+     never fires while typing in a field.
+   · Per-channel SAMPLE RATE: Native / 40k MPC60 / 26,040
+     SP-1200 / 22,050 Akai S-series / 16k / 11,025 / 8k.
+     Downsample ONLY (never upsampled), raw sample-and-hold
+     decimation with NO anti-alias filter, so it aliases and
+     crunches like the hardware. It sits beside the MPC
+     bit-crusher on the channel's mixer strip and in the FX
+     tab, applies to the channel's sample everywhere it plays
+     (steps, notes, chops, wave clips on its lane), and prints
+     into that channel's stem and the master on export.
+   ============================================================ */
+
+/* ---------------- Per-channel sample rate: state ---------------- */
+const BL_SRATES=[
+  [0,"Native (off)"],
+  [40000,"40,000 Hz · MPC60"],
+  [26040,"26,040 Hz · SP-1200"],
+  [22050,"22,050 Hz · Akai S-series (half rate)"],
+  [16000,"16,000 Hz"],
+  [11025,"11,025 Hz"],
+  [8000,"8,000 Hz"]
+];
+const _blSrDefPrev=blStripDefaults;
+blStripDefaults=function(){ const d=_blSrDefPrev(); if(d.sampleRate==null) d.sampleRate=0; return d; };
+function blChRate(ch){
+  if(!ch) return 0;
+  const v=+ensureStrip(ch).sampleRate||0;
+  return BL_SRATES.some(r=>r[0]===v)? v : 0;
+}
+function blRateLabel(v){ const r=BL_SRATES.find(x=>x[0]===v); return r? r[1] : "Native (off)"; }
+
+/* ---------------- Raw decimation (no anti-alias filter) ---------------- */
+const blSrCache=new WeakMap(); // source AudioBuffer -> Map(targetRate -> decimated buffer)
+function blDecimateBuf(ctx, buf, target){
+  if(!buf || !target || target>=buf.sampleRate) return buf; // downsample only — never upsample
+  if(buf._blSrDec===target) return buf;                     // already decimated at this rate
+  let per=blSrCache.get(buf);
+  if(!per){ per=new Map(); blSrCache.set(buf, per); }
+  if(per.has(target)) return per.get(target);
+  const r=target/buf.sampleRate, inv=1/r, len=buf.length;
+  const out=ctx.createBuffer(buf.numberOfChannels, len, buf.sampleRate);
+  try{ out._blSrDec=target; }catch(e){}
+  for(let c=0;c<buf.numberOfChannels;c++){
+    const d=buf.getChannelData(c), o=out.getChannelData(c);
+    for(let i=0;i<len;i++){
+      let idx=Math.floor(Math.floor(i*r)*inv);
+      if(idx>=len) idx=len-1;
+      o[i]=d[idx];
+    }
+  }
+  per.set(target, out);
+  return out;
+}
+function blSetChannelRate(ch, val, srcEl){
+  if(!ch) return;
+  const st=ensureStrip(ch);
+  st.sampleRate=+val||0;
+  // reversed copies and glide voices were derived from the old rate — drop them
+  Object.keys(revCache).forEach(k=>{ if(k===ch.id || k.indexOf(ch.id+"_")===0) delete revCache[k]; });
+  if(ch._glideVoice) ch._glideVoice=null;
+  markDirty();
+  const fx=$("fxSampleRate");
+  if(fx && fx!==srcEl && S.selected===ch.id) fx.value=String(st.sampleRate);
+  if(typeof buildMixerSoon==="function") buildMixerSoon();
+  setStatus(st.sampleRate
+    ? ch.name+" sample rate: "+blRateLabel(st.sampleRate)+" — raw decimation, no anti-alias filter, so it aliases and crunches like the hardware. It plays in the loop and prints into "+ch.name+"’s stem and the master."
+    : ch.name+" sample rate back to Native — full-rate in playback and exports.");
+}
+
+/* Playback: swap the channel's buffer for its decimated copy for the
+   duration of the call — every trigger path (steps, notes, 808, chops,
+   live + offline render) funnels through playBuffer, so playback,
+   stems and masters all carry the rate. Same length, so slice
+   offsets, fit-to-bars and stretch math are untouched. */
+const _blSrPbPrev=playBuffer;
+playBuffer=function(ctx, dest, ch, t, opts){
+  const rate=ch? blChRate(ch) : 0;
+  if(!rate || !ch.buffer || rate>=ch.buffer.sampleRate) return _blSrPbPrev(ctx, dest, ch, t, opts);
+  const orig=ch.buffer;
+  ch.buffer=blDecimateBuf(ctx, orig, rate);
+  try{ return _blSrPbPrev(ctx, dest, ch, t, opts); } finally{ ch.buffer=orig; }
+};
+const _blSrGlidePrev=blGlide808;
+blGlide808=function(ctx, dest, ch, t, midi, vel, durSec){
+  const rate=ch? blChRate(ch) : 0;
+  if(!rate || !ch.buffer || rate>=ch.buffer.sampleRate) return _blSrGlidePrev(ctx, dest, ch, t, midi, vel, durSec);
+  const orig=ch.buffer;
+  ch.buffer=blDecimateBuf(ctx, orig, rate);
+  try{ return _blSrGlidePrev(ctx, dest, ch, t, midi, vel, durSec); } finally{ ch.buffer=orig; }
+};
+/* Wave clips play through their channel — the channel's rate applies. */
+const _blSrPcPrev=playClipAt;
+playClipAt=function(ctx, dest, clip, t){
+  const ch=(clip && clip.channelId)? S.channels[clip.channelId] : null;
+  const rate=ch? blChRate(ch) : 0;
+  if(!rate || !clip.buffer || rate>=clip.buffer.sampleRate) return _blSrPcPrev(ctx, dest, clip, t);
+  const orig=clip.buffer;
+  clip.buffer=blDecimateBuf(ctx, orig, rate);
+  try{ return _blSrPcPrev(ctx, dest, clip, t); } finally{ clip.buffer=orig; }
+};
+
+/* ---------------- Sample-rate UI: mixer strip + FX tab ---------------- */
+function blMakeRateSelect(ch, cls){
+  const selEl=document.createElement("select");
+  selEl.className=cls;
+  BL_SRATES.forEach(([v,l])=>{ const o=document.createElement("option"); o.value=String(v); o.textContent=l; selEl.appendChild(o); });
+  selEl.value=String(blChRate(ch));
+  selEl.title="Sample rate for "+ch.name+" ONLY — raw downsampling, no anti-alias filter (aliasing crunch like the hardware). Native = off. Downsample only, never upsampled.";
+  selEl.onchange=()=>blSetChannelRate(ch, +selEl.value, selEl);
+  return selEl;
+}
+const _blSrBmPrev=buildMixer;
+buildMixer=function(){
+  _blSrBmPrev();
+  document.querySelectorAll("#mixerStrips .bstrip").forEach(st=>{
+    const id=st.dataset.ch, ch=id? S.channels[id] : null;
+    if(!ch) return; // skips the MASTER strip (no channel)
+    const grp=st.querySelector(".crushsel")? st.querySelector(".crushsel").closest(".kgroup") : null;
+    if(!grp || grp.querySelector(".srsel")) return;
+    const lab=document.createElement("div"); lab.className="srlabel"; lab.textContent="Sample Rate";
+    grp.appendChild(lab);
+    grp.appendChild(blMakeRateSelect(ch, "srsel"));
+  });
+};
+(function blFxRateControl(){
+  const cm=$("fxCrushModel"); if(!cm) return;
+  const card=cm.closest(".fx"); if(!card || $("fxSampleRate")) return;
+  const lab=document.createElement("label");
+  lab.innerHTML='<span>Sample rate (this channel)</span><span class="mono" id="fxSrVal">Native</span>';
+  card.appendChild(lab);
+  const selEl=blMakeRateSelect(sel(), "wide");
+  selEl.id="fxSampleRate";
+  // blMakeRateSelect bound its handler to the channel passed in above —
+  // the one selected at page load. Rebind so the rate is applied to the
+  // channel selected in the FX tab at change time, matching the value
+  // syncFxPanel displays for that channel.
+  selEl.onchange=()=>{
+    const chNow=sel(); if(!chNow) return;
+    blSetChannelRate(chNow, +selEl.value, selEl);
+    const v=$("fxSrVal");
+    if(v) v.textContent= blChRate(chNow)? blRateLabel(blChRate(chNow)) : "Native";
+  };
+  card.appendChild(selEl);
+  const note=document.createElement("div"); note.className="small";
+  note.textContent="Classic hardware rates, per channel: the sample is decimated raw with no anti-alias filter — aliasing crunch that plays in the loop and prints into this channel’s stem. Downsample only.";
+  card.appendChild(note);
+})();
+const _blSrSyncPrev=syncFxPanel;
+syncFxPanel=function(){
+  _blSrSyncPrev();
+  const ch=sel(); if(!ch) return;
+  const fx=$("fxSampleRate");
+  if(fx) fx.value=String(blChRate(ch));
+  const v=$("fxSrVal");
+  if(v) v.textContent= blChRate(ch)? blRateLabel(blChRate(ch)) : "Native";
+};
+
+/* ---------------- Add channel: build sound by sound ---------------- */
+let blUsrSeq=0;
+const BL_CH_COLORS=["#e4572e","#e8b33c","#f06ba8","#3fb8a6","#57c7e3","#7bc950","#ffb35c","#ff5a3c","#8ab4ff","#c792ea"];
+function blUniqueChName(base){
+  const taken={};
+  S.order.forEach(id=>{ if(S.channels[id]) taken[S.channels[id].name]=1; });
+  if(!taken[base]) return base;
+  let n=2; while(taken[base+" "+n]) n++;
+  return base+" "+n;
+}
+function blAddChannelOfType(type){
+  let id; do{ id="usr"+(++blUsrSeq); }while(S.channels[id]);
+  const bases={ sample:"Sample", drum:"Drum", "808":"808", chop:"Chop", synth:"Synth" };
+  const ch=makeChannel(id, blUniqueChName(bases[type]||"Sample"), type||"sample", "");
+  if(type==="808") ch.root=36;
+  while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
+  ch.color=BL_CH_COLORS[S.order.length % BL_CH_COLORS.length];
+  S.channels[id]=ch;
+  S.order.push(id);
+  if(typeof AC!=="undefined" && AC && typeof master!=="undefined" && master)
+    liveNodes[id]=buildChain(AC, ch, master, verbBus, delayBus, true);
+  if(typeof blPadSteps==="function") blPadSteps();
+  S.selected=id; S.rollChannel=id;
+  refreshChannelNames();
+  const rc=$("rollChannel"); if(rc) rc.value=id;
+  buildRoll();
+  markDirty();
+  setStatus("Added "+ch.name+" — an empty "+(type==="drum"?"one-shot drum":type==="808"?"808":type==="chop"?"chop":type==="synth"?"synth":"pitched sample")+" channel, wired into the rack, its own Layout lane, a mixer strip with its own crusher + sample rate, and the Piano Roll. Load a sound onto it from the browser (Load → selected channel, or drag onto its rack row), program its steps, and keep building sound by sound. It autosaves and exports as its own stem.");
+  return ch;
+}
+function blOpenAddChannel(){
+  if(typeof blxModal!=="function"){ blAddChannelOfType("sample"); return; }
+  blxModal((card, close)=>{
+    card.innerHTML='<div class="blModalMsg"><b>Add a channel</b><br/>A fresh empty channel joins the rack, the Layout lanes, the mixer board and the Piano Roll — build the beat sound by sound. Load a sound onto it from the browser, or drag a sound onto its rack row.</div>';
+    const wrap=document.createElement("div"); wrap.className="newchoices";
+    [["sample","Sample — pitched","Plays a loaded sound across the Piano Roll from its root note."],
+     ["drum","Drum — one-shot","Step-grid one-shots: kicks, snares, hats, percs."],
+     ["808","808 Bass","Pitched bass channel (root C1) — roll notes play the tune."],
+     ["chop","Chop / Flip","Slice a loaded sample into pads, MPC style."],
+     ["synth","Synth","Built-in synth engines — no sample needed."]]
+    .forEach(([type, t, s])=>{
+      const b=document.createElement("button"); b.className="btn newchoice"; b.type="button";
+      b.innerHTML=escapeHtml(t)+'<span>'+escapeHtml(s)+'</span>';
+      b.onclick=()=>{ close(); blAddChannelOfType(type); };
+      wrap.appendChild(b);
+    });
+    const c=document.createElement("button"); c.className="btn newchoice"; c.type="button"; c.textContent="Cancel";
+    c.onclick=close; wrap.appendChild(c);
+    card.appendChild(wrap);
+  });
+}
+(function blAddChannelBtn(){
+  const rack=$("rack"); if(!rack) return;
+  const panel=rack.closest("section.panel"); if(!panel) return;
+  const tools=panel.querySelector("h2 .tools") || panel.querySelector("h2"); if(!tools) return;
+  if($("btnAddChannel")) return;
+  const b=document.createElement("button");
+  b.className="btn sm gold"; b.id="btnAddChannel"; b.type="button";
+  b.textContent="＋ Add channel";
+  b.title="Add a fresh empty channel — rack row, Layout lane, mixer strip, Piano Roll and its own stem. Build the beat sound by sound from blank.";
+  b.onclick=()=>blOpenAddChannel();
+  tools.insertBefore(b, tools.firstChild);
+})();
+
+/* ---------------- Delete / Backspace: the selected linear clip ---------------- */
+function blDeleteWaveClip(id){
+  const c=(typeof getClip==="function")? getClip(id) : null; if(!c) return;
+  S.clips.splice(S.clips.indexOf(c),1);
+  if(S.selClipId===id) S.selClipId=null;
+  if(typeof edTarget!=="undefined" && edTarget && edTarget.kind==="clip" && edTarget.id===id)
+    edTarget={kind:"channel", id:c.channelId};
+  renderLayout(); syncEditor(); markDirty();
+  setStatus("Clip deleted: "+c.name+". (The channel’s steps and sequences were never touched.)");
+}
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Delete" && e.key!=="Backspace") return;
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  const t=e.target, tag=((t && t.tagName)||"").toLowerCase();
+  if(tag==="input" || tag==="select" || tag==="textarea" || (t && t.isContentEditable)) return; // never while typing
+  const bm=document.getElementById("blModal");
+  if(bm && bm.style.display==="flex") return; // a confirm dialog is open — don't delete behind it
+  if(document.querySelector(".blx-overlay")) return;
+  // a selected Piano Roll note keeps its own Delete handler — let it win
+  const rollSec=$("page-roll");
+  if(typeof rollEdit!=="undefined" && rollEdit && rollEdit.sel && rollSec && rollSec.classList.contains("on")) return;
+  // the selected LINEAR clip (audio-track clip) first…
+  if(S.selAclipId && typeof getAclip==="function" && getAclip(S.selAclipId)){
+    e.preventDefault();
+    deleteAclip(S.selAclipId);
+    markDirty();
+    return;
+  }
+  // …then the selected wave clip on a channel lane
+  const wc=(typeof edTarget!=="undefined" && edTarget && edTarget.kind==="clip")? edTarget.id : S.selClipId;
+  if(wc && typeof getClip==="function" && getClip(wc)){
+    e.preventDefault();
+    blDeleteWaveClip(wc);
+  }
+});
+
+/* ---------------- Persistence: full channel state for added channels ---------------- */
+const _blSrPjPrev=projectJSON;
+projectJSON=function(){
+  const p=_blSrPjPrev();
+  S.order.forEach(id=>{ const ch=S.channels[id], c=p.channels && p.channels[id];
+    if(ch && c) c.sampleRate=blChRate(ch); });
+  return p;
+};
+const _blSrLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){
+  _blSrLcpPrev(p);
+  // The base loaders only fill fields for channels that already exist;
+  // a channel CREATED by the load (an added channel, a kit channel on a
+  // fresh page) gets its full state here — settings, patterns, rate —
+  // so autosave / undo / refresh restore it exactly.
+  Object.keys(p.channels||{}).forEach(id=>{
+    const ch=S.channels[id]; if(!ch) return; const src=p.channels[id];
+    Object.assign(ch, { gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0,
+      mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60,
+      stretch:src.stretch||1, fitBars:src.fitBars||0,
+      volume:src.volume!=null? src.volume:0.8, pan:src.pan||0,
+      mute:!!src.mute, solo:!!src.solo, sampleName:src.sampleName||null,
+      engine:src.engine||"analog" });
+    if(src.name) ch.name=src.name;
+    ch.slicePitch=src.slicePitch||{}; ch.sliceRev=src.sliceRev||{};
+    if(Array.isArray(src.patterns) && src.patterns.length)
+      ch.patterns=src.patterns.map(pp=>({ steps:pp.steps||Array(16).fill(0), notes:pp.notes||[], sub:pp.sub||[], hits:pp.hits||[], rollT:pp.rollT||0 }));
+    const st=ensureStrip(ch);
+    if(src.sampleRate!=null) st.sampleRate=+src.sampleRate||0;
+    else if(src.strip && src.strip.sampleRate!=null) st.sampleRate=+src.strip.sampleRate||0;
+    if(!ch.buffer) ch.missing=!!src.sampleName; else ch.missing=false;
+    if(typeof AC!=="undefined" && AC && typeof master!=="undefined" && master && !liveNodes[id])
+      liveNodes[id]=buildChain(AC, ch, master, verbBus, delayBus, true);
+    refreshChain(ch);
+  });
+  try{ buildRack(); buildMixer(); buildRoll(); if(typeof renderLayout==="function") renderLayout(); }catch(e){}
+  const rc=$("rollChannel"); if(rc && S.channels[S.rollChannel]) rc.value=S.rollChannel;
+};
+
+/* ---------------- Init: decorate the board built before this script ran ---------------- */
+try{ buildMixer(); if(typeof syncFxPanel==="function") syncFxPanel(); }catch(e){}
+</script>
+
+<style>
+/* ---------- Pro Tools-style multitrack wave editor (under the transport) ---------- */
+.ptbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.ptbar .btn,.ptbar .pill{min-height:36px}
+.ptViewport{position:relative;border:1px solid var(--line);border-radius:8px;background:var(--bg2);overflow-x:auto;overflow-y:hidden;margin-top:8px}
+#ptLanes{position:relative;min-width:100%}
+.ptLane{display:flex;border-bottom:1px solid var(--line)}
+.ptLane:last-child{border-bottom:none}
+.ptLane.dragover{background:color-mix(in srgb,var(--gold) 10%, transparent)}
+.ptHead{width:172px;flex:none;padding:6px 8px;background:var(--panel2);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px;justify-content:center;min-height:58px}
+.ptHead.sel{box-shadow:inset 3px 0 0 var(--gold)}
+.ptTrkNo{font-size:9px;font-weight:900;letter-spacing:1px;color:var(--faint);text-transform:uppercase}
+.ptName{font-size:12px;font-weight:900;color:var(--gold);background:none;border:none;text-align:left;padding:0;cursor:text;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:inherit}
+.ptChLine{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptBtns{display:flex;gap:3px;flex-wrap:wrap}
+.ptBtns button{font-size:9px;font-weight:900;border-radius:4px;border:1px solid var(--line);background:var(--btn);color:var(--dim);padding:3px 6px;min-height:26px;cursor:pointer}
+.ptBtns button:hover{color:var(--ink);border-color:var(--gold)}
+.ptBtns button.m-on{background:var(--red);color:#fff}
+.ptBtns button.s-on{background:var(--gold);color:#1c1503}
+.ptBody{position:relative;flex:1;min-height:58px}
+.ptLane.rulerLane .ptBody{min-height:22px}
+.ptLane.rulerLane .ptHead{min-height:22px;justify-content:center}
+.ptBarNum{position:absolute;top:0;height:100%;font-size:9px;color:var(--faint);font-family:"JetBrains Mono",monospace;padding:3px 0 0 4px;border-left:1px solid var(--line);pointer-events:none}
+.ptBeatTick{position:absolute;top:auto;bottom:0;height:6px;border-left:1px solid var(--line);opacity:.55;pointer-events:none}
+.ptclip{z-index:2}
+#ptPlayhead{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:6;pointer-events:none;opacity:0}
+#ptPlayhead::before{content:"";position:absolute;top:0;left:-4px;border:5px solid transparent;border-top:6px solid var(--red)}
+#ptCursor{position:absolute;top:0;bottom:0;width:2px;background:var(--gold);z-index:5;pointer-events:none;opacity:0}
+#ptCursor::before{content:"";position:absolute;top:0;left:-4px;border:5px solid transparent;border-top:6px solid var(--gold)}
+@media (max-width:640px){
+  .ptHead{width:118px;padding:5px 6px}
+  .ptName{font-size:11px}
+  .ptChLine{font-size:9px}
+  .ptBtns button{min-height:36px;padding:4px 7px}
+  .ptbar .btn,.ptbar .pill{min-height:44px}
+  #ptEditorPanel .tools .btn{min-height:44px}
+}
+</style>
+<script>
+"use strict";
+/* ============================================================
+   PRO TOOLS-STYLE MULTITRACK WAVE EDITOR — directly under the
+   transport, History bar above that. This is NOT a second
+   system: tracks ARE channels and clips ARE the Layout's wave
+   clips (S.clips), so playback (live scheduler + offline stem /
+   master render), autosave, undo history and save/load all run
+   through the existing engines. A track lane shows the clips
+   of its wired channel; ＋ Add track creates a real channel
+   (rack row, mixer strip, Piano Roll, stem) via the existing
+   add-channel path and wires the new lane to it; removing a
+   track removes its channel via the existing delete path —
+   both are ordinary project edits, so History/undo and
+   autosave capture them like everything else.
+   ============================================================ */
+if(S.ptGrid==null) S.ptGrid=4;              // snap unit, in steps (4 = 1/4 note)
+S.ptZoom=S.ptZoom||1;
+let ptClipboard=null;
+
+function ptSnapPos(pos){
+  pos=Math.max(0, pos);
+  if(!S.snap || !S.ptGrid) return Math.round(pos*1000)/1000;
+  return Math.round((Math.round(pos/S.ptGrid)*S.ptGrid)*1000)/1000;
+}
+function ptHeadW(){ return window.innerWidth<=640? 118 : 172; }
+function ptSelectedClip(){
+  if(typeof edTarget!=="undefined" && edTarget && edTarget.kind==="clip"){ const c=getClip(edTarget.id); if(c) return c; }
+  return S.selClipId? getClip(S.selClipId) : null;
+}
+/* the arrangement grows to fit the longest wave clip, like the linear tracks */
+const _ptLbPrev=layoutBars;
+layoutBars=function(){
+  let b=_ptLbPrev();
+  (S.clips||[]).forEach(c=>{ if(c.buffer && !c.missing) b=Math.max(b, Math.ceil((c.start+clipDurSteps(c))/16)); });
+  return clamp(Math.max(4, b), 4, 64);
+};
+
+/* ---------------- Rendering ---------------- */
+function ptBuildClipEl(c, ts){
+  const el=document.createElement("div");
+  el.className="wclip ptclip"+(S.selClipId===c.id?" sel":"")+((c.missing||!c.buffer)?" missing":"");
+  el.dataset.ptclip=c.id;
+  el.style.left=(c.start/ts*100)+"%";
+  el.style.width=Math.max(1.2, clipDurSteps(c)/ts*100)+"%";
+  el.title=c.name+" — drag to slide (up/down = another track) · drag the edges to trim · double-click to slice here";
+  const cv=document.createElement("canvas"); cv.height=48;
+  cv.width=Math.max(24, Math.min(1400, Math.round(clipDurSteps(c)*12)));
+  el.appendChild(cv);
+  const nm=document.createElement("span"); nm.className="wname";
+  nm.textContent=(c.missing||!c.buffer)? c.name+" (missing — re-drop the file)" : c.name;
+  el.appendChild(nm);
+  ["l","r"].forEach(side=>{ const w=document.createElement("div"); w.className="wedge "+side; w.dataset.edge=side; el.appendChild(w); });
+  drawClipWave(cv, c);
+  el.addEventListener("pointerdown", ptClipPointerDown);
+  el.addEventListener("dblclick", e=>{
+    e.stopPropagation();
+    const body=el.parentElement, rect=body.getBoundingClientRect();
+    const frac=clamp((e.clientX-rect.left)/rect.width, 0, 1);
+    ptSplitClip(c, c.start + frac*clipDurSteps(c));
+  });
+  return el;
+}
+function ptSyncSelInfo(){
+  const el=$("ptSelInfo"); if(!el) return;
+  const c=ptSelectedClip();
+  if(!c){ el.textContent="No clip selected — click a clip to select it, or click a track header to select its channel."; return; }
+  const ch=S.channels[c.channelId];
+  el.textContent="Selected: "+c.name+" · track "+(ch? ch.name : c.channelId)+" (CH "+(S.order.indexOf(c.channelId)+1)+") · starts "+posLabel(c.start)+" · source in-point "+(c.trimStart||0).toFixed(2)+" s · length "+(clipDurSteps(c)/16).toFixed(2)+" bars";
+}
+function ptRender(){
+  const wrap=$("ptLanes"); if(!wrap || S._ptDrag) return;
+  const bars=layoutBars(), ts=bars*16;
+  wrap.style.width=Math.round((S.ptZoom||1)*100)+"%";
+  wrap.innerHTML="";
+  /* shared ruler */
+  const ruler=document.createElement("div"); ruler.className="ptLane rulerLane";
+  const rHead=document.createElement("div"); rHead.className="ptHead";
+  rHead.innerHTML='<span class="ptTrkNo">Bars · click ruler = cursor</span>';
+  ruler.appendChild(rHead);
+  const rBody=document.createElement("div"); rBody.className="ptBody"; rBody.dataset.ptruler="1";
+  for(let b=0;b<bars;b++){
+    const s=document.createElement("span"); s.className="ptBarNum";
+    s.style.left=(b/bars*100)+"%"; s.style.width=(100/bars)+"%"; s.textContent=(b+1);
+    rBody.appendChild(s);
+    for(let beat=1;beat<4;beat++){ const t=document.createElement("span"); t.className="ptBeatTick";
+      t.style.left=((b*16+beat*4)/ts*100)+"%"; rBody.appendChild(t); }
+  }
+  rBody.addEventListener("pointerdown", e=>{
+    const rect=rBody.getBoundingClientRect();
+    S.tlCursor=ptSnapPos(clamp((e.clientX-rect.left)/rect.width, 0, 1)*ts);
+    ptPositionCursor(); ptSyncSelInfo();
+    if(typeof refreshLinPanel==="function") refreshLinPanel();
+  });
+  ruler.appendChild(rBody);
+  wrap.appendChild(ruler);
+  /* one lane per channel — the track IS the channel lane */
+  S.order.forEach((cid, idx)=>{
+    const ch=S.channels[cid]; if(!ch) return;
+    const lane=document.createElement("div"); lane.className="ptLane"; lane.dataset.pttrack=cid;
+    const head=document.createElement("div"); head.className="ptHead"+(S.selected===cid?" sel":"");
+    const no=document.createElement("div"); no.className="ptTrkNo";
+    no.textContent="Track "+(idx+1)+" · CH "+(idx+1);
+    head.appendChild(no);
+    const nm=document.createElement("button"); nm.className="ptName"; nm.textContent=ch.name;
+    nm.title="Double-click to rename — the track and its channel share one name, everywhere";
+    nm.addEventListener("dblclick", ev=>{
+      ev.stopPropagation();
+      const inp=document.createElement("input"); inp.type="text"; inp.className="trkRename"; inp.value=ch.name; inp.style.width="100%";
+      nm.replaceWith(inp); inp.focus(); inp.select();
+      let done=false;
+      const commit=save=>{ if(done) return; done=true;
+        if(save && inp.value.trim()){ renameChannel(cid, inp.value.trim()); markDirty(); }
+        ptRender(); };
+      inp.addEventListener("blur", ()=>commit(true));
+      inp.addEventListener("keydown", e2=>{ e2.stopPropagation(); if(e2.key==="Enter") commit(true); if(e2.key==="Escape") commit(false); });
+      inp.addEventListener("click", e2=>e2.stopPropagation());
+    });
+    head.appendChild(nm);
+    const chl=document.createElement("div"); chl.className="ptChLine";
+    chl.textContent="→ channel: "+ch.name+" · "+ch.type+" · mixer strip "+(idx+1);
+    head.appendChild(chl);
+    const btns=document.createElement("div"); btns.className="ptBtns";
+    const mk=(label, title, fn, cls)=>{ const b=document.createElement("button"); b.textContent=label; b.title=title; if(cls) b.className=cls;
+      b.onclick=e=>{ e.stopPropagation(); fn(); }; btns.appendChild(b); return b; };
+    mk("M", "Mute this track's channel", ()=>{ ch.mute=!ch.mute; buildRack(); buildMixer(); markDirty(); ptRender(); }, ch.mute?"m-on":"");
+    mk("S", "Solo this track's channel", ()=>{ ch.solo=!ch.solo; buildRack(); buildMixer(); markDirty(); ptRender(); }, ch.solo?"s-on":"");
+    mk("＋ Audio", "Add an audio file to this track at the cursor", ()=>{
+      const inp=document.createElement("input"); inp.type="file"; inp.accept="audio/*"; inp.multiple=true;
+      inp.onchange=async()=>{ ensureCtx(); let at=ptSnapPos(S.tlCursor||0), last=null;
+        for(const f of inp.files){ const buf=await decodeFile(f); if(!buf) continue;
+          addToLibrary([f]); last=makeClip(f.name, cid, buf, at, f.name); at=ptSnapPos(at+Math.max(2, clipDurSteps(last))); }
+        if(last){ S.selClipId=last.id; edTarget={kind:"clip", id:last.id}; markDirty(); ptRender(); renderLayout(); syncEditor();
+          setStatus(last.name+" is on the "+ch.name+" track at "+posLabel(last.start)+" — it plays through the "+ch.name+" channel."); } };
+      inp.click(); });
+    mk("✕", "Remove this track and its wired channel", ()=>{
+      showConfirm("Remove track “"+ch.name+"” and its wired channel? Its clips go with it; every other track and channel stays exactly as it is. Undo (History bar, top of the page) brings it all back.", "Remove track",
+        ()=>{ deleteChannel(cid); markDirty(); ptRender(); });
+    });
+    head.appendChild(btns);
+    lane.appendChild(head);
+    const body=document.createElement("div"); body.className="ptBody"; body.dataset.ptlane=cid;
+    if(!S.clips.some(c=>c.channelId===cid))
+      body.innerHTML='<div class="lanehint">Drop audio here — it lands on the '+escapeHtml(ch.name)+' channel and plays through its fader, EQ and FX.</div>';
+    lane.appendChild(body);
+    wrap.appendChild(lane);
+    S.clips.filter(c=>c.channelId===cid).forEach(c=>body.appendChild(ptBuildClipEl(c, ts)));
+    ptAttachDrop(body, cid);
+    body.addEventListener("click", e=>{
+      if(e.target.closest && e.target.closest(".ptclip")) return;
+      if(Date.now()-(S._ptDragEnd||0)<250) return;
+      S.selClipId=null; selectChannel(cid); edTarget={kind:"channel", id:cid};
+      ptRender(); syncEditor();
+    });
+  });
+  /* cursor + playhead live in lane coordinates so they scroll with the tracks */
+  const cur=document.createElement("div"); cur.id="ptCursor"; wrap.appendChild(cur);
+  const ph=document.createElement("div"); ph.id="ptPlayhead"; wrap.appendChild(ph);
+  ptPositionCursor(); ptPositionPlayhead();
+  const info=$("ptInfo");
+  if(info) info.textContent=S.order.length+" track"+(S.order.length===1?"":"s")+" · "+S.clips.length+" clip"+(S.clips.length===1?"":"s")+" · "+bars+" bars · snap "+(S.snap&&S.ptGrid? "on" : "off");
+  ptSyncSelInfo();
+}
+function ptGeom(){
+  const lanes=$("ptLanes"); if(!lanes) return null;
+  return { lanes, headW:ptHeadW(), w:lanes.clientWidth, ts:totalSteps() };
+}
+function ptPositionCursor(){
+  const g=ptGeom(); if(!g) return;
+  const cur=document.getElementById("ptCursor"); if(!cur) return;
+  if(!g.ts){ cur.style.opacity="0"; return; }
+  cur.style.opacity="1";
+  cur.style.left=(g.headW + clamp(S.tlCursor||0, 0, g.ts)/g.ts*(g.w-g.headW))+"px";
+}
+function ptPositionPlayhead(){
+  const ph=document.getElementById("ptPlayhead"); if(!ph) return;
+  const g=ptGeom(); if(!g || !g.ts){ ph.style.opacity="0"; return; }
+  if(!S.playing || playT0==null || typeof AC==="undefined" || !AC){ ph.style.opacity="0"; return; }
+  const pos=(AC.currentTime-playT0)/stepDurSec(); if(pos<0){ ph.style.opacity="0"; return; }
+  const tl=((pos%g.ts)+g.ts)%g.ts;
+  const x=g.headW + tl/g.ts*(g.w-g.headW);
+  ph.style.opacity="1"; ph.style.left=x+"px";
+  const vp=$("ptViewport");
+  if(vp && S.tlFollow!==false && x-vp.scrollLeft>vp.clientWidth-30) vp.scrollLeft=Math.max(0, x-g.headW-60);
+}
+function ptUiLoop(){ ptPositionPlayhead(); requestAnimationFrame(ptUiLoop); }
+
+/* ---------------- Clip editing ---------------- */
+function ptSplitClip(c, atRaw){
+  if(!c) return null;
+  if(!c.buffer || c.missing){ setStatus("That clip’s audio isn’t loaded in this session — re-drop the file, then slice it."); return null; }
+  const at=ptSnapPos(atRaw), durSteps=clipDurSteps(c);
+  if(at<=c.start+0.01 || at>=c.start+durSteps-0.01){
+    setStatus("Slice point has to land inside "+c.name+" — not on its very edge. Click the ruler for a cursor, play to a spot, or double-click inside the clip.");
+    return null; }
+  const rate=clipRate(c), leftSec=(at-c.start)*stepDurSec()*rate, oldTE=c.trimEnd;
+  const right=makeClip(c.name, c.channelId, c.buffer, at, c.sampleName);
+  Object.assign(right, { gainDb:c.gainDb, pitch:c.pitch, reverse:c.reverse, fadeIn:c.fadeIn, fadeOut:c.fadeOut,
+    srcSeq:null, takeover:false, srcHash:0, missing:false, _revBuf:null, _revFor:null });
+  if(c.reverse){ /* reversed: the timeline-left piece is the END of the source window */
+    right.trimStart=c.trimStart; right.trimEnd=oldTE-leftSec;
+    c.trimStart=oldTE-leftSec;
+  } else {
+    right.trimStart=c.trimStart+leftSec; right.trimEnd=oldTE;
+    c.trimEnd=c.trimStart+leftSec;
+  }
+  c._revBuf=null;
+  S.selClipId=right.id; edTarget={kind:"clip", id:right.id};
+  markDirty(); ptRender(); renderLayout(); syncEditor();
+  setStatus("Sliced "+c.name+" at "+posLabel(at)+" — two independent pieces. The second starts "+right.trimStart.toFixed(2)+" s into the source, so the audio runs seamlessly until you move a piece.");
+  return right;
+}
+function ptCopySelected(){
+  const c=ptSelectedClip();
+  if(!c){ setStatus("Select a clip first, then Copy."); return; }
+  ptClipboard={ name:c.name, channelId:c.channelId, sampleName:c.sampleName, buffer:c.buffer,
+    trimStart:c.trimStart, trimEnd:c.trimEnd, gainDb:c.gainDb, pitch:c.pitch, reverse:c.reverse,
+    fadeIn:c.fadeIn, fadeOut:c.fadeOut, start:c.start, durSteps:clipDurSteps(c) };
+  setStatus("Copied "+c.name+" — Paste drops it at the gold cursor (click the ruler to place it), on the selected track, or on its own track if none is picked.");
+}
+function ptPaste(){
+  if(!ptClipboard){ setStatus("Nothing copied yet — select a clip and hit Copy first."); return; }
+  const cb=ptClipboard;
+  let targetCh=cb.channelId;
+  if(typeof edTarget!=="undefined" && edTarget && edTarget.kind==="channel" && S.channels[edTarget.id]) targetCh=edTarget.id;
+  else if(S.selected && S.channels[S.selected] && ptSelectedClip()==null) targetCh=S.selected;
+  let start=(S.tlCursor!=null && S.tlCursor>0)? S.tlCursor : cb.start+cb.durSteps;
+  start=ptSnapPos(start);
+  const c=makeClip(cb.name, targetCh, cb.buffer, start, cb.sampleName);
+  Object.assign(c, { trimStart:cb.trimStart, trimEnd:cb.trimEnd, gainDb:cb.gainDb, pitch:cb.pitch,
+    reverse:cb.reverse, fadeIn:cb.fadeIn, fadeOut:cb.fadeOut, missing:!cb.buffer, _revBuf:null, _revFor:null });
+  S.selClipId=c.id; edTarget={kind:"clip", id:c.id};
+  markDirty(); ptRender(); renderLayout(); syncEditor();
+  setStatus("Pasted "+c.name+" on the "+(S.channels[targetCh]? S.channels[targetCh].name : targetCh)+" track at "+posLabel(start)+" — drag it anywhere from here.");
+  return c;
+}
+function ptDuplicateSelected(){
+  const o=ptSelectedClip();
+  if(!o){ setStatus("Select a clip first, then Duplicate."); return null; }
+  const start=ptSnapPos(o.start+clipDurSteps(o));
+  const c=makeClip(o.name, o.channelId, o.buffer, start, o.sampleName);
+  Object.assign(c, { trimStart:o.trimStart, trimEnd:o.trimEnd, gainDb:o.gainDb, pitch:o.pitch,
+    reverse:o.reverse, fadeIn:o.fadeIn, fadeOut:o.fadeOut, missing:!o.buffer, _revBuf:null, _revFor:null });
+  S.selClipId=c.id; edTarget={kind:"clip", id:c.id};
+  markDirty(); ptRender(); renderLayout(); syncEditor();
+  setStatus("Duplicated "+o.name+" — the copy sits right after the original"+(S.snap&&S.ptGrid? ", snapped to the grid":"")+". That’s how you run a hook twice.");
+  return c;
+}
+function ptDeleteSelected(){
+  const c=ptSelectedClip();
+  if(!c){ setStatus("Select a clip first, then Delete."); return; }
+  if(typeof blDeleteWaveClip==="function") blDeleteWaveClip(c.id);
+  else { S.clips.splice(S.clips.indexOf(c),1); S.selClipId=null; edTarget={kind:"channel", id:c.channelId}; markDirty(); }
+  ptRender();
+}
+function ptClipPointerDown(e){
+  const el=e.currentTarget, c=getClip(+el.dataset.ptclip); if(!c) return;
+  e.stopPropagation(); e.preventDefault();
+  S.selClipId=c.id; edTarget={kind:"clip", id:c.id};
+  document.querySelectorAll(".ptclip").forEach(x=>x.classList.toggle("sel", +x.dataset.ptclip===c.id));
+  document.querySelectorAll(".wclip:not(.ptclip)").forEach(x=>x.classList.toggle("sel", +x.dataset.clip===c.id));
+  syncEditor(); ptSyncSelInfo();
+  let body=el.parentElement, rect=body.getBoundingClientRect();
+  const ts=totalSteps(), pxPerStep=Math.max(1, rect.width/ts);
+  const edge=e.target.dataset && e.target.dataset.edge;
+  const startX=e.clientX, oStart=c.start, oTS=c.trimStart, oTE=c.trimEnd, sd=stepDurSec();
+  S._ptDrag=true;
+  const move=ev=>{
+    const dSteps=(ev.clientX-startX)/pxPerStep, dSec=dSteps*sd;
+    if(edge==="l"){ const nt=clamp(oTS+dSec, 0, oTE-0.02); c.trimStart=nt; c.start=Math.max(0, oStart+(nt-oTS)/sd); c._revBuf=null; }
+    else if(edge==="r"){ c.trimEnd=clamp(oTE+dSec, oTS+0.02, c.buffer? c.buffer.duration : oTE); c._revBuf=null; }
+    else{
+      c.start=ptSnapPos(oStart+dSteps);
+      /* vertical movement = another track (channel) */
+      const bodies=document.querySelectorAll("#ptLanes .ptBody[data-ptlane]");
+      for(const b of bodies){ const r=b.getBoundingClientRect();
+        if(ev.clientY>=r.top && ev.clientY<=r.bottom && b!==body){
+          c.channelId=b.dataset.ptlane; b.appendChild(el); body=b; rect=r; break; } }
+    }
+    el.style.left=(c.start/ts*100)+"%";
+    el.style.width=Math.max(1.2, clipDurSteps(c)/ts*100)+"%";
+    ptSyncSelInfo();
+  };
+  const up=()=>{ window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+    S._ptDrag=false; S._ptDragEnd=Date.now();
+    markDirty(); ptRender(); renderLayout(); syncEditor();
+    const ch=S.channels[c.channelId];
+    setStatus(c.name+" now starts at "+posLabel(c.start)+" on the "+(ch? ch.name : c.channelId)+" track — press Play and it fires right there, through that channel."); };
+  window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+}
+function ptAttachDrop(body, cid){
+  body.addEventListener("dragover", e=>{ e.preventDefault(); body.parentElement.classList.add("dragover"); });
+  body.addEventListener("dragleave", ()=>body.parentElement.classList.remove("dragover"));
+  body.addEventListener("drop", async e=>{
+    e.preventDefault(); body.parentElement.classList.remove("dragover");
+    const rect=body.getBoundingClientRect();
+    let step=ptSnapPos(clamp((e.clientX-rect.left)/rect.width, 0, 1)*totalSteps());
+    ensureCtx();
+    const files=e.dataTransfer.files;
+    if(files && files.length){
+      let at=step, last=null;
+      for(const f of files){ const buf=await decodeFile(f); if(!buf) continue;
+        addToLibrary([f]); last=makeClip(f.name, cid, buf, at, f.name); at=ptSnapPos(at+Math.max(2, clipDurSteps(last))); }
+      if(last){ S.selClipId=last.id; edTarget={kind:"clip", id:last.id}; markDirty(); ptRender(); renderLayout(); syncEditor();
+        setStatus(last.name+" dropped on the "+S.channels[cid].name+" track at "+posLabel(last.start)+"."); }
+      return;
+    }
+    const idx=parseInt(e.dataTransfer.getData("text/sound-idx"), 10);
+    if(!isNaN(idx) && library[idx]){
+      const buf=await getLibBuffer(idx);
+      if(buf){ const c=makeClip(library[idx].name, cid, buf, step, library[idx].name);
+        S.selClipId=c.id; edTarget={kind:"clip", id:c.id}; markDirty(); ptRender(); renderLayout(); syncEditor();
+        setStatus(library[idx].name+" placed on the "+S.channels[cid].name+" track at "+posLabel(step)+"."); }
+    }
+  });
+}
+
+/* ---------------- Toolbar ---------------- */
+function ptSyncSnapBtn(){
+  const b=$("ptSnapBtn"); if(!b) return;
+  const on=!!(S.snap && S.ptGrid);
+  b.textContent="Snap: "+(on? "On":"Off");
+  b.classList.toggle("on", on);
+}
+$("ptAddTrack").onclick=()=>{
+  const ch=blAddChannelOfType("sample"); if(!ch) return;
+  const taken={}; S.order.forEach(id=>{ if(S.channels[id]) taken[S.channels[id].name]=1; });
+  let n=1; while(taken["Audio "+n]) n++;
+  renameChannel(ch.id, "Audio "+n);
+  S.selClipId=null; edTarget={kind:"channel", id:ch.id};
+  markDirty(); ptRender();
+  setStatus("New track “"+ch.name+"” added — and its channel came with it: rack row, mixer strip "+S.order.length+", Piano Roll and its own stem all share the name “"+ch.name+"”. Drop audio on its lane and it plays through that channel.");
+};
+$("ptSlicePlay").onclick=()=>{ const c=ptSelectedClip(); if(!c){ setStatus("Select a clip first, then slice it."); return; }
+  ptSplitClip(c, S.playing? Math.round(currentTlStep()*1000)/1000 : (S.tlCursor||0)); };
+$("ptSliceCursor").onclick=()=>{ const c=ptSelectedClip(); if(!c){ setStatus("Select a clip first, then slice it."); return; }
+  ptSplitClip(c, S.tlCursor||0); };
+$("ptCopy").onclick=ptCopySelected;
+$("ptPaste").onclick=ptPaste;
+$("ptDup").onclick=ptDuplicateSelected;
+$("ptDel").onclick=ptDeleteSelected;
+$("ptSnapBtn").onclick=()=>{ S.snap=!S.snap;
+  if(typeof syncSnapBtn==="function") syncSnapBtn();
+  if(typeof updateLayoutInfo==="function") updateLayoutInfo();
+  ptSyncSnapBtn(); ptRender();
+  setStatus(S.snap? "Snap ON — slicing, sliding, pasting and duplicating land on the "+$("ptSnapGrid").options[$("ptSnapGrid").selectedIndex].text+" grid." : "Snap OFF — clips slide freely, down to the millisecond; the Nudge buttons still move by 10 ms."); };
+$("ptSnapGrid").onchange=e=>{ S.ptGrid=parseFloat(e.target.value)||0;
+  if(S.ptGrid>0) S.snap=true;
+  if(typeof syncSnapBtn==="function") syncSnapBtn();
+  ptSyncSnapBtn(); ptRender(); markDirty();
+  setStatus("Wave editor grid: "+e.target.options[e.target.selectedIndex].text+(S.ptGrid? " — slicing, sliding, pasting and duplicating land on it." : " — free movement, no grid.")); };
+$("ptZoomRange").oninput=e=>{ S.ptZoom=+e.target.value/100; ptRender(); };
+function ptNudge(dir){
+  const c=ptSelectedClip(); if(!c) { setStatus("Select a clip first, then nudge it."); return; }
+  const d=(S.snap&&S.ptGrid)? S.ptGrid : (0.010/stepDurSec());
+  c.start=Math.max(0, Math.round((c.start+dir*d)*1000)/1000);
+  markDirty(); ptRender(); renderLayout(); syncEditor();
+}
+$("ptNudgeL").onclick=()=>ptNudge(-1);
+$("ptNudgeR").onclick=()=>ptNudge(1);
+document.addEventListener("keydown", e=>{
+  if(!(e.ctrlKey||e.metaKey) || e.altKey) return;
+  const t=e.target, tag=((t && t.tagName)||"").toLowerCase();
+  if(tag==="input"||tag==="select"||tag==="textarea"||(t && t.isContentEditable)) return;
+  const k=(e.key||"").toLowerCase();
+  if(k==="c" && ptSelectedClip()) ptCopySelected();
+  else if(k==="v" && ptClipboard){ e.preventDefault(); ptPaste(); }
+});
+
+/* ---------------- Wraps: stay in sync + persist ---------------- */
+const _ptRlPrev=renderLayout;
+renderLayout=function(){ _ptRlPrev(); ptRender(); };
+const _ptSePrev=syncEditor;
+syncEditor=function(){ _ptSePrev(); if(!S._ptDrag) ptRender(); };
+const _ptPjPrev2=projectJSON;
+projectJSON=function(){ const p=_ptPjPrev2(); p.ptGrid=S.ptGrid; p.ptZoom=S.ptZoom; return p; };
+const _ptLcpPrev2=loadClipsFromProject;
+loadClipsFromProject=function(p){ _ptLcpPrev2(p);
+  if(p.ptGrid!=null){ S.ptGrid=+p.ptGrid||0; const g=$("ptSnapGrid"); if(g) g.value=String(S.ptGrid); }
+  if(p.ptZoom){ S.ptZoom=p.ptZoom; const z=$("ptZoomRange"); if(z) z.value=Math.round(S.ptZoom*100); }
+  ptSyncSnapBtn(); ptRender(); };
+
+/* ---------------- Init: enforce History → Transport → Wave Editor order ---------------- */
+(function ptInit(){
+  const wrapEl=document.querySelector(".wrap");
+  const bar=$("histBar"), tr=document.querySelector(".transport"), log=$("histLog"), pt=$("ptEditorPanel");
+  if(wrapEl && bar && tr && bar!==tr.previousElementSibling) wrapEl.insertBefore(bar, tr);
+  if(wrapEl && log && tr && log!==tr.nextElementSibling) wrapEl.insertBefore(log, tr.nextSibling);
+  if(wrapEl && pt){ const after=log||tr; if(after && pt!==after.nextElementSibling) wrapEl.insertBefore(pt, after.nextSibling); }
+  const g=$("ptSnapGrid"); if(g) g.value=String(S.ptGrid);
+  const z=$("ptZoomRange"); if(z) z.value=Math.round((S.ptZoom||1)*100);
+  ptSyncSnapBtn();
+  ptRender();
+  requestAnimationFrame(ptUiLoop);
+})();
+</script>
+
+<style>
+/* ---------- Unified arrangement: sequence chain + MIDI lanes over wave lanes ---------- */
+.ptViewport{max-height:74vh;overflow-y:auto}
+.ptSectionHead{display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--bg);border-bottom:1px solid var(--line);font-size:9px;font-weight:900;letter-spacing:1.4px;color:var(--faint);text-transform:uppercase}
+.ptSectionHead b{color:var(--gold)}
+.ptLane.chainLane .ptBody{min-height:48px}
+.ptLane.midiLane .ptBody{min-height:42px}
+.ptLane.midiLane .ptHead{min-height:42px}
+.ptLane.dimlane .ptBody{opacity:.38}
+.ptLane.dimlane .ptName{color:var(--faint)}
+.ptseqblock{position:absolute;top:4px;bottom:4px;border:1px solid var(--gold2);background:color-mix(in srgb,var(--gold) 16%, var(--panel));border-radius:5px;overflow:hidden;cursor:grab;touch-action:none;min-width:16px;z-index:2}
+.ptseqblock.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.ptseqblock.ghost{opacity:.5;border-style:dashed}
+.ptseqblock canvas{position:absolute;inset:0;width:100%;height:100%}
+.ptseqblock .wname{position:absolute;left:0;top:0;font-size:9px;font-weight:900;color:var(--ink);background:color-mix(in srgb,var(--bg) 72%, transparent);padding:1px 5px;border-radius:0 0 4px 0;white-space:nowrap;max-width:100%;overflow:hidden;z-index:1}
+.ptseqblock .wedge{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;z-index:2}
+.ptseqblock .wedge.l{left:0}.ptseqblock .wedge.r{right:0}
+.ptmidiblock{position:absolute;top:4px;bottom:4px;border:1px solid color-mix(in srgb,var(--teal) 65%, var(--line));background:color-mix(in srgb,var(--teal) 10%, var(--panel));border-radius:5px;overflow:hidden;cursor:pointer;min-width:16px}
+.ptmidiblock.ghost{opacity:.45;border-style:dashed}
+.ptmidiblock.sel{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+.ptmidiblock canvas{position:absolute;inset:0;width:100%;height:100%}
+.ptmidiblock .wname{position:absolute;left:0;top:0;font-size:8.5px;font-weight:900;color:var(--ink);background:color-mix(in srgb,var(--bg) 72%, transparent);padding:1px 4px;border-radius:0 0 4px 0;white-space:nowrap;max-width:100%;overflow:hidden}
+.laneType{font-size:8.5px;font-weight:900;letter-spacing:.8px;padding:1px 4px;border-radius:3px;border:1px solid var(--line);color:var(--dim)}
+.laneType.wave{color:var(--teal);border-color:var(--teal)}
+.laneType.midi{color:var(--gold);border-color:var(--gold2)}
+@media (max-width:640px){ .ptLane.midiLane .ptBtns button,.ptLane.chainLane .ptBtns button{min-height:44px;min-width:44px} }
+</style>
+<script>
+"use strict";
+/* ============================================================
+   UNIFIED ARRANGEMENT — MIDI SEQUENCES + WAVES, ONE VIEW.
+   The Pro Tools editor gains, directly under its ruler:
+   · a SEQUENCES chain lane whose blocks are the Song playlist
+     entries (Pattern mode shows the looped sequence; the first
+     block edit commits it to an explicit Song chain — audibly
+     identical, now arrangeable), and
+   · one MIDI lane per channel showing that channel's slice of
+     every chain block (mini note/step preview), wired to its
+     instrument channel, Roll button → Piano Roll.
+   Sequence blocks get FULL wave-clip parity by operating on
+   real sequences: slicing inside a block splits every
+   channel's pattern data at the cut bar into two independent
+   sequences (notes crossing the cut are clipped on both
+   sides, so the join is seamless and nothing is lost or
+   doubled); duplicate / copy / paste deep-copy sequence data
+   (the existing Duplicate Sequence rule); slide reorders the
+   chain; trim rewrites the entry with range copies; delete
+   removes the placement. Playback, export, undo and
+   save/load therefore need no new engine — the transport,
+   the offline renderer, History and project files already
+   speak playlist + patterns.
+   MUTE / SOLO is arrangement-wide: wave-lane M/S is the
+   channel's own M/S; MIDI-lane M/S lives in S.seqMS[channel]
+   and gates that channel's sequence playback. Combined solo
+   logic (any solo anywhere narrows everything) is enforced
+   live by gating patterns/clips inside the scheduler, and in
+   renders by the same gate applied around renderMix.
+   ============================================================ */
+S.seqMS=S.seqMS||{};
+S.selSeqEntry=null;
+let ptFocus="wave"; // which selection the toolbar acts on: "wave" | "seq"
+
+function ptLaneMS(id){ return S.seqMS[id]||{mute:false, solo:false}; }
+function ptMSFlags(){
+  let anyChSolo=false, anySeqSolo=false;
+  S.order.forEach(id=>{ const ch=S.channels[id]; if(ch&&ch.solo) anyChSolo=true;
+    const lm=S.seqMS[id]; if(lm&&lm.solo) anySeqSolo=true; });
+  return { anyChSolo, anySeqSolo, anySolo:anyChSolo||anySeqSolo };
+}
+function ptSeqAudible(id, flags){
+  const ch=S.channels[id]; if(!ch) return false;
+  const lm=ptLaneMS(id);
+  if(ch.mute||lm.mute) return false;
+  if(flags.anySolo && !(ch.solo||lm.solo)) return false;
+  return true;
+}
+function ptWaveAudible(id, flags){
+  const ch=S.channels[id]; if(!ch) return false;
+  if(ch.mute) return false;
+  if(flags.anySolo && !(ch.solo||ptLaneMS(id).solo)) return false;
+  return true;
+}
+
+/* ---------------- Live gating: sequence M/S + combined solo, inside the scheduler ---------------- */
+const _ptGateSsPrev=scheduleStep;
+scheduleStep=function(step, t){
+  const flags=ptMSFlags();
+  const anyGate=flags.anySolo || S.order.some(id=>{ const lm=S.seqMS[id]; return lm&&(lm.mute||lm.solo); });
+  if(!anyGate){ _ptGateSsPrev(step, t); return; }
+  const seqAllowed=new Set(S.order.filter(id=>ptSeqAudible(id, flags)));
+  S._ptWaveAllowed=new Set(S.order.filter(id=>ptWaveAudible(id, flags)));
+  const idx=activePatIdx(), swapped=[], soloSaved=[];
+  S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+    if(ch.solo){ soloSaved.push(ch); ch.solo=false; }
+    if(!seqAllowed.has(id)){ const p=ch.patterns[idx];
+      if(p){ swapped.push([ch, idx, p]); ch.patterns[idx]={steps:[], notes:[], sub:[], hits:[]}; } }
+  });
+  try{ _ptGateSsPrev(step, t); }
+  finally{ swapped.forEach(([ch,i,p])=>{ ch.patterns[i]=p; });
+    soloSaved.forEach(ch=>{ ch.solo=true; });
+    S._ptWaveAllowed=null; }
+};
+const _ptGateSclPrev=scheduleClipsLive;
+scheduleClipsLive=function(tlBar, barTime){
+  const set=S._ptWaveAllowed;
+  if(!set){ _ptGateSclPrev(tlBar, barTime); return; }
+  const forced=[];
+  S.order.forEach(id=>{ const ch=S.channels[id];
+    if(ch&&!set.has(id)&&!ch.mute){ forced.push(ch); ch.mute=true; } });
+  try{ _ptGateSclPrev(tlBar, barTime); }
+  finally{ forced.forEach(ch=>{ ch.mute=false; }); }
+};
+/* ---------------- Render gating: same rules around the offline renderer ---------------- */
+const _ptGateRmPrev=renderMix;
+renderMix=async function(bars, onlyId){
+  const flags=ptMSFlags();
+  const anyMS=flags.anySolo || S.order.some(id=>{ const lm=S.seqMS[id]; return lm&&lm.mute; });
+  if(window.BL_PLAIN || !anyMS) return _ptGateRmPrev(bars, onlyId);
+  const saved=[];
+  S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+    const rec={ ch, mute:ch.mute, patterns:null, muteChanged:false };
+    if(!ptWaveAudible(id, flags) && !ch.mute){ ch.mute=true; rec.muteChanged=true; }
+    else if(!ptSeqAudible(id, flags)){ rec.patterns=ch.patterns;
+      ch.patterns=ch.patterns.map(()=>({steps:[], notes:[], sub:[], hits:[]})); }
+    saved.push(rec);
+  });
+  const p=_ptGateRmPrev(bars, onlyId); /* scheduling inside is synchronous — restore immediately */
+  saved.forEach(r=>{ if(r.muteChanged) r.ch.mute=r.mute; if(r.patterns) r.ch.patterns=r.patterns; });
+  return p;
+};
+
+/* ---------------- Chain model ---------------- */
+function ptChainBlocks(){
+  const LB=layoutBars(), blocks=[];
+  if(S.mode==="song" && S.playlist && S.playlist.length){
+    let acc=0;
+    S.playlist.forEach((e, idx)=>{ const len=(e.reps||1)*seqBarsOf(e.seq);
+      blocks.push({ entry:idx, seq:e.seq, reps:e.reps||1, startBar:acc, lenBars:len, real:true }); acc+=len; });
+    const chainLen=acc;
+    if(chainLen>0 && chainLen<LB){
+      let base=chainLen;
+      while(base<LB){
+        for(let idx=0; idx<S.playlist.length && base<LB; idx++){ const e=S.playlist[idx];
+          const len=Math.min((e.reps||1)*seqBarsOf(e.seq), LB-base);
+          blocks.push({ entry:idx, seq:e.seq, reps:e.reps||1, startBar:base, lenBars:len, real:false, ghost:true });
+          base+=len; }
+      }
+    }
+  } else {
+    const seqLen=seqBarsOf(S.pattern);
+    for(let a=0; a<LB; a+=seqLen)
+      blocks.push({ entry:-1, seq:S.pattern, reps:1, startBar:a, lenBars:Math.min(seqLen, LB-a), real:a===0, ghost:a>0, src:true });
+  }
+  return blocks;
+}
+function ptEnsureSongChain(){
+  if(S.mode==="song" && S.playlist && S.playlist.length) return true;
+  const LB=layoutBars(), seqLen=seqBarsOf(S.pattern), reps=Math.max(1, Math.round(LB/seqLen));
+  S.playlist=[]; for(let i=0;i<reps;i++) S.playlist.push({ seq:S.pattern, reps:1 });
+  S.mode="song";
+  if(typeof updateSongUI==="function") updateSongUI();
+  return true;
+}
+function ptAfterChainEdit(msg){
+  if(typeof renderPlaylist==="function") renderPlaylist();
+  if(typeof buildPatBtns==="function") buildPatBtns();
+  markDirty(); ptRender();
+  if(msg) setStatus(msg);
+}
+/* Deep range copy of a sequence across ALL channels → a brand-new sequence.
+   Steps/notes/hits/subs in [offSteps, offSteps+lenSteps) are rebased to 0;
+   notes crossing either edge are clipped, exactly like a wave slice. */
+function ptCreateSeqFromRange(srcSeq, offSteps, lenSteps, suffix){
+  const newIdx=seqCount();
+  S.order.forEach(id=>{ const ch=S.channels[id]; const p=ch.patterns[srcSeq]||{steps:[],notes:[],sub:[],hits:[]};
+    const np={ steps:Array(lenSteps).fill(0), notes:[], sub:[], hits:[] };
+    for(let i=0;i<lenSteps;i++) np.steps[i]= p.steps[offSteps+i]? 1:0;
+    (p.notes||[]).forEach(n=>{ const s=n.step, e=n.step+(n.len||1);
+      if(e<=offSteps||s>=offSteps+lenSteps) return;
+      const cs=Math.max(s, offSteps), ce=Math.min(e, offSteps+lenSteps);
+      const nn=Object.assign({}, n, { step:cs-offSteps }); delete nn.off;
+      if(n.len) nn.len=Math.max(0.1, ce-cs);
+      np.notes.push(nn); });
+    (p.hits||[]).forEach(h=>{ if(h.step>=offSteps&&h.step<offSteps+lenSteps)
+      np.hits.push(Object.assign({}, h, { step:h.step-offSteps })); });
+    (p.sub||[]).forEach(r=>{ if(r.step>=offSteps&&r.step<offSteps+lenSteps)
+      np.sub.push(Object.assign({}, r, { step:r.step-offSteps })); });
+    ch.patterns.push(np);
+  });
+  while(S.seqNames.length<newIdx) S.seqNames.push("SEQ "+(S.seqNames.length+1));
+  S.seqNames.push(((S.seqNames[srcSeq]||("SEQ "+(srcSeq+1)))+(suffix||"")).slice(0,60));
+  while(S.seqBars.length<newIdx) S.seqBars.push(1);
+  S.seqBars.push(Math.max(1, Math.round(lenSteps/16)));
+  if(Array.isArray(S.seqTranspose)){ while(S.seqTranspose.length<newIdx) S.seqTranspose.push(0);
+    S.seqTranspose.push(typeof blSeqT==="function"? blSeqT(srcSeq):0); }
+  return newIdx;
+}
+function ptSeqDataSnapshot(seqIdx){
+  const data={};
+  S.order.forEach(id=>{ const p=S.channels[id].patterns[seqIdx];
+    data[id]= p? JSON.parse(JSON.stringify({ steps:p.steps||[], notes:p.notes||[], sub:p.sub||[], hits:p.hits||[] }))
+               : { steps:[], notes:[], sub:[], hits:[] }; });
+  return data;
+}
+function ptCreateSeqFromData(data, name, bars){
+  const newIdx=seqCount();
+  S.order.forEach(id=>{ const d=data[id]||{ steps:[], notes:[], sub:[], hits:[] };
+    S.channels[id].patterns.push({ steps:(d.steps||[]).slice(), notes:(d.notes||[]).map(n=>Object.assign({},n)),
+      sub:(d.sub||[]).map(r=>Object.assign({},r)), hits:(d.hits||[]).map(h=>Object.assign({},h)) }); });
+  while(S.seqNames.length<newIdx) S.seqNames.push("SEQ "+(S.seqNames.length+1));
+  S.seqNames.push(name||("SEQ "+(newIdx+1)));
+  while(S.seqBars.length<newIdx) S.seqBars.push(1);
+  S.seqBars.push(bars||1);
+  if(Array.isArray(S.seqTranspose)){ while(S.seqTranspose.length<newIdx) S.seqTranspose.push(0); S.seqTranspose.push(0); }
+  return newIdx;
+}
+
+/* ---------------- Sequence block operations (wave parity) ---------------- */
+function ptSeqSlice(entryIdx, atBar){
+  ptEnsureSongChain();
+  const blocks=ptChainBlocks().filter(b=>b.real);
+  const b=blocks.find(x=>x.entry===entryIdx); if(!b) return;
+  if(atBar<=b.startBar||atBar>=b.startBar+b.lenBars){
+    setStatus("Slice point has to land inside the block — not on its edge. Sequences slice wherever the Snap grid lands."); return; }
+  const seqLenBars=seqBarsOf(b.seq), local=atBar-b.startBar;
+  const repIdx=Math.floor(local/seqLenBars), inRep=local%seqLenBars;
+  let before=[], after=[];
+  if(inRep===0){
+    if(repIdx>0) before=[{ seq:b.seq, reps:repIdx }];
+    after=[{ seq:b.seq, reps:b.reps-repIdx }];
+  } else {
+    const leftSeq=ptCreateSeqFromRange(b.seq, 0, inRep*16, " · A");
+    const rightSeq=ptCreateSeqFromRange(b.seq, inRep*16, (seqLenBars-inRep)*16, " · B");
+    if(repIdx>0) before.push({ seq:b.seq, reps:repIdx });
+    before.push({ seq:leftSeq, reps:1 });
+    after.push({ seq:rightSeq, reps:1 });
+    if(b.reps-repIdx-1>0) after.push({ seq:b.seq, reps:b.reps-repIdx-1 });
+  }
+  S.playlist.splice(entryIdx, 1, ...before, ...after);
+  S.selSeqEntry=entryIdx+before.length-1; ptFocus="seq";
+  ptAfterChainEdit("Sliced "+(S.seqNames[b.seq]||"the sequence")+" at bar "+(atBar+1)+" — two independent sequences now. Notes split at the cut (crossing notes are clipped on both sides, so the join plays seamlessly, nothing lost or doubled). Edit either piece in the Piano Roll; the other never changes.");
+}
+function ptSeqDuplicate(entryIdx){
+  ptEnsureSongChain();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const copy=ptCreateSeqFromRange(e.seq, 0, seqBarsOf(e.seq)*16, " (copy)");
+  S.playlist.splice(entryIdx+1, 0, { seq:copy, reps:e.reps||1 });
+  S.selSeqEntry=entryIdx+1; ptFocus="seq";
+  ptAfterChainEdit("Duplicated the sequence block — the copy is a fully independent sequence ("+(S.seqNames[copy])+"). Edit its notes in the Piano Roll and the original stays exactly as it was.");
+}
+function ptSeqDelete(entryIdx){
+  ptEnsureSongChain();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const nm=S.seqNames[e.seq]||("SEQ "+(e.seq+1));
+  S.playlist.splice(entryIdx, 1);
+  if(!S.playlist.length){ S.mode="pattern"; }
+  S.selSeqEntry=null;
+  ptAfterChainEdit("Removed the "+nm+" block from the arrangement — the sequence itself is still in the library (rack sequence buttons) and can be re-added from the Song playlist below.");
+}
+function ptSeqTrim(entryIdx, side, newLenBars){
+  ptEnsureSongChain();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const seqLenBars=seqBarsOf(e.seq), oldLen=(e.reps||1)*seqLenBars;
+  newLenBars=clamp(Math.round(newLenBars), 1, 64);
+  if(newLenBars===oldLen) return;
+  if(side==="r"){
+    if(newLenBars%seqLenBars===0){ e.reps=newLenBars/seqLenBars; }
+    else { const full=Math.floor(newLenBars/seqLenBars), rem=newLenBars%seqLenBars;
+      const tail=ptCreateSeqFromRange(e.seq, 0, rem*16, " · trim");
+      const repl=[]; if(full>0) repl.push({ seq:e.seq, reps:full }); repl.push({ seq:tail, reps:1 });
+      S.playlist.splice(entryIdx, 1, ...repl); }
+  } else {
+    const drop=oldLen-newLenBars; if(drop<=0){ /* growing leftwards isn't possible — content only extends right */ return; }
+    const skipReps=Math.floor(drop/seqLenBars), rem=drop%seqLenBars, repl=[];
+    if(rem>0){ const head=ptCreateSeqFromRange(e.seq, rem*16, (seqLenBars-rem)*16, " · trim"); repl.push({ seq:head, reps:1 }); }
+    const left=(e.reps||1)-skipReps-(rem>0?1:0);
+    if(left>0) repl.push({ seq:e.seq, reps:left });
+    if(!repl.length) repl.push({ seq:ptCreateSeqFromRange(e.seq, (seqLenBars-1)*16, 16, " · trim"), reps:1 });
+    S.playlist.splice(entryIdx, 1, ...repl);
+  }
+  ptAfterChainEdit("Trimmed the sequence block to "+newLenBars+" bar"+(newLenBars===1?"":"s")+" — trimmed pieces are range copies, the library sequence is untouched.");
+}
+function ptSeqReorder(entryIdx, targetIdx){
+  ptEnsureSongChain();
+  if(targetIdx===entryIdx||targetIdx<0) return;
+  const [e]=S.playlist.splice(entryIdx, 1);
+  S.playlist.splice(clamp(targetIdx, 0, S.playlist.length), 0, e);
+  S.selSeqEntry=clamp(targetIdx, 0, S.playlist.length-1); ptFocus="seq";
+  ptAfterChainEdit("Moved the sequence block in the chain — blocks keep their timeline positions, and the whole arrangement (waves included) still shares one playhead.");
+}
+
+/* ---------------- Previews ---------------- */
+function ptDrawSeqCanvas(cv, seqIdx, lenSteps, perChannelId){
+  const ctx2=cv.getContext("2d"), W=cv.width, H=cv.height;
+  ctx2.clearRect(0,0,W,H);
+  const drawPat=(pat, colSteps, colNotes)=>{
+    if(!pat) return;
+    ctx2.fillStyle=colSteps;
+    for(let s=0;s<lenSteps;s++){ if(pat.steps[s]){ const x=s/lenSteps*W;
+      ctx2.fillRect(x, H*0.62, Math.max(1, W/lenSteps*0.6), H*0.3); } }
+    ctx2.fillStyle=colNotes;
+    (pat.notes||[]).forEach(n=>{ if(n.step>=lenSteps) return;
+      const x=n.step/lenSteps*W, w=Math.max(2, (n.len||1)/lenSteps*W);
+      const y=H*0.08 + (1-clamp((n.midi-30)/48, 0, 1))*H*0.5;
+      ctx2.fillRect(x, y, w, 2.5); });
+    (pat.hits||[]).forEach(h=>{ if(h.step>=lenSteps) return;
+      ctx2.fillRect(h.step/lenSteps*W, H*0.62, 1.5, H*0.3); });
+  };
+  if(perChannelId){ const ch=S.channels[perChannelId]; drawPat(ch&&ch.patterns[seqIdx], "#3fb8a6", "#e8b33c"); }
+  else { S.order.forEach(id=>{ const ch=S.channels[id]; drawPat(ch&&ch.patterns[seqIdx], "rgba(63,184,166,.55)", "rgba(232,179,60,.8)"); }); }
+}
+
+/* ---------------- Rendering: chain lane + MIDI lanes inside the PT editor ---------------- */
+function ptSectionHead(text){
+  const d=document.createElement("div"); d.className="ptSectionHead"; d.innerHTML=text; return d;
+}
+function ptBuildChainLane(ts){
+  const LB=layoutBars(), blocks=ptChainBlocks(), flags=ptMSFlags();
+  const lane=document.createElement("div"); lane.className="ptLane chainLane";
+  const head=document.createElement("div"); head.className="ptHead";
+  const allMute=S.order.length>0 && S.order.every(id=>ptLaneMS(id).mute);
+  const allSolo=S.order.length>0 && S.order.every(id=>ptLaneMS(id).solo);
+  head.innerHTML='<div class="ptTrkNo">MIDI / SEQ · Song chain</div>'+
+    '<button class="ptName" type="button">'+(S.mode==="song"? "Song — playlist chain" : "Pattern — "+(S.seqNames[S.pattern]||("SEQ "+(S.pattern+1)))+" loop")+'</button>'+
+    '<div class="ptChLine">Sequence layer · all channels · edits slice / copy real sequences</div>';
+  const btns=document.createElement("div"); btns.className="ptBtns";
+  const mk=(label, title, fn, cls)=>{ const b=document.createElement("button"); b.textContent=label; b.title=title; if(cls) b.className=cls;
+    b.onclick=e=>{ e.stopPropagation(); fn(); }; btns.appendChild(b); return b; };
+  mk("M", "Mute the whole sequence layer (every MIDI lane)", ()=>{ const v=!allMute;
+    S.order.forEach(id=>{ S.seqMS[id]=Object.assign(ptLaneMS(id), { mute:v }); });
+    markDirty(); ptRender(); setStatus(v? "Sequence layer muted — waves still play; every MIDI lane is dimmed." : "Sequence layer unmuted."); }, allMute?"m-on":"");
+  mk("S", "Solo the whole sequence layer", ()=>{ const v=!allSolo;
+    S.order.forEach(id=>{ S.seqMS[id]=Object.assign(ptLaneMS(id), { solo:v }); });
+    markDirty(); ptRender(); setStatus(v? "Sequence layer soloed — only the MIDI sequences play." : "Sequence solo cleared — everything plays again."); }, allSolo?"s-on":"");
+  mk("Roll", "Open the selected channel in the Piano Roll", ()=>openRollFor(S.selected));
+  head.appendChild(btns);
+  lane.appendChild(head);
+  const body=document.createElement("div"); body.className="ptBody"; body.dataset.ptchain="1";
+  blocks.forEach(b=>{
+    const el=document.createElement("div");
+    el.className="ptseqblock"+(b.ghost?" ghost":"")+((ptFocus==="seq"&&S.selSeqEntry===b.entry&&b.real)?" sel":"");
+    el.dataset.entry=b.entry; el.dataset.real=b.real? "1":"";
+    el.style.left=(b.startBar/LB*100)+"%";
+    el.style.width=Math.max(1.4, b.lenBars/LB*100)+"%";
+    el.title=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)))+(b.reps>1? " ×"+b.reps : "")+(b.ghost? " — loop repeat (edit the first block)" : " — drag to slide · edges trim · double-click slices at that bar · click selects");
+    const cv=document.createElement("canvas"); cv.height=44;
+    cv.width=Math.max(24, Math.min(1200, Math.round(b.lenBars*16*10)));
+    el.appendChild(cv);
+    const nm=document.createElement("span"); nm.className="wname";
+    nm.textContent=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)))+(b.reps>1? " ×"+b.reps : "");
+    el.appendChild(nm);
+    ["l","r"].forEach(side=>{ const w=document.createElement("div"); w.className="wedge "+side; w.dataset.edge=side; el.appendChild(w); });
+    ptDrawSeqCanvas(cv, b.seq, seqBarsOf(b.seq)*16, null);
+    el.addEventListener("pointerdown", ev=>ptChainBlockPointer(ev, el, b));
+    el.addEventListener("dblclick", ev=>{ ev.stopPropagation();
+      if(!b.real){ setStatus("That’s the loop repeat — slice the first block and the repeat follows."); return; }
+      ptEnsureSongChain();
+      const rect=body.getBoundingClientRect();
+      const bar=b.startBar+Math.floor(clamp((ev.clientX-rect.left)/rect.width, 0, 1)*LB);
+      ptSeqSlice(b.entry, bar); });
+    body.appendChild(el);
+  });
+  body.addEventListener("click", e=>{
+    if(e.target.closest && e.target.closest(".ptseqblock")) return;
+    const rect=body.getBoundingClientRect();
+    S.tlCursor=ptSnapPos(clamp((e.clientX-rect.left)/rect.width, 0, 1)*ts);
+    ptPositionCursor();
+  });
+  lane.appendChild(body);
+  return lane;
+}
+function ptChainBlockPointer(e, el, b){
+  e.stopPropagation(); e.preventDefault();
+  if(!b.real){ setStatus("That’s the loop repeat of the chain — edit the first block and every repeat follows it."); return; }
+  ptEnsureSongChain();
+  const entry=b.entry;
+  S._ptDrag=true; /* set BEFORE selectSequence: its re-renders must not rebuild the lanes mid-drag */
+  selectSequence(b.seq);
+  S.selSeqEntry=entry; S.selClipId=null; ptFocus="seq";
+  document.querySelectorAll(".ptseqblock").forEach(x=>x.classList.toggle("sel", x===el));
+  ptSyncSelInfo();
+  const body=el.parentElement, rect=body.getBoundingClientRect();
+  const LB=layoutBars(), pxPerBar=Math.max(1, rect.width/LB);
+  const edge=e.target.dataset && e.target.dataset.edge;
+  const startX=e.clientX, oLen=b.lenBars;
+  let moved=false;
+  const move=ev=>{
+    const dBars=Math.round((ev.clientX-startX)/pxPerBar);
+    if(Math.abs(ev.clientX-startX)>5) moved=true;
+    if(!moved) return;
+    if(edge==="l"||edge==="r"){ el.style.width=Math.max(1.4, (oLen+(edge==="r"? dBars:-dBars))/LB*100)+"%";
+      if(edge==="l") el.style.left=((b.startBar+dBars)/LB*100)+"%"; }
+    else el.style.transform="translateX("+(dBars*pxPerBar)+"px)";
+  };
+  const up=ev=>{
+    window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+    S._ptDrag=false; S._ptDragEnd=Date.now();
+    el.style.transform=""; 
+    if(!moved){ ptRender(); return; }
+    const dBars=Math.round((ev.clientX-startX)/pxPerBar);
+    if(edge==="r") ptSeqTrim(entry, "r", oLen+dBars);
+    else if(edge==="l") ptSeqTrim(entry, "l", oLen-dBars);
+    else if(dBars!==0){
+      const blocks=ptChainBlocks().filter(x=>x.real);
+      const targetBar=b.startBar+dBars;
+      let target=blocks.length-1;
+      for(let i=0;i<blocks.length;i++){ if(targetBar<blocks[i].startBar+blocks[i].lenBars){ target=blocks[i].entry; break; } }
+      ptSeqReorder(entry, target);
+    } else ptRender();
+  };
+  window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+}
+function ptBuildMidiLane(cid, idx, ts){
+  const ch=S.channels[cid]; if(!ch) return null;
+  const LB=layoutBars(), blocks=ptChainBlocks(), flags=ptMSFlags(), lm=ptLaneMS(cid);
+  const lane=document.createElement("div");
+  lane.className="ptLane midiLane"+(ptSeqAudible(cid, flags)? "" : " dimlane");
+  lane.dataset.ptmidi=cid;
+  const head=document.createElement("div"); head.className="ptHead"+(S.selected===cid?" sel":"");
+  head.innerHTML='<div class="ptTrkNo">MIDI · CH '+(idx+1)+' <span class="laneType midi">SEQ</span></div>'+
+    '<button class="ptName" type="button">'+escapeHtml(ch.name)+'</button>'+
+    '<div class="ptChLine">→ instrument channel: '+escapeHtml(ch.name)+' · '+ch.type+'</div>';
+  const btns=document.createElement("div"); btns.className="ptBtns";
+  const mk=(label, title, fn, cls)=>{ const b=document.createElement("button"); b.textContent=label; b.title=title; if(cls) b.className=cls;
+    b.onclick=e=>{ e.stopPropagation(); fn(); }; btns.appendChild(b); return b; };
+  mk("M", "Mute "+ch.name+"’s sequence playback in the arrangement (its wave clips and mixer channel are untouched)", ()=>{
+    S.seqMS[cid]=Object.assign(ptLaneMS(cid), { mute:!lm.mute });
+    markDirty(); buildRack(); ptRender();
+    setStatus(ch.name+" MIDI lane "+(S.seqMS[cid].mute? "MUTED — its sequences are silent in the arrangement; wave clips on the channel still play." : "unmuted.")); }, lm.mute?"m-on":"");
+  mk("S", "Solo "+ch.name+"’s sequence lane", ()=>{
+    S.seqMS[cid]=Object.assign(ptLaneMS(cid), { solo:!lm.solo });
+    markDirty(); ptRender();
+    setStatus(ch.name+" MIDI lane "+(S.seqMS[cid].solo? "SOLOED — the arrangement narrows to the soloed lanes." : "solo off.")); }, lm.solo?"s-on":"");
+  mk("Roll", "Open "+ch.name+" in the Piano Roll for note-level editing", ()=>openRollFor(cid));
+  head.appendChild(btns);
+  lane.appendChild(head);
+  const body=document.createElement("div"); body.className="ptBody";
+  blocks.forEach(b=>{
+    const el=document.createElement("div");
+    el.className="ptmidiblock"+(b.ghost?" ghost":"")+((ptFocus==="seq"&&S.selSeqEntry===b.entry)?" sel":"");
+    el.style.left=(b.startBar/LB*100)+"%";
+    el.style.width=Math.max(1.4, b.lenBars/LB*100)+"%";
+    el.title=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)))+" on "+ch.name+" — click to select the sequence, Roll for note editing";
+    const cv=document.createElement("canvas"); cv.height=36;
+    cv.width=Math.max(24, Math.min(1200, Math.round(b.lenBars*16*10)));
+    el.appendChild(cv);
+    const nm=document.createElement("span"); nm.className="wname";
+    nm.textContent=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)));
+    el.appendChild(nm);
+    ptDrawSeqCanvas(cv, b.seq, seqBarsOf(b.seq)*16, cid);
+    el.addEventListener("click", ev=>{ ev.stopPropagation();
+      selectChannel(cid); if(b.real||S.mode==="song") selectSequence(b.seq);
+      S.selSeqEntry=b.real? b.entry : null; ptFocus="seq"; S.selClipId=null;
+      ptRender(); syncEditor(); });
+    body.appendChild(el);
+  });
+  if(!blocks.length) body.innerHTML='<div class="lanehint">No sequences yet.</div>';
+  lane.appendChild(body);
+  return lane;
+}
+
+/* ---------------- ptRender extension: chain + MIDI lanes above the wave lanes ---------------- */
+const _ptRenderUPrev=ptRender;
+ptRender=function(){
+  _ptRenderUPrev();
+  const wrap=$("ptLanes"); if(!wrap || S._ptDrag) return;
+  const ts=totalSteps(), flags=ptMSFlags();
+  const firstWave=wrap.querySelector('.ptLane[data-pttrack]');
+  const anchor=firstWave||wrap.querySelector("#ptCursor")||null;
+  const frag=document.createDocumentFragment();
+  frag.appendChild(ptSectionHead("<b>MIDI / Sequences</b> · chain + one lane per channel — same ruler, same playhead as the waves"));
+  frag.appendChild(ptBuildChainLane(ts));
+  S.order.forEach((cid, idx)=>{ const l=ptBuildMidiLane(cid, idx, ts); if(l) frag.appendChild(l); });
+  frag.appendChild(ptSectionHead("<b>Audio / Waves</b> · one track per channel — clips play through their channel"));
+  if(anchor) wrap.insertBefore(frag, anchor); else wrap.appendChild(frag);
+  /* type badges + dimming on the wave lanes built by the base renderer */
+  wrap.querySelectorAll('.ptLane[data-pttrack]').forEach(l=>{
+    const cid=l.dataset.pttrack, ch=S.channels[cid]; if(!ch) return;
+    l.classList.toggle("dimlane", !ptWaveAudible(cid, flags));
+    const head=l.querySelector(".ptHead"), no=head&&head.querySelector(".ptTrkNo");
+    if(no && !no.querySelector(".laneType")){ const s=document.createElement("span");
+      s.className="laneType wave"; s.textContent="WAVE"; no.appendChild(document.createTextNode(" ")); no.appendChild(s); }
+  });
+  const info=$("ptInfo");
+  if(info) info.textContent=S.order.length+" wave tracks · "+S.order.length+" MIDI lanes · "+S.clips.length+" wave clips · "+ptChainBlocks().filter(b=>b.real).length+" sequence blocks · "+layoutBars()+" bars · snap "+(S.snap&&S.ptGrid? "on":"off");
+  ptPositionCursor(); ptPositionPlayhead();
+};
+/* selection info: sequence blocks get their own readout */
+const _ptSelInfoUPrev=ptSyncSelInfo;
+ptSyncSelInfo=function(){
+  if(ptFocus==="seq" && S.selSeqEntry!=null && S.playlist && S.playlist[S.selSeqEntry]){
+    const el=$("ptSelInfo"); if(!el) return;
+    const e=S.playlist[S.selSeqEntry], blocks=ptChainBlocks().filter(b=>b.real), b=blocks.find(x=>x.entry===S.selSeqEntry);
+    el.textContent="Selected sequence block: "+(S.seqNames[e.seq]||("SEQ "+(e.seq+1)))+" · entry "+(S.selSeqEntry+1)+" of "+S.playlist.length+
+      (b? " · bars "+(b.startBar+1)+"–"+(b.startBar+b.lenBars) : "")+" · Slice / Duplicate / Copy / Paste / Delete act on this block · Roll (lane header) opens its notes in the Piano Roll";
+    return;
+  }
+  _ptSelInfoUPrev();
+};
+/* wave interactions hand focus back to the wave selection */
+const _ptClipPdUPrev=ptClipPointerDown;
+ptClipPointerDown=function(e){ S.selSeqEntry=null; ptFocus="wave"; _ptClipPdUPrev(e); };
+
+/* ---------------- Toolbar dispatch: sequence blocks get the same buttons ---------------- */
+function ptSeqSelectedEntry(){
+  if(S.selSeqEntry!=null && S.playlist && S.playlist[S.selSeqEntry]) return S.selSeqEntry;
+  return null;
+}
+$("ptSlicePlay").onclick=()=>{ const at=S.playing? Math.round(currentTlStep()*1000)/1000 : (S.tlCursor||0);
+  const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqSlice(en, Math.round(at/16)); return; }
+  const c=ptSelectedClip(); if(!c){ setStatus("Select a clip or a sequence block first, then slice it."); return; }
+  ptSplitClip(c, at); };
+$("ptSliceCursor").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqSlice(en, Math.round((S.tlCursor||0)/16)); return; }
+  const c=ptSelectedClip(); if(!c){ setStatus("Select a clip or a sequence block first, then slice it."); return; }
+  ptSplitClip(c, S.tlCursor||0); };
+$("ptCopy").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptEnsureSongChain(); const e=S.playlist[en];
+    ptClipboard={ kind:"seq", seq:e.seq, reps:e.reps||1, bars:seqBarsOf(e.seq),
+      name:S.seqNames[e.seq]||("SEQ "+(e.seq+1)), data:ptSeqDataSnapshot(e.seq) };
+    setStatus("Copied sequence block "+ptClipboard.name+" — Paste drops an independent copy at the cursor bar (or after the selected block).");
+    return; }
+  ptCopySelected(); };
+$("ptPaste").onclick=()=>{ 
+  if(ptClipboard && ptClipboard.kind==="seq"){ ptEnsureSongChain();
+    const copy=ptCreateSeqFromData(ptClipboard.data, ptClipboard.name+" (copy)", ptClipboard.bars);
+    let insertAt=S.playlist.length;
+    const cursorBar=Math.floor((S.tlCursor||0)/16), blocks=ptChainBlocks().filter(b=>b.real);
+    for(const b of blocks){ if(cursorBar<b.startBar+b.lenBars){ insertAt=b.entry; break; } }
+    if(ptFocus==="seq" && ptSeqSelectedEntry()!=null) insertAt=ptSeqSelectedEntry()+1;
+    S.playlist.splice(insertAt, 0, { seq:copy, reps:ptClipboard.reps });
+    S.selSeqEntry=insertAt; ptFocus="seq";
+    ptAfterChainEdit("Pasted "+(S.seqNames[copy])+" at position "+(insertAt+1)+" — an independent sequence; editing it never touches the copied original.");
+    return; }
+  ptPaste(); };
+$("ptDup").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqDuplicate(en); return; }
+  ptDuplicateSelected(); };
+$("ptDel").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqDelete(en); return; }
+  ptDeleteSelected(); };
+$("ptNudgeL").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null && en>0){ ptSeqReorder(en, en-1); return; }
+  ptNudge(-1); };
+$("ptNudgeR").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null && S.playlist && en<S.playlist.length-1){ ptSeqReorder(en, en+1); return; }
+  ptNudge(1); };
+document.addEventListener("keydown", e=>{
+  if(!(e.ctrlKey||e.metaKey) || e.altKey) return;
+  const t=e.target, tag=((t && t.tagName)||"").toLowerCase();
+  if(tag==="input"||tag==="select"||tag==="textarea"||(t && t.isContentEditable)) return;
+  const k=(e.key||"").toLowerCase();
+  if(k==="c" && ptFocus==="seq" && ptSeqSelectedEntry()!=null){ $("ptCopy").onclick(); }
+});
+
+/* ---------------- Persistence: MIDI lane M/S joins the project ---------------- */
+const _ptPjUPrev=projectJSON;
+projectJSON=function(){ const p=_ptPjUPrev(); p.seqMS=JSON.parse(JSON.stringify(S.seqMS||{})); return p; };
+const _ptLcpUPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){ _ptLcpUPrev(p);
+  if(p.seqMS) S.seqMS=p.seqMS;
+  if(S.selSeqEntry!=null && (!S.playlist || !S.playlist[S.selSeqEntry])) S.selSeqEntry=null;
+  ptRender(); };
+
+/* ---------------- Init ---------------- */
+ptRender();
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   SEQUENCE POSITIONING — sequence blocks get FULL wave parity.
+   Playlist entries gain explicit timeline positions:
+   · e.start — start position in STEPS (float; sub-bar and
+     off-grid values included). Entries without one chain
+     gaplessly from the previous entry's end, so every existing
+     project converts losslessly (start = cumulative position).
+   · e.len — explicit length in steps for sliced/trimmed
+     pieces; entries without one span reps × the sequence's
+     bar length, exactly as before.
+   A project is "positioned" once any entry's start/len
+   diverges from the gapless chain. Positioned songs are
+   driven by a per-step song map in BOTH engines: the live
+   scheduler wrapper sets playPat/seqBarPos per step (gaps
+   silence the sequence layer, wave clips keep playing), and
+   the offline renderer schedules from the same map — so
+   playback, master/stem export, undo and save/load all honor
+   sub-bar slices and start offsets exactly. Unpositioned
+   (legacy chain) projects run the original engines untouched.
+   Slicing honors the arrangement Snap grid (bar → 1/32,
+   triplets, or free at the exact click/playhead position):
+   pieces are built by a step-accurate range copy that
+   partitions steps/notes/hits/rolls at the cut, clipping
+   crossing notes on both sides so the join is seamless.
+   ============================================================ */
+function ptR3(v){ return Math.round(v*1000)/1000; }
+function ptEntryLen(e){
+  if(!e) return 0;
+  if(typeof e.len==="number" && isFinite(e.len) && e.len>0) return ptR3(e.len);
+  return clamp(e.reps||1, 1, 64)*seqBarsOf(e.seq)*16;
+}
+function ptSongSegments(){
+  const segs=[]; let acc=0;
+  (S.playlist||[]).forEach((e, idx)=>{
+    const len=ptEntryLen(e);
+    const start=(typeof e.start==="number" && isFinite(e.start))? ptR3(e.start) : acc;
+    segs.push({ entry:idx, seq:validSeq(e.seq), reps:e.reps||1, start, len });
+    acc=start+len;
+  });
+  return segs;
+}
+function ptSongTotalSteps(){
+  return ptSongSegments().reduce((m,s)=>Math.max(m, s.start+s.len), 0);
+}
+function ptMaterializeStarts(){
+  ptSongSegments().forEach(sg=>{ const e=S.playlist[sg.entry]; if(e) e.start=sg.start; });
+}
+function ptArrangementPositioned(){
+  if(!S.playlist || !S.playlist.length) return false;
+  let acc=0;
+  for(const e of S.playlist){
+    const len=ptEntryLen(e);
+    const start=(typeof e.start==="number" && isFinite(e.start))? e.start : acc;
+    if(Math.abs(start-acc)>0.001) return true;
+    if(typeof e.len==="number") return true;
+    acc=start+len;
+  }
+  return false;
+}
+function ptSeqEngineActive(){
+  return S.mode==="song" && !!(S.playlist && S.playlist.length) && ptArrangementPositioned();
+}
+let _ptMapCache={ key:null, map:null };
+function ptSongStepMap(){
+  const key=JSON.stringify(S.playlist||[])+"|"+(S.seqBars||[]).join(",");
+  if(_ptMapCache.key===key && _ptMapCache.map) return _ptMapCache.map;
+  const segs=ptSongSegments();
+  const total=segs.reduce((m,s)=>Math.max(m, s.start+s.len), 0);
+  const n=Math.max(0, Math.ceil(total-1e-6));
+  const cells=new Array(n).fill(null);
+  /* later entries win where blocks overlap — same as stacked wave clips */
+  segs.forEach(sg=>{
+    const j0=Math.max(0, Math.ceil(sg.start-1e-6)), j1=Math.min(n, Math.ceil(sg.start+sg.len-1e-6));
+    for(let j=j0;j<j1;j++) cells[j]={ seq:sg.seq, at:j-sg.start, entry:sg.entry };
+  });
+  const map={ totalSteps:total, cells, segs };
+  _ptMapCache={ key, map };
+  return map;
+}
+function ptAssignStarts(pieces, base){
+  let acc=base;
+  pieces.forEach(p=>{ p.start=ptR3(acc); acc+=ptEntryLen(p); });
+  return pieces;
+}
+
+/* ---------- Step-accurate range copy → a brand-new sequence ----------
+   Content in [offSteps, offSteps+lenSteps) is rebased to 0. Notes and
+   hits keep their continuous position (step + off), so a note crossing
+   either edge is clipped to the boundary on both sides: the two pieces
+   play seamlessly, nothing lost, nothing doubled. Works at any snap
+   resolution, including fractional (Snap off) cut points. */
+function ptRangeCopy(srcSeq, offSteps, lenSteps, suffix){
+  offSteps=Math.max(0, offSteps); lenSteps=Math.max(0.05, lenSteps);
+  const endSteps=offSteps+lenSteps;
+  const barsPick=[1,2,4,8,16].find(b=>b*16>=Math.ceil(lenSteps-1e-9))||16;
+  const capSteps=barsPick*16;
+  const newIdx=seqCount();
+  S.order.forEach(id=>{ const ch=S.channels[id]; const p=ch.patterns[srcSeq]||{steps:[],notes:[],sub:[],hits:[]};
+    const np={ steps:Array(capSteps).fill(0), notes:[], sub:[], hits:[] };
+    const src=p.steps||[];
+    const hitMidi=(ch.type==="chop"? 0 : (ch.root||60));
+    for(let i=0;i<src.length;i++){ if(!src[i]) continue;
+      if(i>=offSteps && i<endSteps){ const rel=i-offSteps, st=Math.floor(rel+1e-9), fr=Math.round((rel-st)*10000)/10000;
+        if(fr<=0.0005 || fr>=0.9995){ const ni=Math.round(rel); if(ni>=0 && ni<capSteps) np.steps[ni]=1; }
+        /* a step at a fractional position (Snap-off / triplet cut) keeps its
+           EXACT timing as a sub-step hit — the same {step, off} form recorded
+           hits use — instead of being rounded onto the grid */
+        else if(st>=0 && st<capSteps) np.hits.push({ step:st, off:fr, vel:0.92, midi:hitMidi }); } }
+    (p.notes||[]).forEach(n=>{ const s=n.step+(n.off||0), e=s+(n.len||1);
+      if(e<=offSteps || s>=endSteps) return;
+      const cs=Math.max(s, offSteps), ce=Math.min(e, endSteps), rel=cs-offSteps;
+      const st=Math.floor(rel+1e-9), fr=Math.round((rel-st)*10000)/10000;
+      const nn=Object.assign({}, n, { step:st, len:Math.max(0.05, Math.round((ce-cs)*10000)/10000) });
+      if(fr>0) nn.off=fr; else delete nn.off;
+      np.notes.push(nn); });
+    (p.hits||[]).forEach(h=>{ const pos=h.step+(h.off||0);
+      if(pos<offSteps || pos>=endSteps) return;
+      const rel=pos-offSteps, st=Math.floor(rel+1e-9), fr=Math.round((rel-st)*10000)/10000;
+      const nh=Object.assign({}, h, { step:st }); if(fr>0) nh.off=fr; else delete nh.off;
+      np.hits.push(nh); });
+    (p.sub||[]).forEach(r=>{ if(r.step>=offSteps && r.step<endSteps){
+      const rel=r.step-offSteps, st=Math.floor(rel+1e-9), fr=Math.round((rel-st)*10000)/10000;
+      if(fr<=0.0005 || fr>=0.9995) np.sub.push(Object.assign({}, r, { step:Math.round(rel) }));
+      else { /* a roll at a fractional position becomes its exact hits */
+        const frs=r.kind==="32"? [0.25,0.5,0.75] : r.kind==="trip"? [1/3,2/3] : [0.5];
+        const items=(src[r.step]? [] : [{ f:0, vel:0.92 }]).concat(frs.map((f,i)=>({ f, vel:0.7-i*0.12 })));
+        items.forEach(it=>{ const pos=rel+it.f; let s2=Math.floor(pos+1e-9), o2=Math.round((pos-s2)*10000)/10000;
+          if(o2>=0.9995){ s2+=1; o2=0; }
+          const nh={ step:s2, vel:it.vel, midi:hitMidi }; if(o2>0.0005) nh.off=o2;
+          np.hits.push(nh); });
+      } } });
+    ch.patterns.push(np);
+  });
+  while(S.seqNames.length<newIdx) S.seqNames.push("SEQ "+(S.seqNames.length+1));
+  S.seqNames.push(((S.seqNames[srcSeq]||("SEQ "+(srcSeq+1)))+(suffix||"")).slice(0,60));
+  while(S.seqBars.length<newIdx) S.seqBars.push(1);
+  S.seqBars.push(barsPick);
+  if(Array.isArray(S.seqTranspose)){ while(S.seqTranspose.length<newIdx) S.seqTranspose.push(0);
+    S.seqTranspose.push(typeof blSeqT==="function"? blSeqT(srcSeq):0); }
+  return newIdx;
+}
+/* Rebuild playlist entries covering content range [from, to) of an entry.
+   A repeating entry's content at position p is sequence step p % period;
+   an atomic (sliced) entry's content is its own data read directly. */
+function ptEntryPiecesForRange(e, from, to, opts){
+  opts=opts||{};
+  const M=seqBarsOf(e.seq)*16;
+  if(e.len!=null){
+    const L=e.len, out=[];
+    const headTo=Math.min(to, L);
+    if(headTo-from>0.001){
+      if(from<=0.001 && headTo>=L-0.001 && !opts.forceCopy) out.push({ seq:e.seq, reps:1, len:L });
+      else out.push({ seq:ptRangeCopy(e.seq, from, headTo-from, " · part"), reps:1, len:ptR3(headTo-from) });
+    }
+    if(to>L+0.001) out.push({ seq:ptRangeCopy(e.seq, L, to-L, " · ext"), reps:1, len:ptR3(to-L) });
+    if(!out.length) out.push({ seq:e.seq, reps:1, len:L });
+    return out;
+  }
+  const pieces=[]; let p=from;
+  const off0=p % M;
+  if(off0>0.001){ const take=Math.min(M-off0, to-p);
+    if(take>0.001){ pieces.push({ seq:ptRangeCopy(e.seq, off0, take, " · part"), reps:1, len:ptR3(take) }); p+=take; } }
+  const full=Math.floor((to-p)/M + 1e-9);
+  if(full>0){ if(opts.forceCopy) pieces.push({ seq:ptRangeCopy(e.seq, 0, M, " · part"), reps:full });
+    else pieces.push({ seq:e.seq, reps:full }); p+=full*M; }
+  if(to-p>0.001){ pieces.push({ seq:ptRangeCopy(e.seq, 0, to-p, " · part"), reps:1, len:ptR3(to-p) }); p=to; }
+  if(!pieces.length) pieces.push({ seq:e.seq, reps:1 });
+  return pieces;
+}
+
+/* ---------- Sequence operations at step resolution (wave parity) ---------- */
+ptSeqSlice=function(entryIdx, atStepRaw){
+  if(entryIdx==null || entryIdx<0){ ptEnsureSongChain(); entryIdx=0; }
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const e=S.playlist[entryIdx]; if(!e){ setStatus("Select a sequence block first, then slice it."); return; }
+  const sg=ptSongSegments()[entryIdx]; if(!sg) return;
+  const start=sg.start, len=sg.len, at=ptSnapPos(atStepRaw);
+  if(at<=start+0.01 || at>=start+len-0.01){
+    setStatus("Slice point has to land inside "+(S.seqNames[e.seq]||"the block")+" — not on its very edge. Sequences slice wherever the Snap grid lands: a bar, a beat, a single step — or the exact clicked spot with Snap off."); return; }
+  const k=ptR3(at-start);
+  const left=ptEntryPiecesForRange(e, 0, k, { forceCopy:true });
+  const right=ptEntryPiecesForRange(e, k, len, { forceCopy:true });
+  ptAssignStarts(left, start); ptAssignStarts(right, start+k);
+  S.playlist.splice(entryIdx, 1, ...left, ...right);
+  S.selSeqEntry=entryIdx+left.length-1; ptFocus="seq";
+  ptAfterChainEdit("Sliced "+(S.seqNames[e.seq]||"the sequence")+" at "+posLabel(at)+((S.snap&&S.ptGrid)? " — right on the "+$("ptSnapGrid").options[$("ptSnapGrid").selectedIndex].text+" grid" : " — at the exact spot")+". The steps and notes split at the cut: anything crossing it is clipped on both sides, so the two pieces play seamlessly — nothing lost, nothing doubled — and each piece is an independent sequence sitting in its own place on the timeline. Slide either one anywhere; the other won't move.");
+};
+function ptSeqSlide(entryIdx, newStartRaw){
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const sg=ptSongSegments()[entryIdx]; if(!sg) return;
+  const ns=ptSnapPos(newStartRaw);
+  if(Math.abs(ns-sg.start)<0.001){ ptRender(); return; }
+  e.start=ns;
+  S.selSeqEntry=entryIdx; ptFocus="seq";
+  ptAfterChainEdit("Slid "+(S.seqNames[e.seq]||"the sequence")+" to "+posLabel(ns)+" — it starts exactly there now. The space before it is a real gap: playback and export stay silent there, and no other block moved.");
+}
+ptSeqDuplicate=function(entryIdx){
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const sg=ptSongSegments()[entryIdx]; if(!sg) return;
+  const M=seqBarsOf(e.seq)*16;
+  let copyEntry;
+  if(e.len!=null) copyEntry={ seq:ptRangeCopy(e.seq, 0, sg.len, " (copy)"), reps:1, len:sg.len };
+  else copyEntry={ seq:ptRangeCopy(e.seq, 0, M, " (copy)"), reps:e.reps||1 };
+  copyEntry.start=ptSnapPos(sg.start+sg.len);
+  S.playlist.splice(entryIdx+1, 0, copyEntry);
+  S.selSeqEntry=entryIdx+1; ptFocus="seq";
+  ptAfterChainEdit("Duplicated the sequence block — the copy ("+(S.seqNames[copyEntry.seq])+") sits right after the original at "+posLabel(copyEntry.start)+", fully independent: edit its notes in the Piano Roll and the original never changes. Drag it anywhere from here.");
+};
+ptSeqDelete=function(entryIdx){
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const nm=S.seqNames[e.seq]||("SEQ "+(e.seq+1));
+  S.playlist.splice(entryIdx, 1);
+  if(!S.playlist.length){ S.mode="pattern"; if(typeof updateSongUI==="function") updateSongUI(); }
+  S.selSeqEntry=null;
+  ptAfterChainEdit("Removed the "+nm+" block from the arrangement — every other block keeps its exact timeline position, and the sequence itself is still in the library (rack sequence buttons) to re-add anytime.");
+};
+function ptSeqTrimSteps(entryIdx, side, edgeStep){
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const sg=ptSongSegments()[entryIdx]; if(!sg) return;
+  const start=sg.start, len=sg.len;
+  if(side==="l" && edgeStep<start-0.001){ ptSeqSlide(entryIdx, edgeStep); return; }
+  if(side==="r"){
+    const newLen=ptR3(clamp(edgeStep-start, 0.25, 1024));
+    if(Math.abs(newLen-len)<0.001){ ptRender(); return; }
+    const pieces=ptEntryPiecesForRange(e, 0, newLen, {});
+    ptAssignStarts(pieces, start);
+    S.playlist.splice(entryIdx, 1, ...pieces);
+    S.selSeqEntry=entryIdx; ptFocus="seq";
+    ptAfterChainEdit("Trimmed the block's right edge to "+posLabel(start+newLen)+" — this placement is now "+(newLen/16).toFixed(2)+" bars. Trimmed pieces are range copies; the library sequence is untouched.");
+  } else {
+    const drop=ptR3(edgeStep-start);
+    if(drop<0.001){ ptRender(); return; }
+    if(len-drop<0.25){ setStatus("That trim would erase the block — Delete it instead if that's the goal."); ptRender(); return; }
+    const pieces=ptEntryPiecesForRange(e, drop, len, {});
+    ptAssignStarts(pieces, edgeStep);
+    S.playlist.splice(entryIdx, 1, ...pieces);
+    S.selSeqEntry=entryIdx; ptFocus="seq";
+    ptAfterChainEdit("Trimmed the block's left edge to "+posLabel(edgeStep)+" — the cut part is gone from this placement only; the library sequence is untouched.");
+  }
+}
+ptSeqTrim=function(entryIdx, side, newLenBars){ /* legacy bar-based signature, kept for safety */
+  const sg=ptSongSegments()[entryIdx]; if(!sg) return;
+  if(side==="r") ptSeqTrimSteps(entryIdx, "r", sg.start+newLenBars*16);
+  else ptSeqTrimSteps(entryIdx, "l", sg.start + Math.max(0, sg.len-newLenBars*16));
+};
+ptSeqReorder=function(entryIdx, targetIdx){ /* positions are explicit now: blocks trade places */
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const a=S.playlist[entryIdx], b=S.playlist[targetIdx];
+  if(!a || !b || a===b) return;
+  const segs=ptSongSegments(), sa=segs[entryIdx].start;
+  a.start=segs[targetIdx].start; b.start=sa;
+  S.selSeqEntry=targetIdx; ptFocus="seq";
+  ptAfterChainEdit("Swapped the two blocks' timeline positions — blocks hold explicit start positions now, so they trade places instead of pushing the chain around.");
+};
+function ptSeqNudge(entryIdx, dir){
+  ptEnsureSongChain(); ptMaterializeStarts();
+  const e=S.playlist[entryIdx]; if(!e) return;
+  const sg=ptSongSegments()[entryIdx]; if(!sg) return;
+  const d=(S.snap&&S.ptGrid)? S.ptGrid : (0.010/stepDurSec());
+  e.start=Math.max(0, ptR3(sg.start+dir*d));
+  S.selSeqEntry=entryIdx; ptFocus="seq";
+  ptAfterChainEdit("Nudged "+(S.seqNames[e.seq]||"the sequence")+" to "+posLabel(e.start)+".");
+}
+
+/* ---------- Chain model in steps (float bar geometry for the lanes) ---------- */
+ptChainBlocks=function(){
+  const LB=layoutBars(), blocks=[];
+  if(S.mode==="song" && S.playlist && S.playlist.length){
+    const segs=ptSongSegments();
+    segs.forEach(sg=>{ blocks.push({ entry:sg.entry, seq:sg.seq, reps:sg.reps,
+      startBar:sg.start/16, lenBars:sg.len/16, startStep:sg.start, lenSteps:sg.len, real:true }); });
+    const total=ptSongTotalSteps();
+    if(total>0 && total<LB*16){
+      let base=total, guard=0;
+      while(base<LB*16 && guard++<64){
+        for(const sg of segs){ const st=base+sg.start; if(st>=LB*16) continue;
+          const ln=Math.min(sg.len, LB*16-st); if(ln<=0) continue;
+          blocks.push({ entry:sg.entry, seq:sg.seq, reps:sg.reps,
+            startBar:st/16, lenBars:ln/16, startStep:st, lenSteps:ln, real:false, ghost:true }); }
+        base+=total;
+      }
+    }
+  } else {
+    const seqLen=seqBarsOf(S.pattern);
+    for(let a=0; a<LB; a+=seqLen)
+      blocks.push({ entry:-1, seq:S.pattern, reps:1, startBar:a, lenBars:Math.min(seqLen, LB-a),
+        startStep:a*16, lenSteps:Math.min(seqLen, LB-a)*16, real:a===0, ghost:a>0, src:true });
+  }
+  return blocks;
+};
+
+/* ---------- Chain lane: step-accurate slice + slide/trim drag ---------- */
+/* Slice-by-double-click goes through one guarded door: the block's
+   pointerdown calls preventDefault (needed for clean drags), which
+   suppresses the native dblclick mouse event — so the pointer handler
+   ALSO detects the double-tap itself and calls this. The guard stops
+   a native dblclick that does get through from slicing twice. */
+function ptBlockDblSlice(entryIdx, step){
+  const now=Date.now();
+  if(S._ptSliceGuard && now-S._ptSliceGuard.t<600 && Math.abs(S._ptSliceGuard.step-step)<0.01) return;
+  S._ptSliceGuard={ step, t:now };
+  ptSeqSlice(entryIdx, step);
+}
+ptBuildChainLane=function(ts){
+  const LB=layoutBars(), blocks=ptChainBlocks();
+  const lane=document.createElement("div"); lane.className="ptLane chainLane";
+  const head=document.createElement("div"); head.className="ptHead";
+  const allMute=S.order.length>0 && S.order.every(id=>ptLaneMS(id).mute);
+  const allSolo=S.order.length>0 && S.order.every(id=>ptLaneMS(id).solo);
+  head.innerHTML='<div class="ptTrkNo">MIDI / SEQ · Song chain</div>'+
+    '<button class="ptName" type="button">'+(S.mode==="song"? "Song — playlist chain" : "Pattern — "+(S.seqNames[S.pattern]||("SEQ "+(S.pattern+1)))+" loop")+'</button>'+
+    '<div class="ptChLine">Sequence layer · all channels · slice / slide / copy real sequences, at the Snap grid</div>';
+  const btns=document.createElement("div"); btns.className="ptBtns";
+  const mk=(label, title, fn, cls)=>{ const b=document.createElement("button"); b.textContent=label; b.title=title; if(cls) b.className=cls;
+    b.onclick=e=>{ e.stopPropagation(); fn(); }; btns.appendChild(b); return b; };
+  mk("M", "Mute the whole sequence layer (every MIDI lane)", ()=>{ const v=!allMute;
+    S.order.forEach(id=>{ S.seqMS[id]=Object.assign(ptLaneMS(id), { mute:v }); });
+    markDirty(); ptRender(); setStatus(v? "Sequence layer muted — waves still play; every MIDI lane is dimmed." : "Sequence layer unmuted."); }, allMute?"m-on":"");
+  mk("S", "Solo the whole sequence layer", ()=>{ const v=!allSolo;
+    S.order.forEach(id=>{ S.seqMS[id]=Object.assign(ptLaneMS(id), { solo:v }); });
+    markDirty(); ptRender(); setStatus(v? "Sequence layer soloed — only the MIDI sequences play." : "Sequence solo cleared — everything plays again."); }, allSolo?"s-on":"");
+  mk("Roll", "Open the selected channel in the Piano Roll", ()=>openRollFor(S.selected));
+  head.appendChild(btns);
+  lane.appendChild(head);
+  const body=document.createElement("div"); body.className="ptBody"; body.dataset.ptchain="1";
+  blocks.forEach(b=>{
+    const el=document.createElement("div");
+    el.className="ptseqblock"+(b.ghost?" ghost":"")+((ptFocus==="seq"&&S.selSeqEntry===b.entry&&b.real)?" sel":"");
+    el.dataset.entry=b.entry; el.dataset.real=b.real? "1":"";
+    el.style.left=(b.startBar/LB*100)+"%";
+    el.style.width=Math.max(1.4, b.lenBars/LB*100)+"%";
+    el.title=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)))+(b.reps>1? " ×"+b.reps : "")+(b.ghost? " — loop repeat (edit the first block)" : " — drag to slide anywhere (Snap grid applies, gaps are fine) · edges trim · double-click slices at the Snap grid · click selects");
+    const cv=document.createElement("canvas"); cv.height=44;
+    cv.width=Math.max(24, Math.min(1200, Math.round(b.lenBars*16*10)));
+    el.appendChild(cv);
+    const nm=document.createElement("span"); nm.className="wname";
+    nm.textContent=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)))+(b.reps>1? " ×"+b.reps : "");
+    el.appendChild(nm);
+    ["l","r"].forEach(side=>{ const w=document.createElement("div"); w.className="wedge "+side; w.dataset.edge=side; el.appendChild(w); });
+    ptDrawSeqCanvas(cv, b.seq, seqBarsOf(b.seq)*16, null);
+    el.addEventListener("pointerdown", ev=>ptChainBlockPointer(ev, el, b));
+    el.addEventListener("dblclick", ev=>{ ev.stopPropagation();
+      clearTimeout(S._ptClickTimer);
+      if(!b.real){ setStatus("That’s the loop repeat — slice the first block and the repeat follows."); return; }
+      const rect=body.getBoundingClientRect();
+      const step=ptSnapPos(clamp((ev.clientX-rect.left)/rect.width, 0, 1)*ts);
+      ptBlockDblSlice(b.entry, step); });
+    body.appendChild(el);
+  });
+  body.addEventListener("click", e=>{
+    if(e.target.closest && e.target.closest(".ptseqblock")) return;
+    const rect=body.getBoundingClientRect();
+    S.tlCursor=ptSnapPos(clamp((e.clientX-rect.left)/rect.width, 0, 1)*ts);
+    ptPositionCursor();
+  });
+  /* fallback: if a re-render replaced the block element between the two
+     clicks, the dblclick lands here instead — slice by geometry */
+  body.addEventListener("dblclick", ev=>{
+    if(ev.target.closest && ev.target.closest(".ptseqblock")) return;
+    const rect=body.getBoundingClientRect();
+    const step=ptSnapPos(clamp((ev.clientX-rect.left)/rect.width, 0, 1)*ts);
+    const blk=ptChainBlocks().filter(x=>x.real).find(x=>step>x.startStep+0.01 && step<x.startStep+x.lenSteps-0.01);
+    if(blk) ptBlockDblSlice(blk.entry, step);
+  });
+  lane.appendChild(body);
+  return lane;
+};
+ptChainBlockPointer=function(e, el, b){
+  e.stopPropagation(); e.preventDefault();
+  if(b.ghost && !b.src){ setStatus("That’s the loop repeat of the chain — edit the first block and every repeat follows it."); return; }
+  clearTimeout(S._ptClickTimer);
+  /* double-tap detection: preventDefault above suppresses the native
+     dblclick, so a second press on the same block within 350 ms IS the
+     double-click — slice right here, at the Snap grid */
+  const tapKey=b.seq+"@"+b.startStep, nowT=Date.now();
+  if(S._ptLastBlockTap && S._ptLastBlockTap.key===tapKey && nowT-S._ptLastBlockTap.t<350){
+    S._ptLastBlockTap=null;
+    if(!b.real){ setStatus("That’s the loop repeat — slice the first block and the repeat follows."); return; }
+    const r0=el.parentElement.getBoundingClientRect();
+    const step=ptSnapPos(clamp((e.clientX-r0.left)/r0.width, 0, 1)*totalSteps());
+    ptBlockDblSlice(b.entry, step);
+    return;
+  }
+  S._ptDrag=true; /* set BEFORE anything that re-renders: the lanes must not rebuild mid-drag */
+  ptEnsureSongChain();
+  ptMaterializeStarts();
+  /* resolve the playlist entry under this block (Pattern mode converts to a chain first) */
+  let entry=b.entry, blk=b;
+  if(entry==null || entry<0 || !S.playlist[entry]){
+    const real=ptChainBlocks().filter(x=>x.real);
+    blk=real.find(x=>Math.abs(x.startStep-b.startStep)<0.01) || real[0];
+    entry=blk? blk.entry : 0;
+  }
+  const ent=S.playlist[entry]; if(!ent){ S._ptDrag=false; return; }
+  selectSequence(ent.seq);
+  S.selSeqEntry=entry; S.selClipId=null; ptFocus="seq";
+  document.querySelectorAll(".ptseqblock").forEach(x=>x.classList.toggle("sel", x===el));
+  ptSyncSelInfo();
+  const body=el.parentElement, rect=body.getBoundingClientRect();
+  const ts=totalSteps(), pxPerStep=Math.max(1, rect.width/ts);
+  const edge=e.target.dataset && e.target.dataset.edge;
+  const startX=e.clientX;
+  const sg=ptSongSegments()[entry];
+  const oStart=sg.start, oLen=sg.len, oEnd=oStart+oLen;
+  let moved=false, curStart=oStart, curEnd=oEnd;
+  const move=ev=>{
+    const raw=(ev.clientX-startX)/pxPerStep;
+    if(Math.abs(ev.clientX-startX)>4) moved=true;
+    if(!moved) return;
+    if(edge==="r"){ curEnd=clamp(ptSnapPos(oEnd+raw), oStart+0.25, oStart+1024);
+      el.style.width=Math.max(1.4, (curEnd-oStart)/ts*100)+"%"; }
+    else if(edge==="l"){ curStart=clamp(ptSnapPos(oStart+raw), 0, oEnd-0.25);
+      el.style.left=(curStart/ts*100)+"%";
+      el.style.width=Math.max(1.4, (oEnd-curStart)/ts*100)+"%"; }
+    else { curStart=ptSnapPos(oStart+raw);
+      el.style.transform="translateX("+((curStart-oStart)*pxPerStep)+"px)"; }
+  };
+  const up=ev=>{
+    window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+    S._ptDrag=false; S._ptDragEnd=Date.now();
+    el.style.transform="";
+    if(!moved){ /* remember the tap for double-click slicing, and defer the
+       rebuild: an instant re-render would destroy this element between the
+       two presses — selection visuals were already updated on pointerdown */
+      S._ptLastBlockTap={ key:tapKey, t:Date.now() };
+      clearTimeout(S._ptClickTimer);
+      S._ptClickTimer=setTimeout(()=>{ if(!S._ptDrag) ptRender(); }, 350);
+      return; }
+    S._ptLastBlockTap=null;
+    if(edge==="r") ptSeqTrimSteps(entry, "r", curEnd);
+    else if(edge==="l") ptSeqTrimSteps(entry, "l", curStart);
+    else if(Math.abs(curStart-oStart)>0.001) ptSeqSlide(entry, curStart);
+    else ptRender();
+  };
+  window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+};
+
+/* ---------- Toolbar: sequence blocks slice at steps + slide with Nudge ---------- */
+$("ptSlicePlay").onclick=()=>{ const at=S.playing? currentTlStep() : (S.tlCursor||0);
+  const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqSlice(en, at); return; }
+  const c=ptSelectedClip(); if(!c){ setStatus("Select a clip or a sequence block first, then slice it."); return; }
+  ptSplitClip(c, S.playing? Math.round(at*1000)/1000 : at); };
+$("ptSliceCursor").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqSlice(en, S.tlCursor||0); return; }
+  const c=ptSelectedClip(); if(!c){ setStatus("Select a clip or a sequence block first, then slice it."); return; }
+  ptSplitClip(c, S.tlCursor||0); };
+$("ptPaste").onclick=()=>{
+  if(ptClipboard && ptClipboard.kind==="seq"){ ptEnsureSongChain(); ptMaterializeStarts();
+    const copy=ptCreateSeqFromData(ptClipboard.data, ptClipboard.name+" (copy)", ptClipboard.bars);
+    const selE=(ptFocus==="seq")? ptSeqSelectedEntry() : null;
+    let start, insertAt;
+    if(selE!=null && S.playlist[selE]){ const sg=ptSongSegments()[selE];
+      start=ptSnapPos(sg.start+sg.len); insertAt=selE+1; }
+    else { start=ptSnapPos(S.tlCursor||0); insertAt=S.playlist.length; }
+    S.playlist.splice(insertAt, 0, { seq:copy, reps:ptClipboard.reps||1, start });
+    S.selSeqEntry=insertAt; ptFocus="seq";
+    ptAfterChainEdit("Pasted "+(S.seqNames[copy])+" at "+posLabel(start)+" — an independent sequence placed exactly there; editing it never touches the copied original.");
+    return; }
+  ptPaste(); };
+$("ptNudgeL").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqNudge(en, -1); return; }
+  ptNudge(-1); };
+$("ptNudgeR").onclick=()=>{ const en=ptSeqSelectedEntry();
+  if(ptFocus==="seq" && en!=null){ ptSeqNudge(en, 1); return; }
+  ptNudge(1); };
+
+/* ---------- Arrangement length: positioned songs size the timeline ---------- */
+const _ptLbPosPrev=layoutBars;
+layoutBars=function(){
+  const b0=_ptLbPosPrev();
+  if(S.mode!=="song" || !ptArrangementPositioned()) return b0;
+  let b=4;
+  (S.clips||[]).forEach(c=>{ if(c.buffer && !c.missing) b=Math.max(b, Math.ceil((c.start+clipDurSteps(c))/16)); });
+  if(typeof aclipEndSteps==="function") b=Math.max(b, Math.ceil(aclipEndSteps()/16));
+  b=Math.max(b, Math.ceil(ptSongTotalSteps()/16));
+  return clamp(Math.max(4, b), 4, 64);
+};
+const _ptSttPosPrev=songTotalText;
+songTotalText=function(){
+  if(S.playlist && S.playlist.length && ptArrangementPositioned()){
+    const steps=ptSongTotalSteps(); if(!steps) return "playlist is empty";
+    const barsF=steps/16, secs=Math.round(steps*stepDurSec());
+    return (Number.isInteger(barsF)? barsF : Math.round(barsF*100)/100)+" bar"+(barsF===1?"":"s")+" · ~"+secs+"s at "+S.bpm+" BPM";
+  }
+  return _ptSttPosPrev();
+};
+const _ptFbsPosPrev=firstBarOfSeq;
+firstBarOfSeq=function(seqIdx){
+  if(ptArrangementPositioned()){
+    const sg=ptSongSegments().find(s=>s.seq===seqIdx);
+    return sg? sg.start/16 : 0;
+  }
+  return _ptFbsPosPrev(seqIdx);
+};
+/* old Layout panel: draw the sequence lane from explicit positions too */
+const _ptRlPosPrev=renderLayout;
+renderLayout=function(){
+  _ptRlPosPrev();
+  if(S.mode!=="song" || !ptArrangementPositioned()) return;
+  const body=document.querySelector("#layoutLanes .lane.seqlane .laneBody"); if(!body) return;
+  body.querySelectorAll(".seqblock").forEach(el=>el.remove());
+  const bars=layoutBars(), ts=bars*16, segs=ptSongSegments(), total=ptSongTotalSteps();
+  const draw=(off, cls)=>{ segs.forEach(sg=>{ const st=sg.start+off; if(st>=ts) return;
+    const d=document.createElement("div"); d.className="seqblock"+(cls?" "+cls:"");
+    d.dataset.from=st/16; d.dataset.to=Math.min(ts, st+sg.len)/16;
+    d.style.left=(st/ts*100)+"%"; d.style.width=(Math.min(sg.len, ts-st)/ts*100)+"%";
+    d.textContent=(S.seqNames[sg.seq]||("SEQ "+(sg.seq+1)))+(sg.reps>1? " ×"+sg.reps : "");
+    body.appendChild(d); }); };
+  draw(0, "");
+  if(total>0) for(let off=total; off<ts; off+=total) draw(off, "rep");
+};
+
+/* ---------- Live playback: the song map drives the scheduler ---------- */
+const _ptAdvPosPrev=advanceSong;
+advanceSong=function(){
+  if(!ptSeqEngineActive()){ _ptAdvPosPrev(); return; }
+  const total=ptSongTotalSteps(), nextStep=barCount*16, segs=ptSongSegments();
+  if(nextStep>=total){
+    if(!S.songLoop && !(layoutBars()*16>total+0.001 && barCount<layoutBars())) pendingSongStop=true;
+    songEntry=0; songRep=0; songBarInEntry=0; seqBarPos=0;
+    const first=segs.slice().sort((a,b)=>a.start-b.start)[0];
+    if(first) playPat=validSeq(first.seq);
+    if(typeof updateSongUI==="function") updateSongUI();
+    return;
+  }
+  const cell=ptSongStepMap().cells[nextStep];
+  let sg=cell? segs[cell.entry] : null;
+  if(!sg){ /* the next bar starts inside a gap — point the UI at what's coming */
+    sg=segs.filter(s=>s.start>nextStep).sort((a,b)=>a.start-b.start)[0] || null;
+    if(sg){ songEntry=sg.entry; songRep=0; songBarInEntry=0; seqBarPos=0; }
+  } else {
+    songEntry=sg.entry;
+    const into=Math.max(0, nextStep-sg.start);
+    songRep=Math.floor(into/16); songBarInEntry=songRep; seqBarPos=Math.floor(into/16);
+    playPat=validSeq(sg.seq);
+    if(S.songFollow && S.pattern!==playPat){
+      S.pattern=playPat;
+      if(typeof buildPatBtns==="function") buildPatBtns();
+      if(typeof buildRack==="function") buildRack();
+      if(typeof buildRoll==="function") buildRoll();
+      if(typeof buildSliceSteps==="function") buildSliceSteps();
+    }
+  }
+  if(typeof updateSongUI==="function") updateSongUI();
+};
+const _ptSchedPosPrev=scheduleStep;
+scheduleStep=function(step, t){
+  if(!ptSeqEngineActive()){ _ptSchedPosPrev(step, t); return; }
+  const map=ptSongStepMap(), total=map.totalSteps;
+  const g=barCount*16+step;
+  let pos=g;
+  if(total>0 && (S.songLoop || layoutBars()*16>total+0.001)) pos=((g % total)+total)%total;
+  const cell=(pos>=0 && pos<map.cells.length)? map.cells[Math.floor(pos)] : null;
+  if(cell){
+    playPat=validSeq(cell.seq);
+    seqBarPos=(Math.floor(cell.at)-step)/16;
+    _ptSchedPosPrev(step, t);
+  } else {
+    /* a gap in the sequence layer: patterns rest, clips + metronome still run */
+    const idx=activePatIdx(), swapped=[];
+    S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+      const p=ch.patterns[idx];
+      if(p){ swapped.push([ch, idx, p]); ch.patterns[idx]={ steps:[], notes:[], sub:[], hits:[] }; } });
+    try{ _ptSchedPosPrev(step, t); }
+    finally{ swapped.forEach(([ch,i,p])=>{ ch.patterns[i]=p; }); }
+  }
+};
+
+/* ---------- Offline render: the same song map, step for step ---------- */
+async function ptRenderPositioned(bars, onlyId){
+  /* arrangement M/S gating, same rules as the render gate wrapper */
+  const flags=ptMSFlags();
+  const anyMS=flags.anySolo || S.order.some(id=>{ const lm=S.seqMS[id]; return lm && lm.mute; });
+  const saved=[];
+  if(anyMS && !window.BL_PLAIN){
+    S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+      const rec={ ch, mute:ch.mute, patterns:null, muteChanged:false };
+      if(!ptWaveAudible(id, flags) && !ch.mute){ ch.mute=true; rec.muteChanged=true; }
+      else if(!ptSeqAudible(id, flags)){ rec.patterns=ch.patterns;
+        ch.patterns=ch.patterns.map(()=>({ steps:[], notes:[], sub:[], hits:[] })); }
+      saved.push(rec); });
+  }
+  const restore=()=>{ saved.forEach(r=>{ if(r.muteChanged) r.ch.mute=r.mute; if(r.patterns) r.ch.patterns=r.patterns; }); };
+  try{
+    const sr=44100, stepDur=stepDurSec(), patDur=16*stepDur, tail=1.6;
+    const map=ptSongStepMap();
+    const totalBars=Math.max(1, Math.ceil(map.totalSteps/16));
+    const total=totalBars*patDur+tail;
+    const ctx=new OfflineAudioContext(2, Math.ceil(sr*total), sr);
+    const mGain=ctx.createGain(); mGain.gain.value=parseFloat($("masterVol").value)/100;
+    const limiter=ctx.createDynamicsCompressor(); limiter.threshold.value=-0.3; limiter.ratio.value=20; limiter.attack.value=0.001; limiter.release.value=0.12; limiter.knee.value=0;
+    mGain.connect(limiter); limiter.connect(ctx.destination);
+    const verb=ctx.createConvolver(); verb.buffer=makeImpulse(ctx,2.2,2.4); const vg=ctx.createGain(); vg.gain.value=0.9; verb.connect(vg); vg.connect(mGain);
+    const delay=ctx.createDelay(2); delay.delayTime.value=(60/S.bpm)*0.75; const fb=ctx.createGain(); fb.gain.value=0.34; delay.connect(fb); fb.connect(delay);
+    const dw=ctx.createGain(); dw.gain.value=0.8; delay.connect(dw); dw.connect(mGain);
+    const bundles={};
+    S.order.forEach(id=>{ bundles[id]=buildChain(ctx, S.channels[id], mGain, verb, delay, false); });
+    const _layBars=layoutBars();
+    for(let bar=0; bar<totalBars; bar++){
+      const _tlBar=((bar%_layBars)+_layBars)%_layBars;
+      let firstSeq=null;
+      for(let s2=0;s2<16;s2++){ const cc=map.cells[bar*16+s2]; if(cc){ firstSeq=cc.seq; break; } }
+      const _taken=!window.BL_PLAIN && (typeof barTakenOver==="function") && barTakenOver(_tlBar, firstSeq);
+      if(typeof scheduleClipsOffline==="function") scheduleClipsOffline(ctx, bundles, bar, _tlBar, onlyId);
+      for(let step=0; step<16; step++){
+        const cell=map.cells[bar*16+step]; if(!cell) continue;
+        BL_T=blSeqT(cell.seq);
+        let t=bar*patDur + step*stepDur; if(step%2===1) t+=S.swing*stepDur;
+        if(_taken) continue;
+        const aStep=Math.floor(cell.at);
+        S.order.forEach(id=>{ const ch=S.channels[id]; if(onlyId && id!==onlyId) return; if(!audible(ch)) return;
+          if(ch.fx.half && bar%2===1) return; if(ch.fx.gate && step%2===1) return;
+          const pat=ch.patterns[cell.seq]; if(!pat) return;
+          if(pat.steps[aStep]) triggerChannel(ctx, bundles[id], ch, t, { vel:0.92 });
+          pat.notes.forEach(n=>{ if(n.step===aStep) triggerChannel(ctx, bundles[id], ch, t + (n.off||0)*stepDur, { midi:n.midi, vel:n.vel||0.9, lenSteps:n.len }); });
+          (pat.hits||[]).forEach(h=>{ if(h.step===aStep) triggerChannel(ctx, bundles[id], ch, t + (h.off||0)*stepDur, { midi:h.midi, vel:h.vel||0.9 }); });
+          (pat.sub||[]).forEach(r=>{ if(r.step!==aStep) return;
+            const hits2=r.kind==="32"? [0.25,0.5,0.75] : r.kind==="trip"? [1/3,2/3] : [0.5];
+            hits2.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, t+stepDur*fr, { vel:0.7-i*0.12 });
+              else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, t+stepDur*fr, 0.7-i*0.12); }); });
+        });
+      }
+    }
+    BL_T=0;
+    const rendered=ctx.startRendering();
+    restore();
+    return await rendered;
+  }catch(err){ restore(); throw err; }
+}
+const _ptRenderPosPrev=renderMix;
+renderMix=async function(bars, onlyId){
+  if(!ptSeqEngineActive()) return _ptRenderPosPrev(bars, onlyId);
+  return ptRenderPositioned(bars, onlyId);
+};
+
+/* ---------------- Init: redraw with the positioned chain lane ---------------- */
+ptRender();
 </script>
 </body>
 </html>
