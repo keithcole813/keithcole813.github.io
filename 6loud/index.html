@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6loud — The Endless Cloud Runner</title>
+<meta name="description" content="6loud is an endless runner: the Shinobi Brawl cast, shrunk down, sprinting across real clouds. One jump button. Every jump scores. Named for the song '6loud' — 6lade, on cloud 9.">
+<meta property="og:title" content="6loud — The Endless Cloud Runner">
+<meta property="og:description" content="The Shinobi Brawl cast, shrunk down, running on cloud 9. One button. Every jump scores. Coming soon.">
+<meta property="og:image" content="logo.png">
+<link rel="icon" type="image/png" href="icon.png">
+<style>
+  :root{
+    --gold:#f7b500; --gold2:#ffd23f; --ink:#0b1030; --panel:rgba(16,22,58,.72);
+    --line:rgba(247,181,0,.35); --text:#eef1ff; --dim:#b9c2e8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+    color:var(--text); min-height:100vh;
+    background:linear-gradient(180deg,#131c52 0%,#232a6b 30%,#4b3a72 58%,#9c5a44 82%,#d97a3f 100%);
+    background-attachment:fixed;
+  }
+  .stars{position:fixed; inset:0; pointer-events:none; opacity:.8;
+    background-image:
+      radial-gradient(2px 2px at 12% 18%, #fff 50%, transparent 51%),
+      radial-gradient(1.6px 1.6px at 32% 8%, #fff 50%, transparent 51%),
+      radial-gradient(2px 2px at 55% 14%, #ffe9a8 50%, transparent 51%),
+      radial-gradient(1.6px 1.6px at 74% 6%, #fff 50%, transparent 51%),
+      radial-gradient(2px 2px at 88% 22%, #fff 50%, transparent 51%),
+      radial-gradient(1.4px 1.4px at 44% 26%, #fff 50%, transparent 51%),
+      radial-gradient(1.4px 1.4px at 66% 30%, #fff 50%, transparent 51%),
+      radial-gradient(1.8px 1.8px at 22% 34%, #fff 50%, transparent 51%);}
+  .wrap{max-width:880px; margin:0 auto; padding:28px 20px 0; position:relative}
+  .back{display:inline-block; color:var(--gold2); text-decoration:none; font-weight:600; font-size:.95rem; margin-bottom:18px}
+  .back:hover{text-decoration:underline}
+  .hero{text-align:center}
+  .hero img.logo{width:min(620px,94%); height:auto; border-radius:22px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45); outline:1px solid rgba(255,255,255,.14)}
+  .pill{display:inline-block; margin-top:20px; padding:7px 18px; border-radius:999px;
+    border:1px solid var(--line); background:rgba(0,0,0,.35); color:var(--gold2);
+    font-weight:700; letter-spacing:.16em; font-size:.8rem; text-transform:uppercase}
+  .tagline{margin-top:16px; font-size:clamp(1.25rem,3.4vw,1.7rem); font-weight:700; line-height:1.3}
+  .tagline .g{color:var(--gold2)}
+  .sub{margin:10px auto 0; max-width:620px; color:var(--dim); font-size:1.02rem; line-height:1.55}
+  .strip{display:block; width:100vw; max-width:none; margin:26px calc(50% - 50vw) 0; height:auto}
+  section{background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:26px 26px 22px; margin-top:22px; backdrop-filter:blur(6px)}
+  h2{color:var(--gold2); font-size:1.28rem; letter-spacing:.02em; margin-bottom:12px}
+  p{color:var(--text); line-height:1.65; font-size:1rem}
+  p + p{margin-top:10px}
+  .dim{color:var(--dim)}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-top:6px}
+  .card{background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:16px 16px 13px}
+  .card h3{color:#fff; font-size:1.02rem; margin-bottom:6px}
+  .card h3 .ic{color:var(--gold2); margin-right:7px}
+  .card p{font-size:.95rem; color:var(--dim); line-height:1.55}
+  ul{margin:4px 0 0 20px; line-height:1.7; color:var(--text)}
+  ul li::marker{color:var(--gold)}
+  .status{text-align:center}
+  .status .big{font-size:1.12rem; font-weight:700}
+  footer{text-align:center; color:var(--dim); font-size:.9rem; padding:30px 16px 36px}
+  footer a{color:var(--gold2); text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <a class="back" href="https://keithcole813.github.io/">← All apps &amp; games</a>
+
+  <div class="hero">
+    <img class="logo" src="logo.png" alt="6loud logo — a chibi ninja sprinting across a cloud under the 6LOUD wordmark">
+    <div><span class="pill">Coming Soon</span></div>
+    <div class="tagline">The Shinobi Brawl cast. Shrunk down.<br>Running on <span class="g">cloud 9</span>.</div>
+    <p class="sub">6loud is an endless runner played in the browser. Your fighter sprints across
+    real clouds on their own — all you control is the jump. No levels, no finish line:
+    the run just gets faster the longer you stay in it.</p>
+  </div>
+
+  <img class="strip" src="clouds-strip.png" alt="A row of real clouds — the platforms of 6loud">
+
+  <section>
+    <h2>Named for the song</h2>
+    <p>Keith Cole and 6lade have a song called <strong>“6loud”</strong> — 6lade rapping about
+    being on cloud 9. The game takes its name from the song, and its whole world from the idea:
+    a crew of chibi shinobi racing across the tops of real clouds, high above everything.</p>
+  </section>
+
+  <section>
+    <h2>How it plays</h2>
+    <div class="cards">
+      <div class="card"><h3><span class="ic">▶</span>One button</h3>
+        <p>Your runner auto-runs. The only control is the jump button — easy to learn, hard to master.</p></div>
+      <div class="card"><h3><span class="ic">☁</span>Tap or hold</h3>
+        <p>A tap is a short hop. Hold the button and you float higher and longer — the gap decides which one you need.</p></div>
+      <div class="card"><h3><span class="ic">✊</span>The ledge grab</h3>
+        <p>Come up just short and your runner grabs the edge of the next cloud and pulls up. Close counts.</p></div>
+      <div class="card"><h3><span class="ic">★</span>Every jump scores</h3>
+        <p>Each jump adds to your score. Survive longer, jump more, score bigger.</p></div>
+      <div class="card"><h3><span class="ic">♛</span>Arcade initials</h3>
+        <p>Beat the high score and you enter your initials, classic arcade style — the board remembers.</p></div>
+      <div class="card"><h3><span class="ic">⚡</span>Faster, forever</h3>
+        <p>There are no levels. One endless run that keeps speeding up until it ends you. How long can you stay in?</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The world</h2>
+    <ul>
+      <li><strong>Real clouds.</strong> The platforms are real-looking clouds in all shapes — long runners and short islands, at different heights, with gaps between them.</li>
+      <li><strong>Built from segments.</strong> The run is chained together from a database of hand-designed segments, so every jump is fair and every stretch can be learned — even though no two runs come in the same order.</li>
+      <li><strong>Mountain &amp; tree tops.</strong> In the harder stretches, peaks and treetops push up through the clouds — land on them and bounce off to keep the run alive.</li>
+      <li><strong>A sky on its own clock.</strong> The background fades sunset → night → sunrise as your run goes on, all on its own timer. At night: shooting stars and a sparkling sky.</li>
+      <li><strong>Handy-cam feel.</strong> The camera zooms in and out and shakes like a handheld shot — punching in on a ledge grab, easing out as the speed climbs.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The cast</h2>
+    <p>The fighters of <a href="https://keithcole813.github.io/shinobi-brawl/" style="color:var(--gold2)">Shinobi Brawl</a>,
+    shrunk down to chibi size. They run with their own run cycles and jumps from the fighting game —
+    nothing redrawn, the same fighters in a whole new kind of fight: against the fall.</p>
+  </section>
+
+  <section class="status">
+    <h2>Release status</h2>
+    <p class="big">In design — coming after Shinobi Brawl.</p>
+    <p class="dim" style="margin-top:8px">6loud is being designed now and enters production once Shinobi Brawl ships.
+    It will play right in the browser, built light for phones. This page is where the date lands first.</p>
+  </section>
+
+  <footer>
+    © Keith Cole · Ninja Music Records<br>
+    <a href="https://keithcole813.github.io/">keithcole813.github.io</a> ·
+    <a href="https://keithcole813.github.io/shinobi-brawl/">Shinobi Brawl</a>
+  </footer>
+</div>
+</body>
+</html>
