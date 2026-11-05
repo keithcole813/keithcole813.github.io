@@ -441,7 +441,6 @@ a{color:var(--teal)}
       <button class="btn sm" id="ptNudgeR" title="Nudge the selected clip right by one grid unit (10 ms when snap is off)">Nudge ▶</button>
       <span class="small" id="ptInfo"></span>
     </div>
-    <div class="small">One arrangement, both worlds: the <b>Sequences chain</b> up top, then each channel’s <b>MIDI lane</b> and <b>wave track</b> interleaved in pairs — MIDI, wave, MIDI, wave — bar-for-bar under one ruler and one playhead. <b>Drag any lane by its ⠿ grip</b> to rearrange the list (the order saves with the project); the <b>size button</b> on every lane cycles collapsed / normal / enlarged; <b>double-click a MIDI lane name to rename</b> it, exactly like a wave track — one channel, one name everywhere. MIDI lanes carry <b>⧉ Duplicate track</b> and <b>✕ Delete track</b>, just like the wave side. Lay a vocal wave against the programmed drums and watch both while everything plays in sync. Sequence blocks edit exactly like wave clips: <b>drag to slide</b> them anywhere on the timeline — they land on the Snap grid (bar, 1/2, 1/4, 1/8, 1/16, 1/32, triplets, or the exact spot with Snap off) and can leave real gaps before or after, which playback and export honor; <b>double-click to slice inside the sequence</b> at the Snap grid — mid-bar, on a beat, on a single step — and the notes split cleanly across the join (a note crossing the cut is clipped on both sides, nothing lost or doubled), each piece an independent sequence; <b>Duplicate / Copy / Paste</b> make independent sequences you can edit in the Piano Roll without touching the original. Wave rules stay Pro Tools: <b>every wave track is wired to its own channel</b> — track name <i>is</i> the channel name (double-click renames both), clips play through that channel’s fader, pan, EQ, FX and crusher and export inside its stem; <b>＋ Add track</b> creates the channel, ✕ removes track + channel cleanly. <b>Every lane has Mute / Solo</b> — wave M/S is the channel’s own M/S (same as the mixer), MIDI lane M/S governs that channel’s sequence playback; any solo anywhere narrows the whole arrangement to the soloed lanes. Every edit is a History point and autosaves.</div>
     <div class="ptViewport" id="ptViewport">
       <div id="ptLanes"></div>
     </div>
@@ -3222,12 +3221,12 @@ $("blModalNo").onclick=()=>{ blModal.style.display="none"; blModalCb=null; };
     const b=document.createElement("button"); b.className="pill"; b.id="btnRecMode"; b.textContent="Rec: ADD";
     b.title="ADD: new hits layer over what is in the sequence. OVERWRITE: channels you play during a pass get their old events replaced — channels you don't touch keep theirs.";
     b.onclick=()=>toggleRecMode(); grp.appendChild(b);
-    const sq=document.createElement("select"); sq.id="recQuantSel"; sq.title="Record quantize — on: hits snap as recorded. Off: true played timing is kept (sub-step offsets).";
-    [["off","Quantize: Off"],["4","Quantize: 1/4"],["8","Quantize: 1/8"],["16","Quantize: 1/16"],["32","Quantize: 1/32"],["8t","Quantize: 1/8 trip"],["16t","Quantize: 1/16 trip"]]
-      .forEach(([v,l])=>{ const o=document.createElement("option"); o.value=v; o.textContent=l; sq.appendChild(o); });
-    sq.value=S.recQuant;
-    sq.onchange=()=>{ S.recQuant=sq.value; setStatus(sq.value==="off" ? "Record quantize OFF — hits keep their true played timing, sub-step offsets and all. Quantize them later from the Piano Roll if you want." : "Record quantize ON ("+sq.options[sq.selectedIndex].text.replace("Quantize: ","")+") — hits snap to the grid as you record."); };
-    grp.appendChild(sq);
+    /* Record quantize is NO LONGER a global top-bar control (Keith,
+       2026-11-05): the Quantize grid/strength now live per track in
+       each MIDI lane header of the multitrack editor, and recording
+       snaps by the grid of the channel being recorded onto. The old
+       #recQuantSel select is not created anymore; S.recQuant stays
+       only as the legacy value that migrates onto channels on load. */
   }
 })();
 function toggleRecMode(){
@@ -3587,44 +3586,14 @@ const _u808Prev=update808Status; update808Status=function(b){ if(!S.channels.bas
     ch.poly=!ch.poly; e.target.textContent="Slices: "+(ch.poly?"Poly":"Choke (mono)");
     setStatus(ch.name+" slices now play "+(ch.poly?"POLY — slices overlap and ring out together.":"CHOKE (mono) — each new slice cuts the previous one, MPC mute-group style.")); };
 })();
-/* ---------------- Quantize-after panel (injected into the Piano Roll) ---------------- */
-(function(){
-  const grid=document.querySelector("#page-roll .ctlgrid"); if(!grid) return;
-  const d=document.createElement("div"); d.className="ctl";
-  d.innerHTML='<h3>Quantize — fix timing after recording</h3>'+
-    '<label>Scope</label><select id="qScope"><option value="sel">Selected channel</option><option value="seq">Whole sequence (all channels)</option></select>'+
-    '<label>Grid</label><select id="qGrid"><option value="4">1/4</option><option value="8">1/8</option><option value="16" selected>1/16</option><option value="32">1/32</option><option value="8t">1/8 triplet</option><option value="16t">1/16 triplet</option></select>'+
-    '<label>Strength <span class="mono" id="qStrVal">100%</span></label><input type="range" id="qStr" min="0" max="100" value="100" class="wide" />'+
-    '<button class="btn gold" id="qApply" style="width:100%;margin-top:8px">Quantize</button>'+
-    '<button class="btn" id="qUndo" style="width:100%;margin-top:6px">Undo quantize</button>'+
-    '<div class="small" style="margin-top:6px">Works on live recordings made with quantize off, recordings made at another grid, and imported .mid files. 100% = hard snap to the grid; less moves hits only partway, keeping some feel.</div>';
-  grid.appendChild(d);
-  $("qStr").oninput=e=>{ $("qStrVal").textContent=e.target.value+"%"; };
-  $("qApply").onclick=()=>applyQuantize();
-  $("qUndo").onclick=()=>undoQuantize();
-})();
-let quantUndoSnap=null;
-function applyQuantize(){
-  const scope=$("qScope").value, g=GRID_STEPS[$("qGrid").value], str=+$("qStr").value/100;
-  const ids= scope==="seq"? S.order.slice() : [S.selected];
-  quantUndoSnap={};
-  ids.forEach(id=>{ const ch=S.channels[id]; if(ch) quantUndoSnap[id]=JSON.stringify(ch.patterns[S.pattern]); });
-  let moved=0;
-  ids.forEach(id=>{ const ch=S.channels[id]; if(!ch) return; const pat=ch.patterns[S.pattern];
-    const mv=o=>{ const p=o.step+(o.off||0); const target=Math.round(p/g)*g; const np=p+(target-p)*str;
-      o.step=Math.floor(np); o.off=+((np-o.step).toFixed(4)); if(!o.off) delete o.off; moved++; };
-    pat.notes.forEach(mv); (pat.hits||[]).forEach(mv);
-    if(pat.hits) pat.hits=pat.hits.filter(h=>{ if(!h.off){ pat.steps[h.step]=1; return false; } return true; });
-  });
-  buildRack(); buildRoll(); buildSliceSteps();
-  setStatus("Quantized "+moved+" hit(s) — grid "+$("qGrid").selectedOptions[0].text+", strength "+$("qStr").value+"%"+(str<1?" (offsets shrunk, not erased)":" (hard on the grid)")+". Undo puts the original timing back.");
-}
-function undoQuantize(){
-  if(!quantUndoSnap){ setStatus("Nothing to undo — run Quantize first."); return; }
-  Object.keys(quantUndoSnap).forEach(id=>{ if(S.channels[id]) S.channels[id].patterns[S.pattern]=JSON.parse(quantUndoSnap[id]); });
-  quantUndoSnap=null; buildRack(); buildRoll(); buildSliceSteps();
-  setStatus("Quantize undone — the original off-grid timing is restored.");
-}
+/* ---------------- Quantize-after panel — REMOVED (Keith, 2026-11-05) ----------------
+   The global "Quantize — fix timing after recording" box that used to
+   be injected into the Piano Roll (Scope / Grid / Strength / Quantize /
+   Undo quantize, applyQuantize + undoQuantize) is gone: quantize is
+   per track now. Each MIDI lane header in the multitrack editor
+   carries its own grid + strength + Quantize button (see the
+   per-track quantize pass at the end of this file), running the same
+   step/offset math on that channel only, as a History/undo point. */
 
 /* ---------------- Live recording: multi-channel, ADD/OVERWRITE, quantize ---------------- */
 function recPosSteps(){
@@ -3652,7 +3621,7 @@ function recordEvent(ev){ /* ev: {chId, kind:"step"|"note", midi, vel} */
     pat.sub=(pat.sub||[]).filter(r=>r.step<b0||r.step>=b1);
     recTouched.add(ev.chId);
   }
-  const g=GRID_STEPS[S.recQuant];
+  const g=GRID_STEPS[blQGridOf(ch)]; /* per-track record quantize: the grid of the channel being recorded onto */
   let p=pos;
   if(g){ p=Math.round(p/g)*g; if(p>=16) p-=16; }
   const step=Math.floor(p)+seqBarPos*16, off=+((p-Math.floor(p)).toFixed(4));
@@ -5076,7 +5045,7 @@ buildMixer=function(){
     html+='<div class="kgroup"><div class="klabel">MPC Crusher</div><select class="crushsel"></select><div class="krow" data-g="crush"></div></div>';
     html+='<div class="kgroup"><div class="klabel">Filters</div><div class="krow" data-g="filt"></div></div>';
     html+='<div class="kgroup"><div class="klabel">Pan · Width</div><div class="krow" data-g="pw"></div></div>';
-    html+='<div class="faderRow"><input type="range" class="vert" min="0" max="100" value="'+Math.round(ch.volume*100)+'" /><div class="vu"><div class="vucover"></div><div class="vupeak"></div></div></div>';
+    html+='<div class="faderRow"><div class="frail" aria-hidden="true"><span class="ft" style="top:0">100</span><span class="ft" style="top:25%">75</span><span class="ft" style="top:50%">50</span><span class="ft" style="top:75%">25</span><span class="ft" style="top:100%">0</span></div><input type="range" class="vert" min="0" max="100" value="'+Math.round(ch.volume*100)+'" /><div class="vu"><div class="vucover"></div><div class="vupeak"></div></div></div>';
     html+='<div class="val">'+Math.round(ch.volume*100)+'%</div>';
     html+='<div class="msbtns"><button data-ms="m" class="'+(ch.mute?"m-on":"")+'">MUTE</button><button data-ms="s" class="'+(ch.solo?"s-on":"")+'">SOLO</button></div>';
     html+='<input type="color" class="colpick" title="Fader color" />';
@@ -6177,10 +6146,9 @@ function blBuildMasterStrip(){
     '<div class="kgroup"><div class="klabel">Console Warmth</div><select id="mxWarmth" class="crushsel" title="Analog console warmth model on the master bus — per-channel HEAT knobs drive into it"></select><div class="krow big" id="mxHeatRow" style="margin-top:6px"></div><div class="small">Per-channel HEAT knobs drive into this console.</div></div>'+
     '<div class="kgroup"><div class="klabel">Master Suite — presets</div><div class="suitebtns" id="mxSuiteBtns"></div><div class="togglerow"><button class="pill" id="mxSuiteBypass">Suite bypass: Off</button></div></div>'+
     '<div class="kgroup"><div class="klabel">GOO — one-knob loud</div><div class="krow big" id="mxGooRow"></div><div class="togglerow" id="mxGooFlavors"></div></div>'+
+    '<div class="small" style="margin-top:8px">Polish lives on the master mix — stems stay clean.</div>'+
     '<div class="kgroup"><div class="klabel">Limiter Ceiling</div><div class="krow big" id="mxCeilRow"></div></div>'+
-    '<div class="faderRow"><input type="range" class="vert" id="mxFader" min="0" max="100" value="'+$("masterVol").value+'" /><div class="vu"><div class="vucover"></div><div class="vupeak"></div></div></div>'+
-    '<div class="val" id="mxFaderVal">'+$("masterVol").value+'%</div>'+
-    '<div class="small">Polish lives on the master mix — stems stay clean.</div>';
+    '<div class="faderRow"><div class="frail" aria-hidden="true"><span class="ft" style="top:0">100</span><span class="ft" style="top:25%">75</span><span class="ft" style="top:50%">50</span><span class="ft" style="top:75%">25</span><span class="ft" style="top:100%">0</span></div><input type="range" class="vert" id="mxFader" min="0" max="100" value="'+$("masterVol").value+'" /><div class="vu"><div class="vucover"></div><div class="vupeak"></div></div><div class="val" id="mxFaderVal">'+$("masterVol").value+'%</div></div>';
   const wsel=d.querySelector("#mxWarmth");
   Object.keys(BL_WARMTH).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=BL_WARMTH[k].label; wsel.appendChild(o); });
   wsel.value=S.masterFx.warmth;
@@ -7133,7 +7101,7 @@ function ptRender(){
           setStatus(last.name+" is on the "+ch.name+" track at "+posLabel(last.start)+" — it plays through the "+ch.name+" channel."); } };
       inp.click(); });
     mk("✕", "Remove this track and its wired channel", ()=>{
-      showConfirm("Remove track “"+ch.name+"” and its wired channel? Its clips go with it; every other track and channel stays exactly as it is. Undo (History bar, top of the page) brings it all back.", "Remove track",
+      showConfirm("Remove track “"+ch.name+"” and its wired channel? Its clips go with it; every other track and channel stays exactly as it is. Undo (Options → Undo, or Ctrl+Z) brings it all back.", "Remove track",
         ()=>{ deleteChannel(cid); markDirty(); ptRender(); });
     });
     head.appendChild(btns);
@@ -9210,7 +9178,7 @@ function blFinDecorateLane(lane, key){
     mk("⧉ Track", "Duplicate this track — a full independent copy of the channel (same sound + settings, deep copy of its sequences) in the editor, rack, mixer and Piano Roll",
        ()=>blDuplicateChannel(cid));
     mk("✕ Track", "Delete this track — removes the channel, its MIDI lane and its wave track everywhere (undo brings it back)",
-       ()=>{ showConfirm("Delete track “"+ch.name+"”? The channel, its sequences, its wave clips and its mixer strip all go. Undo (History bar, top of the page) brings it all back.", "Delete track",
+       ()=>{ showConfirm("Delete track “"+ch.name+"”? The channel, its sequences, its wave clips and its mixer strip all go. Undo (Options → Undo, or Ctrl+Z) brings it all back.", "Delete track",
          ()=>{ deleteChannel(cid); markDirty(); ptRender(); }); });
   }
 }
@@ -9719,7 +9687,1252 @@ function blTrulyBlank(){
 }
 </script>
 
+<script>
+"use strict";
+/* ================================================================
+   START BLANK CLEANUP — no stale channel may survive anywhere.
+   blSyncChannelUI() is the single place that reconciles EVERY
+   channel-referencing control with the real channel list
+   (S.order / S.channels):
+   · Piano Roll channel dropdown + header + grid + velocity lane
+   · Sound Browser target line + Load button
+   · Sampler and FX headers
+   · Hat roll helper channel picker (values stay the semantic
+     "chat"/"ohat" its handler maps through kit roles; only the
+     labels follow the real hat channels)
+   · 808 status, Chopper empty state, export channel count
+   With zero channels each one shows an explicit no-channel state
+   — never a deleted channel's name. The same sync runs after the
+   first channel is added, after any channel delete / duplicate,
+   after every project load (Load .json, undo/redo, autosave
+   restore) and after every template install, so recovery
+   repopulates everything.
+   Start Blank also resets project identity: name → "Untitled
+   Beat", template selection cleared, Song playlist emptied, and
+   exactly one empty SEQ 1 as the working sequence (seqCount
+   reads 1 while the project has no channels). Loads prune any
+   channel object that is not in S.order, so Redo back into a
+   blank (or a delete) leaves nothing behind in memory either.
+   ================================================================ */
+function blSafe(fn){ try{ return fn(); }catch(e){} }
+function blHasAnyChannel(){ return S.order.some(id=>!!S.channels[id]); }
+function blFirstChannelId(){ const id=S.order.find(x=>!!S.channels[x]); return id||null; }
 
+function blSyncChannelUI(){
+  if(!S.channels[S.selected]) S.selected=blFirstChannelId();
+  if(!S.channels[S.rollChannel]) S.rollChannel=blFirstChannelId();
+  const has=blHasAnyChannel();
+  const selCh=S.selected? S.channels[S.selected] : null;
+  const rollCh=S.rollChannel? S.channels[S.rollChannel] : null;
+
+  /* ---- Piano Roll: dropdown, header, grid, velocity lane ---- */
+  const rc=$("rollChannel");
+  if(rc){
+    if(!has){
+      rc.innerHTML="";
+      const o=document.createElement("option"); o.value=""; o.textContent="No channels yet"; rc.appendChild(o);
+      rc.value=""; rc.disabled=true;
+    }else{
+      const want=S.order.filter(id=>!!S.channels[id]);
+      const cur=Array.from(rc.options).map(o=>o.value);
+      if(rc.disabled || cur.length!==want.length || cur.some((v,i)=>v!==want[i])){
+        rc.innerHTML="";
+        want.forEach(id=>{ const o=document.createElement("option"); o.value=id; o.textContent=S.channels[id].name; rc.appendChild(o); });
+      }
+      Array.from(rc.options).forEach(o=>{ if(S.channels[o.value]) o.textContent=S.channels[o.value].name; });
+      rc.disabled=false;
+      if(rollCh) rc.value=S.rollChannel;
+    }
+  }
+  const rn=$("rollName");
+  if(!has){
+    if(rn) rn.textContent="No channel";
+    const rg=$("rollGrid");
+    if(rg) rg.innerHTML='<div style="grid-column:1 / -1;padding:18px 10px;color:var(--dim);font-size:12px">No channels yet — add a channel and its notes will appear here.</div>';
+    const vl=$("velLane"); if(vl) vl.innerHTML="";
+    const rsi=$("rollSelInfo"); if(rsi) rsi.textContent="No channel selected — add a channel to use the Piano Roll.";
+    const vr=$("velReadout"); if(vr) vr.textContent="No channel — the velocity lane is empty.";
+  }else if(rn && rollCh){
+    rn.textContent=rollCh.name;
+  }
+
+  /* ---- Sound Browser: target line + Load ---- */
+  const pv=$("pvTarget"), loadBtn=$("btnLoadPreview");
+  if(!has){
+    if(pv) pv.textContent="Target channel: none — add a channel first";
+    if(loadBtn) loadBtn.disabled=true;
+  }else{
+    if(pv && selCh) pv.textContent="Target channel: "+selCh.name;
+    if(loadBtn) loadBtn.disabled=false;
+  }
+
+  /* ---- Sampler + FX headers ---- */
+  const sn=$("sampName"), fn2=$("fxName"), si=$("sampInfo");
+  if(!has){
+    if(sn) sn.textContent="No channel";
+    if(fn2) fn2.textContent="No channel";
+    if(si) si.textContent="No channel — add a channel, then load a sound onto it.";
+  }else if(selCh){
+    if(sn) sn.textContent=selCh.name;
+    if(fn2) fn2.textContent=selCh.name;
+  }
+
+  /* ---- Hat roll helper picker ---- */
+  const rh=$("rollHelperCh");
+  if(rh){
+    let chatId=null, ohatId=null;
+    blSafe(()=>{ const roles=blRoleIds(S.order.slice()); chatId=roles.chat||null; ohatId=roles.ohat||null; });
+    if(!chatId && !ohatId){
+      const hats=S.order.filter(id=>{ const c=S.channels[id]; return c && (/hat/i.test(c.name) || id==="chat" || id==="ohat"); });
+      chatId=hats[0]||null; ohatId=hats[1]||null;
+    }
+    if(!chatId && !ohatId){
+      rh.innerHTML="";
+      const o=document.createElement("option"); o.value=""; o.textContent="No hat channels yet"; rh.appendChild(o);
+      rh.value=""; rh.disabled=true;
+    }else{
+      const prev=rh.value;
+      rh.innerHTML="";
+      if(chatId){ const o=document.createElement("option"); o.value="chat"; o.textContent=S.channels[chatId].name; rh.appendChild(o); }
+      if(ohatId){ const o=document.createElement("option"); o.value="ohat"; o.textContent=S.channels[ohatId].name; rh.appendChild(o); }
+      rh.disabled=false;
+      if(prev && Array.from(rh.options).some(o=>o.value===prev)) rh.value=prev;
+    }
+  }
+
+  /* ---- 808 status + Chopper empty state ---- */
+  const s808=$("status808");
+  const ch808=S.order.map(id=>S.channels[id]).find(c=>c && (c.type==="808" || c.id==="bass808"));
+  if(s808){
+    if(!ch808) s808.textContent="No 808 channel in this project.";
+    else if(s808.textContent.indexOf("No 808")===0) s808.textContent="Root: "+noteName(ch808.root)+" ("+(ch808.sampleName||"built-in 808")+")";
+  }
+  const chopCh=S.order.map(id=>S.channels[id]).find(c=>c && c.type==="chop") || S.channels.chop;
+  if(!chopCh){
+    const pads=$("chopPads"); if(pads) pads.innerHTML="";
+    const ssteps=$("sliceSteps"); if(ssteps) ssteps.innerHTML="";
+    const ci=$("chopInfo"); if(ci) ci.textContent="No chop channel in this project — add a Chop channel, then load a sample here to slice it.";
+  }
+
+  /* ---- anything the old Layout still exposes ---- */
+  const weCh=$("weChannel");
+  if(weCh){
+    if(!has){ weCh.innerHTML=""; weCh.disabled=true; }
+    else if(weCh.disabled) weCh.disabled=false;
+  }
+  blSafe(()=>renderLibrary());
+  blSafe(()=>refreshExportNote());
+}
+
+/* ---- Sequence count: a channel-less project has exactly SEQ 1 ---- */
+const _blCleanSeqPrev=seqCount;
+seqCount=function(){
+  if(!S.order || !S.order.length) return 1;
+  return _blCleanSeqPrev();
+};
+
+/* ---- Persistence: keep each channel's builtin drum kind so an
+        undo-restored drum channel still sounds like itself ---- */
+const _blCleanPjPrev=projectJSON;
+projectJSON=function(){
+  const p=_blCleanPjPrev();
+  S.order.forEach(id=>{ const ch=S.channels[id], c=p.channels && p.channels[id];
+    if(ch && c){ c.builtin=ch.builtin||""; if(!c.type) c.type=ch.type; } });
+  return p;
+};
+
+/* ---- Loads (file, undo/redo, autosave restore): prune stale
+        channel objects, restore template identity exactly, sync ---- */
+const _blCleanLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){
+  _blCleanLcpPrev(p);
+  if(p && Object.prototype.hasOwnProperty.call(p, "template")){
+    S.template=p.template||"";
+    const st=$("selTemplate");
+    if(st){
+      if(S.template){ st.value=S.template; if(st.value!==S.template) st.selectedIndex=-1; }
+      else { st.value=""; st.selectedIndex=-1; }
+    }
+  }
+  Object.keys(S.channels||{}).forEach(id=>{
+    if(S.order.indexOf(id)<0){
+      const n=liveNodes[id];
+      if(n){ blSafe(()=>n.fader.disconnect()); delete liveNodes[id]; }
+      delete S.channels[id];
+    }
+  });
+  if(p && p.channels){
+    Object.keys(p.channels).forEach(id=>{
+      const ch=S.channels[id]; if(!ch) return; const src=p.channels[id];
+      if(src.builtin!=null) ch.builtin=src.builtin;
+      else if(!ch.builtin){
+        const dm={kick:"kick",snare:"snare",clap:"clap",chat:"chat",ohat:"ohat"};
+        if(dm[id]) ch.builtin=dm[id];
+      }
+    });
+  }
+  blSyncChannelUI();
+  if(blHasAnyChannel() && S.channels[S.rollChannel]) blSafe(()=>buildRoll());
+  blSafe(()=>ptRender());
+};
+
+/* ---- Start Blank: identity + song reset on top of truly blank ---- */
+const _blCleanBlankPrev=blTrulyBlank;
+blTrulyBlank=function(){
+  _blCleanBlankPrev();
+  const pn=$("projName"); if(pn) pn.value="Untitled Beat";
+  S.template="";
+  const st=$("selTemplate"); if(st){ st.value=""; st.selectedIndex=-1; }
+  S.playlist=[]; S.mode="pattern"; S.pattern=0; S.selSeqEntry=null;
+  S.seqNames=["SEQ 1"]; S.seqBars=[1];
+  if(Array.isArray(S.seqTranspose)) S.seqTranspose=[0];
+  S.flipKey=null; S.starterHats=null;
+  const ko=$("keyOrig"); if(ko) ko.textContent="—";
+  const kf=$("keyFlip"); if(kf) kf.textContent="—";
+  const kc=$("keyConf"); if(kc) kc.textContent="—";
+  const ka=$("keyAlt"); if(ka) ka.textContent="Load a sample into a channel, then analyze. Pitch changes move the flip key live; time-stretch alone doesn’t change it.";
+  const pm=$("pitchMatch"); if(pm) pm.textContent="—";
+  const sti=$("starterInfo"); if(sti) sti.textContent="No starter set yet.";
+  const ml=$("midiLog"); if(ml) ml.textContent="MIDI log ready.";
+  const el2=$("exportLog"); if(el2) el2.textContent="Nothing rendered yet.";
+  const ml2=$("midiLast"); if(ml2) ml2.textContent="—";
+  blSafe(()=>buildPatBtns());
+  blSafe(()=>renderPlaylist());
+  blSafe(()=>updateSongUI());
+  blSyncChannelUI();
+  blSafe(()=>ptRender());
+  markDirty();
+  setStatus("Blank project — “Untitled Beat”, no template, empty song playlist, one empty SEQ 1. Zero channels everywhere: add your first channel and every panel follows it.");
+};
+
+/* ---- Recovery: first channel in repopulates every selector ---- */
+const _blCleanAddPrev=blAddChannelOfType;
+blAddChannelOfType=function(type){
+  const ch=_blCleanAddPrev(type);
+  if(ch){
+    if(!S.channels[S.selected]) S.selected=ch.id;
+    if(!S.channels[S.rollChannel]) S.rollChannel=ch.id;
+    blSyncChannelUI();
+    if(S.channels[S.rollChannel]) blSafe(()=>buildRoll());
+    blSafe(()=>ptRender());
+  }
+  return ch;
+};
+const _blCleanDupPrev2=(typeof blDuplicateChannel==="function")? blDuplicateChannel : null;
+if(_blCleanDupPrev2){
+  blDuplicateChannel=function(cid){
+    const ch=_blCleanDupPrev2(cid);
+    blSyncChannelUI();
+    return ch;
+  };
+}
+const _blCleanDelPrev=deleteChannel;
+deleteChannel=function(id){
+  _blCleanDelPrev(id);
+  blSyncChannelUI();
+  blSafe(()=>ptRender());
+};
+const _blCleanInstallPrev=blInstallProject;
+blInstallProject=async function(spec){
+  await _blCleanInstallPrev(spec);
+  blSyncChannelUI();
+  if(S.channels[S.rollChannel]) blSafe(()=>buildRoll());
+  blSafe(()=>ptRender());
+};
+const _blCleanApplyTplPrev=applyTemplate;
+applyTemplate=function(key){
+  _blCleanApplyTplPrev(key);
+  blSyncChannelUI();
+};
+
+/* ---- Guards: actions that assume a channel fail soft when blank ---- */
+const _blCleanAssignPrev=assignSoundToChannel;
+assignSoundToChannel=async function(i, chId){
+  if(!S.channels[chId]){
+    setStatus("No channel to load into yet — add a channel first, then load the sound onto it.");
+    return;
+  }
+  return _blCleanAssignPrev(i, chId);
+};
+const _blCleanAddLibPrev=addToLibrary;
+addToLibrary=function(files, auto){
+  if(blHasAnyChannel()) return _blCleanAddLibPrev(files, auto);
+  try{ return _blCleanAddLibPrev(files, auto); }
+  catch(e){
+    blSafe(()=>renderLibrary());
+    setStatus("Sounds are in the browser — add a channel first, then load one onto it.");
+  }
+};
+(function blCleanGuardButtons(){
+  const bcp=$("btnClearPat");
+  if(bcp) bcp.onclick=()=>{
+    const ch=S.channels[S.selected];
+    if(!ch){ setStatus("No channel to clear — add a channel first."); return; }
+    ch.patterns[S.pattern].steps.fill(0); ch.patterns[S.pattern].notes=[];
+    buildRack(); buildRoll(); blSafe(()=>buildSliceSteps()); markDirty();
+  };
+  const bcr=$("btnClearRoll");
+  if(bcr) bcr.onclick=()=>{
+    const ch=S.channels[S.rollChannel];
+    if(!ch){ setStatus("No channel on the Piano Roll — add a channel first."); return; }
+    ch.patterns[S.pattern].notes=[];
+    if(typeof rollEdit!=="undefined" && rollEdit.sel && rollEdit.sel.kind==="note") rollEdit.sel=null;
+    buildRoll(); blSafe(()=>buildSliceSteps()); markDirty();
+  };
+})();
+
+/* ---- Init: reconcile the freshly loaded page once ---- */
+blSyncChannelUI();
+</script>
+
+<style>
+/* ================================================================
+   OPTIONS PASS (Keith, 2026-11-05) — Add Track asks WAV or MIDI ·
+   playlist panel gone · master fader/VU lengthened · mixer knobs
+   in TWO columns · suite presets as clean uniform buttons ·
+   per-track unique lane names · Options dropdown in the top bar
+   ================================================================ */
+/* --- Mixer knobs: TWO side-by-side columns (paired rows) --- */
+#mixerStrips .bstrip:not(.masterstrip){width:148px;flex:none;padding:8px 6px}
+#mixerStrips .bstrip:not(.masterstrip) .krow{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:3px}
+#mixerStrips .bstrip:not(.masterstrip) .knobwrap{flex:0 0 calc(50% - 3px)}
+#mixerStrips .bstrip:not(.masterstrip) .blCutMini{flex:0 0 100%}
+#mixerStrips .bstrip:not(.masterstrip) .blSlopeSel{flex:0 0 calc(50% - 3px);width:auto}
+#mixerStrips .bstrip:not(.masterstrip) .sname{font-size:11px}
+/* --- MASTER strip: wider, fader + VU lengthened to fill the strip --- */
+#mixerStrips .masterstrip{width:212px;flex:none}
+#mixerStrips .masterstrip .faderRow{margin-top:10px}
+#mixerStrips .masterstrip input[type=range].vert{height:252px}
+#mixerStrips .masterstrip .vu{height:252px;width:12px}
+/* --- Master Suite presets: clean, uniform buttons, clear active state --- */
+#mixerStrips .masterstrip .suitebtns{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+#mixerStrips .masterstrip .suitebtns .btn{width:100%;min-height:32px;padding:6px 4px;font-size:10.5px;line-height:1.15;text-align:center;border-radius:6px;display:flex;align-items:center;justify-content:center}
+#mixerStrips .masterstrip .suitebtns .btn.suitebtn.on{background:var(--gold);border-color:var(--gold);color:#191204;font-weight:800;box-shadow:0 0 0 1px var(--gold)}
+/* --- Options dropdown in the top bar --- */
+.blopts{position:relative}
+.bloptsmenu{position:absolute;top:calc(100% + 5px);left:0;z-index:80;min-width:216px;background:var(--panel2);border:1px solid var(--gold2);border-radius:9px;padding:5px;box-shadow:0 12px 30px rgba(0,0,0,.55)}
+.bloptsitem{display:block;width:100%;text-align:left;background:none;border:none;color:var(--ink);font:inherit;font-size:12.5px;padding:9px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.bloptsitem:hover{background:color-mix(in srgb,var(--gold) 16%, transparent)}
+.bloptsitem:active{background:color-mix(in srgb,var(--gold) 28%, transparent)}
+@media (max-width:640px){ .bloptsmenu{left:auto;right:0} .bloptsitem{min-height:40px} }
+</style>
+<script>
+"use strict";
+/* ================================================================
+   OPTIONS PASS (Keith, 2026-11-05)
+   1 · ADD TRACK ASKS WAV OR MIDI — the editor's ＋ Add track now
+       opens a chooser. WAV keeps the exact previous behaviour (a
+       sample channel named "Audio N", wave lane wired to it).
+       MIDI builds a first-class synth channel through the same
+       blAddChannelOfType path every channel uses, so it lands in
+       the editor as a MIDI lane AND in the rack, a full mixer
+       strip, the Piano Roll list and the Sampler — and deleting
+       its track removes all of it via deleteChannel, undoable.
+   2 · PLAYLIST PANEL REMOVED — the SONG — PLAYLIST section is
+       taken out of the page. Sequences are arranged on the
+       multitrack chain lane (blocks carry start/len in
+       S.playlist, untouched), so song playback and master/stem
+       renders run exactly as before; Pattern mode is unaffected.
+       renderPlaylist becomes a layout-only no-op so every legacy
+       caller stays safe; project files carrying playlist data
+       still load (the data is honoured by playback, the panel is
+       simply gone).
+   3 · MASTER FADER + VU LONGER — CSS above stretches the MASTER
+       strip's fader travel and VU to 252px so they fill the strip
+       against the tall channel strips. Same controls; the VU
+       cover/peak are percentage-driven, so the scale stretches
+       with the height.
+   4 · MIXER KNOBS IN 2 COLUMNS — CSS above pairs the knobs again:
+       strips widen to 148px, knob rows wrap two-across (cut
+       labels full-width, slope selectors paired beside their
+       FREQ knob), so strips come out visibly shorter while every
+       control stays put and labelled.
+   5 · SUITE PRESETS = CLEAN BUTTONS — CSS grid of uniform
+       buttons on the MASTER strip, gold-filled active state (the
+       existing blSyncMasterUI "on" toggling drives it).
+   6 · MIDI TRACKS SPAWN MIXER CHANNELS — see 1: a MIDI track IS
+       a channel, so buildMixer gives it a strip automatically;
+       verified by strip count when adding one.
+   7 · UNIQUE TRACK NAMES — S.laneNames holds one display name
+       per lane ("m:<id>" / "w:<id>"), decoupled from the channel
+       name (which the rack/mixer keep). Defaults: MIDI lane =
+       channel name, WAV lane = channel name + " WAV". A shared
+       registry across BOTH lane types is enforced on every
+       render and every load — collisions get a numeric suffix
+       (later lane loses), and a rename to any name another lane
+       already uses is rejected with a notice and reverts.
+       Lane names ride projectJSON / loadClipsFromProject, so
+       they are History points, autosaved and saved/loaded.
+   8 · OPTIONS DROPDOWN — Save .json / Load .json / ＋ New and
+       the standalone Templates button leave the top bar (hidden,
+       handlers intact); one Options menu carries New…, Save
+       project, Load project and Save as Template…. The template
+       picker group leaves the bar too: templates are only
+       offered inside the New flow.
+   9 · NEW FLOW + SAVE AS TEMPLATE — New… keeps the existing
+       modal: Blank (truly blank, confirm-if-dirty) or Template,
+       and only then the picker (7 built-ins + session customs +
+       your saved templates). Save as Template prompts for a name
+       and stores the full current project in this browser
+       (localStorage "beatlab.userTemplates.v1"); those templates
+       appear in the New → Template picker and load through the
+       same path as Load .json.
+   ================================================================ */
+
+/* ---------------- 7 · Lane names: shared unique registry ---------------- */
+S.laneNames=(S.laneNames && typeof S.laneNames==="object")? S.laneNames : {};
+function blLaneDefault(key){
+  const ch=S.channels[key.slice(2)]; if(!ch) return "";
+  return key.charAt(0)==="m"? ch.name : ch.name+" WAV";
+}
+function blLaneName(key){
+  const v=S.laneNames[key];
+  return (typeof v==="string" && v.trim())? v.trim() : blLaneDefault(key);
+}
+function blEnforceLaneNames(){
+  if(typeof blLaneKeys!=="function") return;
+  let keys=[]; try{ keys=blLaneKeys(); }catch(e){ return; }
+  const used={}, keep={};
+  keys.forEach(k=>{
+    let nm=blLaneName(k) || blLaneDefault(k) || k;
+    if(used[nm.toLowerCase()]){
+      let n=2, cand=nm+" 2";
+      while(used[cand.toLowerCase()]){ n++; cand=nm+" "+n; }
+      nm=cand;
+    }
+    used[nm.toLowerCase()]=1; keep[k]=nm;
+  });
+  S.laneNames=keep;
+}
+function blLaneRenameStart(key, nmEl){
+  const cur=blLaneName(key);
+  const inp=document.createElement("input"); inp.type="text"; inp.className="trkRename";
+  inp.value=cur; inp.style.width="100%";
+  nmEl.replaceWith(inp); inp.focus(); inp.select();
+  let done=false;
+  const commit=save=>{
+    if(done) return; done=true;
+    if(save){
+      const v=inp.value.trim();
+      if(v && v!==cur){
+        const clash=(typeof blLaneKeys==="function"? blLaneKeys() : [])
+          .some(k2=>k2!==key && blLaneName(k2).toLowerCase()===v.toLowerCase());
+        if(clash){
+          setStatus("“"+v+"” is already the name of another track — a MIDI track and a WAV track can't share the same name. Rename reverted to “"+cur+"”.");
+        }else{
+          S.laneNames[key]=v; markDirty();
+          setStatus("Track renamed to “"+v+"”. Track names live on the lane now — the channel keeps its own name in the rack and mixer, and no other track, MIDI or WAV, may use “"+v+"”.");
+        }
+      }
+    }
+    ptRender();
+  };
+  inp.addEventListener("blur", ()=>commit(true));
+  inp.addEventListener("keydown", e2=>{ e2.stopPropagation(); if(e2.key==="Enter") commit(true); if(e2.key==="Escape") commit(false); });
+  inp.addEventListener("click", e2=>e2.stopPropagation());
+  inp.addEventListener("dblclick", e2=>e2.stopPropagation());
+  inp.addEventListener("pointerdown", e2=>e2.stopPropagation());
+}
+function blApplyLaneNames(){
+  blEnforceLaneNames();
+  const wrap=$("ptLanes"); if(!wrap) return;
+  wrap.querySelectorAll(".ptLane[data-lanekey]").forEach(lane=>{
+    const key=lane.dataset.lanekey; if(!key) return;
+    const nm=lane.querySelector(".ptName"); if(!nm) return;
+    const want=blLaneName(key);
+    if(nm.textContent!==want) nm.textContent=want;
+    nm.title="Double-click to rename this track — names must be unique across MIDI and WAV tracks";
+    const head=lane.querySelector(".ptHead")||lane;
+    head.addEventListener("dblclick", e=>{
+      if(e.target && e.target.closest && e.target.closest(".ptName")){
+        e.stopPropagation(); e.preventDefault();
+        blLaneRenameStart(key, nm);
+      }
+    }, true);
+  });
+}
+const _blOptPtRenderPrev=ptRender;
+ptRender=function(){ _blOptPtRenderPrev(); blApplyLaneNames(); };
+const _blOptPjPrev=projectJSON;
+projectJSON=function(){ const p=_blOptPjPrev();
+  blEnforceLaneNames();
+  p.laneNames=JSON.parse(JSON.stringify(S.laneNames||{}));
+  return p; };
+const _blOptLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){ _blOptLcpPrev(p);
+  if(p && p.laneNames && typeof p.laneNames==="object")
+    S.laneNames=JSON.parse(JSON.stringify(p.laneNames));
+  blEnforceLaneNames(); /* legacy loads: any colliding pair is auto-uniqued, later lane suffixed */
+  ptRender(); };
+if(typeof blTrulyBlank==="function"){
+  const _blOptBlankPrev=blTrulyBlank;
+  blTrulyBlank=function(){ _blOptBlankPrev(); S.laneNames={}; blEnforceLaneNames(); ptRender(); };
+}
+
+/* ---------------- 1 + 6 · Add Track: WAV or MIDI chooser ---------------- */
+function blAddWavTrack(){
+  const ch=blAddChannelOfType("sample"); if(!ch) return;
+  const taken={}; S.order.forEach(id=>{ if(S.channels[id]) taken[S.channels[id].name]=1; });
+  let n=1; while(taken["Audio "+n]) n++;
+  renameChannel(ch.id, "Audio "+n);
+  S.selClipId=null; edTarget={kind:"channel", id:ch.id};
+  markDirty(); ptRender();
+  setStatus("New WAV track “"+ch.name+"” added — wired to its own channel: rack row, mixer strip "+S.order.length+", Piano Roll and its own stem. Drop audio on its lane and it plays through that channel. Its MIDI lane is “"+blLaneName("m:"+ch.id)+"”, its WAV lane “"+blLaneName("w:"+ch.id)+"” — the two never share a name.");
+}
+function blAddMidiTrack(){
+  const ch=blAddChannelOfType("synth"); if(!ch) return;
+  const taken={}; S.order.forEach(id=>{ if(S.channels[id] && id!==ch.id) taken[S.channels[id].name]=1; });
+  let nm="MIDI"; if(taken[nm]){ let n=2; while(taken["MIDI "+n]) n++; nm="MIDI "+n; }
+  if(ch.name!==nm) renameChannel(ch.id, nm);
+  S.selected=ch.id; S.rollChannel=ch.id;
+  blEnforceLaneNames();
+  markDirty(); ptRender();
+  setStatus("New MIDI track “"+ch.name+"” added — a full channel came with it: MIDI lane here in the editor, rack row, mixer strip "+(S.order.indexOf(ch.id)+1)+" with EQ, cuts, crusher and sample rate, Piano Roll channel and Sampler assignment. Program it in the rack or the Piano Roll; delete the track and all of it goes (undo brings it back).");
+}
+(function blAddTrackChooser(){
+  const btn=$("ptAddTrack"); if(!btn) return;
+  btn.title="Add a track to the multitrack — you choose: a WAV track (audio lane wired to its own channel) or a MIDI track (a full channel: MIDI lane, rack row, mixer strip, Piano Roll)";
+  btn.onclick=()=>{
+    if(typeof blxModal!=="function"){ blAddWavTrack(); return; }
+    blxModal((card, close)=>{
+      card.innerHTML='<div class="blModalMsg"><b>Add a track</b><br/>A <b>WAV track</b> is an audio lane wired to its own new channel — drop audio on it and it plays through that channel’s fader, EQ, cuts and FX. A <b>MIDI track</b> is a full new channel of its own — MIDI lane, rack row, mixer strip, Piano Roll and Sampler — ready to program.</div>';
+      const wrap=document.createElement("div"); wrap.className="newchoices";
+      const b1=document.createElement("button"); b1.className="btn gold newchoice"; b1.type="button";
+      b1.innerHTML='WAV track<span>Audio lane + its own channel — drop audio on it</span>';
+      b1.onclick=()=>{ close(); blAddWavTrack(); };
+      const b2=document.createElement("button"); b2.className="btn newchoice"; b2.type="button";
+      b2.innerHTML='MIDI track<span>Full channel — MIDI lane, rack, mixer strip, Piano Roll</span>';
+      b2.onclick=()=>{ close(); blAddMidiTrack(); };
+      const b3=document.createElement("button"); b3.className="btn newchoice"; b3.type="button"; b3.textContent="Cancel";
+      b3.onclick=close;
+      wrap.appendChild(b1); wrap.appendChild(b2); wrap.appendChild(b3);
+      card.appendChild(wrap);
+    });
+  };
+})();
+
+/* ---------------- 2 · Playlist panel removed ---------------- */
+(function blRemovePlaylistPanel(){
+  document.querySelectorAll("section.panel").forEach(sec=>{
+    const h=sec.querySelector("h2");
+    if(h && h.textContent.indexOf("Song — Playlist")>=0) sec.remove();
+  });
+})();
+/* every legacy caller keeps working; the arrangement itself lives in
+   S.playlist (chain-lane blocks with start/len) and the renderers,
+   which are untouched — only the panel's row UI is gone */
+renderPlaylist=function(){ if(typeof renderLayout==="function") renderLayout(); };
+
+/* ---------------- 9 · User templates (this browser) ---------------- */
+const BL_UTPL_KEY="beatlab.userTemplates.v1";
+function blUserTemplates(){
+  try{ const o=JSON.parse(localStorage.getItem(BL_UTPL_KEY)||"{}"); return (o && typeof o==="object")? o : {}; }
+  catch(e){ return {}; }
+}
+function blStoreUserTemplates(store){
+  try{ localStorage.setItem(BL_UTPL_KEY, JSON.stringify(store)); return true; }
+  catch(e){ setStatus("Could not save that template — this browser's storage is full or blocked. Your project itself is untouched."); return false; }
+}
+function blLoadUserTemplate(name){
+  const t=blUserTemplates()[name];
+  if(!t || !t.project){ setStatus("That template is no longer in this browser."); return; }
+  const go=()=>{
+    try{
+      const file=new File([JSON.stringify(t.project)], name+".beatlab.json", {type:"application/json"});
+      const dt=new DataTransfer(); dt.items.add(file);
+      const inp=$("fileProj"); if(!inp) throw new Error("no loader");
+      inp.files=dt.files;
+      inp.dispatchEvent(new Event("change", {bubbles:true}));
+      setStatus("Template loaded: “"+name+"” — your saved project, restored as the starting point. Rename it up top and make it something new.");
+    }catch(e){
+      setStatus("Could not open that template in this browser — export it instead via a project .json (Options → Save project) and load that file.");
+    }
+  };
+  if(S._blDirty) showConfirm("Loading your template “"+name+"” starts from it — your current project's edits will be replaced. Load it?", "Load template", go);
+  else go();
+}
+function blSaveAsTemplate(){
+  if(typeof blxModal!=="function") return;
+  blxModal((card, close)=>{
+    card.innerHTML='<div class="blModalMsg"><b>Save as Template</b><br/>Saves the whole current project — channels, patterns, clips, mixer and master — under a name. It will be offered under Options → New… → Start from Template, in this browser.</div>';
+    const inp=document.createElement("input"); inp.type="text"; inp.placeholder="Template name";
+    inp.value=($("projName").value||"My Template").trim();
+    inp.style.cssText="width:100%;margin:2px 0 10px";
+    card.appendChild(inp);
+    const row=document.createElement("div"); row.className="newchoices";
+    const sv=document.createElement("button"); sv.className="btn gold newchoice"; sv.type="button"; sv.textContent="Save template";
+    sv.onclick=()=>{
+      const name=inp.value.trim(); if(!name){ inp.focus(); return; }
+      const store=blUserTemplates();
+      const existed=!!store[name];
+      store[name]={ bpm:S.bpm, savedAt:Date.now(), project:projectJSON() };
+      if(blStoreUserTemplates(store)){
+        close();
+        setStatus("Template "+(existed? "updated" : "saved")+": “"+name+"” — find it under Options → New… → Start from Template. It lives in this browser, alongside the built-in templates.");
+      }
+    };
+    const cn=document.createElement("button"); cn.className="btn newchoice"; cn.type="button"; cn.textContent="Cancel";
+    cn.onclick=close;
+    row.appendChild(sv); row.appendChild(cn); card.appendChild(row);
+    setTimeout(()=>{ try{ inp.focus(); inp.select(); }catch(e){} }, 40);
+  });
+}
+/* your saved templates join the New → Template picker */
+if(typeof blxOpenPicker==="function"){
+  const _blOptPickerPrev=blxOpenPicker;
+  blxOpenPicker=function(){
+    _blOptPickerPrev();
+    const list=document.querySelector(".blx-overlay .tpllist"); if(!list) return;
+    const store=blUserTemplates();
+    Object.keys(store).forEach(name=>{
+      const t=store[name];
+      const b=document.createElement("button"); b.className="tplrow"; b.type="button";
+      b.innerHTML='<span>'+escapeHtml(name)+' (your template)</span><span class="tplmeta">'+(t.bpm||S.bpm)+' BPM · saved by you</span>';
+      b.onclick=()=>{ const ov=document.querySelector(".blx-overlay"); if(ov) ov.remove(); blLoadUserTemplate(name); };
+      list.appendChild(b);
+    });
+  };
+}
+
+/* ---------------- 8 · Options dropdown replaces the loose buttons ---------------- */
+(function blOptionsMenu(){
+  const saveBtn=$("btnSaveProj"); if(!saveBtn) return;
+  const grp=saveBtn.closest(".tgroup");
+  [saveBtn, $("btnTemplates"), $("btnNewProj")].forEach(el=>{ if(el) el.style.display="none"; });
+  const fileLabel=$("fileProj")? $("fileProj").closest("label") : null;
+  if(fileLabel) fileLabel.style.display="none";
+  const tplGrp=$("selTemplate")? $("selTemplate").closest(".tgroup") : null;
+  if(tplGrp) tplGrp.style.display="none";
+  const wrap=document.createElement("div"); wrap.className="tgroup blopts";
+  const btn=document.createElement("button"); btn.className="btn sm gold"; btn.id="btnOptions"; btn.type="button";
+  btn.textContent="Options ▾"; btn.title="Project options — New, Save, Load and Save as Template";
+  wrap.appendChild(btn);
+  const menu=document.createElement("div"); menu.className="bloptsmenu"; menu.style.display="none";
+  const items=[
+    ["New…", "Start a new project — asks Blank or Template first", ()=>{ const b=$("btnNewProj"); if(b) b.click(); }],
+    ["Save project (.json)", "Download this project as a .json file", ()=>{ const b=$("btnSaveProj"); if(b) b.click(); }],
+    ["Load project (.json)", "Open a project .json from this device", ()=>{ const f=$("fileProj"); if(f) f.click(); }],
+    ["Save as Template…", "Save the current project as a reusable template", ()=>blSaveAsTemplate()]
+  ];
+  items.forEach(([label, title, fn])=>{
+    const b=document.createElement("button"); b.type="button"; b.className="bloptsitem";
+    b.textContent=label; b.title=title;
+    b.onclick=()=>{ menu.style.display="none"; fn(); };
+    menu.appendChild(b);
+  });
+  wrap.appendChild(menu);
+  btn.onclick=e=>{ e.stopPropagation(); menu.style.display=(menu.style.display==="none")? "block" : "none"; };
+  document.addEventListener("pointerdown", e=>{ if(!wrap.contains(e.target)) menu.style.display="none"; });
+  if(grp && grp.parentNode) grp.parentNode.insertBefore(wrap, grp);
+  else { const tr=document.querySelector(".transport"); if(tr) tr.appendChild(wrap); }
+})();
+
+/* ---------------- Init ---------------- */
+blEnforceLaneNames();
+try{ ptRender(); }catch(e){}
+setStatus("Beat Lab ready — ＋ Add track now asks WAV or MIDI; the playlist panel is gone (arrange sequences right on the multitrack); Save / Load / New / Save as Template live under Options in the top bar, and templates only come up when you start New. Master fader and VU run long, mixer knobs sit in two columns, and every track name is unique across MIDI and WAV.");
+</script>
+
+<style>
+/* ================================================================
+   FADER REDESIGN (Keith, 2026-11-05) — real mixer hardware faders.
+   Pre-edit rendered heights, measured on the page: channel fader
+   104px, master fader 252px. Channel faders now run 312px (3×),
+   every VU matches its fader's length exactly, and the MASTER
+   fader + VU flex the full span of the master window — from the
+   bottom of the Limiter Ceiling block to the strip's bottom
+   padding. The native range inputs stay the control (values,
+   % readouts, gain mapping, MIDI, History/autosave all ride the
+   same input events as before) — only the rendering changes:
+   recessed slot with a centre line, a tick rail with % labels,
+   and a wide beveled cap with grip ridges + a centre line in the
+   channel colour (gold on the master).
+   ================================================================ */
+/* --- channel faders: 3× travel (104px → 312px) --- */
+#mixerStrips .bstrip input[type=range].vert{
+  -webkit-appearance:none; appearance:none; -moz-appearance:none;
+  writing-mode:vertical-lr; direction:rtl;
+  width:58px; height:312px; flex:none;
+  background:transparent; border:none; border-radius:0;
+  padding:0; margin:0; cursor:pointer;
+}
+#mixerStrips .bstrip input[type=range].vert::-webkit-slider-runnable-track{
+  width:14px; border-radius:7px; border:1px solid #000;
+  background:
+    linear-gradient(to right, transparent 0, transparent calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 60%, transparent) calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 60%, transparent) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom, #050404, #171410 12%, #100e0b 88%, #050404);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.92), inset 0 -1px 2px rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.05);
+}
+#mixerStrips .bstrip input[type=range].vert::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:50px; height:44px; border:none; border-radius:0; cursor:grab;
+  background:
+    repeating-linear-gradient(to right, rgba(255,255,255,.08) 0 2px, rgba(255,255,255,0) 2px 6px) center/38px 22px no-repeat,
+    linear-gradient(to bottom, rgba(0,0,0,0) calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 55%, #fff) calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 55%, #fff) calc(50% + 1px), rgba(0,0,0,0) calc(50% + 1px)) center/46px 30px no-repeat,
+    linear-gradient(to bottom, #5d5546 0%, #3a362d 38%, #24221e 56%, #453f34 100%) center/46px 30px no-repeat,
+    linear-gradient(to bottom, #000, #000) center/48px 32px no-repeat;
+}
+#mixerStrips .bstrip input[type=range].vert::-webkit-slider-thumb:active{cursor:grabbing}
+#mixerStrips .bstrip input[type=range].vert::-moz-range-track{
+  width:14px; border-radius:7px; border:1px solid #000;
+  background:
+    linear-gradient(to right, transparent 0, transparent calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 60%, transparent) calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 60%, transparent) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom, #050404, #171410 12%, #100e0b 88%, #050404);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.92), inset 0 -1px 2px rgba(255,255,255,.05);
+}
+#mixerStrips .bstrip input[type=range].vert::-moz-range-thumb{
+  width:50px; height:44px; border:none; border-radius:0; cursor:grab;
+  background:
+    repeating-linear-gradient(to right, rgba(255,255,255,.08) 0 2px, rgba(255,255,255,0) 2px 6px) center/38px 22px no-repeat,
+    linear-gradient(to bottom, rgba(0,0,0,0) calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 55%, #fff) calc(50% - 1px), color-mix(in srgb, var(--chcol, var(--gold)) 55%, #fff) calc(50% + 1px), rgba(0,0,0,0) calc(50% + 1px)) center/46px 30px no-repeat,
+    linear-gradient(to bottom, #5d5546 0%, #3a362d 38%, #24221e 56%, #453f34 100%) center/46px 30px no-repeat,
+    linear-gradient(to bottom, #000, #000) center/48px 32px no-repeat;
+}
+/* --- tick rail with % labels, exactly as tall as the fader --- */
+#mixerStrips .bstrip .frail{
+  position:relative; width:26px; height:312px; flex:none;
+  background:
+    repeating-linear-gradient(to bottom, rgba(236,228,212,.55) 0 1px, rgba(236,228,212,0) 1px 25%) right center/11px 100% no-repeat,
+    repeating-linear-gradient(to bottom, rgba(236,228,212,.30) 0 1px, rgba(236,228,212,0) 1px 10%) right center/7px 100% no-repeat;
+}
+#mixerStrips .bstrip .frail .ft{
+  position:absolute; right:14px; transform:translateY(-50%);
+  font-family:"JetBrains Mono",monospace; font-size:7.5px; line-height:1; color:var(--faint);
+}
+#mixerStrips .bstrip .frail .ft:first-child{transform:translateY(0)}
+#mixerStrips .bstrip .frail .ft:last-child{transform:translateY(-100%)}
+/* --- channel VU: same length as the fader, top and bottom aligned --- */
+#mixerStrips .bstrip .vu{height:312px; width:12px}
+/* --- MASTER: fader + VU flex the whole window, ceiling knob → bottom --- */
+#mixerStrips .masterstrip .faderRow{
+  flex:1 1 auto; min-height:230px; position:relative;
+  align-items:stretch; margin-top:12px;
+}
+#mixerStrips .masterstrip input[type=range].vert{height:100%}
+#mixerStrips .masterstrip .vu{height:100%; width:12px}
+#mixerStrips .masterstrip .frail{height:100%}
+#mixerStrips .masterstrip .val{
+  position:absolute; left:0; bottom:0; margin:0;
+  background:color-mix(in srgb, var(--panel2) 82%, transparent);
+  padding:1px 3px; border-radius:3px;
+}
+</style>
+
+<style>
+/* ================================================================
+   FINAL PASS (Keith, 2026-11-05) — fader caps centred on the slide ·
+   master volume leaves the top bar · Undo/Redo inside Options ·
+   quantize per track · ONE unified transport + live position
+   readout (Bar · Beat · MIN:SEC)
+   ================================================================ */
+/* --- 1 · Fader cap centred over the slide -------------------------------
+   Measured on the rendered page before this fix: cap centre sat
+   +15.5px to the right of the slot centre — identical on a channel
+   strip and on the MASTER. Chromium centres the 50px thumb inside
+   the 58px input box but runs the 14px slot at the box's cross-
+   start, so the cap rides right of the slide it belongs to. The
+   offset is a fixed cross-axis layout constant (it does not vary
+   with value), so a thumb margin puts the cap centre exactly on
+   the slot centre line at min, middle and max alike. Measured
+   after the first −15.5px pass (probe-driven, pixel-counted on
+   the rendered page): a constant +4.0px residual remained at
+   min/mid/max on BOTH a channel strip and the MASTER, so the
+   margin is −19.5px — the −15.5 plus the measured −4.0 residual.
+   Fader lengths (312px channels, master flex span), the tick rail
+   and the VU lengths are untouched. */
+#mixerStrips .bstrip input[type=range].vert::-webkit-slider-thumb{margin-left:-19.5px}
+/* --- 3 · Undo / Redo as Options menu items: disabled = greyed --- */
+.bloptsitem:disabled{opacity:.38;cursor:default}
+.bloptsitem:disabled:hover{background:none}
+/* --- 4 · Per-track quantize rows in the MIDI lane headers --- */
+.blQuantRow{display:flex;align-items:center;gap:5px;margin-top:2px}
+.blQuantRow select{flex:1;min-width:0;font-size:10px;padding:2px 3px}
+.blQuantRow input[type=range]{flex:1;min-width:0;height:18px}
+.blQuantLab{font-size:8.5px;letter-spacing:1px;color:var(--gold);font-weight:700;text-transform:uppercase;flex:none}
+.blQuantVal{font-size:10px;color:var(--teal);flex:none;min-width:30px}
+.blQuantApply{flex:none;font-size:9px;font-weight:900;letter-spacing:.4px;border-radius:4px;border:1px solid var(--gold2);background:color-mix(in srgb,var(--gold) 16%, var(--btn));color:var(--gold);padding:3px 7px;cursor:pointer;font-family:inherit}
+.blQuantApply:active{background:var(--gold);color:#1c1503}
+.ptLane.blSz0 .blQuantRow{display:none}
+@media (max-width:640px){ .blQuantRow input[type=range]{height:26px} .blQuantApply{min-height:30px} }
+/* --- 5 · Unified transport: the moved loop buttons + readout --- */
+.blTpBtn{width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--btn);color:var(--ink);font-size:14px;line-height:1;padding:0;cursor:pointer;font-family:inherit}
+.blTpBtn:hover{color:var(--gold);border-color:var(--gold)}
+.blTpBtn.on{background:var(--gold);color:#1c1503;border-color:var(--gold2);font-weight:900}
+.blTpBtn .psel{display:inline-block;border:1.5px dashed var(--gold);border-radius:3px;padding:1px 5px;color:var(--gold);font-size:12px}
+.blTpBtn:hover .psel{color:var(--ink);border-color:var(--ink)}
+#blPosReadout{font-size:13px;color:var(--teal);white-space:nowrap}
+@media (max-width:640px){ .blTpBtn{width:44px;height:44px} }
+/* --- 6 · Project name: read-only title text beside the wordmark --- */
+.brand{flex-wrap:wrap;min-width:0}
+.brand .blProjTitle{flex:1 1 120px;min-width:60px;margin-left:8px;font-weight:700;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .blProjTitle::before{content:"— ";color:var(--gold)}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   FINAL PASS (Keith, 2026-11-05)
+   2 · MASTER VOLUME LEAVES THE TOP BAR — the mixer's big MASTER
+       fader is the one and only master volume now. The top-bar
+       group (Master label + slider + meter) is parked in a hidden
+       container — the same pattern the global Swing removal used —
+       so every legacy line that reads/writes #masterVol by id
+       (audio init, exports, the mixer fader's own sync) keeps
+       working, and the mixer fader is the single visible writer:
+       default 80%, readout, undo/autosave and playback gain all
+       ride it exactly as before. The top bar closes up on its own
+       (flex), leaving no hole.
+   3 · UNDO / REDO LIVE IN OPTIONS — the actual #btnUndo / #btnRedo
+       elements are MOVED into the Options dropdown (not copied):
+       their onclick handlers (blUndo / blRedo), the live
+       disabled-state + counts that blHistUI writes by id, and the
+       Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y shortcuts are untouched, so
+       menu state and history can never disagree. The History bar
+       keeps its log (clickable entries), autosave readout and
+       Discard button — only the two buttons moved out.
+   4 · QUANTIZE IS PER TRACK — ch.qGrid ("off"/"4"/"8"/"16"/"32"/
+       "8t"/"16t", the GRID_STEPS keys the quantize engine always
+       used) + ch.qStr (0–100%, FL-style) live on each channel,
+       exactly like ch.swing. Every MIDI lane header gains a Quant
+       row beside its Swing row: grid selector, strength slider,
+       and a Quantize button that runs the original quantize math
+       on THAT channel's current-sequence notes/hits only, as a
+       History point (markDirty). Recording snaps by the grid of
+       the channel being recorded onto (recordEvent now reads
+       blQGridOf(ch)). WAV lanes get no quantize control. The two
+       global copies are gone: the top-bar record-quantize select
+       and the Piano Roll quantize-after panel. Persistence rides
+       projectJSON per channel; a legacy project's global
+       p.recQuant migrates onto every channel once when no
+       per-channel values exist (the swing migration pattern);
+       strength had no persisted global, so it starts at 100%.
+   5 · ONE TRANSPORT — the LOOP cluster's five transport buttons
+       are deleted as duplicates. ⏮ Rewind, ▶-selected and ↻ Loop
+       are MOVED (same elements, same handlers) into the master
+       transport beside Play/Stop in DAW order ⏮ ■ ▶ ▶-sel ↻;
+       the cluster's own ■ and ▶ are removed outright (btnStop /
+       btnPlay already do exactly that job on the one shared
+       transport). The LOOP box keeps Set IN / Set OUT / Reset
+       region and its teal readout, which still reports Loop
+       ON/OFF from lpSyncLoopUI. A live position readout joins the
+       master transport — "Bar N · Beat M · M:SS" — updated inside
+       ptPositionPlayhead (the rAF that draws the editor playhead)
+       from lpPlayheadPos(), the very position the playhead is
+       drawn from: one source, so it advances with playback, wraps
+       with the loop, follows rewind/seek, and parks at
+       Bar 1 · Beat 1 · 0:00.
+   ================================================================ */
+
+/* ---------- 2 · Master volume leaves the top bar ---------- */
+(function blParkMasterVolTop(){
+  const el=$("masterVol"); if(!el) return;
+  const grp=el.closest(".tgroup") || el.parentElement; if(!grp) return;
+  const park=document.createElement("div"); park.id="blMasterVolPark"; park.style.display="none";
+  document.body.appendChild(park); park.appendChild(grp);
+})();
+
+/* ---------- 3 · Undo / Redo move into the Options menu ---------- */
+(function blUndoIntoOptions(){
+  const u=$("btnUndo"), r=$("btnRedo"), menu=document.querySelector(".bloptsmenu");
+  if(!u || !r || !menu) return;
+  [u,r].forEach(b=>{
+    b.classList.remove("btn","sm"); b.classList.add("bloptsitem");
+    b.addEventListener("click", ()=>{ menu.style.display="none"; });
+  });
+  menu.insertBefore(r, menu.firstChild);
+  menu.insertBefore(u, menu.firstChild);
+})();
+
+/* ---------- 4 · Quantize is per track ---------- */
+function blQGridOf(ch){
+  if(!ch) return "off";
+  return (typeof ch.qGrid==="string" && ch.qGrid)? ch.qGrid : (S.recQuant||"off");
+}
+function blQStrOf(ch){
+  if(!ch) return 100;
+  const v=+ch.qStr;
+  return isFinite(v)? clamp(Math.round(v),0,100) : 100;
+}
+/* channels that predate per-track quantize start from the session's
+   legacy global grid, so nothing changes feel on load */
+S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+  if(ch.qGrid==null) ch.qGrid=(typeof S.recQuant==="string" && S.recQuant)? S.recQuant : "16";
+  if(ch.qStr==null) ch.qStr=100; });
+/* duplicating a channel copies its quantize settings too */
+const _blQDupPrev=blDuplicateChannel;
+blDuplicateChannel=function(cid){
+  const src=S.channels[cid];
+  const ch=_blQDupPrev(cid);
+  if(ch && src){ if(src.qGrid!=null) ch.qGrid=src.qGrid; if(src.qStr!=null) ch.qStr=src.qStr; }
+  return ch;
+};
+function blQuantizeChannel(ch){
+  if(!ch) return;
+  const gk=blQGridOf(ch), g=GRID_STEPS[gk], str=blQStrOf(ch)/100;
+  if(!g){ setStatus(ch.name+" — this track's quantize grid is Off. Pick a grid in its lane header in the multitrack editor to snap its notes."); return; }
+  const pat=ch.patterns[S.pattern]; if(!pat){ setStatus(ch.name+" has no pattern in this sequence to quantize."); return; }
+  let moved=0;
+  const mv=o=>{ const p=o.step+(o.off||0); const target=Math.round(p/g)*g; const np=p+(target-p)*str;
+    o.step=Math.floor(np); o.off=+((np-o.step).toFixed(4)); if(!o.off) delete o.off; moved++; };
+  (pat.notes||[]).forEach(mv); (pat.hits||[]).forEach(mv);
+  if(pat.hits) pat.hits=pat.hits.filter(h=>{ if(!h.off){ pat.steps[h.step]=1; return false; } return true; });
+  buildRack(); buildRoll(); if(typeof buildSliceSteps==="function") buildSliceSteps();
+  markDirty();
+  const glab={ "4":"1/4","8":"1/8","16":"1/16","32":"1/32","8t":"1/8 triplet","16t":"1/16 triplet" }[gk]||gk;
+  setStatus(ch.name+" quantized — "+moved+" hit(s) snapped toward "+glab+" at "+blQStrOf(ch)+"% strength"+(str<1? " (offsets shrunk, not erased)" : " (hard on the grid)")+". Only this track moved — Undo (Options → Undo, or Ctrl+Z) restores its timing.");
+}
+/* every MIDI lane header gains its channel's Quantize controls,
+   right under its Swing row; WAV lanes never pass through here */
+const _blQLanePrev=ptBuildMidiLane;
+ptBuildMidiLane=function(cid, idx, ts){
+  const lane=_blQLanePrev(cid, idx, ts);
+  if(!lane) return lane;
+  const ch=S.channels[cid]; if(!ch) return lane;
+  if(ch.qGrid==null) ch.qGrid=(typeof S.recQuant==="string" && S.recQuant)? S.recQuant : "16";
+  if(ch.qStr==null) ch.qStr=100;
+  const head=lane.querySelector(".ptHead"); if(!head) return lane;
+  const stop=e=>e.stopPropagation();
+  const row1=document.createElement("div"); row1.className="blQuantRow";
+  const lab=document.createElement("span"); lab.className="blQuantLab"; lab.textContent="Quant"; row1.appendChild(lab);
+  const sel=document.createElement("select");
+  sel.title="Quantize grid — "+ch.name+" only: recording onto this channel snaps to this grid, and the Quantize button below snaps its existing notes to it. No other track is affected.";
+  [["off","Off"],["4","1/4"],["8","1/8"],["16","1/16"],["32","1/32"],["8t","1/8 trip"],["16t","1/16 trip"]].forEach(([v,l])=>{
+    const o=document.createElement("option"); o.value=v; o.textContent=l; sel.appendChild(o); });
+  sel.value=blQGridOf(ch);
+  sel.addEventListener("pointerdown", stop); sel.addEventListener("click", stop); sel.addEventListener("dblclick", stop);
+  sel.onchange=()=>{ ch.qGrid=sel.value; markDirty();
+    setStatus(ch.name+" quantize grid: "+sel.options[sel.selectedIndex].text+" — recording onto this channel snaps to it, and its Quantize button snaps its existing notes. Every other track keeps its own grid."); };
+  row1.appendChild(sel); head.appendChild(row1);
+  const row2=document.createElement("div"); row2.className="blQuantRow";
+  const slider=document.createElement("input");
+  slider.type="range"; slider.min="0"; slider.max="100"; slider.step="1"; slider.value=String(blQStrOf(ch));
+  slider.title="Quantize strength — "+ch.name+" only: 100% = hard snap to the grid; less moves hits only partway, keeping some feel.";
+  const val=document.createElement("span"); val.className="blQuantVal mono"; val.textContent=blQStrOf(ch)+"%";
+  slider.addEventListener("pointerdown", stop); slider.addEventListener("click", stop); slider.addEventListener("dblclick", stop);
+  slider.oninput=()=>{ ch.qStr=+slider.value; val.textContent=slider.value+"%"; markDirty(); };
+  slider.onchange=()=>setStatus(ch.name+" quantize strength: "+slider.value+"%.");
+  const apply=document.createElement("button"); apply.type="button"; apply.className="blQuantApply"; apply.textContent="Quantize";
+  apply.title="Quantize "+ch.name+" — snap this track's existing notes in this sequence toward its grid by its strength. Only this channel moves; Undo restores them.";
+  apply.addEventListener("pointerdown", stop); apply.addEventListener("dblclick", stop);
+  apply.addEventListener("click", e=>{ e.stopPropagation(); blQuantizeChannel(ch); });
+  row2.appendChild(slider); row2.appendChild(val); row2.appendChild(apply);
+  head.appendChild(row2);
+  return lane;
+};
+/* ---------------- Persistence + legacy migration ---------------- */
+const _blQPjPrev=projectJSON;
+projectJSON=function(){ const p=_blQPjPrev();
+  S.order.forEach(id=>{ const ch=S.channels[id], c=p.channels && p.channels[id];
+    if(ch && c){ c.qGrid=blQGridOf(ch); c.qStr=blQStrOf(ch); } });
+  return p; };
+const _blQLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){
+  _blQLcpPrev(p);
+  if(!p) return;
+  const srcs=p.channels||{};
+  const anyPer=Object.keys(srcs).some(id=>srcs[id] && srcs[id].qGrid!=null);
+  if(anyPer){
+    Object.keys(srcs).forEach(id=>{ const ch=S.channels[id];
+      if(ch && srcs[id]){ if(srcs[id].qGrid!=null) ch.qGrid=String(srcs[id].qGrid);
+        if(srcs[id].qStr!=null) ch.qStr=clamp(Math.round(+srcs[id].qStr)||0, 0, 100); } });
+  } else if(typeof p.recQuant==="string" && p.recQuant){
+    /* one-time migration: the old global record-quantize grid
+       becomes every channel's grid; strength starts at 100% */
+    S.order.forEach(id=>{ const ch=S.channels[id]; if(ch) ch.qGrid=p.recQuant; });
+  }
+  S.order.forEach(id=>{ const ch=S.channels[id]; if(ch){ if(ch.qGrid==null) ch.qGrid="16"; if(ch.qStr==null) ch.qStr=100; } });
+  if(typeof ptRender==="function") ptRender();
+};
+
+/* ---------- 5 · One transport + live position readout ---------- */
+(function blUnifyTransport(){
+  const play=$("btnPlay"), stop=$("btnStop");
+  const rew=$("ptTpRew"), sel=$("ptTpSel"), loop=$("ptTpLoop");
+  if(play && play.parentElement){
+    const grp=play.parentElement;
+    if(rew){ rew.classList.add("blTpBtn"); grp.insertBefore(rew, grp.firstChild); }
+    if(stop) grp.insertBefore(stop, play);
+    if(sel){ sel.classList.add("blTpBtn"); grp.appendChild(sel); }
+    if(loop){ loop.classList.add("blTpBtn"); grp.appendChild(loop); }
+    /* live position readout, its own group right after Play/Stop */
+    const g=document.createElement("div"); g.className="tgroup";
+    const lab=document.createElement("span"); lab.className="tlabel"; lab.textContent="Position";
+    const rd=document.createElement("span"); rd.id="blPosReadout"; rd.className="mono"; rd.textContent="Bar 1 · Beat 1 · 0:00";
+    g.appendChild(lab); g.appendChild(rd);
+    grp.parentElement.insertBefore(g, grp.nextSibling);
+  }
+  /* the LOOP cluster's own Stop / Play duplicate btnStop / btnPlay
+     on the one shared transport — out they go, and the emptied
+     button strip with them. Set IN / Set OUT / Reset region and
+     the teal readout stay in the LOOP box. */
+  const dupPlay=$("ptTpPlay"), dupStop=$("ptTpStop");
+  if(dupPlay) dupPlay.remove();
+  if(dupStop) dupStop.remove();
+  const pttp=document.querySelector("#ptLoopBar .pttp"); if(pttp) pttp.remove();
+})();
+/* ---------- 6 · Project name: read-only title text (Keith's correction) ----------
+   "I dont need to edit the name, thats what save as is for. I want
+   it next to the app name in the window title." So the editable
+   #projName INPUT is removed from the page entirely — no editable
+   project-name field anywhere, and the old PROJECT row in the
+   transport goes with it. In its place the title bar carries the
+   current name as plain title text beside the BEAT LAB wordmark.
+   Every existing code path reads/writes the name as
+   $("projName").value (projectJSON, safeName, load, history
+   apply, recovery, Start Blank's reset to "Untitled Beat"), so
+   the display span keeps the id and a value accessor: reads get
+   the current name, writes update the title text. Naming happens
+   through the save/load flow exactly as before — the name a
+   project is saved under is the name the title shows. */
+(function blProjNameToTitleBar(){
+  const inp=$("projName"), brand=document.querySelector(".brand");
+  if(!inp || !brand) return;
+  const grp=inp.closest(".tgroup");
+  let cur=inp.value||"Untitled Beat";
+  const disp=document.createElement("span");
+  disp.className="blProjTitle";
+  disp.title="Project name — set by the project you save or load (Save / Load / New live in Options).";
+  Object.defineProperty(disp, "value", {
+    get(){ return cur; },
+    set(v){ cur=(v==null? "" : String(v)); disp.textContent=cur||"Untitled Beat"; }
+  });
+  disp.textContent=cur;
+  inp.remove();
+  disp.id="projName";
+  brand.appendChild(disp);
+  if(grp) grp.remove(); /* the old PROJECT label + input row leaves the transport; Options stays where it is */
+})();
+
+/* The readout updates inside ptPositionPlayhead — the same rAF
+   that draws the editor playhead — from lpPlayheadPos(), the very
+   position the playhead is drawn from. One source, no second
+   clock: it advances with playback, wraps with the loop, follows
+   rewind / stop / seek, and parks at Bar 1 · Beat 1 · 0:00. */
+let blPosLastTxt=null;
+const _blPosPphPrev=ptPositionPlayhead;
+ptPositionPlayhead=function(){
+  _blPosPphPrev();
+  const rd=$("blPosReadout"); if(!rd) return;
+  let pos=0;
+  try{ pos=lpPlayheadPos(); }catch(e){ pos=S.tlCursor||0; }
+  if(!(pos>0)) pos=0;
+  const bar=Math.floor(pos/16)+1, beat=Math.floor((pos%16)/4)+1;
+  const secs=pos*stepDurSec();
+  const mm=Math.floor(secs/60), ss=Math.floor(secs%60);
+  const txt="Bar "+bar+" · Beat "+beat+" · "+mm+":"+(ss<10? "0" : "")+ss;
+  if(txt!==blPosLastTxt){ blPosLastTxt=txt; rd.textContent=txt; }
+};
+
+try{ ptRender(); }catch(e){}
+setStatus("Beat Lab ready — project name displayed beside the wordmark in the title bar (it takes the name of the project you save or load); one transport up top (⏮ ■ ▶, play-selected and ↻ Loop moved up from the LOOP box, which keeps Set IN / Set OUT / Reset region), a live Bar · Beat · MIN:SEC position readout beside Play, fader caps centred on their slides, no master volume up top (the mixer's MASTER fader is the master volume), Undo / Redo inside Options, and quantize per track in every MIDI lane header.");
+</script>
+
+<script>
+"use strict";
+/* ================================================================
+   CHAIN LANE REMOVED + BLANK START = TRACK 1 (Keith, 2026-11-05)
+   1 · THE SONG CHAIN / PLAYLIST LANE LEAVES THE EDITOR — the
+       "MIDI / SEQ · Song chain" lane, its header (M/S/Roll) and
+       its "Song — playlist…" label are removed from the rendered
+       lanes on every render (the same post-render removal pattern
+       the final pass already uses for linear lanes and section
+       heads). Nothing functional depended on the lane's DOM:
+       playback, loop, play-selected and exports all run off
+       S.playlist DATA through lpSongStateAt / ptChainBlocks, and
+       every per-channel MIDI lane renders the same sequence
+       blocks from that data — clicking one still selects its
+       entry, and the toolbar's Slice / Duplicate / Copy / Paste /
+       Delete still act on the selection. Legacy projects carrying
+       chain data load exactly as before (the data is parsed and
+       honoured; only the extra lane is gone), so nothing is lost
+       and load / autosave restore / undo never see a missing-lane
+       error.
+   2 · BLANK START = ONE BLANK WAV TRACK, "Track 1" — this
+       supersedes the old "truly blank = zero channels" rule.
+       blTrulyBlank still zeroes the project (name → "Untitled
+       Beat", empty playlist, one empty SEQ 1, History point),
+       then builds ONE WAV track through the exact Add Track
+       (WAV) path: a fresh sample channel ("Audio 1" in a blank
+       project) with its rack row, mixer strip, Piano Roll
+       channel and stem. Its wave lane is named "Track 1" in the
+       lane-name registry (unique there — the channel's MIDI lane
+       keeps the channel name), no clips on it, and that channel's
+       MIDI lane is not shown in the editor, so the editor opens
+       on exactly one lane: Track 1. The flag rides projectJSON
+       per channel like swing/quantize, so saves, loads, autosave
+       and undo keep the same one-lane start. Templates still
+       install their full channel sets untouched.
+   3 · FRESH FIRST RUN — the same conversion runs once at load,
+       before the history init (~700 ms), so the session baseline
+       IS the Track 1 state. If an autosave exists, recovery
+       applies it over the top through the normal load chain,
+       which creates the saved channels and prunes this one if
+       the saved project doesn't contain it — and Discard
+       Recovery now returns to the Track 1 start.
+   ================================================================ */
+
+/* ---------- 1 · Chain lane out of the editor (every render) ---------- */
+const _blChainPtRenderPrev=ptRender;
+ptRender=function(){
+  _blChainPtRenderPrev();
+  const wrap=$("ptLanes"); if(!wrap) return;
+  wrap.querySelectorAll(".ptLane.chainLane").forEach(el=>el.remove());
+  /* Track 1 is a WAV track only — its channel's MIDI lane stays out */
+  Object.keys(S.channels).forEach(cid=>{ const ch=S.channels[cid];
+    if(ch && ch.blTrack1){ const el=wrap.querySelector('.ptLane[data-ptmidi="'+cid+'"]'); if(el) el.remove(); } });
+  const info=$("ptInfo");
+  if(info){ const n=wrap.querySelectorAll(".ptLane[data-lanekey]").length;
+    info.textContent=S.order.length+" channels · "+n+" lanes (MIDI + wave interleaved) · "+S.clips.length+" wave clips · "+layoutBars()+" bars · snap "+(S.snap&&S.ptGrid? "on" : "off"); }
+};
+
+/* ---------- 2 · Blank start builds Track 1 ---------- */
+const _blT1BlankPrev=blTrulyBlank;
+blTrulyBlank=function(){
+  _blT1BlankPrev();
+  blAddWavTrack(); /* the exact Add Track (WAV) path — fresh sample
+    channel, wired to its wave lane, rack, mixer and Piano Roll */
+  const ch=S.channels[S.selected];
+  if(ch){
+    ch.blTrack1=true;
+    S.laneNames=S.laneNames||{};
+    S.laneNames["w:"+ch.id]="Track 1";
+    blEnforceLaneNames();
+  }
+  markDirty(); ptRender();
+  setStatus("Blank project — “Untitled Beat” with ONE empty WAV track: Track 1, on its own channel (rack row + mixer strip, MASTER beside it). Drop audio onto Track 1 and press Play; ＋ Add track builds from there. Undo brings the previous project back.");
+};
+/* the Track 1 flag rides the project like swing / quantize do */
+const _blT1PjPrev=projectJSON;
+projectJSON=function(){ const p=_blT1PjPrev();
+  S.order.forEach(id=>{ const ch=S.channels[id], c=p.channels && p.channels[id];
+    if(ch && c && ch.blTrack1) c.blTrack1=1; });
+  return p; };
+const _blT1LcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){
+  _blT1LcpPrev(p);
+  if(p && p.channels) Object.keys(p.channels).forEach(id=>{ const ch=S.channels[id];
+    if(ch && p.channels[id] && p.channels[id].blTrack1) ch.blTrack1=true; });
+  if(typeof ptRender==="function") ptRender();
+};
+
+/* ---------- 3 · Fresh first run opens on Track 1 ---------- */
+try{ blTrulyBlank(); }catch(e){}
+try{ ptRender(); }catch(e){}
+</script>
+
+<style>
+/* ================================================================
+   FINAL PASS 3 (Keith, 2026-11-05) — History lives in Options ·
+   the LOOP panel leaves the transport (the region already exists
+   in graphic form as the gold IN/OUT bars on the editor ruler)
+   ================================================================ */
+/* --- History log as an Options-opened panel: autosave readout on top --- */
+.histlog{border-color:var(--gold2)}
+.blHistTop{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.blHistTop .savestate{font-size:12px;color:var(--teal);font-weight:700;margin-right:auto}
+.blHistTop .savestate.fail{color:var(--red)}
+.blHistTop .btn{min-height:32px}
+#blHistCount{color:var(--gold)}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   FINAL PASS 3 (Keith, 2026-11-05)
+   1 · HISTORY MOVES INTO OPTIONS — the standalone History bar at
+       the top of the page is removed entirely: the page now opens
+       title bar → transport. The history LOG becomes a panel
+       opened from a new "History…" item in the Options menu,
+       sitting alongside the Undo / Redo items that moved there
+       earlier — one menu for all of it. It is the SAME log,
+       driven by the same history state: the #histLog element and
+       its #histItems list (rebuilt by blHistUI on every logged
+       action, timestamped, current entry marked, click an entry
+       to jump to that state) are untouched — only their home and
+       their opener change. Moved into the panel's top row: the
+       autosave readout (#saveState — setSaveState writes it by
+       id, so it keeps updating live) and the Discard recovered
+       session button (same element, same handler, still shown
+       only when a recovered session is present). The bar's
+       explanatory prose paragraph does NOT come along — it is
+       dropped with the bar. Autosave behaviour is unchanged: it
+       still saves on every action; only the readout's home moved.
+       Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y are untouched.
+   2 · THE LOOP PANEL LEAVES THE TRANSPORT — #ptLoopBar (Set IN at
+       playhead / Set OUT at playhead / Reset region + the teal
+       region readout) is removed whole. The region already exists
+       in graphic form: the gold IN/OUT marker bars on the editor
+       ruler, dragged via lpBarDrag → lpSetInOut (snap-honouring),
+       and those functions all stay — only the panel UI goes.
+       Every later call into the panel is null-guarded
+       (lpSyncLoopInfo checks #ptLoopInfo before writing), the
+       same proven pattern as the ptTpPlay/ptTpStop removal.
+       Loop playback still wraps at OUT, play-selected still
+       plays the region once, and the ↻ toggle in the master
+       transport still shows Loop on/off at a glance: lpSyncLoopUI
+       toggles its .on class (gold fill), which now carries the
+       state alone. The general status line under the transport
+       is NOT part of the panel and keeps reporting every action,
+       loop sets included.
+   ================================================================ */
+
+/* ---------- 1 · History into Options ---------- */
+(function blHistoryIntoOptions(){
+  const menu=document.querySelector(".bloptsmenu");
+  const bar=$("histBar"), log=$("histLog");
+  if(!log) return;
+  /* autosave readout + Discard move into the panel's top row */
+  const save=$("saveState"), disc=$("btnDiscardRecovery");
+  const top=document.createElement("div"); top.className="blHistTop"; top.id="blHistTop";
+  if(save) top.appendChild(save);
+  if(disc) top.appendChild(disc);
+  const close=document.createElement("button"); close.type="button"; close.className="btn sm";
+  close.textContent="✕ Close"; close.title="Close the history log";
+  close.addEventListener("click", ()=>{ log.classList.remove("open"); });
+  top.appendChild(close);
+  log.insertBefore(top, log.firstChild);
+  /* the panel header carries the entry count, kept live off the
+     same #histItems list blHistUI rebuilds */
+  const h3=log.querySelector("h3");
+  const count=document.createElement("span"); count.id="blHistCount"; count.className="mono";
+  if(h3){ h3.textContent="History — click an entry to jump to that state. "; h3.appendChild(count); }
+  const upd=()=>{ const items=$("histItems");
+    const n=items? items.querySelectorAll(".histitem").length : 0;
+    count.textContent=n? "("+n+" logged)" : ""; };
+  const itemsEl=$("histItems");
+  if(itemsEl && window.MutationObserver) new MutationObserver(upd).observe(itemsEl, {childList:true});
+  upd(); setTimeout(upd, 900); setTimeout(upd, 2000);
+  /* "History…" joins Undo / Redo in the Options menu */
+  if(menu){
+    const b=document.createElement("button"); b.type="button"; b.className="bloptsitem"; b.id="btnHistoryMenu";
+    b.textContent="History…";
+    b.title="Open the history log — every logged action with its timestamp, plus the autosave readout";
+    b.addEventListener("click", ()=>{
+      menu.style.display="none";
+      log.classList.toggle("open"); upd();
+      if(log.classList.contains("open")) log.scrollIntoView({block:"nearest", behavior:"smooth"});
+    });
+    const kids=menu.children;
+    if(kids.length>=2) menu.insertBefore(b, kids[2]); else menu.appendChild(b);
+  }
+  /* the old log toggle button goes with the bar (blHistUI looks it
+     up by id and skips it when absent); the bar itself — label,
+     prose note and all — is removed, so the page opens on the
+     transport */
+  const oldBtn=$("btnHistLog"); if(oldBtn) oldBtn.remove();
+  if(bar) bar.remove();
+  /* the panel lives directly under the transport, hidden until
+     Options → History… opens it */
+  const tr=document.querySelector(".transport");
+  if(tr && tr.parentNode && log!==tr.nextElementSibling) tr.parentNode.insertBefore(log, tr.nextSibling);
+})();
+
+/* ---------- 2 · The LOOP panel leaves the transport ---------- */
+(function blRemoveLoopPanel(){
+  const bar=$("ptLoopBar"); if(bar) bar.remove();
+})();
+
+try{ ptRender(); }catch(e){}
+setStatus("Beat Lab ready — History lives in Options now (Undo, Redo and History… — the log opens as a panel with the autosave readout on top); the page opens straight on the transport. The LOOP panel is gone from the transport: the loop region is the gold IN / OUT bars on the editor ruler — drag them to set it, ↻ in the transport toggles Loop, and the position readout stays beside Play.");
+</script>
 
 </body>
 </html>
