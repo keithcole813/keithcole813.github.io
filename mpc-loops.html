@@ -996,5 +996,24 @@ $("expSlices").addEventListener("click", exportSlices);
 drawWave();
 </script>
 <footer id="kc-site-footer" style="margin-top:40px;padding:18px 12px 24px;border-top:1px solid rgba(127,127,127,.35);text-align:center;font-size:13px;line-height:1.7;opacity:.85"><div>Copyright &copy; 2026 Keith Cole. All rights reserved.</div><div><a href="https://keithcole813.github.io/" style="color:inherit">&#8592; Back to the main page</a></div></footer>
+
+<script>
+// Pre-load hook: ?file=<url> opens MPC Loops with that track already loaded
+// (used for tracks Amy stages on the box under /tracks/). Added 2026-11-04.
+(function(){
+  try {
+    var qf = new URLSearchParams(location.search).get("file");
+    if (!qf) return;
+    var name = decodeURIComponent(qf.split("/").pop() || "track");
+    var st = document.getElementById("fileStat");
+    if (st) st.textContent = "Loading " + name + "\u2026";
+    fetch(qf).then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.arrayBuffer();
+    }).then(function(ab){ loadArrayBuffer(ab, name); })
+      .catch(function(e){ if (st) st.textContent = "Couldn't load " + name + " (" + e.message + ") \u2014 drop the file instead."; });
+  } catch(e){}
+})();
+</script>
 </body>
 </html>
