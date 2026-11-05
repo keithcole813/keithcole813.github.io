@@ -134,6 +134,11 @@
     </div>
     <div class="btns" id="lenBtns"></div>
   </div>
+  <div>
+    <label>Sample rate — whole file, downsample only (the old machines)</label>
+    <div class="btns" id="rateBtns"></div>
+    <div class="stat" id="rateStat"></div>
+  </div>
   <div class="stat" id="loopStat">Lock a loop to see its exact length.</div>
 
   <h2>Export</h2>
@@ -156,6 +161,23 @@
 // ==CORE==
 // Pure DSP helpers — operate on plain arrays/buffers, no DOM. (Also unit-tested outside the page.)
 function dbToLin(db){ return Math.pow(10, db/20); }
+
+// Downsample one channel the way the old hardware effectively sounded:
+// plain resampling with NO anti-alias filter, so harmonics fold back as
+// aliasing grit (S900/MPC60/SP-1200 character). Down only — a target at or
+// above the source rate returns the channel untouched.
+function downsampleChan(data, srcRate, dstRate){
+  if (!(dstRate > 0) || dstRate >= srcRate) return data;
+  var ratio = srcRate / dstRate;
+  var outLen = Math.max(1, Math.floor(data.length / ratio));
+  var out = new Float32Array(outLen);
+  for (var i = 0; i < outLen; i++){
+    var pos = i * ratio, j = Math.floor(pos), f = pos - j;
+    var a = data[j] || 0, b = (j + 1 < data.length) ? data[j + 1] : a;
+    out[i] = a + (b - a) * f;
+  }
+  return out;
+}
 
 // First/last index where short-window RMS rises above the gate. ch = mono Float32Array.
 function findSoundBounds(ch, sr, gateDb, winMs){
@@ -368,6 +390,8 @@ var state = {
   buf: null,        // decoded AudioBuffer
   mono: null,       // mono mixdown Float32Array (analysis)
   sr: 0,
+  rateHz: 0,        // sample-rate downsample target (0 = native/off)
+  ds: null,         // cached downsampled channels {hz, chans}
   name: "sample",
   bounds: null,     // {start,end} samples — trimmed sound region
   bpm: 0,
@@ -603,17 +627,43 @@ function stopPlayback(){
   state.playing = false; state.playMode = null; cancelAnimationFrame(state.raf);
 }
 
+// The sample-rate feature: when a lower rate is picked, playback and
+// exports run on downsampled channels at that true rate (a 22.05 kHz
+// export is a real 22.05 kHz WAV, like the hardware wrote).
+function effRate(){ return (state.rateHz && state.sr && state.rateHz < state.sr) ? state.rateHz : 0; }
+function effChans(){
+  var nCh = Math.min(2, state.buf.numberOfChannels), r = effRate(), chans = [], c;
+  if (!r){
+    for (c = 0; c < nCh; c++) chans.push(state.buf.getChannelData(c));
+    return { chans: chans, sr: state.sr };
+  }
+  if (!state.ds || state.ds.hz !== r){
+    for (c = 0; c < nCh; c++) chans.push(downsampleChan(state.buf.getChannelData(c), state.sr, r));
+    state.ds = { hz: r, chans: chans };
+  }
+  return { chans: state.ds.chans, sr: r };
+}
+function rateTag(){
+  var r = effRate(); if (!r) return "";
+  return "_" + (r === 26040 ? "26k" : r === 22050 ? "22k" : r === 11025 ? "11k" : Math.round(r / 1000) + "k");
+}
+
 // Seamless loop audition: play a crossfaded render of the region, looped by the player.
 function renderRegionBuffer(forExport){
   var reg = regionSamples(); if (!reg || !state.buf) return null;
-  var sr = state.sr, nCh = Math.min(2, state.buf.numberOfChannels);
+  var eff = effChans(), sr = eff.sr, nCh = eff.chans.length;
+  // Region is tracked in source samples/seconds; convert into the
+  // effective (possibly downsampled) source's samples.
+  var start = Math.round(reg.start / state.sr * sr);
+  var len = Math.max(1, Math.round(reg.len / state.sr * sr));
   var chans = [];
   for (var c = 0; c < nCh; c++){
-    var src = state.buf.getChannelData(c);
-    var out = new Float32Array(reg.len);
-    for (var i = 0; i < reg.len; i++) out[i] = src[reg.start + i] || 0;
+    var src = eff.chans[c];
+    var out = new Float32Array(len);
+    for (var i = 0; i < len; i++) out[i] = src[start + i] || 0;
     chans.push(out);
   }
+  reg = { start: start, len: len };
   if (state.mode === "loop" && $("expFade").checked){
     var f = Math.round(sr * 0.005);
     for (var c2 = 0; c2 < nCh; c2++) bakeLoopCrossfade(chans[c2], 0, reg.len, f);
@@ -624,13 +674,13 @@ function renderRegionBuffer(forExport){
     for (var c3 = 0; c3 < nCh; c3++)
       for (var j = 0; j < f2; j++) chans[c3][reg.len - f2 + j] *= 1 - j / f2;
   }
-  return { chans: chans, len: reg.len, nCh: nCh };
+  return { chans: chans, len: reg.len, nCh: nCh, sr: sr };
 }
 
 function playRegion(loop){
   ensureCtx(); stopPlayback();
   var r = renderRegionBuffer(false); if (!r) return;
-  var buf = actx.createBuffer(r.nCh, r.len, state.sr);
+  var buf = actx.createBuffer(r.nCh, r.len, r.sr);
   for (var c = 0; c < r.nCh; c++) buf.getChannelData(c).set(r.chans[c]);
   var src = actx.createBufferSource(); src.buffer = buf; src.loop = loop;
   var g = actx.createGain(), t0 = actx.currentTime;
@@ -638,14 +688,22 @@ function playRegion(loop){
   g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
   src.connect(g); g.connect(actx.destination); src.start();
   state.src = src; state.playing = true; state.playMode = "region";
-  state.playStartCtx = actx.currentTime; state.playStartOff = 0; state.playDur = r.len / state.sr;
+  state.playStartCtx = actx.currentTime; state.playStartOff = 0; state.playDur = r.len / r.sr;
   var reg = regionSamples(); state.regionStartSec = reg.start / state.sr;
   src.onended = function(){ if (!loop){ state.playing = false; } };
   tickPlayhead(loop);
 }
 function playFull(){
   ensureCtx(); stopPlayback();
-  var src = actx.createBufferSource(); src.buffer = state.buf;
+  var src = actx.createBufferSource();
+  var r = effRate();
+  if (r){
+    // Whole file, downsampled: play the converted channels at their true rate.
+    var eff = effChans();
+    var ab = actx.createBuffer(eff.chans.length, eff.chans[0].length, r);
+    for (var c = 0; c < eff.chans.length; c++) ab.getChannelData(c).set(eff.chans[c]);
+    src.buffer = ab;
+  } else src.buffer = state.buf;
   var g = actx.createGain(), t0 = actx.currentTime;
   g.gain.setValueAtTime(0, t0);
   g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
@@ -723,9 +781,9 @@ function exportLoop(){
   var r = renderRegionBuffer(true); if (!r) return;
   var chans = prepExportChans(r);
   var name;
-  if (state.mode === "loop") name = slug() + "_loop_" + bpm().toFixed(1) + "bpm_" + state.bars + "bars_" + keySlug() + ".wav";
-  else name = slug() + "_oneshot_" + keySlug() + ".wav";
-  download(encodeWAV(chans, state.sr), name);
+  if (state.mode === "loop") name = slug() + "_loop_" + bpm().toFixed(1) + "bpm_" + state.bars + "bars_" + keySlug() + rateTag() + ".wav";
+  else name = slug() + "_oneshot_" + keySlug() + rateTag() + ".wav";
+  download(encodeWAV(chans, r.sr), name);
 }
 function exportSlices(){
   var r = renderRegionBuffer(true); if (!r) return;
@@ -735,7 +793,7 @@ function exportSlices(){
       setTimeout(function(){
         var chans = r.chans.map(function(ch){ return ch.slice(s * per, s === n - 1 ? r.len : (s + 1) * per); });
         chans = prepExportChans({ chans: chans, len: chans[0].length });
-        download(encodeWAV(chans, state.sr), slug() + "_slice" + (s + 1) + "of" + n + "_" + keySlug() + ".wav");
+        download(encodeWAV(chans, r.sr), slug() + "_slice" + (s + 1) + "of" + n + "_" + keySlug() + rateTag() + ".wav");
       }, s * 350);
     })(s);
   }
@@ -748,7 +806,8 @@ function loadDecoded(buf, displayName){
   var c0 = buf.getChannelData(0);
   if (buf.numberOfChannels > 1){ var c1 = buf.getChannelData(1); for (var i = 0; i < n; i++) mono[i] = (c0[i] + c1[i]) / 2; }
   else mono.set(c0);
-  state.mono = mono; state.shotOut = 0; state.startBar = 1; state.playhead = 0;
+  state.mono = mono; state.rateHz = 0; state.ds = null; syncRateUI();
+  state.shotOut = 0; state.startBar = 1; state.playhead = 0;
   state.viewStart = 0; state.viewDur = 0; state.dragOffSec = 0;
   state.inSec = null; state.outSec = null;
   $("fileStat").innerHTML = "<b>" + displayName + "</b> · " + fmtT(buf.duration) + " · " +
@@ -1096,6 +1155,33 @@ var lenWrap = $("lenBtns");
   if (L === 4) btn.classList.add("on");
   btn.addEventListener("click", function(){ setBars(L); });
   lenWrap.appendChild(btn);
+});
+// Sample-rate chips: the classic hardware rates. Whole file — the picked
+// rate drives playback AND exports (true-rate WAVs). Downsample only:
+// a rate at/above the file's own rate is treated as Native.
+var RATE_OPTS = [[0, "Native"], [40000, "40k MPC60"], [26040, "26k SP-1200"], [22050, "22k S1000"], [16000, "16k"], [11025, "11k"], [8000, "8k"]];
+function syncRateUI(){
+  Array.prototype.forEach.call($("rateBtns").children, function(x){
+    x.classList.toggle("on", parseInt(x.getAttribute("data-r"), 10) === (state.rateHz || 0));
+  });
+  var el = $("rateStat"); if (!el) return;
+  if (!state.buf){ el.textContent = ""; return; }
+  var r = effRate();
+  el.textContent = r
+    ? "Whole file plays and exports at " + (r / 1000) + " kHz — resampled raw, no anti-alias filter, so it folds and crunches like the hardware did. Exports are true " + (r / 1000) + " kHz WAVs."
+    : "Native rate (" + (state.sr / 1000) + " kHz) — no downsampling. Pick a machine to hear its rate; it applies to the whole file, playback and exports.";
+}
+function setRate(hz){
+  state.rateHz = hz; state.ds = null;
+  if (state.playing) stopPlayback();
+  syncRateUI(); drawWave();
+}
+var rateWrap = $("rateBtns");
+RATE_OPTS.forEach(function(o){
+  var btn = document.createElement("button"); btn.textContent = o[1]; btn.setAttribute("data-r", o[0]);
+  if (o[0] === 0) btn.classList.add("on");
+  btn.addEventListener("click", function(){ setRate(o[0]); });
+  rateWrap.appendChild(btn);
 });
 $("lenMinus").addEventListener("click", function(){ setBars(state.bars - 1); });
 $("lenPlus").addEventListener("click", function(){ setBars(state.bars + 1); });
