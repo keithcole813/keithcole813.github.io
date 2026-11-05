@@ -824,15 +824,60 @@ function ytFetch(){
             btn.disabled = false;
           }).catch(function(){ ytStatus("Downloaded on the box, but MPC Loops couldn't pull the file over."); btn.disabled = false; });
         }
-        else if (j.state === "error"){ ytStatus("Download failed on the box: " + (j.error || "unknown error")); btn.disabled = false; }
+        else if (j.state === "error"){ ytStatus("The box couldn't download that one (" + (j.error || "unknown error") + ") — trying public mirrors…"); ytPublicFallback(url, btn); }
         else setTimeout(poll, 1200);
       }).catch(function(){ setTimeout(poll, 2000); });
     };
     poll();
   }).catch(function(){
-    ytStatus("Couldn't reach the YouTube Sample Downloader — it lives on your Mint box. At home, open MPC Loops from the box instead: 192.168.4.113:5001/mpc-loops");
-    btn.disabled = false;
+    ytPublicFallback(url, btn);
   });
+}
+// ---- Public fallback: volunteer Piped mirrors --------------------------
+// Used only when the Mint box can't be reached (or its job fails). These
+// are strangers' servers — hit-or-miss by nature, exactly as flagged to
+// Keith. Only MP4/AAC audio is taken: it's what an iPhone can decode;
+// WebM/Opus streams are skipped even when they're the only ones offered.
+var PIPED_HOSTS = ["pipedapi.kavin.rocks", "pipedapi.leptons.xyz", "pipedapi.reallyaweso.me", "pipedapi-libre.kavin.rocks", "pipedapi.adminforge.de"];
+function ytVideoId(url){
+  var m = String(url).match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/live\/|\/embed\/|\/v\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function pickPipedAudio(streams){
+  if (!streams || !streams.length) return null;
+  var mp4 = streams.filter(function(s){ return /audio\/mp4/.test(s.mimeType || "") || s.format === "M4A"; });
+  if (!mp4.length) return null;
+  mp4.sort(function(a, b){ return (b.bitrate || 0) - (a.bitrate || 0); });
+  return mp4[0];
+}
+function ytPublicFallback(url, btn){
+  var id = ytVideoId(url);
+  if (!id){
+    ytStatus("Couldn't reach the Mint box, and that link has no video ID the public mirrors can use. At home, open MPC Loops from the box: 192.168.4.113:5001/mpc-loops");
+    btn.disabled = false; return;
+  }
+  var i = 0;
+  function next(){
+    if (i >= PIPED_HOSTS.length){
+      ytStatus("No luck — the Mint box is unreachable and every public mirror refused or is down. At home, open MPC Loops from the box instead: 192.168.4.113:5001/mpc-loops");
+      btn.disabled = false; return;
+    }
+    var host = PIPED_HOSTS[i++];
+    ytStatus("Trying public mirror " + i + " of " + PIPED_HOSTS.length + " (" + host + ")…");
+    var t = dlTimed(15000), o = {}; if (t.signal) o.signal = t.signal;
+    fetch("https://" + host + "/streams/" + id, o).then(function(r){ t.done(); if (!r.ok) throw 0; return r.json(); }).then(function(d){
+      var s = pickPipedAudio(d.audioStreams);
+      if (!s || !s.url) throw 0;
+      ytStatus("A mirror has it" + (d.title ? ": " + d.title : "") + " — pulling the audio…");
+      var t2 = dlTimed(120000), o2 = {}; if (t2.signal) o2.signal = t2.signal;
+      return fetch(s.url, o2).then(function(r){ t2.done(); if (!r.ok) throw 0; return r.arrayBuffer(); }).then(function(ab){
+        loadArrayBuffer(ab, (d.title || "youtube") + ".mp3");
+        ytStatus("Loaded via a public mirror" + (d.title ? ": " + d.title : "") + ". Your Mint box is still the reliable route.");
+        btn.disabled = false;
+      });
+    }).catch(function(){ t.done(); next(); });
+  }
+  next();
 }
 $("ytGo").addEventListener("click", ytFetch);
 $("ytUrl").addEventListener("keydown", function(e){ if (e.key === "Enter") ytFetch(); });
