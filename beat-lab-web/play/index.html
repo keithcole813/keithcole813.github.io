@@ -378,7 +378,7 @@ a{color:var(--teal)}
       <button class="btn sm" id="btnTemplates" title="Start a new project from one of your starter templates — kit, BPM and starter patterns loaded">Templates</button>
       <button class="btn sm gold" id="btnNewProj" title="Start a new track — blank, or from a template">＋ New</button>
     </div>
-    <div class="statusline" id="statusLine">Ready — press Play. A starter beat is loaded in Sequence 1; chain sequences together in the Song playlist under the rack.</div>
+    <div class="statusline" id="statusLine">Ready — press Play. History bar on top, transport under it, and ONE unified editor below: MIDI sequences and wave tracks share a single timeline, with MPC-style gold loop IN / OUT markers and loop play in the editor toolbar. A starter beat is loaded in Sequence 1.</div>
   </div>
 
   <!-- ================= UNDO / REDO + HISTORY + AUTOSAVE (directly under the transport) ================= -->
@@ -426,6 +426,20 @@ a{color:var(--teal)}
       <button class="btn sm" id="ptNudgeL" title="Nudge the selected clip left by one grid unit (10 ms when snap is off)">◀ Nudge</button>
       <button class="btn sm" id="ptNudgeR" title="Nudge the selected clip right by one grid unit (10 ms when snap is off)">Nudge ▶</button>
       <span class="small" id="ptInfo"></span>
+    </div>
+    <div class="ptloopbar" id="ptLoopBar">
+      <span class="tlabel">Loop</span>
+      <div class="pttp" role="group" aria-label="Editor transport — drives the same single transport as the main Play button">
+        <button type="button" id="ptTpRew" title="Rewind — return the playhead to the IN point (or the top of the timeline when no region is set)">⏮</button>
+        <button type="button" id="ptTpStop" title="Stop">■</button>
+        <button type="button" id="ptTpPlay" title="Play / stop the arrangement — with Loop on, playback starts at IN and wraps OUT → IN">▶</button>
+        <button type="button" id="ptTpSel" title="Play selected — play the IN → OUT region exactly once, then stop at OUT"><span class="psel">▶</span></button>
+        <button type="button" id="ptTpLoop" title="Loop — repeat the IN → OUT region seamlessly (MIDI sequences and wave clips together)">↻</button>
+      </div>
+      <button class="btn sm" id="ptSetIn" title="Set the loop IN point at the playhead (or at the gold cursor when stopped)">Set IN at playhead</button>
+      <button class="btn sm" id="ptSetOut" title="Set the loop OUT point at the playhead (or at the gold cursor when stopped)">Set OUT at playhead</button>
+      <button class="btn sm" id="ptLoopReset" title="Reset the loop region to the whole timeline">Reset region</button>
+      <span class="small mono" id="ptLoopInfo"></span>
     </div>
     <div class="small">One arrangement, both worlds: the <b>Sequences chain</b> and a <b>MIDI lane per channel</b> sit directly over the <b>wave lanes</b>, bar-for-bar under one ruler and one playhead — lay a vocal wave against the programmed drums and watch both while everything plays in sync. Sequence blocks edit exactly like wave clips: <b>drag to slide</b> them anywhere on the timeline — they land on the Snap grid (bar, 1/2, 1/4, 1/8, 1/16, 1/32, triplets, or the exact spot with Snap off) and can leave real gaps before or after, which playback and export honor; <b>double-click to slice inside the sequence</b> at the Snap grid — mid-bar, on a beat, on a single step — and the notes split cleanly across the join (a note crossing the cut is clipped on both sides, nothing lost or doubled), each piece an independent sequence; <b>Duplicate / Copy / Paste</b> make independent sequences you can edit in the Piano Roll without touching the original. Wave rules stay Pro Tools: <b>every wave track is wired to its own channel</b> — track name <i>is</i> the channel name (double-click renames both), clips play through that channel’s fader, pan, EQ, FX and crusher and export inside its stem; <b>＋ Add track</b> creates the channel, ✕ removes track + channel cleanly. <b>Every lane has Mute / Solo</b> — wave M/S is the channel’s own M/S (same as the mixer), MIDI lane M/S governs that channel’s sequence playback; any solo anywhere narrows the whole arrangement to the soloed lanes. Every edit is a History point and autosaves.</div>
     <div class="ptViewport" id="ptViewport">
@@ -489,23 +503,6 @@ a{color:var(--teal)}
       </section>
     </aside>
     <div class="maincol">
-      <!-- ================= LAYOUT — SEQUENCES + WAVES, SIDE BY SIDE ================= -->
-      <section class="panel" id="layoutPanel">
-        <h2>Layout — Sequences + Linear Audio · one timeline
-          <span class="tools">
-            <button class="pill" id="btnSnap">Snap: On</button>
-            <button class="btn sm" id="btnPlaceClip">＋ Place selected channel’s sound</button>
-            <button class="btn sm gold" id="btnConvertSeq2">Convert SEQ → Wave</button>
-          </span>
-        </h2>
-        <div class="small">Build <b>both ways</b>, under <b>one playhead</b>. The top lane is the <b>sequence chain</b> from the playlist; under it sit <b>channel wave lanes</b> and <b>linear audio tracks</b>. Drop a <b>full vocal acapella</b> (or any long audio) onto an audio track and it plays start-to-finish while your sequences run underneath — that’s the quick-remix lane. Click a linear clip to open the <b>Linear Clip</b> panel below the lanes: <b>Find Tempo</b> detects its BPM, <b>Match project to clip</b> makes the beat follow the vocal, <b>Stretch clip to project</b> time-stretches the vocal pitch-preserved onto your grid, edges can <b>trim or stretch</b>, and you can <b>split</b> a long clip into verse / hook pieces and rearrange them. Channel waves are <b>not locked to the step grid</b>: drag to shift, turn <b>Snap</b> off for free timing, nudge by the millisecond. A channel clip plays through its channel’s gain, fader and effects, and lands inside that channel’s stem; each audio track exports as <b>its own stem</b>.</div>
-        <div class="lanesViewport" id="lanesViewport">
-          <div id="layoutLanes"></div>
-          <div id="layoutPlayhead"></div>
-        </div>
-        <div class="small" id="layoutInfo" style="margin-top:6px"></div>
-      </section>
-
       <!-- ================= MIXER ================= -->
       <section class="panel" id="page-mixer">
         <h2>Mixer — fader is the mix level, gain lives in the Sampler</h2>
@@ -2900,7 +2897,7 @@ function placeFromChannel(chId){
   setStatus("Placed "+c.name+" on the "+ch.name+" lane at "+posLabel(start)+" — drag it to shift, drag its edges to trim, nudge it off-grid right here in the Wave Editor.");
 }
 $("wePlace").onclick=()=>{ if(edTarget.kind==="channel") placeFromChannel(edTarget.id); };
-$("btnPlaceClip").onclick=()=>placeFromChannel(S.selected);
+if($("btnPlaceClip")) $("btnPlaceClip").onclick=()=>placeFromChannel(S.selected);
 $("weDup").onclick=()=>duplicateClip(edTarget.id, true);
 $("weDel").onclick=()=>{ const c=getClip(edTarget.id); if(!c) return;
   S.clips.splice(S.clips.indexOf(c),1); S.selClipId=null;
@@ -3007,7 +3004,7 @@ async function convertSequenceToWave(seqIdx){
     "Shift it, trim it, pitch it like any wave clip.");
 }
 $("btnConvertSeq").onclick=()=>convertSequenceToWave(S.pattern);
-$("btnConvertSeq2").onclick=()=>convertSequenceToWave(S.pattern);
+if($("btnConvertSeq2")) $("btnConvertSeq2").onclick=()=>convertSequenceToWave(S.pattern);
 /* ---------------- Wraps: keep layout/editor in sync with the rest of the app ---------------- */
 const _selChPrev = selectChannel;
 selectChannel = function(id){
@@ -3077,10 +3074,11 @@ function clearClips(){
 }
 /* snap + misc bindings */
 function syncSnapBtn(){
-  $("btnSnap").textContent="Snap: "+(S.snap?"On":"Off");
-  $("btnSnap").classList.toggle("on", !!S.snap);
+  const b=$("btnSnap"); if(!b) return;
+  b.textContent="Snap: "+(S.snap?"On":"Off");
+  b.classList.toggle("on", !!S.snap);
 }
-$("btnSnap").onclick=()=>{ S.snap=!S.snap; syncSnapBtn(); updateLayoutInfo();
+if($("btnSnap")) $("btnSnap").onclick=()=>{ S.snap=!S.snap; syncSnapBtn(); updateLayoutInfo();
   setStatus(S.snap? "Snap on — dragged clips land on steps. Ms nudges in the Wave Editor still go off-grid." : "Snap off — wave clips drag freely, down to the millisecond. That’s the timing freedom waves give you over steps."); };
 $("bpmRange").addEventListener("input", ()=>renderLayout());
 $("bpmNum").addEventListener("change", ()=>renderLayout());
@@ -4350,9 +4348,12 @@ function syncEdgeBtn(){
   b.classList.toggle("on", S.edgeMode==="stretch");
 }
 (function buildLinUI(){
-  const panel=$("layoutPanel"); if(!panel) return;
-  const vp=$("lanesViewport");
-  const cur=document.createElement("div"); cur.id="layoutCursor"; vp.appendChild(cur);
+  /* ONE WINDOW: the linear-audio toolbar + Linear Clip inspector live
+     inside the unified multitrack editor now — the old separate Layout
+     timeline panel is gone, and the linear tracks are lanes in the
+     same editor surface (rendered by the unification script). */
+  const panel=$("ptEditorPanel"); if(!panel) return;
+  const vp=$("ptViewport"); if(!vp) return;
   const bar=document.createElement("div"); bar.className="linbar"; bar.id="linBar";
   bar.innerHTML=
     '<button class="btn sm gold" id="linAddTrack">＋ Audio track</button>'+
@@ -4366,15 +4367,18 @@ function syncEdgeBtn(){
     '<button class="btn sm" id="linSplitCursor">✂ Split at cursor</button>';
   panel.insertBefore(bar, vp);
   const info=document.createElement("div"); info.className="small"; info.id="linInfo"; info.style.marginTop="6px";
-  const li=$("layoutInfo"); if(li && li.parentElement===panel) panel.insertBefore(info, li.nextSibling); else panel.appendChild(info);
+  panel.insertBefore(info, vp);
   const cp=document.createElement("div"); cp.id="linClipPanel"; cp.className="linclip"; panel.appendChild(cp);
   $("linAddTrack").onclick=()=>addAudioTrack();
   $("linEdgeMode").onclick=()=>{ S.edgeMode= S.edgeMode==="trim"? "stretch":"trim"; syncEdgeBtn(); renderLayout();
     setStatus(S.edgeMode==="stretch"
       ? "Clip edges now STRETCH: drag a linear clip’s edge and it time-stretches in place, pitch preserved — watch the effective BPM in the clip’s label."
       : "Clip edges now TRIM: dragging an edge eats into (or reveals) the audio, like the channel wave clips."); };
-  $("linZoom").oninput=e=>{ S.tlZoom=+e.target.value/100; renderLayout(); };
-  $("linFit").onclick=()=>{ S.tlZoom=1; $("linZoom").value=100; $("lanesViewport").scrollLeft=0; renderLayout();
+  $("linZoom").oninput=e=>{ S.tlZoom=+e.target.value/100; S.ptZoom=S.tlZoom;
+    const pz=$("ptZoomRange"); if(pz) pz.value=e.target.value; renderLayout(); };
+  $("linFit").onclick=()=>{ S.tlZoom=1; S.ptZoom=1; $("linZoom").value=100;
+    const pz=$("ptZoomRange"); if(pz) pz.value=100;
+    const pv=$("ptViewport"); if(pv) pv.scrollLeft=0; renderLayout();
     setStatus("Timeline fit: the whole "+layoutBars()+"-bar arrangement is on screen. Zoom in to work a long acapella bar by bar."); };
   $("linFollow").onclick=e=>{ S.tlFollow=!S.tlFollow;
     e.target.textContent="Follow playhead: "+(S.tlFollow?"On":"Off"); e.target.classList.toggle("on", S.tlFollow); };
@@ -7413,6 +7417,28 @@ loadClipsFromProject=function(p){ _ptLcpPrev2(p);
 .laneType.wave{color:var(--teal);border-color:var(--teal)}
 .laneType.midi{color:var(--gold);border-color:var(--gold2)}
 @media (max-width:640px){ .ptLane.midiLane .ptBtns button,.ptLane.chainLane .ptBtns button{min-height:44px;min-width:44px} }
+
+/* ---------- MPC-style loop: gold IN / OUT playheads + editor transport ---------- */
+.ptloopbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px;padding:7px 8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px}
+.pttp{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--btn) 88%, #fff 6%),var(--btn))}
+.pttp button{appearance:none;border:none;border-right:1px solid var(--line);background:transparent;color:var(--ink);font-size:14px;line-height:1;padding:8px 11px;cursor:pointer;min-height:36px;min-width:42px;font-family:inherit}
+.pttp button:last-child{border-right:none}
+.pttp button:hover{color:var(--gold)}
+.pttp button:active{box-shadow:inset 0 2px 5px rgba(0,0,0,.45)}
+.pttp button.on{background:var(--gold);color:#1c1503;font-weight:900}
+.pttp .psel{display:inline-block;border:1.5px dashed var(--gold);border-radius:3px;padding:1px 5px;color:var(--gold);font-size:12px}
+.pttp button:hover .psel{color:var(--ink);border-color:var(--ink)}
+#ptLoopInfo{color:var(--teal)}
+#ptLoopRegion{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--gold) 7%, transparent);z-index:1;pointer-events:none}
+.ptLoopBar{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--gold);z-index:4;cursor:ew-resize;touch-action:none}
+.ptLoopBar .ptLoopTab{position:absolute;top:0;left:50%;transform:translateX(-50%);background:var(--gold);color:#1c1503;font-size:8.5px;font-weight:900;letter-spacing:.6px;padding:2px 5px;border-radius:0 0 4px 4px;white-space:nowrap;z-index:7}
+.ptLoopBar.out{background:var(--gold2)}
+.ptLoopBar.out .ptLoopTab{background:var(--gold2);color:#1c1503}
+/* linear audio tracks as lanes of the one editor */
+.ptLane.atracklane .ptBody{min-height:58px}
+.ptLane.atracklane.dragover{background:color-mix(in srgb,var(--gold) 10%, transparent)}
+#ptEditorPanel .linclip{margin-top:10px}
+@media (max-width:640px){ .pttp button{min-height:44px;min-width:44px} .ptloopbar .btn{min-height:44px} }
 </style>
 <script>
 "use strict";
@@ -8599,6 +8625,374 @@ renderMix=async function(bars, onlyId){
 };
 
 /* ---------------- Init: redraw with the positioned chain lane ---------------- */
+ptRender();
+</script>
+
+<script>
+"use strict";
+/* ============================================================
+   ONE WINDOW + MPC-STYLE LOOP — the final unification pass.
+   PART 2 · ONE WINDOW: the old LAYOUT timeline panel is removed
+   from the page. The unified multitrack editor is now the ONLY
+   arrangement surface: this script renders the LINEAR AUDIO
+   TRACKS (full-length acapella lanes) as lanes inside the same
+   editor, under the same ruler and playhead as the chain lane,
+   the MIDI lanes and the channel wave lanes. The Linear Clip
+   inspector (Find Tempo / Match project / Stretch to project /
+   trim-stretch edges / per-clip settings) lives inside the
+   editor panel and appears when a linear clip is selected.
+   PART 1 · LOOP: gold IN / OUT playhead markers span every lane
+   of the editor (draggable tabs on the ruler, following the
+   editor's Snap grid, free when Snap is off). The editor
+   transport cluster — ⏮ rewind · ■ stop · ▶ play · ▶ in a
+   dashed gold bracket (play region once) · ↻ loop — drives the
+   SAME single transport as the main Play button. Looping wraps
+   the scheduler's own counters from OUT back to IN, so the MIDI
+   sequence engine (legacy chain AND the positioned song map)
+   and both clip systems (channel waves + linear audio) wrap
+   together with zero drift. IN / OUT / loop state ride in
+   projectJSON, so History/undo, autosave and project files all
+   carry them.
+   ============================================================ */
+if(S.loopIn==null) S.loopIn=0;
+if(S.loopOut===undefined) S.loopOut=null;
+S.loopOn=!!S.loopOn;
+let lpOnce=false, lpPendingStart=null, lpWrapOffset=0, lpLastT0=null, lpFirstStepTime=null, lpStopOnce=false;
+
+/* ---------------- Region model ---------------- */
+function lpInEff(){ const ts=totalSteps(); return clamp(S.loopIn||0, 0, Math.max(0, ts-1)); }
+function lpOutEff(){ const ts=totalSteps(); const o=(S.loopOut==null? ts : S.loopOut); return clamp(o, 1, ts); }
+function lpRegionValid(){ return lpOutEff()-lpInEff()>=1; }
+/* the step engine runs on whole steps: audio wraps on step boundaries */
+function lpInAudio(){ return Math.floor(lpInEff()); }
+function lpOutAudio(){ return Math.max(lpInAudio()+1, Math.ceil(lpOutEff())); }
+function lpLoopActive(){ return !!(S.playing && (S.loopOn || lpOnce) && lpRegionValid()); }
+function lpPosShort(s){ const bar=Math.floor(s/16), inBar=s-bar*16, beat=Math.floor(inBar/4), st=inBar-beat*4;
+  return "Bar "+(bar+1)+" · Beat "+(beat+1)+(st>0.01? " · Step "+(Math.floor(st)+1) : ""); }
+function lpReadoutText(){
+  const i=lpInEff(), o=lpOutEff(), len=o-i, ts=totalSteps();
+  const barsTxt=(Math.round(len/16*100)/100).toString();
+  return "IN "+lpPosShort(i)+" → OUT "+lpPosShort(o)+(S.loopOut==null? " (timeline end)" : "")+
+    " · region "+barsTxt+" bar"+(len===16?"":"s")+" · "+(Math.round(len*100)/100)+" steps · "+
+    (len*stepDurSec()).toFixed(2)+" s @ "+S.bpm+" BPM · Loop "+(S.loopOn? "ON":"OFF")+
+    (lpOnce && S.playing? " · playing region once" : "")+" · timeline "+layoutBars()+" bars";
+}
+
+/* ---------------- Song state at an arrangement bar (legacy engine) ---------------- */
+function lpSongStateAt(bar){
+  if(S.mode==="song" && S.playlist && S.playlist.length){
+    let total=0; const spans=S.playlist.map(e=>{ const s=(e.reps||1)*seqBarsOf(e.seq); total+=s; return s; });
+    if(total>0){ let b=((bar%total)+total)%total;
+      for(let i=0;i<S.playlist.length;i++){ if(b<spans[i]){ const e=S.playlist[i];
+        return { entry:i, barInEntry:b, seqBarPos:b%seqBarsOf(e.seq), pat:validSeq(e.seq) }; } b-=spans[i]; } }
+  }
+  return { entry:0, barInEntry:0, seqBarPos: bar%Math.max(1, seqBarsOf(S.pattern)), pat:S.pattern };
+}
+function lpApplySongState(bar){
+  const st=lpSongStateAt(bar);
+  songEntry=st.entry; songBarInEntry=st.barInEntry; songRep=st.barInEntry; seqBarPos=st.seqBarPos; playPat=st.pat;
+  if(S.mode==="song" && S.songFollow && S.pattern!==playPat){
+    S.pattern=playPat;
+    if(typeof buildPatBtns==="function") buildPatBtns();
+    if(typeof buildRack==="function") buildRack();
+    if(typeof buildRoll==="function") buildRoll();
+    if(typeof buildSliceSteps==="function") buildSliceSteps();
+  }
+  if(typeof updateSongUI==="function") updateSongUI();
+}
+/* clips fire at bar starts in the engines — when playback (re)starts or
+   wraps to a MID-BAR point, fire this bar's remaining clips by hand */
+function lpFirePartialBar(stepFrom, baseTime){
+  if(typeof AC==="undefined" || !AC) return;
+  const bar=Math.floor(stepFrom/16), sd=stepDurSec();
+  const flags=(typeof ptMSFlags==="function")? ptMSFlags() : null;
+  (S.clips||[]).forEach(c=>{
+    if(!c.buffer || c.missing || c.start<stepFrom-1e-9 || Math.floor(c.start/16)!==bar) return;
+    const ch=S.channels[c.channelId]; if(ch && !audible(ch)) return;
+    if(flags && typeof ptWaveAudible==="function" && !ptWaveAudible(c.channelId, flags)) return;
+    const node=liveNodes[c.channelId];
+    const dest=(node && node.input) || (typeof master!=="undefined"? master : null);
+    if(dest) playClipAt(AC, dest, c, baseTime + (c.start-stepFrom)*sd);
+  });
+  (S.aclips||[]).forEach(c=>{
+    if(!c.buffer || c.missing || c.start<stepFrom-1e-9 || Math.floor(c.start/16)!==bar) return;
+    playAclipAt(AC, master, c, baseTime + (c.start-stepFrom)*sd);
+  });
+}
+
+/* ---------------- Transport: start position + loop-aware scheduler ---------------- */
+const _lpSetPlayingPrev=setPlaying;
+setPlaying=function(on){
+  if(!on){ lpOnce=false; _lpSetPlayingPrev(false); lpSyncLoopUI(); return; }
+  let startStep=0;
+  if(lpPendingStart!=null){ startStep=lpPendingStart; lpPendingStart=null; }
+  else if((S.loopOn || lpOnce) && lpRegionValid()) startStep=lpInAudio();
+  startStep=clamp(Math.floor(startStep)||0, 0, Math.max(0, totalSteps()-1));
+  _lpSetPlayingPrev(true);
+  if(startStep>0){
+    barCount=Math.floor(startStep/16); curStep=startStep%16;
+    lpApplySongState(barCount);
+    if(playT0!=null) playT0-=startStep*stepDurSec();
+    if(startStep%16!==0 && typeof AC!=="undefined" && AC && playT0!=null)
+      lpFirePartialBar(startStep, playT0+startStep*stepDurSec());
+  }
+  lpLastT0=playT0; lpWrapOffset=0;
+  lpFirstStepTime=(playT0!=null)? playT0+startStep*stepDurSec() : null;
+  lpSyncLoopUI();
+};
+/* The scheduler itself, with the loop boundary inside its lookahead loop:
+   when the next step to schedule reaches OUT, the counters wrap to IN
+   BEFORE that step is scheduled — one transport, no second clock. */
+const _lpSchedTailPrev=scheduler;
+scheduler=function(){
+  let stopOnce=false;
+  while(nextStepTime < AC.currentTime + 0.12){
+    if(lpLoopActive()){
+      const arrNext=barCount*16+curStep;
+      if(arrNext>=lpOutAudio()){
+        if(lpOnce){ stopOnce=true; break; }
+        const inStep=lpInAudio();
+        lpWrapOffset+=lpOutAudio()-inStep;
+        barCount=Math.floor(inStep/16); curStep=inStep%16;
+        lpApplySongState(barCount);
+        if(inStep%16!==0) lpFirePartialBar(inStep, nextStepTime);
+      }
+    }
+    let t=nextStepTime; if(curStep%2===1) t += S.swing*stepDurSec();
+    scheduleStep(curStep, t);
+    uiStep=curStep;
+    nextStepTime += stepDurSec();
+    curStep=(curStep+1)%16; if(curStep===0){ barCount++; advanceSong(); }
+  }
+  if(stopOnce){ lpOnce=false; setPlaying(false);
+    setStatus("Played the loop region once — "+lpPosShort(lpInEff())+" → "+lpPosShort(lpOutEff())+" — and stopped at OUT.");
+    if(typeof updateSongUI==="function") updateSongUI();
+    return; }
+  if(lpLoopActive()) pendingSongStop=false;
+  else if(pendingSongStop){ pendingSongStop=false; setPlaying(false);
+    setStatus("Song finished — the playlist played through. Press Play to run it again, or turn Loop song on.");
+    if(typeof updateSongUI==="function") updateSongUI(); }
+  if(!lpLoopActive() && S.playing && S.mode==="song" && !S.songLoop && typeof chainBars==="function" &&
+     chainBars()>0 && layoutBars()>chainBars() && barCount>=layoutBars()){
+    setPlaying(false);
+    setStatus("Arrangement finished — the linear timeline played through ("+layoutBars()+" bars). Press Play to run it again, or turn Loop song on.");
+    if(typeof updateSongUI==="function") updateSongUI();
+  }
+};
+/* ---------------- Playhead + playhead-position reads, loop-aware ---------------- */
+function lpCheckT0(){ if(playT0!==lpLastT0){ lpLastT0=playT0; lpWrapOffset=0; } }
+const _lpCtsPrev=currentTlStep;
+currentTlStep=function(){
+  if(S.playing && playT0!=null && typeof AC!=="undefined" && AC){
+    lpCheckT0();
+    let pos=(AC.currentTime-playT0)/stepDurSec() - lpWrapOffset;
+    const ts=totalSteps(); if(ts>0) pos=((pos%ts)+ts)%ts;
+    return pos;
+  }
+  return _lpCtsPrev();
+};
+let lpLastPlayGlyph=null;
+const _lpPphPrev=ptPositionPlayhead;
+ptPositionPlayhead=function(){
+  const ph=document.getElementById("ptPlayhead"); if(!ph) return;
+  if(!S.playing || playT0==null || typeof AC==="undefined" || !AC){ ph.style.opacity="0"; lpSyncPlayGlyph(); return; }
+  if(lpFirstStepTime!=null && AC.currentTime<lpFirstStepTime-0.001){ ph.style.opacity="0"; return; }
+  const g=ptGeom(); if(!g || !g.ts){ ph.style.opacity="0"; return; }
+  const pos=currentTlStep();
+  const x=g.headW + pos/g.ts*(g.w-g.headW);
+  ph.style.opacity="1"; ph.style.left=x+"px";
+  const vp=$("ptViewport");
+  if(vp && S.tlFollow!==false && x-vp.scrollLeft>vp.clientWidth-30) vp.scrollLeft=Math.max(0, x-g.headW-60);
+  lpSyncPlayGlyph();
+};
+function lpSyncPlayGlyph(){
+  const b=$("ptTpPlay"); if(!b) return;
+  const gl=S.playing? "❚❚" : "▶";
+  if(gl!==lpLastPlayGlyph){ lpLastPlayGlyph=gl; b.textContent=gl; }
+}
+
+/* ---------------- IN / OUT overlay: gold bars through every lane ---------------- */
+function lpPositionOverlay(){
+  const wrap=$("ptLanes"); if(!wrap) return;
+  const ib=document.getElementById("ptLoopIn"), ob=document.getElementById("ptLoopOut"), rg=document.getElementById("ptLoopRegion");
+  if(!ib || !ob || !rg) return;
+  const g=ptGeom(); if(!g || !g.ts){ ib.style.opacity="0"; ob.style.opacity="0"; rg.style.opacity="0"; return; }
+  const xi=g.headW + clamp(lpInEff(), 0, g.ts)/g.ts*(g.w-g.headW);
+  const xo=g.headW + clamp(lpOutEff(), 0, g.ts)/g.ts*(g.w-g.headW);
+  ib.style.opacity="1"; ob.style.opacity="1"; rg.style.opacity="1";
+  ib.style.left=xi+"px"; ob.style.left=xo+"px";
+  rg.style.left=xi+"px"; rg.style.width=Math.max(0, xo-xi)+"px";
+}
+function lpEnsureOverlay(wrap){
+  if(document.getElementById("ptLoopIn")){ lpPositionOverlay(); return; }
+  const rg=document.createElement("div"); rg.id="ptLoopRegion"; wrap.appendChild(rg);
+  const mk=(id, cls, label, which)=>{
+    const d=document.createElement("div"); d.id=id; d.className="ptLoopBar "+cls;
+    const tab=document.createElement("span"); tab.className="ptLoopTab"; tab.textContent=label; d.appendChild(tab);
+    d.title=(which==="in"? "Loop IN" : "Loop OUT")+" — drag to move (follows the Snap grid; free when Snap is off)";
+    d.addEventListener("pointerdown", e=>lpBarDrag(e, which));
+    wrap.appendChild(d); return d; };
+  mk("ptLoopIn", "in", "IN", "in");
+  mk("ptLoopOut", "out", "OUT", "out");
+  lpPositionOverlay();
+}
+function lpSetInOut(which, pos, commit){
+  const ts=totalSteps(); pos=clamp(pos, 0, ts);
+  if(which==="in"){ S.loopIn=Math.round(Math.min(pos, lpOutEff()-1)*1000)/1000; }
+  else { S.loopOut=Math.round(Math.max(pos, lpInEff()+1)*1000)/1000; }
+  lpPositionOverlay(); lpSyncLoopInfo();
+  if(commit){ markDirty();
+    setStatus("Loop "+(which==="in"? "IN" : "OUT")+" set at "+lpPosShort(which==="in"? lpInEff() : lpOutEff())+
+      " — region is now "+(Math.round((lpOutEff()-lpInEff())*100)/100)+" steps ("+(Math.round((lpOutEff()-lpInEff())/16*100)/100)+" bars)."+
+      (S.loopOn? " Loop is ON — playback wraps OUT → IN." : " Turn ↻ Loop on in the editor to repeat it.")); }
+}
+function lpBarDrag(e, which){
+  e.preventDefault(); e.stopPropagation();
+  const lanes=$("ptLanes"); if(!lanes) return;
+  const move=ev=>{
+    const rect=lanes.getBoundingClientRect(), headW=ptHeadW(), ts=totalSteps();
+    const w=lanes.clientWidth; if(!ts || w<=headW) return;
+    const pos=ptSnapPos(clamp((ev.clientX-rect.left-headW)/(w-headW), 0, 1)*ts);
+    lpSetInOut(which, pos, false);
+  };
+  const up=()=>{ window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+    lpSetInOut(which, which==="in"? lpInEff() : lpOutEff(), true); };
+  window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+}
+/* ---------------- Loop UI sync + editor transport wiring ---------------- */
+function lpSyncLoopInfo(){ const el=$("ptLoopInfo"); if(el) el.textContent=lpReadoutText(); }
+function lpSyncLoopUI(){
+  const lb=$("ptTpLoop"); if(lb) lb.classList.toggle("on", !!S.loopOn);
+  lpSyncLoopInfo(); lpPositionOverlay(); lpSyncPlayGlyph();
+}
+function lpPlayheadPos(){ return S.playing? currentTlStep() : (S.tlCursor||0); }
+function lpRestartAt(step){
+  lpPendingStart=step;
+  if(S.playing) setPlaying(false);
+  setPlaying(true);
+}
+$("ptTpRew").onclick=()=>{
+  const target=lpRegionValid()? lpInAudio() : 0;
+  if(S.playing){ lpRestartAt(target);
+    setStatus("Rewound to "+(lpRegionValid()? "the IN point — "+lpPosShort(lpInEff()) : "the top of the timeline")+"."); }
+  else { S.tlCursor=lpInEff(); ptPositionCursor();
+    setStatus("Playhead at "+(lpRegionValid()? "the IN point — "+lpPosShort(lpInEff()) : "the top of the timeline")+" — press Play and it starts right there."); }
+};
+$("ptTpStop").onclick=()=>{ if(S.playing) setPlaying(false); setStatus("Stopped."); };
+$("ptTpPlay").onclick=()=>{ setPlaying(!S.playing); lpSyncLoopUI(); };
+$("ptTpSel").onclick=()=>{
+  if(!lpRegionValid()){ setStatus("Set a loop region first — drag the gold IN / OUT tabs on the editor ruler, or use Set IN / Set OUT."); return; }
+  lpOnce=true; lpRestartAt(lpInAudio());
+  setStatus("Playing the region once — "+lpPosShort(lpInEff())+" → "+lpPosShort(lpOutEff())+" — stops at OUT.");
+};
+$("ptTpLoop").onclick=()=>{
+  S.loopOn=!S.loopOn; markDirty(); lpSyncLoopUI();
+  if(S.loopOn && S.playing){ lpRestartAt(lpInAudio());
+    setStatus("Loop ON — re-cued to IN ("+lpPosShort(lpInEff())+"); the playhead wraps OUT → IN, sequences and waves together."); }
+  else setStatus(S.loopOn? "Loop ON — press Play and the IN → OUT region repeats seamlessly (MIDI + waves on the one transport)."
+    : "Loop OFF — the arrangement plays straight through again.");
+};
+$("ptSetIn").onclick=()=>{ const p=lpPlayheadPos();
+  if(p>=lpOutEff()-0.001){ S.loopOut=Math.round(Math.min(totalSteps(), p+16)*1000)/1000; }
+  lpSetInOut("in", p, true); };
+$("ptSetOut").onclick=()=>{ const p=lpPlayheadPos();
+  if(p<=lpInEff()+0.001){ S.loopIn=Math.round(Math.max(0, p-16)*1000)/1000; }
+  lpSetInOut("out", p, true); };
+$("ptLoopReset").onclick=()=>{ S.loopIn=0; S.loopOut=null; markDirty(); lpSyncLoopUI();
+  setStatus("Loop region reset — IN at the top, OUT at the end of the timeline ("+layoutBars()+" bars). Drag the gold tabs to carve out a smaller region."); };
+{ const z=$("ptZoomRange"); if(z) z.addEventListener("input", ()=>{ const lz=$("linZoom");
+  if(lz){ lz.value=z.value; S.tlZoom=+z.value/100; } }); }
+
+/* ---------------- Linear audio lanes inside the one editor ---------------- */
+function lpBuildAtrackLane(t, ts){
+  const lane=document.createElement("div"); lane.className="ptLane atracklane"; lane.dataset.atrack=t.id;
+  if(typeof trackAudible==="function" && !trackAudible(t)) lane.classList.add("dimlane");
+  const head=document.createElement("div"); head.className="ptHead";
+  const no=document.createElement("div"); no.className="ptTrkNo";
+  no.innerHTML='AUDIO · LINEAR <span class="laneType wave">WAVE</span>'; head.appendChild(no);
+  const nm=document.createElement("button"); nm.className="ptName"; nm.type="button"; nm.textContent=t.name;
+  nm.title="Double-click to rename this track";
+  nm.addEventListener("dblclick", ev=>{ ev.stopPropagation();
+    const inp=document.createElement("input"); inp.type="text"; inp.className="trkRename"; inp.value=t.name; inp.style.width="100%";
+    nm.replaceWith(inp); inp.focus(); inp.select();
+    let done=false;
+    const commit=save=>{ if(done) return; done=true;
+      if(save && inp.value.trim()){ t.name=inp.value.trim(); markDirty(); }
+      renderLayout(); if(typeof refreshLinPanel==="function") refreshLinPanel();
+      if(typeof refreshLinExportNote==="function") refreshLinExportNote(); };
+    inp.addEventListener("blur", ()=>commit(true));
+    inp.addEventListener("keydown", e2=>{ e2.stopPropagation();
+      if(e2.key==="Enter") commit(true); if(e2.key==="Escape") commit(false); });
+    inp.addEventListener("click", e2=>e2.stopPropagation());
+  });
+  head.appendChild(nm);
+  const chl=document.createElement("div"); chl.className="ptChLine";
+  chl.textContent="Full-length audio — plays start-to-finish under the sequences · own stem on export";
+  head.appendChild(chl);
+  const btns=document.createElement("div"); btns.className="ptBtns";
+  const mk=(label, title, fn, cls)=>{ const b=document.createElement("button"); b.textContent=label; b.title=title; if(cls) b.className=cls;
+    b.onclick=e=>{ e.stopPropagation(); fn(); }; btns.appendChild(b); return b; };
+  mk("M", "Mute track", ()=>{ t.mute=!t.mute; markDirty(); renderLayout(); if(typeof refreshLinPanel==="function") refreshLinPanel(); }, t.mute?"m-on":"");
+  mk("S", "Solo track", ()=>{ t.solo=!t.solo; markDirty(); renderLayout(); if(typeof refreshLinPanel==="function") refreshLinPanel(); }, t.solo?"s-on":"");
+  mk("＋ Audio", "Add an audio file to this track at the cursor", ()=>{
+    const inp=document.createElement("input"); inp.type="file"; inp.accept="audio/*"; inp.multiple=true;
+    inp.onchange=async()=>{ ensureCtx(); let at=S.tlCursor||0, last=null;
+      for(const f of inp.files){ const buf=await decodeFile(f); if(!buf) continue;
+        addToLibrary([f]); last=placeAclip(t.id, buf, f.name, at, f.name); at+=Math.max(2, aclipDurSteps(last)); }
+      if(last) setStatus(last.name+" added to "+t.name+" at "+posLabel(last.start)+"."); };
+    inp.click(); });
+  mk("✕", "Remove track", ()=>removeAudioTrack(t.id));
+  head.appendChild(btns);
+  lane.appendChild(head);
+  const body=document.createElement("div"); body.className="ptBody"; body.dataset.atrackbody=t.id;
+  if(!(S.aclips||[]).some(c=>c.trackId===t.id))
+    body.innerHTML='<div class="lanehint">Drop a full acapella or any long audio here — it plays start-to-finish under your sequences.</div>';
+  lane.appendChild(body);
+  (S.aclips||[]).filter(c=>c.trackId===t.id).forEach(c=>body.appendChild(buildAclipEl(c, ts)));
+  attachTrackDrop(body);
+  return lane;
+}
+/* ptRender gains: linear lanes + the loop overlay, inside the same surface */
+const _lpPtRenderPrev=ptRender;
+ptRender=function(){
+  _lpPtRenderPrev();
+  const wrap=$("ptLanes"); if(!wrap || S._ptDrag || S._aclipDrag) return;
+  const ts=totalSteps();
+  if((S.atracks||[]).length){
+    wrap.appendChild(ptSectionHead("<b>Linear audio</b> · full-length tracks — same ruler, same playhead, same window"));
+    S.atracks.forEach(t=>wrap.appendChild(lpBuildAtrackLane(t, ts)));
+  }
+  lpEnsureOverlay(wrap);
+  lpSyncLoopInfo();
+  if(typeof refreshLinInfo==="function") refreshLinInfo();
+};
+/* ---------------- Linear Clip inspector: appears on selection ---------------- */
+const _lpRfPrev=refreshLinPanel;
+refreshLinPanel=function(){
+  _lpRfPrev();
+  const cp=$("linClipPanel"); if(cp) cp.style.display=S.selAclipId? "" : "none";
+};
+/* selecting a wave clip or a sequence block hands the inspector back */
+const _lpClipPdPrev=ptClipPointerDown;
+ptClipPointerDown=function(e){ if(S.selAclipId!=null){ S.selAclipId=null; refreshLinPanel(); } _lpClipPdPrev(e); };
+const _lpChainPdPrev=ptChainBlockPointer;
+ptChainBlockPointer=function(e, el, b){ if(S.selAclipId!=null){ S.selAclipId=null; refreshLinPanel(); } _lpChainPdPrev(e, el, b); };
+
+/* ---------------- Persistence: region + loop ride the project ---------------- */
+const _lpPjPrev=projectJSON;
+projectJSON=function(){ const p=_lpPjPrev();
+  p.loopIn=(S.loopIn==null? 0 : S.loopIn); p.loopOut=(S.loopOut==null? null : S.loopOut); p.loopOn=!!S.loopOn;
+  return p; };
+const _lpLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){ _lpLcpPrev(p);
+  S.loopIn=(typeof p.loopIn==="number" && isFinite(p.loopIn))? Math.max(0, p.loopIn) : 0;
+  S.loopOut=(typeof p.loopOut==="number" && isFinite(p.loopOut) && p.loopOut>0)? p.loopOut : null;
+  S.loopOn=!!p.loopOn;
+  lpSyncLoopUI(); ptRender(); };
+
+/* ---------------- Init ---------------- */
+refreshLinPanel();
+lpSyncLoopUI();
 ptRender();
 </script>
 </body>
