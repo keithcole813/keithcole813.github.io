@@ -378,7 +378,21 @@ a{color:var(--teal)}
       <button class="btn sm" id="btnTemplates" title="Start a new project from one of your starter templates — kit, BPM and starter patterns loaded">Templates</button>
       <button class="btn sm gold" id="btnNewProj" title="Start a new track — blank, or from a template">＋ New</button>
     </div>
-    <div class="statusline" id="statusLine">Ready — press Play. History bar on top, transport under it, and ONE unified editor below: MIDI sequences and wave tracks share a single timeline, with MPC-style gold loop IN / OUT markers and loop play in the editor toolbar. A starter beat is loaded in Sequence 1.</div>
+    <div class="ptloopbar" id="ptLoopBar">
+      <span class="tlabel">Loop</span>
+      <div class="pttp" role="group" aria-label="Loop transport — drives the same single transport as the main Play button">
+        <button type="button" id="ptTpRew" title="Rewind — return the playhead to the IN point (or the top of the timeline when no region is set)">⏮</button>
+        <button type="button" id="ptTpStop" title="Stop">■</button>
+        <button type="button" id="ptTpPlay" title="Play / stop the arrangement — with Loop on, playback starts at IN and wraps OUT → IN">▶</button>
+        <button type="button" id="ptTpSel" title="Play selected — play the IN → OUT region exactly once, then stop at OUT"><span class="psel">▶</span></button>
+        <button type="button" id="ptTpLoop" title="Loop — repeat the IN → OUT region seamlessly (MIDI sequences and wave clips together)">↻</button>
+      </div>
+      <button class="btn sm" id="ptSetIn" title="Set the loop IN point at the playhead (or at the gold cursor when stopped)">Set IN at playhead</button>
+      <button class="btn sm" id="ptSetOut" title="Set the loop OUT point at the playhead (or at the gold cursor when stopped)">Set OUT at playhead</button>
+      <button class="btn sm" id="ptLoopReset" title="Reset the loop region to the whole timeline">Reset region</button>
+      <span class="small mono" id="ptLoopInfo"></span>
+    </div>
+    <div class="statusline" id="statusLine">Ready — press Play. History bar on top, transport under it with the loop transport alongside, and ONE unified editor below: each channel’s MIDI lane and wave track sit side by side in a single interleaved lane list — drag a lane header to rearrange, cycle its size button for collapsed / normal / enlarged. A starter beat is loaded in Sequence 1.</div>
   </div>
 
   <!-- ================= UNDO / REDO + HISTORY + AUTOSAVE (directly under the transport) ================= -->
@@ -427,21 +441,7 @@ a{color:var(--teal)}
       <button class="btn sm" id="ptNudgeR" title="Nudge the selected clip right by one grid unit (10 ms when snap is off)">Nudge ▶</button>
       <span class="small" id="ptInfo"></span>
     </div>
-    <div class="ptloopbar" id="ptLoopBar">
-      <span class="tlabel">Loop</span>
-      <div class="pttp" role="group" aria-label="Editor transport — drives the same single transport as the main Play button">
-        <button type="button" id="ptTpRew" title="Rewind — return the playhead to the IN point (or the top of the timeline when no region is set)">⏮</button>
-        <button type="button" id="ptTpStop" title="Stop">■</button>
-        <button type="button" id="ptTpPlay" title="Play / stop the arrangement — with Loop on, playback starts at IN and wraps OUT → IN">▶</button>
-        <button type="button" id="ptTpSel" title="Play selected — play the IN → OUT region exactly once, then stop at OUT"><span class="psel">▶</span></button>
-        <button type="button" id="ptTpLoop" title="Loop — repeat the IN → OUT region seamlessly (MIDI sequences and wave clips together)">↻</button>
-      </div>
-      <button class="btn sm" id="ptSetIn" title="Set the loop IN point at the playhead (or at the gold cursor when stopped)">Set IN at playhead</button>
-      <button class="btn sm" id="ptSetOut" title="Set the loop OUT point at the playhead (or at the gold cursor when stopped)">Set OUT at playhead</button>
-      <button class="btn sm" id="ptLoopReset" title="Reset the loop region to the whole timeline">Reset region</button>
-      <span class="small mono" id="ptLoopInfo"></span>
-    </div>
-    <div class="small">One arrangement, both worlds: the <b>Sequences chain</b> and a <b>MIDI lane per channel</b> sit directly over the <b>wave lanes</b>, bar-for-bar under one ruler and one playhead — lay a vocal wave against the programmed drums and watch both while everything plays in sync. Sequence blocks edit exactly like wave clips: <b>drag to slide</b> them anywhere on the timeline — they land on the Snap grid (bar, 1/2, 1/4, 1/8, 1/16, 1/32, triplets, or the exact spot with Snap off) and can leave real gaps before or after, which playback and export honor; <b>double-click to slice inside the sequence</b> at the Snap grid — mid-bar, on a beat, on a single step — and the notes split cleanly across the join (a note crossing the cut is clipped on both sides, nothing lost or doubled), each piece an independent sequence; <b>Duplicate / Copy / Paste</b> make independent sequences you can edit in the Piano Roll without touching the original. Wave rules stay Pro Tools: <b>every wave track is wired to its own channel</b> — track name <i>is</i> the channel name (double-click renames both), clips play through that channel’s fader, pan, EQ, FX and crusher and export inside its stem; <b>＋ Add track</b> creates the channel, ✕ removes track + channel cleanly. <b>Every lane has Mute / Solo</b> — wave M/S is the channel’s own M/S (same as the mixer), MIDI lane M/S governs that channel’s sequence playback; any solo anywhere narrows the whole arrangement to the soloed lanes. Every edit is a History point and autosaves.</div>
+    <div class="small">One arrangement, both worlds: the <b>Sequences chain</b> up top, then each channel’s <b>MIDI lane</b> and <b>wave track</b> interleaved in pairs — MIDI, wave, MIDI, wave — bar-for-bar under one ruler and one playhead. <b>Drag any lane by its ⠿ grip</b> to rearrange the list (the order saves with the project); the <b>size button</b> on every lane cycles collapsed / normal / enlarged; <b>double-click a MIDI lane name to rename</b> it, exactly like a wave track — one channel, one name everywhere. MIDI lanes carry <b>⧉ Duplicate track</b> and <b>✕ Delete track</b>, just like the wave side. Lay a vocal wave against the programmed drums and watch both while everything plays in sync. Sequence blocks edit exactly like wave clips: <b>drag to slide</b> them anywhere on the timeline — they land on the Snap grid (bar, 1/2, 1/4, 1/8, 1/16, 1/32, triplets, or the exact spot with Snap off) and can leave real gaps before or after, which playback and export honor; <b>double-click to slice inside the sequence</b> at the Snap grid — mid-bar, on a beat, on a single step — and the notes split cleanly across the join (a note crossing the cut is clipped on both sides, nothing lost or doubled), each piece an independent sequence; <b>Duplicate / Copy / Paste</b> make independent sequences you can edit in the Piano Roll without touching the original. Wave rules stay Pro Tools: <b>every wave track is wired to its own channel</b> — track name <i>is</i> the channel name (double-click renames both), clips play through that channel’s fader, pan, EQ, FX and crusher and export inside its stem; <b>＋ Add track</b> creates the channel, ✕ removes track + channel cleanly. <b>Every lane has Mute / Solo</b> — wave M/S is the channel’s own M/S (same as the mixer), MIDI lane M/S governs that channel’s sequence playback; any solo anywhere narrows the whole arrangement to the soloed lanes. Every edit is a History point and autosaves.</div>
     <div class="ptViewport" id="ptViewport">
       <div id="ptLanes"></div>
     </div>
@@ -1135,14 +1135,15 @@ function scheduleStep(step, t){
     if(ch.fx.gate && step%2===1) return;
     const pat=ch.patterns[activePatIdx()];
     const as=step+seqBarPos*16; // absolute step inside the (possibly multi-bar) sequence
-    if(pat.steps[as]) triggerChannel(AC, liveNodes[id], ch, t, {vel:0.92, fromStep:true});
-    pat.notes.forEach(n=>{ if(n.step===as) triggerChannel(AC, liveNodes[id], ch, t + (n.off||0)*stepDurSec(), {midi:n.midi, vel:n.vel||0.9, lenSteps:n.len, fromStep:true}); });
-    (pat.hits||[]).forEach(h=>{ if(h.step===as) triggerChannel(AC, liveNodes[id], ch, t + (h.off||0)*stepDurSec(), {midi:h.midi, vel:h.vel||0.9, fromStep:true}); });
+    const tch=(step%2===1)? t + blSwingOf(ch)*stepDurSec() : t; // per-channel swing: odd 16ths of THIS channel only
+    if(pat.steps[as]) triggerChannel(AC, liveNodes[id], ch, tch, {vel:0.92, fromStep:true});
+    pat.notes.forEach(n=>{ if(n.step===as) triggerChannel(AC, liveNodes[id], ch, tch + (n.off||0)*stepDurSec(), {midi:n.midi, vel:n.vel||0.9, lenSteps:n.len, fromStep:true}); });
+    (pat.hits||[]).forEach(h=>{ if(h.step===as) triggerChannel(AC, liveNodes[id], ch, tch + (h.off||0)*stepDurSec(), {midi:h.midi, vel:h.vel||0.9, fromStep:true}); });
   });
 }
 function scheduler(){
   while(nextStepTime < AC.currentTime + 0.12){
-    let t=nextStepTime; if(curStep%2===1) t += S.swing*stepDurSec();
+    let t=nextStepTime; /* swing is per-channel now — applied inside scheduleStep */
     scheduleStep(curStep, t);
     uiStep=curStep;
     nextStepTime += stepDurSec();
@@ -2219,8 +2220,9 @@ function writeVarLen(arr, v){ const bytes=[v&0x7f]; v>>=7; while(v>0){ bytes.uns
 $("btnExportMid").onclick=()=>{
   const ppq=96, events=[];
   S.order.forEach(id=>{ const ch=S.channels[id]; const pat=ch.patterns[S.pattern];
-    pat.steps.forEach((on,s)=>{ if(on){ const gmNote=Object.keys(GM_MAP).find(k=>GM_MAP[k]===id); if(gmNote) events.push({tick:s*ppq/4, note:+gmNote, vel:100}); } });
-    pat.notes.forEach(n=>{ if(ch.type!=="chop") events.push({tick:Math.round((n.step+(n.off||0))*ppq/4), note:n.midi, vel:clamp(Math.round((n.vel||0.9)*127),1,127), len:Math.max(1,Math.round((n.len||1)*ppq/4))}); });
+    const swT=Math.round(blSwingOf(ch)*(ppq/4)); // per-channel swing, in ticks per odd 16th
+    pat.steps.forEach((on,s)=>{ if(on){ const gmNote=Object.keys(GM_MAP).find(k=>GM_MAP[k]===id); if(gmNote) events.push({tick:s*ppq/4 + ((s%2===1)? swT:0), note:+gmNote, vel:100}); } });
+    pat.notes.forEach(n=>{ if(ch.type!=="chop") events.push({tick:Math.round((n.step+(n.off||0))*ppq/4) + ((Math.floor(n.step)%2===1)? swT:0), note:n.midi, vel:clamp(Math.round((n.vel||0.9)*127),1,127), len:Math.max(1,Math.round((n.len||1)*ppq/4))}); });
   });
   events.sort((a,b)=>a.tick-b.tick);
   const flat=[];
@@ -2314,17 +2316,18 @@ async function renderMix(bars, onlyId){
     const _taken=!window.BL_PLAIN && (typeof barTakenOver==="function") && barTakenOver(_tlBar, chain? chain[bar] : S.pattern);
     if(typeof scheduleClipsOffline==="function") scheduleClipsOffline(ctx, bundles, bar, _tlBar, onlyId);
     for(let step=0; step<16; step++){
-      let t=bar*patDur + step*stepDur; if(step%2===1) t+=S.swing*stepDur;
+      let t=bar*patDur + step*stepDur;
       S.order.forEach(id=>{ const ch=S.channels[id]; if(onlyId && id!==onlyId) return; if(_taken) return; if(!audible(ch)) return;
         if(ch.fx.half && bar%2===1) return; if(ch.fx.gate && step%2===1) return;
         const pat=ch.patterns[chain? chain[bar] : S.pattern];
         const aStep=(chain? chainOff[bar] : (bar%seqBarsOf(S.pattern)))*16 + step;
-        if(pat.steps[aStep]) triggerChannel(ctx, bundles[id], ch, t, {vel:0.92});
-        pat.notes.forEach(n=>{ if(n.step===aStep) triggerChannel(ctx, bundles[id], ch, t + (n.off||0)*stepDur, {midi:n.midi, vel:n.vel||0.9, lenSteps:n.len}); });
-        (pat.hits||[]).forEach(h=>{ if(h.step===aStep) triggerChannel(ctx, bundles[id], ch, t + (h.off||0)*stepDur, {midi:h.midi, vel:h.vel||0.9}); });
+        const tch=(step%2===1)? t + blSwingOf(ch)*stepDur : t; // per-channel swing (wave clips are never swung)
+        if(pat.steps[aStep]) triggerChannel(ctx, bundles[id], ch, tch, {vel:0.92});
+        pat.notes.forEach(n=>{ if(n.step===aStep) triggerChannel(ctx, bundles[id], ch, tch + (n.off||0)*stepDur, {midi:n.midi, vel:n.vel||0.9, lenSteps:n.len}); });
+        (pat.hits||[]).forEach(h=>{ if(h.step===aStep) triggerChannel(ctx, bundles[id], ch, tch + (h.off||0)*stepDur, {midi:h.midi, vel:h.vel||0.9}); });
         (pat.sub||[]).forEach(r=>{ if(r.step!==aStep) return; const hits=r.kind==="32"?[0.25,0.5,0.75]:r.kind==="trip"?[1/3,2/3]:[0.5];
-          hits.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, t+stepDur*fr, {vel:0.7-i*0.12});
-            else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, t+stepDur*fr, 0.7-i*0.12); }); });
+          hits.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, tch+stepDur*fr, {vel:0.7-i*0.12});
+            else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, tch+stepDur*fr, 0.7-i*0.12); }); });
       });
     }
   }
@@ -5860,7 +5863,7 @@ function blStartRollPreview(){
     if(!ch2 || !liveNodes[ch2.id]){ blStopRollPreview(); return; }
     while(blRpNext < AC.currentTime+0.12){
       const pat=ch2.patterns[S.pattern], step=blRpStep;
-      let t=blRpNext; if(step%2===1) t+=S.swing*stepDurSec();
+      let t=blRpNext; if(step%2===1) t+=blSwingOf(ch2)*stepDurSec();
       if(pat){
         const prev=BL_T; BL_T=blRollT();
         try{
@@ -6261,12 +6264,12 @@ function blxModal(build){
 const _blxDoNew=$("btnNewProj").onclick;
 $("btnNewProj").onclick=()=>{
   blxModal((card, close)=>{
-    card.innerHTML='<div class="blModalMsg"><b>Start a new track</b><br/>Start blank clears the patterns, playlist and clips and keeps your channels and sounds loaded — or start from a template with its kit, BPM and starter patterns in place.</div>';
+    card.innerHTML='<div class="blModalMsg"><b>Start a new track</b><br/>Start blank gives you a truly empty project — no channels, no tracks, just the MASTER strip in the mixer; build up from zero with ＋ Add channel / ＋ Add track. Or start from a template with its kit, BPM and starter patterns in place.</div>';
     const wrap=document.createElement("div"); wrap.className="newchoices";
     const b1=document.createElement("button"); b1.className="btn gold newchoice"; b1.type="button";
-    b1.innerHTML='Start Blank<span>Fresh empty project — patterns, playlist &amp; clips cleared</span>';
+    b1.innerHTML='Start Blank<span>Truly blank — zero channels, zero tracks, MASTER only</span>';
     b1.onclick=()=>{ close();
-      const go=()=>{ if(_blxDoNew) _blxDoNew(); S._blDirty=false; };
+      const go=()=>{ if(_blxDoNew) _blxDoNew(); if(typeof blTrulyBlank==="function") blTrulyBlank(); S._blDirty=false; };
       if(S._blDirty) showConfirm("Start blank? Your current project's edits will be cleared.", "Start blank", go); else go(); };
     const b2=document.createElement("button"); b2.className="btn newchoice"; b2.type="button";
     b2.innerHTML='Start from Template<span>Your 7 starter templates — name, BPM and kit</span>';
@@ -8596,19 +8599,20 @@ async function ptRenderPositioned(bars, onlyId){
       for(let step=0; step<16; step++){
         const cell=map.cells[bar*16+step]; if(!cell) continue;
         BL_T=blSeqT(cell.seq);
-        let t=bar*patDur + step*stepDur; if(step%2===1) t+=S.swing*stepDur;
+        let t=bar*patDur + step*stepDur;
         if(_taken) continue;
         const aStep=Math.floor(cell.at);
         S.order.forEach(id=>{ const ch=S.channels[id]; if(onlyId && id!==onlyId) return; if(!audible(ch)) return;
           if(ch.fx.half && bar%2===1) return; if(ch.fx.gate && step%2===1) return;
           const pat=ch.patterns[cell.seq]; if(!pat) return;
-          if(pat.steps[aStep]) triggerChannel(ctx, bundles[id], ch, t, { vel:0.92 });
-          pat.notes.forEach(n=>{ if(n.step===aStep) triggerChannel(ctx, bundles[id], ch, t + (n.off||0)*stepDur, { midi:n.midi, vel:n.vel||0.9, lenSteps:n.len }); });
-          (pat.hits||[]).forEach(h=>{ if(h.step===aStep) triggerChannel(ctx, bundles[id], ch, t + (h.off||0)*stepDur, { midi:h.midi, vel:h.vel||0.9 }); });
+          const tch=(step%2===1)? t + blSwingOf(ch)*stepDur : t; // per-channel swing (wave clips are never swung)
+          if(pat.steps[aStep]) triggerChannel(ctx, bundles[id], ch, tch, { vel:0.92 });
+          pat.notes.forEach(n=>{ if(n.step===aStep) triggerChannel(ctx, bundles[id], ch, tch + (n.off||0)*stepDur, { midi:n.midi, vel:n.vel||0.9, lenSteps:n.len }); });
+          (pat.hits||[]).forEach(h=>{ if(h.step===aStep) triggerChannel(ctx, bundles[id], ch, tch + (h.off||0)*stepDur, { midi:h.midi, vel:h.vel||0.9 }); });
           (pat.sub||[]).forEach(r=>{ if(r.step!==aStep) return;
             const hits2=r.kind==="32"? [0.25,0.5,0.75] : r.kind==="trip"? [1/3,2/3] : [0.5];
-            hits2.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, t+stepDur*fr, { vel:0.7-i*0.12 });
-              else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, t+stepDur*fr, 0.7-i*0.12); }); });
+            hits2.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, tch+stepDur*fr, { vel:0.7-i*0.12 });
+              else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, tch+stepDur*fr, 0.7-i*0.12); }); });
         });
       }
     }
@@ -8758,7 +8762,7 @@ scheduler=function(){
         if(inStep%16!==0) lpFirePartialBar(inStep, nextStepTime);
       }
     }
-    let t=nextStepTime; if(curStep%2===1) t += S.swing*stepDurSec();
+    let t=nextStepTime; /* swing is per-channel now — applied inside scheduleStep */
     scheduleStep(curStep, t);
     uiStep=curStep;
     nextStepTime += stepDurSec();
@@ -8995,5 +8999,727 @@ refreshLinPanel();
 lpSyncLoopUI();
 ptRender();
 </script>
+
+<style>
+/* ================================================================
+   FINAL REFINEMENTS — loop transport up top · interleaved lanes ·
+   lane drag / rename / 3 sizes · no editor height cap · linear
+   audio removed · mixer knobs stacked vertically
+   ================================================================ */
+/* loop transport lives inside the main transport bar, on its own row */
+.transport .ptloopbar{flex:1 1 100%;margin:0;border-color:var(--gold2)}
+/* the multitrack editor has NO height limit — the page scrolls */
+#ptViewport{max-height:none!important;overflow-y:visible!important}
+/* lane size cycle: collapsed / normal / enlarged */
+.ptLane.blSz0 .ptHead{min-height:22px;padding:2px 8px}
+.ptLane.blSz0 .ptBody{min-height:22px!important}
+.ptLane.blSz0 .ptChLine{display:none}
+.ptLane.blSz0 .ptBtns button{min-height:20px;padding:1px 5px}
+.ptLane.blSz2 .ptHead{min-height:112px}
+.ptLane.blSz2 .ptBody{min-height:112px!important}
+.ptLane.midiLane.blSz2 .ptBody{min-height:88px!important}
+.ptLane.midiLane.blSz2 .ptHead{min-height:88px}
+/* lane drag grip + drop hints */
+.blGrip{display:inline-block;cursor:grab;color:var(--faint);font-size:13px;line-height:1;padding:2px 4px 2px 0;touch-action:none;user-select:none;-webkit-user-select:none}
+.blGrip:hover{color:var(--gold)}
+.blGrip:active{cursor:grabbing}
+.ptLane.blDragSrc{outline:1px dashed var(--gold2);outline-offset:-1px}
+.ptLane.blDragging{opacity:.55}
+.ptLane.blDropBefore{box-shadow:inset 0 3px 0 var(--gold)}
+.ptLane.blDropAfter{box-shadow:inset 0 -3px 0 var(--gold)}
+/* mixer: channel-strip knobs stack in ONE vertical column → narrow strips, more across */
+#mixerStrips .bstrip:not(.masterstrip){width:76px;flex:none;padding:8px 5px}
+#mixerStrips .bstrip:not(.masterstrip) .krow{flex-direction:column;align-items:center;justify-content:flex-start;gap:3px}
+#mixerStrips .bstrip:not(.masterstrip) .knobwrap{flex:none}
+#mixerStrips .bstrip:not(.masterstrip) .sname{font-size:10px}
+#mixerStrips .bstrip:not(.masterstrip) .msbtns button{font-size:8px}
+#mixerStrips .masterstrip{width:176px;flex:none}
+@media (max-width:640px){
+  .transport .ptloopbar .btn{min-height:44px}
+  .ptLane.blSz0 .ptBtns button{min-height:30px}
+}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   FINAL REFINEMENTS (Keith, 2026-11-05)
+   1 · LOOP TRANSPORT UP TOP — the #ptLoopBar markup now lives in
+       the main .transport bar; every handler (ptTp*, ptSetIn…)
+       already binds by id and drives the ONE transport, so the
+       move is pure layout. Gold IN/OUT markers stay on the ruler.
+   2 · MIDI TRACK DELETE + DUPLICATE — buttons added to every MIDI
+       lane head: Duplicate deep-copies the channel (sound,
+       settings, strip, patterns) into a brand-new channel that
+       joins rack / mixer / Piano Roll / stems; Delete reuses the
+       wave side's deleteChannel path. Both flow through
+       markDirty → History/undo + autosave like every edit.
+   3 · INTERLEAVED LANES — S.laneOrder is one list of lane keys
+       ("m:<id>" MIDI, "w:<id>" wave). Default pairs each channel:
+       CH MIDI, CH wave, next CH MIDI, next CH wave… under the
+       chain lane. The final ptRender pass reorders the built lane
+       nodes into that list and drops the old section heads.
+   4 · DRAG TO REARRANGE — the ⠿ grip on every lane header drags
+       the lane; the drop writes S.laneOrder (saved in the project).
+       Clip dragging is untouched: only the grip starts a lane drag.
+   5 · RENAME MIDI — double-click a MIDI lane name = the wave
+       rename interaction; renameChannel renames the one channel
+       everywhere (editor lanes, rack, mixer, Piano Roll).
+   6 · THREE LANE SIZES — S.laneSizes[key] ∈ 0 collapsed /
+       1 normal / 2 enlarged, cycled by the Size button on every
+       lane head; persists in the project.
+   7 · NO EDITOR HEIGHT LIMIT — CSS above removes the viewport's
+       max-height cap; the editor grows with the lane list and the
+       page scrolls (horizontal timeline scroll stays).
+   8 · LINEAR AUDIO REMOVED — toolbar, inspector, export note and
+       lanes are gone. Migration (below) converts any existing
+       linear clips onto wave tracks of the same track name, each
+       wired to its own channel, before the linear state is
+       cleared — old projects load clean, nothing placed is lost.
+   9 · MIXER KNOBS VERTICAL — CSS above stacks each channel
+       strip's knob rows into a single column and narrows strips
+       to 76px, so far more channels fit across the window;
+       MASTER stays first at full width. All knob/fader handlers
+       are unchanged — layout only.
+   ================================================================ */
+S.laneOrder=(Array.isArray(S.laneOrder)&&S.laneOrder.length)? S.laneOrder : null;
+S.laneSizes=(S.laneSizes && typeof S.laneSizes==="object")? S.laneSizes : {};
+
+function blLaneKeys(){
+  const want=[];
+  S.order.forEach(cid=>{ if(S.channels[cid]){ want.push("m:"+cid, "w:"+cid); } });
+  const cur=(Array.isArray(S.laneOrder)? S.laneOrder : []).filter(k=>want.indexOf(k)>=0);
+  want.forEach(k=>{
+    if(cur.indexOf(k)>=0) return;
+    const partner=(k.charAt(0)==="m"? "w:" : "m:")+k.slice(2), pi=cur.indexOf(partner);
+    if(pi>=0) cur.splice(k.charAt(0)==="m"? pi : pi+1, 0, k); else cur.push(k);
+  });
+  S.laneOrder=cur;
+  return cur;
+}
+function blLaneSize(key){ const v=S.laneSizes[key]; return (v===0||v===2)? v : 1; }
+const BL_LANE_SIZE_NAMES=["collapsed","normal","enlarged"];
+
+/* ---------------- Duplicate a whole channel (MIDI Duplicate Track) ---------------- */
+function blDuplicateChannel(cid){
+  const src=S.channels[cid]; if(!src) return null;
+  let n=1, nid; do{ nid="dup"+(n++); }while(S.channels[nid]);
+  const name=(typeof blUniqueChName==="function")? blUniqueChName(src.name+" copy") : (src.name+" copy");
+  const ch=makeChannel(nid, name, src.type, src.builtin||"");
+  const deep=o=>{ try{ return JSON.parse(JSON.stringify(o)); }catch(e){ return o; } };
+  ch.patterns=deep(src.patterns||[]);
+  while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
+  ch.fx=Object.assign(ch.fx, deep(src.fx||{}));
+  ch.buffer=src.buffer||null; ch.sampleName=src.sampleName||null; ch.missing=!!src.missing;
+  ["gainDb","pitch","fine","mode","reverse","root","stretch","fitBars","volume","pan","engine","color","glide","glideTime"].forEach(k=>{ if(src[k]!==undefined) ch[k]=src[k]; });
+  ch.mute=!!src.mute; ch.solo=!!src.solo;
+  ch.slicePitch=deep(src.slicePitch||{}); ch.sliceRev=deep(src.sliceRev||{});
+  ch.slices=Array.isArray(src.slices)? src.slices.slice() : [];
+  if(src.strip) ch.strip=deep(src.strip);
+  S.channels[nid]=ch;
+  const at=S.order.indexOf(cid); S.order.splice(at<0? S.order.length : at+1, 0, nid);
+  if(typeof AC!=="undefined" && AC && typeof master!=="undefined" && master && !liveNodes[nid])
+    liveNodes[nid]=buildChain(AC, ch, master, verbBus, delayBus, true);
+  const keys=blLaneKeys().filter(k=>k!=="m:"+nid && k!=="w:"+nid);
+  const wi=keys.indexOf("w:"+cid);
+  keys.splice(wi>=0? wi+1 : keys.length, 0, "m:"+nid, "w:"+nid);
+  S.laneOrder=keys;
+  S.selected=nid;
+  refreshChannelNames();
+  if(S.channels[S.rollChannel]) buildRoll();
+  markDirty(); ptRender();
+  setStatus("Duplicated track “"+src.name+"” → “"+name+"” — a full independent channel: same sound and settings, a deep copy of every sequence. It has its own rack row, mixer strip, Piano Roll channel and stem; editing the copy never touches the original.");
+  return ch;
+}
+
+/* ---------------- Rename from a MIDI lane (same interaction as wave) ---------------- */
+function blFinRenameMidi(nm, cid){
+  const ch=S.channels[cid]; if(!ch) return;
+  const inp=document.createElement("input"); inp.type="text"; inp.className="trkRename"; inp.value=ch.name; inp.style.width="100%";
+  nm.replaceWith(inp); inp.focus(); inp.select();
+  let done=false;
+  const commit=save=>{ if(done) return; done=true;
+    if(save && inp.value.trim()){ renameChannel(cid, inp.value.trim()); markDirty(); }
+    ptRender(); };
+  inp.addEventListener("blur", ()=>commit(true));
+  inp.addEventListener("keydown", e2=>{ e2.stopPropagation(); if(e2.key==="Enter") commit(true); if(e2.key==="Escape") commit(false); });
+  inp.addEventListener("click", e2=>e2.stopPropagation());
+  inp.addEventListener("dblclick", e2=>e2.stopPropagation());
+}
+
+/* ---------------- Drag a lane by its header grip ---------------- */
+function blLaneDragStart(e, lane, key){
+  e.preventDefault(); e.stopPropagation();
+  const wrap=$("ptLanes"); if(!wrap) return;
+  const startY=e.clientY; let active=false;
+  S._ptDrag=true; /* the render chain must not rebuild lanes mid-drag */
+  lane.classList.add("blDragSrc");
+  const move=ev=>{
+    if(!active && Math.abs(ev.clientY-startY)>6){ active=true; lane.classList.add("blDragging"); }
+    if(!active) return;
+    const lanes=Array.from(wrap.querySelectorAll(".ptLane[data-lanekey]"));
+    lanes.forEach(l=>l.classList.remove("blDropBefore","blDropAfter"));
+    for(const l of lanes){ const r=l.getBoundingClientRect();
+      if(ev.clientY>=r.top && ev.clientY<=r.bottom){ l.classList.add(ev.clientY<r.top+r.height/2? "blDropBefore" : "blDropAfter"); break; } }
+  };
+  const up=ev=>{
+    window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+    lane.classList.remove("blDragSrc","blDragging");
+    const lanes=Array.from(wrap.querySelectorAll(".ptLane[data-lanekey]"));
+    lanes.forEach(l=>l.classList.remove("blDropBefore","blDropAfter"));
+    S._ptDrag=false; S._ptDragEnd=Date.now();
+    if(!active){ return; }
+    let targetKey=null, before=true, found=false;
+    for(const l of lanes){ if(l===lane) continue; const r=l.getBoundingClientRect();
+      if(ev.clientY<r.top+r.height/2){ targetKey=l.dataset.lanekey; before=true; found=true; break; }
+      targetKey=l.dataset.lanekey; before=false; found=true; }
+    const keys=blLaneKeys().filter(k=>k!==key);
+    const idx=found? keys.indexOf(targetKey)+(before? 0 : 1) : keys.length;
+    keys.splice(idx, 0, key);
+    if(JSON.stringify(keys)!==JSON.stringify(S.laneOrder)){ S.laneOrder=keys; markDirty(); }
+    ptRender();
+    const ch=S.channels[key.slice(2)];
+    setStatus((ch? ch.name+" " : "")+(key.charAt(0)==="m"? "MIDI lane" : "wave track")+" moved to lane position "+(S.laneOrder.indexOf(key)+1)+" of "+S.laneOrder.length+" — drag any lane by its ⠿ grip to rearrange; the order saves with the project.");
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+}
+
+/* ---------------- Lane decoration: grip + size + MIDI track controls + rename ---------------- */
+function blFinDecorateLane(lane, key){
+  const cid=key.slice(2), ch=S.channels[cid]; if(!ch) return;
+  const isMidi=key.charAt(0)==="m", size=blLaneSize(key);
+  lane.dataset.lanekey=key;
+  lane.classList.toggle("blSz0", size===0);
+  lane.classList.toggle("blSz2", size===2);
+  const head=lane.querySelector(".ptHead"); if(!head) return;
+  const grip=document.createElement("span"); grip.className="blGrip"; grip.textContent="⠿";
+  grip.title="Drag to rearrange this lane — the new order saves with the project";
+  head.insertBefore(grip, head.firstChild);
+  grip.addEventListener("pointerdown", e=>blLaneDragStart(e, lane, key));
+  const btns=head.querySelector(".ptBtns"); if(!btns) return;
+  const mk=(label, title, fn)=>{ const b=document.createElement("button"); b.type="button"; b.textContent=label; b.title=title;
+    b.onclick=e=>{ e.stopPropagation(); fn(); }; btns.appendChild(b); return b; };
+  mk("Size: "+["Mini","Norm","Tall"][size],
+     "Lane size: "+BL_LANE_SIZE_NAMES[size]+" — click to cycle collapsed → normal → enlarged (saved per lane)",
+     ()=>{ const ns=(blLaneSize(key)+1)%3; S.laneSizes[key]=ns; markDirty(); ptRender();
+       setStatus(ch.name+" "+(isMidi? "MIDI lane" : "wave track")+" size: "+BL_LANE_SIZE_NAMES[ns]+(ns===0? " — slim strip, name + M/S stay visible." : ns===2? " — tall lane, bigger waveform / note preview." : ".")); });
+  if(isMidi){
+    const nm=head.querySelector(".ptName");
+    if(nm){ nm.title="Double-click to rename — the MIDI lane and its wave track are one channel, so the name changes everywhere (rack, mixer, Piano Roll)";
+      nm.addEventListener("dblclick", ev=>{ ev.stopPropagation(); blFinRenameMidi(nm, cid); }); }
+    mk("⧉ Track", "Duplicate this track — a full independent copy of the channel (same sound + settings, deep copy of its sequences) in the editor, rack, mixer and Piano Roll",
+       ()=>blDuplicateChannel(cid));
+    mk("✕ Track", "Delete this track — removes the channel, its MIDI lane and its wave track everywhere (undo brings it back)",
+       ()=>{ showConfirm("Delete track “"+ch.name+"”? The channel, its sequences, its wave clips and its mixer strip all go. Undo (History bar, top of the page) brings it all back.", "Delete track",
+         ()=>{ deleteChannel(cid); markDirty(); ptRender(); }); });
+  }
+}
+
+/* ---------------- Final ptRender pass: interleave + decorate ---------------- */
+const _blFinPtRenderPrev=ptRender;
+ptRender=function(){
+  _blFinPtRenderPrev();
+  const wrap=$("ptLanes"); if(!wrap || S._ptDrag) return;
+  /* linear audio lanes + the old two-block section heads never show */
+  wrap.querySelectorAll(".ptLane[data-atrack]").forEach(el=>el.remove());
+  wrap.querySelectorAll(".ptSectionHead").forEach(el=>el.remove());
+  const ruler=wrap.querySelector(".ptLane.rulerLane");
+  const chain=wrap.querySelector(".ptLane.chainLane");
+  const byKey={};
+  wrap.querySelectorAll(".ptLane[data-ptmidi]").forEach(el=>{ byKey["m:"+el.dataset.ptmidi]=el; });
+  wrap.querySelectorAll(".ptLane[data-pttrack]").forEach(el=>{ byKey["w:"+el.dataset.pttrack]=el; });
+  const keys=blLaneKeys();
+  if(ruler) wrap.appendChild(ruler);
+  if(chain) wrap.appendChild(chain);
+  keys.forEach(k=>{ const el=byKey[k]; if(el) wrap.appendChild(el); });
+  keys.forEach(k=>{ const el=byKey[k]; if(el) blFinDecorateLane(el, k); });
+  if(typeof lpEnsureOverlay==="function") lpEnsureOverlay(wrap);
+  if(typeof lpPositionOverlay==="function") lpPositionOverlay();
+  if(typeof ptPositionCursor==="function") ptPositionCursor();
+  const info=$("ptInfo");
+  if(info) info.textContent=S.order.length+" channels · "+keys.length+" lanes (MIDI + wave interleaved) · "+S.clips.length+" wave clips · "+layoutBars()+" bars · snap "+(S.snap&&S.ptGrid? "on" : "off");
+};
+
+/* ---------------- Linear audio: removal + migration ---------------- */
+function blRemoveLinearUI(){
+  ["linBar","linInfo","linClipPanel","expLinNote"].forEach(id=>{ const el=document.getElementById(id); if(el) el.remove(); });
+}
+refreshLinExportNote=function(){ const en=$("expLinNote"); if(en) en.remove(); };
+function blFinMakeChannel(name){
+  let n=1, id; do{ id="lin"+(n++); }while(S.channels[id]);
+  const ch=makeChannel(id, name, "sample", "");
+  while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
+  if(typeof BL_CH_COLORS!=="undefined") ch.color=BL_CH_COLORS[S.order.length % BL_CH_COLORS.length];
+  S.channels[id]=ch; S.order.push(id);
+  if(typeof AC!=="undefined" && AC && typeof master!=="undefined" && master && !liveNodes[id])
+    liveNodes[id]=buildChain(AC, ch, master, verbBus, delayBus, true);
+  return ch;
+}
+function blMigrateLinear(){
+  const tracks=(S.atracks||[]).slice(), aclips=(S.aclips||[]).slice();
+  let converted=0;
+  if(aclips.length){
+    const byTrack={};
+    aclips.forEach(c=>{ (byTrack[c.trackId]=byTrack[c.trackId]||[]).push(c); });
+    const trackName=tid=>{ const t=tracks.find(x=>x.id===tid); return t? t.name : "Audio"; };
+    Object.keys(byTrack).forEach(tid=>{
+      const nm=trackName(tid);
+      let cid=S.order.find(id=>S.channels[id] && S.channels[id].name===nm);
+      if(!cid) cid=blFinMakeChannel(nm).id;
+      byTrack[tid].forEach(c=>{
+        const wc=makeClip(c.name||"Audio clip", cid, c.buffer||null, c.start||0, c.sampleName||c.name||"");
+        wc.trimStart=c.srcStart||0;
+        wc.trimEnd=(c.srcStart||0)+((c.srcDur&&c.srcDur>0)? c.srcDur : (c.buffer? c.buffer.duration : 0));
+        if(c.pitch) wc.pitch=c.pitch;
+        if(c.gainDb) wc.gainDb=c.gainDb;
+        if(c.reverse) wc.reverse=true;
+        if(c.fadeIn!=null) wc.fadeIn=c.fadeIn;
+        if(c.fadeOut!=null) wc.fadeOut=c.fadeOut;
+        wc.missing=!c.buffer;
+        converted++;
+      });
+    });
+  }
+  S.atracks=[]; S.aclips=[]; S.selAclipId=null;
+  if(converted && typeof relinkMissingClips==="function") relinkMissingClips();
+  return converted;
+}
+
+/* ---------------- Persistence: lane order + sizes ride the project ---------------- */
+const _blFinPjPrev=projectJSON;
+projectJSON=function(){ const p=_blFinPjPrev();
+  p.laneOrder=blLaneKeys().slice();
+  p.laneSizes=JSON.parse(JSON.stringify(S.laneSizes||{}));
+  p.atracks=[]; p.aclips=[];
+  return p; };
+const _blFinLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){
+  _blFinLcpPrev(p);
+  if(p){
+    if(Array.isArray(p.laneOrder)) S.laneOrder=p.laneOrder.slice();
+    if(p.laneSizes && typeof p.laneSizes==="object") S.laneSizes=p.laneSizes;
+  }
+  blLaneKeys();
+  const converted=blMigrateLinear();
+  blRemoveLinearUI();
+  try{ refreshChannelNames(); }catch(e){}
+  ptRender();
+  if(converted) setStatus("Linear audio is removed — its "+converted+" clip"+(converted===1? "" : "s")+" now live"+(converted===1? "s" : "")+" on wave tracks of the same name, each wired to its own channel. Nothing you placed was lost.");
+};
+
+/* ---------------- Init ---------------- */
+blLaneKeys();
+blMigrateLinear();
+blRemoveLinearUI();
+try{ refreshChannelNames(); }catch(e){}
+ptRender();
+if(typeof lpSyncLoopUI==="function") lpSyncLoopUI();
+</script>
+
+<style>
+/* ---------- Cut filters: slope selectors in the vertical strip stack + FX tab ---------- */
+.blSlopeSel{width:100%;font-size:9.5px;padding:2px 1px;margin-top:2px}
+.blCutMini{font-size:8.5px;letter-spacing:1px;color:var(--gold);font-weight:700;text-transform:uppercase;text-align:center;margin:3px 0 1px}
+.fx .blSlopeRow{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim);margin-top:6px}
+.fx .blSlopeRow select{width:110px}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   ITEM 10 · LO CUT + HI CUT WITH FREQUENCY AND SLOPE, PER CHANNEL
+   The strip's existing HP (st.hp) and LP (fx.cut) are UPGRADED in
+   place — no second filter pair is added. Each cut becomes a
+   cascaded Butterworth section built where the single biquad used
+   to sit (trim → LO CUT → HI CUT → EQ …):
+     slope 6  dB/oct → order 1: one-pole IIR section
+     slope 12 dB/oct → order 2: one biquad (today's sound; default)
+     slope 18 dB/oct → order 3: one-pole + one biquad
+     slope 24 dB/oct → order 4: two biquads (Butterworth Qs)
+     slope 48 dB/oct → order 8: four biquads (Butterworth Qs)
+   Biquad stages beyond the chosen order are parked at 8 Hz /
+   19 kHz (inaudible). The one-pole IIR stage is rebuilt (throttled)
+   as its frequency moves, since IIR coefficients are fixed at
+   creation. buildChain is wrapped, so LIVE playback and every
+   offline render (stems + master) build the same cascades — the
+   selected slope is the real rendered slope.
+   Off behaviour: LO CUT freq at its minimum (20 Hz) and HI CUT
+   freq at its maximum (18 kHz) read "OFF" and sit out of the way
+   of the music, exactly as the old knobs behaved at their ends.
+   State: st.hpSlope / st.lpSlope ride inside ch.strip, which the
+   project serializer already stores whole — so the cuts are
+   per-channel History/undo points, autosaved and saved/loaded.
+   Controls: rebuilt Filters group on every mixer strip (freq knob
+   + slope selector per cut, in the vertical stack) and slope
+   selectors mirrored in the FX tab's Filter card; both write the
+   same state and refresh each other.
+   ================================================================ */
+const BL_CUT_SLOPES=[6,12,18,24,48];
+const _blCutDefPrev=blStripDefaults;
+blStripDefaults=function(){ const d=_blCutDefPrev();
+  if(d.hpSlope==null) d.hpSlope=12;
+  if(d.lpSlope==null) d.lpSlope=12;
+  return d; };
+function blCutSlope(ch, which){
+  const st=ensureStrip(ch);
+  const v=+(which==="hp"? st.hpSlope : st.lpSlope);
+  return BL_CUT_SLOPES.indexOf(v)>=0? v : 12;
+}
+function blCutFmtHp(v){ return v<=20.5? "OFF" : (v>=1000? (Math.round(v/100)/10)+" kHz" : Math.round(v)+" Hz"); }
+function blCutFmtLp(v){ return v>=17999? "OFF" : (v>=1000? (Math.round(v/100)/10)+" kHz" : Math.round(v)+" Hz"); }
+
+/* ---------------- Cascaded Butterworth cut sections ---------------- */
+function blCutQs(order){
+  const qs=[], pairs=Math.floor(order/2);
+  for(let k=0;k<pairs;k++) qs.push(1/(2*Math.sin(Math.PI*(2*k+1)/(2*order))));
+  while(qs.length<4) qs.push(0.7071);
+  return qs;
+}
+function blPoleCoeffs(type, f, sr){
+  const K=Math.tan(Math.PI*Math.min(Math.max(f,5), sr*0.45)/sr), norm=1/(1+K);
+  if(type==="lowpass") return { ff:[K*norm, K*norm], fb:[1, (K-1)*norm] };
+  return { ff:[norm, -norm], fb:[1, (K-1)*norm] };
+}
+function blSetCutSection(sec, freq, slope){
+  const order=Math.max(1, Math.round(slope/6)), pairs=Math.floor(order/2), qs=blCutQs(order);
+  sec.bqs.forEach((b,i)=>{
+    if(i<pairs){ b.frequency.value=freq; b.Q.value=qs[i]; }
+    else { b.frequency.value= sec.type==="highpass"? 8 : 19000; b.Q.value=0.7071; }
+  });
+  sec.freq=freq; sec.slope=slope; sec.order=order;
+}
+function blRebuildPole(sec){
+  const c=blPoleCoeffs(sec.type, sec.freq, sec.ctx.sampleRate);
+  let np=null;
+  try{ np=sec.ctx.createIIRFilter(c.ff, c.fb); }catch(e){ np=null; }
+  sec.bqs[3].disconnect();
+  if(sec.pole){ try{ sec.pole.disconnect(); }catch(e){} sec.pole=null; }
+  if(np){ sec.bqs[3].connect(np); np.connect(sec.out); sec.pole=np; }
+  else sec.bqs[3].connect(sec.out);
+  sec._poleFreq=sec.freq; sec._poleSlope=sec.slope; sec._poleLast=performance.now();
+}
+function blRemovePole(sec){
+  if(!sec.pole) return;
+  sec.bqs[3].disconnect();
+  try{ sec.pole.disconnect(); }catch(e){}
+  sec.pole=null;
+  sec.bqs[3].connect(sec.out);
+}
+function blApplyCutSection(sec, freq, slope){
+  if(!sec) return;
+  const prevFreq=sec.freq, prevSlope=sec.slope;
+  blSetCutSection(sec, freq, slope);
+  const odd=sec.order%2===1;
+  if(odd){
+    if(!sec.pole || prevSlope!==slope || Math.abs((prevFreq||0)-freq)>Math.max(0.5, freq*0.002)){
+      const now=performance.now();
+      if(now-(sec._poleLast||0)>30) blRebuildPole(sec);
+      else if(!sec._poleTimer) sec._poleTimer=setTimeout(()=>{ sec._poleTimer=null; try{ blRebuildPole(sec); }catch(e){} }, 50);
+    }
+  } else if(sec.pole) blRemovePole(sec);
+}
+function blBuildCutSection(ctx, type, freq, slope){
+  const sec={ ctx, type, freq:0, slope:0, order:2, pole:null, _poleFreq:0, _poleSlope:0, _poleLast:0, _poleTimer:null,
+    in:ctx.createGain(), out:ctx.createGain(), bqs:[] };
+  for(let i=0;i<4;i++){ const b=ctx.createBiquadFilter(); b.type=type; sec.bqs.push(b); }
+  let prev=sec.in;
+  sec.bqs.forEach(b=>{ prev.connect(b); prev=b; });
+  prev.connect(sec.out);
+  blSetCutSection(sec, freq, slope);
+  if(sec.order%2===1) blRebuildPole(sec);
+  return sec;
+}
+
+/* ---------------- buildChain / refreshChain: sections in place of the single biquads ---------------- */
+const _blCutBuildPrev=buildChain;
+buildChain=function(ctx, ch, masterIn, verb, delay, withAnalyser){
+  const nodes=_blCutBuildPrev(ctx, ch, masterIn, verb, delay, withAnalyser);
+  const st=ensureStrip(ch), f=ch.fx;
+  try{
+    const hpSec=blBuildCutSection(ctx, "highpass", st.hp, blCutSlope(ch, "hp"));
+    const lpSec=blBuildCutSection(ctx, "lowpass", f.cut, blCutSlope(ch, "lp"));
+    nodes.trim.disconnect();
+    if(nodes.hp) nodes.hp.disconnect();
+    if(nodes.filter) nodes.filter.disconnect();
+    nodes.trim.connect(hpSec.in); hpSec.out.connect(lpSec.in); lpSec.out.connect(nodes.eqIn);
+    nodes.hpSec=hpSec; nodes.lpSec=lpSec;
+  }catch(e){ /* if the graph shape ever changes, the original HP/LP biquads stay wired */ }
+  return nodes;
+};
+const _blCutRefreshPrev=refreshChain;
+refreshChain=function(ch){
+  _blCutRefreshPrev(ch);
+  const n=liveNodes[ch.id]; if(!n) return;
+  const st=ensureStrip(ch), f=ch.fx;
+  if(n.hpSec) blApplyCutSection(n.hpSec, st.hp, blCutSlope(ch, "hp"));
+  if(n.lpSec) blApplyCutSection(n.lpSec, f.cut, blCutSlope(ch, "lp"));
+};
+
+/* ---------------- Mixer strips: Filters group becomes LO CUT / HI CUT ---------------- */
+const _blCutBuildMixerPrev=buildMixer;
+buildMixer=function(){
+  _blCutBuildMixerPrev();
+  const wrap=$("mixerStrips"); if(!wrap) return;
+  wrap.querySelectorAll(".bstrip:not(.masterstrip)").forEach(d=>{
+    const id=d.dataset.ch, ch=S.channels[id]; if(!ch) return;
+    const st=ensureStrip(ch), f=ch.fx;
+    const row=d.querySelector('[data-g="filt"]'); if(!row) return;
+    const grp=row.closest(".kgroup");
+    if(grp){ const lab=grp.querySelector(".klabel"); if(lab) lab.textContent="Cuts · LO / HI"; }
+    const rc=()=>{ refreshChain(ch); markDirty(); };
+    const syncFxIfSel=()=>{ if(S.selected===id && typeof syncFxPanel==="function") syncFxPanel(); };
+    row.innerHTML="";
+    const mini=t=>{ const s=document.createElement("div"); s.className="blCutMini"; s.textContent=t; return s; };
+    const slopeSel=which=>{
+      const sel=document.createElement("select"); sel.className="crushsel blSlopeSel";
+      BL_CUT_SLOPES.forEach(v=>{ const o=document.createElement("option"); o.value=String(v); o.textContent=v+" dB/oct"; sel.appendChild(o); });
+      sel.value=String(blCutSlope(ch, which));
+      sel.title=(which==="hp"? "LO CUT" : "HI CUT")+" slope — "+ch.name+" (cascaded stages; the real slope in playback and exports)";
+      sel.onchange=()=>{ if(which==="hp") st.hpSlope=+sel.value; else st.lpSlope=+sel.value; rc(); syncFxIfSel();
+        setStatus(ch.name+" "+(which==="hp"? "LO CUT" : "HI CUT")+" slope: "+sel.value+" dB/oct — "+(sel.value==="48"? "brick-wall, 8th-order cascade" : sel.value==="6"? "gentle 1st-order" : "cascaded Butterworth stages")+", live in playback and in stem/master exports."); };
+      return sel;
+    };
+    row.appendChild(mini("LO CUT"));
+    row.appendChild(blKnob({ label:"FREQ", min:20, max:1000, value:st.hp, def:20, log:true, fmt:blCutFmtHp,
+      oninput:val=>{ st.hp=Math.round(val); rc(); syncFxIfSel(); } }).el);
+    row.appendChild(slopeSel("hp"));
+    row.appendChild(mini("HI CUT"));
+    row.appendChild(blKnob({ label:"FREQ", min:200, max:18000, value:f.cut, def:18000, log:true, fmt:blCutFmtLp,
+      oninput:val=>{ f.cut=Math.round(val); rc(); syncFxIfSel(); } }).el);
+    row.appendChild(slopeSel("lp"));
+  });
+};
+
+/* ---------------- FX tab: slope selectors mirrored in the Filter card ---------------- */
+(function blCutFxTab(){
+  const cut=$("fxCut"); if(!cut) return;
+  const card=cut.closest(".fx"); if(!card || $("fxHpSlope")) return;
+  const mkRow=(label, id)=>{
+    const r=document.createElement("div"); r.className="blSlopeRow";
+    const s=document.createElement("span"); s.textContent=label; r.appendChild(s);
+    const sel=document.createElement("select"); sel.id=id;
+    BL_CUT_SLOPES.forEach(v=>{ const o=document.createElement("option"); o.value=String(v); o.textContent=v+" dB/oct"; sel.appendChild(o); });
+    r.appendChild(sel); card.appendChild(r); return sel;
+  };
+  const hpS=mkRow("LO CUT slope", "fxHpSlope"), lpS=mkRow("HI CUT slope", "fxLpSlope");
+  hpS.title="LO CUT (high-pass) slope for the selected channel — same setting as the mixer strip";
+  lpS.title="HI CUT (low-pass) slope for the selected channel — same setting as the mixer strip";
+  hpS.onchange=()=>{ const ch=sel(); if(!ch) return; ensureStrip(ch).hpSlope=+hpS.value; refreshChain(ch); markDirty(); buildMixerSoon();
+    setStatus(ch.name+" LO CUT slope: "+hpS.value+" dB/oct (FX tab and mixer strip agree)."); };
+  lpS.onchange=()=>{ const ch=sel(); if(!ch) return; ensureStrip(ch).lpSlope=+lpS.value; refreshChain(ch); markDirty(); buildMixerSoon();
+    setStatus(ch.name+" HI CUT slope: "+lpS.value+" dB/oct (FX tab and mixer strip agree)."); };
+})();
+const _blCutSyncFxPrev=syncFxPanel;
+syncFxPanel=function(){
+  _blCutSyncFxPrev();
+  const ch=sel(); if(!ch) return;
+  const hs=$("fxHpSlope"), ls=$("fxLpSlope");
+  if(hs) hs.value=String(blCutSlope(ch, "hp"));
+  if(ls) ls.value=String(blCutSlope(ch, "lp"));
+};
+try{ syncFxPanel(); }catch(e){}
+/* the board was built before this script ran — rebuild it once so the
+   strips pick up the LO CUT / HI CUT controls immediately */
+try{ buildMixer(); }catch(e){}
+</script>
+
+<style>
+/* ---------- Per-channel swing: control inside every MIDI lane header ---------- */
+.blSwingRow{display:flex;align-items:center;gap:5px;margin-top:2px}
+.blSwingRow input[type=range]{flex:1;min-width:0;height:18px}
+.blSwingLab{font-size:8.5px;letter-spacing:1px;color:var(--gold);font-weight:700;text-transform:uppercase;flex:none}
+.blSwingVal{font-size:10px;color:var(--teal);flex:none;min-width:30px}
+.ptLane.blSz0 .blSwingRow{display:none}
+@media (max-width:640px){ .blSwingRow input[type=range]{height:26px} }
+</style>
+<script>
+"use strict";
+/* ================================================================
+   ITEM 11 · SWING IS PER MIDI CHANNEL, NOT GLOBAL
+   ch.swing (0–0.60, same range and off-16th delay model the old
+   global used) lives on each channel. The timing engines were
+   converted at the source:
+   · live scheduleStep adds blSwingOf(ch) × stepDur to odd 16ths
+     of THAT channel only — the schedulers no longer offset the
+     shared step time, and wave clips (scheduled separately) are
+     never swung;
+   · both offline renderers (base renderMix + the positioned
+     song renderer) apply the same per-channel offset, so stems
+     and masters match the live feel;
+   · the Piano Roll preview swings by the previewed channel;
+   · .mid export shifts odd-16th ticks by the channel's swing.
+   The Transport's global Swing control is REMOVED from the bar
+   (its nodes are parked in a hidden container so legacy load
+   code that writes to them by id keeps working; S.swing itself
+   is never applied to timing anywhere anymore).
+   Migration: a project/autosave carrying only a global swing
+   value (p.swing, no per-channel values) applies that value to
+   every channel once on load — old projects keep their exact
+   feel; from then on each channel's own value rules.
+   Persistence: ch.swing rides projectJSON per channel, so lane
+   edits are History/undo points, autosaved, saved/loaded.
+   ================================================================ */
+function blSwingOf(ch){
+  if(!ch) return 0;
+  const v=+ch.swing;
+  return isFinite(v)? clamp(v, 0, 0.6) : 0;
+}
+/* channels that predate per-channel swing start from the session's
+   current (legacy global) value, so nothing changes feel on load */
+S.order.forEach(id=>{ const ch=S.channels[id];
+  if(ch && ch.swing==null) ch.swing=clamp(+S.swing||0, 0, 0.6); });
+/* remove the global Swing control from the Transport */
+(function blSwingRemoveGlobal(){
+  const el=$("swingRange"); if(!el) return;
+  const grp=el.closest(".tgroup") || el.parentElement; if(!grp) return;
+  const park=document.createElement("div");
+  park.id="blSwingPark"; park.style.display="none";
+  document.body.appendChild(park);
+  park.appendChild(grp);
+})();
+/* duplicating a channel copies its swing too */
+const _blSwingDupPrev=blDuplicateChannel;
+blDuplicateChannel=function(cid){
+  const src=S.channels[cid];
+  const ch=_blSwingDupPrev(cid);
+  if(ch && src) ch.swing=blSwingOf(src);
+  return ch;
+};
+/* every MIDI lane header gains its channel's Swing control */
+const _blSwingLanePrev=ptBuildMidiLane;
+ptBuildMidiLane=function(cid, idx, ts){
+  const lane=_blSwingLanePrev(cid, idx, ts);
+  if(!lane) return lane;
+  const ch=S.channels[cid]; if(!ch) return lane;
+  if(ch.swing==null) ch.swing=clamp(+S.swing||0, 0, 0.6);
+  const head=lane.querySelector(".ptHead"); if(!head) return lane;
+  const row=document.createElement("div"); row.className="blSwingRow";
+  const lab=document.createElement("span"); lab.className="blSwingLab"; lab.textContent="Swing"; row.appendChild(lab);
+  const slider=document.createElement("input");
+  slider.type="range"; slider.min="0"; slider.max="60"; slider.step="1";
+  slider.value=String(Math.round(blSwingOf(ch)*100));
+  slider.title="Swing — "+ch.name+" only: this channel's odd 16ths delay by this % of a step. Wave clips are never swung, and no other channel is affected.";
+  const val=document.createElement("span"); val.className="blSwingVal mono";
+  val.textContent=Math.round(blSwingOf(ch)*100)+"%";
+  slider.addEventListener("pointerdown", e=>e.stopPropagation());
+  slider.addEventListener("click", e=>e.stopPropagation());
+  slider.addEventListener("dblclick", e=>e.stopPropagation());
+  slider.oninput=()=>{ ch.swing=+slider.value/100; val.textContent=slider.value+"%"; markDirty(); };
+  slider.onchange=()=>setStatus(ch.name+" swing: "+slider.value+"% — its odd 16ths sit "+slider.value+"% of a step late in playback, renders and .mid export. Every other channel keeps its own swing; wave clips never swing.");
+  row.appendChild(slider); row.appendChild(val);
+  head.appendChild(row);
+  return lane;
+};
+/* ---------------- Persistence + legacy migration ---------------- */
+const _blSwingPjPrev=projectJSON;
+projectJSON=function(){ const p=_blSwingPjPrev();
+  S.order.forEach(id=>{ const ch=S.channels[id], c=p.channels && p.channels[id];
+    if(ch && c) c.swing=blSwingOf(ch); });
+  return p; };
+const _blSwingLcpPrev=loadClipsFromProject;
+loadClipsFromProject=function(p){
+  _blSwingLcpPrev(p);
+  if(!p) return;
+  const srcs=p.channels||{};
+  const anyPer=Object.keys(srcs).some(id=>srcs[id] && srcs[id].swing!=null);
+  if(anyPer){
+    Object.keys(srcs).forEach(id=>{ const ch=S.channels[id];
+      if(ch && srcs[id] && srcs[id].swing!=null) ch.swing=clamp(+srcs[id].swing||0, 0, 0.6); });
+  } else if(typeof p.swing==="number" && isFinite(p.swing)){
+    const v=p.swing>1? p.swing/100 : p.swing, sv=clamp(v, 0, 0.6);
+    S.order.forEach(id=>{ const ch=S.channels[id]; if(ch) ch.swing=sv; });
+  }
+  S.order.forEach(id=>{ const ch=S.channels[id]; if(ch && ch.swing==null) ch.swing=0; });
+  if(typeof ptRender==="function") ptRender();
+};
+try{ ptRender(); }catch(e){}
+</script>
+<style>
+/* ---------- Items 12–13: truly blank start · single-channel Wave Editor panel gone ---------- */
+#waveEditorPanel{display:none!important}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   ITEM 12 · START BLANK = TRULY BLANK
+   The ＋ New → Start Blank flow (its modal now says so) finishes by
+   calling blTrulyBlank(): every channel object is dropped, every
+   live chain is disconnected, clips/atracks cleared, lane order
+   reset — S.order = [] and S.channels = {} — so the multitrack
+   editor shows just the chain lane, the Channel Rack is empty and
+   the Mixer renders only its MASTER strip. projectJSON serializes
+   from S.order, so a blank project saves/loads/autosaves as truly
+   blank — nothing re-seeds the starter kit (the kit is only built
+   by the page's first-load literal and by templates, never by the
+   load path). Templates are untouched and still install full kits.
+   selectChannel / syncFxPanel get zero-channel guards so the
+   blank state (and an undo/refresh restore of it) never throws on
+   a missing channel; Add Channel / Add Track / Duplicate all build
+   from zero through the existing blAddChannelOfType path.
+
+   ITEM 13 · SINGLE-CHANNEL WAVE EDITOR PANEL REMOVED
+   The old per-channel "Wave Editor — CHANNEL: …" panel (VIEW /
+   TRIM / Shift / Clip sound, wePlace "Place on layout", weDup,
+   weRecon, weDel) is removed from the page entirely — all wave
+   work happens in the multitrack editor, and the Sampler keeps
+   its own Stretch & Fit / pitch / root-note controls. The panel's
+   sync helpers become no-ops and selectClip keeps only its state
+   + lane-refresh job (no panel to scroll to), so every existing
+   caller — lane clicks, clip drags, drops, converts — keeps
+   working with zero errors. Sample loading and preview from the
+   Browser and Sampler never touched this panel and are unchanged.
+   ================================================================ */
+
+/* ---- Item 13: neutralize the panel's sync helpers, then remove it ---- */
+syncEditor=function(){};
+refreshTrimUI=function(){};
+fillWeChannels=function(){};
+selectClip=function(id){
+  const c=getClip(id); if(!c) return;
+  S.selClipId=id; edTarget={kind:"clip", id};
+  renderLayout();
+};
+(function blRemoveWaveEditorPanel(){
+  const p=$("waveEditorPanel"); if(p) p.remove();
+})();
+
+/* ---- Zero-channel guards (blank state + blank restores) ---- */
+const _blBlankSelPrev=selectChannel;
+selectChannel=function(id){
+  if(!S.channels[id]){
+    S.selected=S.order[0]||null;
+    document.querySelectorAll(".rackrow").forEach(r=>r.classList.remove("sel"));
+    return;
+  }
+  return _blBlankSelPrev(id);
+};
+const _blBlankSyncFxPrev=syncFxPanel;
+syncFxPanel=function(){ if(!sel()) return; return _blBlankSyncFxPrev(); };
+
+/* ---- Item 12: truly blank ---- */
+function blTrulyBlank(){
+  if(S.playing) setPlaying(false);
+  Object.keys(liveNodes).forEach(id=>{ const n=liveNodes[id];
+    try{ n.fader.disconnect(); }catch(e){}
+    try{ if(n.analyser) n.analyser.disconnect(); }catch(e){}
+    delete liveNodes[id]; });
+  S.channels={}; S.order=[]; S.selected=null; S.rollChannel=null;
+  S.clips=[]; S.aclips=[]; S.atracks=[]; S.selClipId=null; S.selAclipId=null;
+  edTarget={kind:"channel", id:null};
+  Object.keys(GM_MAP).forEach(k=>{ delete GM_MAP[k]; });
+  S.laneOrder=[]; S.laneSizes={};
+  buildRack(); buildMixer();
+  const rg=$("rollGrid"); if(rg) rg.innerHTML="";
+  const rn=$("rollName"); if(rn) rn.textContent="—";
+  const sn=$("sampName"); if(sn) sn.textContent="—";
+  if(typeof buildPatBtns==="function") buildPatBtns();
+  if(typeof renderPlaylist==="function") renderPlaylist();
+  if(typeof ptRender==="function") ptRender();
+  markDirty();
+  setStatus("Truly blank project — zero channels, zero tracks, MASTER only in the mixer. Build from zero: ＋ Add channel (Sample / Drum / 808 / Chop / Synth) or ＋ Add track in the editor.");
+}
+</script>
+
+
+
 </body>
 </html>
