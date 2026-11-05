@@ -56,7 +56,7 @@
 <body>
 <div class="wrap">
   <h1>MPC LOOPS</h1>
-  <div class="sub">Feed it any audio — a stem, a song, a one-shot. It finds the tempo and <b style="color:var(--gold)">the 1</b>, locks a loop of 1–8 bars that starts and stops exactly, and plays it back with no pops. Exports start exactly on the 1 and end exactly at the loop end — ready to zone on the MPC.</div>
+  <div class="sub">Feed it any audio — a stem, a song, a one-shot. It finds the tempo and <b style="color:var(--gold)">the 1</b>, locks a loop of any bar count that starts and stops exactly, and plays it back with no pops. Exports start exactly on the 1 and end exactly at the loop end — ready to zone on the MPC.</div>
 
   <div class="drop" id="drop">Tap to pick an audio file — or drop one here<br><b>MP3 · WAV · M4A · anything your browser plays</b></div>
   <input type="file" id="file" accept=".mp3,.wav,.m4a,.aac,.flac,.ogg,.oga,.aif,.aiff,.opus,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/aac,audio/flac,audio/ogg,audio/aiff,audio/opus" style="display:none">
@@ -126,7 +126,12 @@
       <span class="big len" id="startBarOut">1</span>
       <button id="barPlus">+</button>
     </div>
-    <label>Loop length</label>
+    <label for="barsIn">Loop length (bars) — tap a chip, step it, or type any count</label>
+    <div class="btns" style="align-items:center">
+      <button id="lenMinus">−</button>
+      <input id="barsIn" type="number" inputmode="numeric" min="1" step="1" value="4" style="width:88px; text-align:center">
+      <button id="lenPlus">+</button>
+    </div>
     <div class="btns" id="lenBtns"></div>
   </div>
   <div class="stat" id="loopStat">Lock a loop to see its exact length.</div>
@@ -538,6 +543,7 @@ function refreshStats(){
       (state.key ? " · key <b>" + keyName(state.key.best) + "</b>" : "");
     $("startBarOut").textContent = state.startBar;
   }
+  syncLenUI();
   drawWave();
 }
 
@@ -970,8 +976,22 @@ $("toStart").addEventListener("click", function(){
 $("playFull").addEventListener("click", playFull);
 $("stopBtn").addEventListener("click", function(){ stopPlayback(); drawWave(); });
 function snapOn(){ return $("snapGrid").checked; }
-function syncLenButtons(){
-  Array.prototype.forEach.call($("lenBtns").children, function(x, i){ x.classList.toggle("on", i + 1 === state.bars); });
+function syncLenUI(){
+  Array.prototype.forEach.call($("lenBtns").children, function(x){
+    x.classList.toggle("on", parseInt(x.getAttribute("data-b"), 10) === state.bars);
+  });
+  var inp = $("barsIn");
+  if (inp && document.activeElement !== inp) inp.value = state.bars;
+}
+// One setter behind every loop-length control (chips, steppers, typed
+// entry): resizes a dragged region exactly like the old 1–8 buttons did,
+// and keeps the export filename's bar count honest at any length.
+function setBars(n){
+  n = Math.round(n);
+  if (!(n >= 1)) return;
+  state.bars = Math.min(n, 999);
+  if (state.outSec != null && bpm()) state.outSec = regionStartSec() + state.bars * barLenSec(bpm(), bpb());
+  syncLenUI(); refreshStats(); scheduleKey();
 }
 // The gold In/Out bars on the wave set these (drag), with the snap rules applied.
 function setInSec(v){
@@ -990,7 +1010,7 @@ function setOutSec(v){
     var bar = barLenSec(b, bpb());
     var nb = Math.max(1, Math.round((v - start) / bar));
     v = start + nb * bar;
-    if (nb !== state.bars && nb >= 1 && nb <= 8){ state.bars = nb; syncLenButtons(); }
+    if (nb !== state.bars && nb >= 1){ state.bars = nb; syncLenUI(); }
   }
   v = clamp(v, start + 0.05, state.buf.duration);
   state.outSec = v;
@@ -1026,19 +1046,18 @@ function jumpToBar(){
 $("barMinus").addEventListener("click", function(){ state.startBar = Math.max(1, state.startBar - 1); jumpToBar(); });
 $("barPlus").addEventListener("click", function(){ state.startBar += 1; jumpToBar(); });
 var lenWrap = $("lenBtns");
-for (var L = 1; L <= 8; L++){
-  (function(L){
-    var btn = document.createElement("button"); btn.textContent = L + (L === 1 ? " bar" : " bars");
-    if (L === 4) btn.classList.add("on");
-    btn.addEventListener("click", function(){
-      state.bars = L;
-      if (state.outSec != null && bpm()) state.outSec = regionStartSec() + L * barLenSec(bpm(), bpb());
-      Array.prototype.forEach.call(lenWrap.children, function(x){ x.classList.remove("on"); });
-      btn.classList.add("on"); refreshStats(); scheduleKey();
-    });
-    lenWrap.appendChild(btn);
-  })(L);
-}
+[1, 2, 4, 8, 16, 24, 32].forEach(function(L){
+  var btn = document.createElement("button"); btn.textContent = L; btn.setAttribute("data-b", L);
+  if (L === 4) btn.classList.add("on");
+  btn.addEventListener("click", function(){ setBars(L); });
+  lenWrap.appendChild(btn);
+});
+$("lenMinus").addEventListener("click", function(){ setBars(state.bars - 1); });
+$("lenPlus").addEventListener("click", function(){ setBars(state.bars + 1); });
+$("barsIn").addEventListener("change", function(){
+  var v = parseInt($("barsIn").value, 10);
+  if (v >= 1) setBars(v); else $("barsIn").value = state.bars;
+});
 $("sliceCountBtn").addEventListener("click", function(){
   state.slices = state.slices === 16 ? 4 : state.slices === 4 ? 8 : 16;
   $("sliceCountBtn").textContent = "Slices: " + state.slices;
