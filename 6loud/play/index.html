@@ -47,7 +47,7 @@
 <div id="ui">
   <div id="hud">
     <div class="hudbox" id="score"><small>SCORE</small>0</div>
-    <div class="hudbox" id="dist"><small>DISTANCE</small>0m</div>
+    <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
   <div id="flash"></div>
   <div id="center">
@@ -66,7 +66,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.7.1 ==============================
+/* ============================== 6LOUD demo v0.7.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -731,7 +731,7 @@ function gameOver() {
   mode = 'over'; dead = true;
   const best = JSON.parse(localStorage.getItem('sixloud_scores') || '[]');
   const qualifies = best.length < 5 || score > best[best.length - 1].s;
-  $('overStats').textContent = 'SCORE ' + score + '  ·  ' + Math.floor(dist / 50) + 'm  ·  ' + jumps + ' JUMPS';
+  $('overStats').textContent = 'SCORE ' + score + '  ·  ' + Math.floor(dist / 15.24) + 'ft  ·  ' + jumps + ' JUMPS';
   $('board').innerHTML = best.map(b => b.n + ' — ' + b.s).join('<br>') || 'NO SCORES YET';
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('over').style.display = 'flex';
@@ -867,7 +867,7 @@ function update(dt) {
   shake = Math.max(0, shake - dt * 26);
   if (flashT > 0) { flashT -= dt; $('flash').style.opacity = Math.min(1, flashT); }
   $('score').innerHTML = '<small>SCORE</small>' + score;
-  $('dist').innerHTML = '<small>DISTANCE</small>' + Math.floor(dist / 50) + 'm';
+  $('dist').innerHTML = '<small>DISTANCE</small>' + Math.floor(dist / 15.24) + 'ft';
   if (py - camY > viewH / zoom + 260) gameOver();
 }
 
