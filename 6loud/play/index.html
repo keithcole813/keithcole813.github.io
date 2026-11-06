@@ -69,9 +69,8 @@
   </div>
   <div id="center">
     <div id="tap">TAP TO START</div>
-    <div id="best"></div>
   </div>
-  <div id="ver">v0.19.3</div>
+  <div id="ver">v0.20</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.19.3 ==============================
+/* ============================== 6LOUD demo v0.20 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1360,8 +1359,9 @@ function loop(ts) {
   requestAnimationFrame(loop);
 }
 resize();
-const best0 = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + Number(best0[0].s).toLocaleString('en-US') + ' FT';
+/* the title's BEST line was removed (Keith v0.20: "remove the txt at
+   the front that says who has the high score") — the boards still live
+   on the wipeout screen; the front stays clean. */
 fetchBoard();
 requestAnimationFrame(loop);
 </script>
