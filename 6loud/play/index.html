@@ -71,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.16.1</div>
+  <div id="ver">v0.17</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.16.1 ==============================
+/* ============================== 6LOUD demo v0.17 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -650,35 +650,39 @@ pumpQ();
 const CHAR_H = 256;              // 6lade standing height in world units — 20% smaller (Keith 2026-11-06: see more clouds above + below)
 const PX2U = CHAR_H / 400;          // the renders' canon: figure is 400 px tall
 const GRAV = 5200;               // units / s^2
-const BAND_Y = [0, -170, -340, -510, -680, -850];  // six cloud levels (Keith 2026-11-06: 3 higher, jump up/down, lower clouds save you)
+const BAND_Y = [340, 170, 0, -170, -340, -510];  // Keith v0.17: 5 levels around the start line — 2 DOWN (idx 0,1), START (idx 2), 3 UP (idx 3,4,5); the course should travel up AND down as it goes across, not just climb
 const GAP = { TAP: 250, HOLD: 430, FULL: 590 };
 const LEN = { LONG: 880, MED: 520, SHORT: 330, NEEDLE: 185 };
 
 /* ---------- segment database (SEGMENTS.md, Keith-approved structure) ----------
-   steps: [gapClass|null for first, lenClass, bandAfter] — band is absolute 0/1/2 */
+   steps: [gapClass|null for first, lenClass, bandAfter] — band = absolute index into BAND_Y; 2 is the start line */
 const SEGMENTS = [
-  {n:'Flat Cruise',  t:1, e:0, steps:[[null,'LONG',0],['TAP','LONG',0],['TAP','MED',0]]},
-  {n:'Step Up',      t:1, e:2, steps:[[null,'MED',0],['TAP','MED',1],['TAP','MED',2],['TAP','LONG',2]]},
-  {n:'Step Down',    t:1, e:0, steps:[[null,'MED',2],['TAP','MED',1],['TAP','LONG',0]]},
-  {n:'Hopscotch',    t:1, e:1, steps:[[null,'SHORT',1],['TAP','SHORT',1],['TAP','SHORT',1],['TAP','MED',1]]},
-  {n:'Long Bridge',  t:1, e:0, steps:[[null,'LONG',0],['TAP','LONG',0]]},
-  {n:'Double Gap',   t:2, e:1, steps:[[null,'MED',1],['HOLD','SHORT',1],['HOLD','MED',1]]},
-  {n:'High Shelf',   t:2, e:1, steps:[[null,'MED',1],['HOLD','LONG',2],['TAP','MED',1]]},
-  {n:'Staircase',    t:2, e:0, steps:[[null,'SHORT',0],['HOLD','SHORT',1],['HOLD','SHORT',2],['HOLD','SHORT',1],['TAP','MED',0]]},
-  {n:'Island Hop',   t:2, e:2, steps:[[null,'MED',1],['HOLD','MED',2],['HOLD','MED',1],['HOLD','MED',2]]},
-  {n:'Tree Top',     t:2, e:1, steps:[[null,'MED',1],['HOLD','ISLE',1],['HOLD','MED',1]]},
-  {n:'Mountain Pass',t:2, e:1, steps:[[null,'MED',1],['HOLD','ISLE',1],['TAP','LONG',1]]},
-  {n:'Wide Void',    t:3, e:0, steps:[[null,'LONG',0],['FULL','LONG',0]]},
-  {n:'Rapid Steps',  t:3, e:1, steps:[[null,'SHORT',1],['TAP','SHORT',2],['TAP','SHORT',1],['TAP','SHORT',2],['TAP','MED',1]]},
-  {n:'Cloud Ladder', t:3, e:0, steps:[[null,'SHORT',0],['HOLD','SHORT',1],['HOLD','SHORT',2],['FULL','LONG',0]]},
-  {n:'Needle Island',t:3, e:1, steps:[[null,'MED',1],['FULL','NEEDLE',1],['FULL','MED',1]]},
-  {n:'Peak to Peak', t:3, e:2, steps:[[null,'ISLE',2],['FULL','ISLE',2],['HOLD','MED',1]]},
-  {n:'Final Float',  t:3, e:1, steps:[[null,'LONG',1],['HOLD','SHORT',2],['FULL','SHORT',1],['HOLD','MED',2],['FULL','LONG',1]]},
-  {n:'Sky Stairs',   t:2, e:2, steps:[[null,'MED',2],['TAP','MED',3],['TAP','MED',4],['TAP','MED',3],['TAP','LONG',2]]},
-  {n:'Cloud Nine',   t:3, e:2, steps:[[null,'LONG',2],['HOLD','MED',3],['TAP','SHORT',4],['TAP','SHORT',5],['TAP','SHORT',4],['HOLD','MED',3],['TAP','LONG',2]]},
-  {n:'Summit Run',   t:3, e:2, steps:[[null,'MED',2],['HOLD','MED',3],['HOLD','LONG',4],['TAP','LONG',5],['TAP','LONG',4],['TAP','MED',3],['TAP','MED',2]]},
-  {n:'High Dive',    t:2, e:2, steps:[[null,'MED',2],['TAP','SHORT',3],['TAP','SHORT',4],['FULL','LONG',2],['TAP','LONG',2]]},
-  {n:'Stratosphere', t:3, e:2, steps:[[null,'SHORT',2],['HOLD','SHORT',3],['HOLD','MED',4],['HOLD','MED',5],['TAP','MED',4],['TAP','MED',3],['HOLD','LONG',2]]}
+  {n:'Flat Cruise',  t:1, e:2, steps:[[null,'LONG',2],['TAP','LONG',2],['TAP','MED',2]]},
+  {n:'Step Up',      t:1, e:4, steps:[[null,'MED',2],['TAP','MED',3],['TAP','MED',4],['TAP','LONG',4]]},
+  {n:'Step Down',    t:1, e:2, steps:[[null,'MED',4],['TAP','MED',3],['TAP','LONG',2]]},
+  {n:'The Dip',      t:1, e:2, steps:[[null,'MED',2],['TAP','MED',1],['TAP','LONG',1],['TAP','MED',2]]},
+  {n:'Hopscotch',    t:1, e:3, steps:[[null,'SHORT',3],['TAP','SHORT',3],['TAP','SHORT',3],['TAP','MED',3]]},
+  {n:'Long Bridge',  t:1, e:2, steps:[[null,'LONG',2],['TAP','LONG',2]]},
+  {n:'Double Gap',   t:2, e:3, steps:[[null,'MED',3],['HOLD','SHORT',3],['HOLD','MED',3]]},
+  {n:'High Shelf',   t:2, e:3, steps:[[null,'MED',3],['HOLD','LONG',4],['TAP','MED',3]]},
+  {n:'Staircase',    t:2, e:2, steps:[[null,'SHORT',2],['HOLD','SHORT',3],['HOLD','SHORT',4],['HOLD','SHORT',3],['TAP','MED',2]]},
+  {n:'Island Hop',   t:2, e:4, steps:[[null,'MED',3],['HOLD','MED',4],['HOLD','MED',3],['HOLD','MED',4]]},
+  {n:'Tree Top',     t:2, e:3, steps:[[null,'MED',3],['HOLD','ISLE',3],['HOLD','MED',3]]},
+  {n:'Mountain Pass',t:2, e:3, steps:[[null,'MED',3],['HOLD','ISLE',3],['TAP','LONG',3]]},
+  {n:'Low Road',     t:2, e:2, steps:[[null,'LONG',1],['TAP','LONG',0],['HOLD','MED',0],['TAP','MED',1],['TAP','LONG',2]]},
+  {n:'Valley Run',   t:2, e:2, steps:[[null,'MED',2],['TAP','SHORT',1],['TAP','SHORT',2],['TAP','SHORT',1],['TAP','SHORT',0],['HOLD','MED',1],['TAP','MED',2]]},
+  {n:'Sky Stairs',   t:2, e:3, steps:[[null,'MED',4],['TAP','MED',5],['TAP','MED',4],['TAP','LONG',3]]},
+  {n:'High Dive',    t:2, e:2, steps:[[null,'MED',4],['TAP','SHORT',5],['FULL','LONG',2],['TAP','LONG',2]]},
+  {n:'Wide Void',    t:3, e:2, steps:[[null,'LONG',2],['FULL','LONG',2]]},
+  {n:'Rapid Steps',  t:3, e:3, steps:[[null,'SHORT',3],['TAP','SHORT',4],['TAP','SHORT',3],['TAP','SHORT',4],['TAP','MED',3]]},
+  {n:'Cloud Ladder', t:3, e:2, steps:[[null,'SHORT',2],['HOLD','SHORT',3],['HOLD','SHORT',4],['FULL','LONG',2]]},
+  {n:'Needle Island',t:3, e:3, steps:[[null,'MED',3],['FULL','NEEDLE',3],['FULL','MED',3]]},
+  {n:'Peak to Peak', t:3, e:4, steps:[[null,'ISLE',4],['FULL','ISLE',4],['HOLD','MED',3]]},
+  {n:'Final Float',  t:3, e:3, steps:[[null,'LONG',3],['HOLD','SHORT',4],['FULL','SHORT',3],['HOLD','MED',4],['FULL','LONG',3]]},
+  {n:'Cloud Nine',   t:3, e:2, steps:[[null,'LONG',4],['HOLD','MED',5],['TAP','SHORT',5],['TAP','SHORT',4],['HOLD','MED',3],['TAP','LONG',2]]},
+  {n:'Summit Run',   t:3, e:2, steps:[[null,'MED',4],['HOLD','MED',5],['HOLD','LONG',5],['TAP','LONG',4],['TAP','MED',3],['TAP','MED',2]]},
+  {n:'Stratosphere', t:3, e:2, steps:[[null,'SHORT',4],['HOLD','SHORT',5],['HOLD','MED',5],['TAP','MED',4],['TAP','MED',3],['HOLD','LONG',2]]},
+  {n:'The Basement', t:3, e:2, steps:[[null,'MED',1],['FULL','NEEDLE',0],['HOLD','ISLE',0],['HOLD','MED',1],['FULL','LONG',2]]}
 ];
 
 /* ---------- state ---------- */
@@ -753,6 +757,11 @@ function skyAt(ph) {
 let dressFar = [], dressMid = [];
 for (let i = 0; i < 6; i++) dressFar.push({ img: BGFAR[(i * 2 + 1) % BGFAR.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1750, w: 640 + Math.random() * 360 });
 for (let i = 0; i < 8; i++) dressMid.push({ img: BGMID[(i * 2) % BGMID.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1900, w: 340 + Math.random() * 280 });
+/* the depths below (Keith v0.17): when he rises above the clouds, the
+   lower view shouldn't empty out — a far-below cloud layer fades in
+   with altitude and fills the bottom of the frame */
+let dressLow = [];
+for (let i = 0; i < 7; i++) dressLow.push({ img: BGMID[(i * 3 + 2) % BGMID.length], x: Math.random() * 3000, fy: 0.52 + (i % 4) * 0.11 + Math.random() * 0.05, w: 400 + Math.random() * 260 });
 
 /* ---------- helpers ---------- */
 let puffAcc = 0, rollPuffT = 0, flipPuffT = 0;
@@ -796,8 +805,8 @@ function nextSegment() {
   lastSeg = o.i; buildSegment(o.s);
 }
 function resetWorld() {
-  plats = []; worldEnd = 0; exitBand = 0; lastSeg = -1; lastTier = 1;
-  addPlat(-300, 0, 'LONG'); worldEnd = -300 + LEN.LONG;
+  plats = []; worldEnd = 0; exitBand = 2; lastSeg = -1; lastTier = 1;
+  addPlat(-300, 2, 'LONG'); worldEnd = -300 + LEN.LONG;
   buildSegment(SEGMENTS[0]); nextSegment(); nextSegment();
 }
 
@@ -817,7 +826,7 @@ const FEET = 16;            // his feet sit this deep in the cloud tops
 /* ---------- game flow ---------- */
 function startRun() {
   resetWorld();
-  px = 60; py = BAND_Y[0]; vy = 0; grounded = plats[0];
+  px = 60; py = BAND_Y[2]; vy = 0; grounded = plats[0];
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
   airMove = null; dead = false; hangPlat = null; held = false; pressT = 0; lastHold = 0;
   flipped = false; flipMove = null; landMove = null; landT = 0; puffs = [];
@@ -1159,6 +1168,19 @@ function draw() {
     const dy = d.y - camY * 0.38 + viewH / zoom * 0.55;
     ctx.save(); ctx.globalAlpha = 0.74 * nightDim;
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+  }
+  /* the depths below: fade in with climb, out at ground level */
+  {
+    const climbL = Math.max(0, -camY - viewH / zoom * 0.42);
+    const lowA = Math.max(0, Math.min(1, (climbL - 60) / 500));
+    if (lowA > 0.01) for (const d of dressLow) {
+      const img = BGIMG['m' + d.img];
+      if (!img || !img.naturalWidth) continue;
+      let dx = (d.x - camX * 0.30) % (viewW / zoom + 760); if (dx < -760) dx += viewW / zoom + 760;
+      const dy = viewH / zoom * d.fy - camY * 0.05;
+      ctx.save(); ctx.globalAlpha = 0.58 * lowA * nightDim;
+      ctx.drawImage(img, dx - 380, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+    }
   }
   /* the cloud sea far below — the mockup's signature: big sunset clouds
      banked along the bottom of the sky, half-parallax scroll */
