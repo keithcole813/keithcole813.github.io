@@ -71,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.19</div>
+  <div id="ver">v0.19.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.19 ==============================
+/* ============================== 6LOUD demo v0.19.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -747,7 +747,7 @@ const SKY_PERIOD = 75; // OLD driver (retired): a 75-second wall clock that ran 
    advances only while he runs; one full day = CYCLE_FEET of travel.
    Slower by a tad, and the sky he gets is the sky he ran for. */
 let skyPh = 0;
-const CYCLE_FEET = 2400;
+const CYCLE_FEET = 2000;   // Keith's number: one full 24h per 2,000 ft
 let stars = [];
 for (let i = 0; i < 130; i++) stars.push({ x: Math.random(), y: Math.random() * 0.62, r: Math.random() * 1.7 + 0.5, tw: Math.random() * 6.28 });
 let stars2 = [];   /* the deep-night layer (Keith v0.19): fainter, smaller, only out when night is TRUE */
