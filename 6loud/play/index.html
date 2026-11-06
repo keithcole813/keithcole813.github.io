@@ -71,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.17</div>
+  <div id="ver">v0.17.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.17 ==============================
+/* ============================== 6LOUD demo v0.17.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -119,42 +119,48 @@ if (window.fetch) {
   fetch('assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
   fetch('assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
 }
-async function ensureAudio() {
+/* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
+   still doesn't play until I die"). v0.13.4's flaw: it trusted the
+   WebAudio context once buffers decoded — but on his iPhone the context
+   sits inaudible through the whole first run while the code actively
+   PAUSES the plain <audio> element, the one path that demonstrably
+   works from the first tap. New rule: the element leads. WebAudio is
+   used ONLY when the context reports state 'running' — proven alive —
+   and every boundary (run start, crown moment) re-picks the route.
+   kickDecode is non-blocking, decodes both tracks in parallel, and is
+   also poked from press() so every jump tap gives the context another
+   gesture to unlock with. */
+let decD = null, decB = null;
+function kickDecode() {
   const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return false;
-  if (!actx) { try { actx = new AC(); } catch (e) { return false; } }
-  if (actx.state === 'suspended') { try { await actx.resume(); } catch (e) {} }
-  if (!bufD && rawD) { try { bufD = await actx.decodeAudioData(rawD.slice(0)); } catch (e) {} }
-  if (!bufB && rawB) { try { bufB = await actx.decodeAudioData(rawB.slice(0)); } catch (e) {} }
-  return !!bufD;
+  if (!AC) return;
+  if (!actx) { try { actx = new AC(); } catch (e) { return; } }
+  if (actx.state === 'suspended') { const p = actx.resume(); if (p && p.catch) p.catch(() => {}); }
+  if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => {});
+  if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => {});
 }
-function startTracks() {
-  if (!actx || !bufD) {
-    /* fallback: ONE element at a time (iOS-safe) — its src is the mode's track */
-    const want = champMode ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
-    if (!(music.src || '').includes(want)) music.src = want;
-    music.currentTime = 0; music.play().catch(() => {}); return;
-  }
-  if (!srcD) {
-    gainD = actx.createGain(); gainD.connect(actx.destination);
-    srcD = actx.createBufferSource(); srcD.buffer = bufD; srcD.loop = true; srcD.connect(gainD); srcD.start();
-    if (bufB) {
-      gainB = actx.createGain(); gainB.connect(actx.destination);
-      srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
+function playTrack() {
+  const want = champMode ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
+  if (actx && bufD && actx.state === 'running') {
+    if (!srcD) {
+      gainD = actx.createGain(); gainD.connect(actx.destination);
+      srcD = actx.createBufferSource(); srcD.buffer = bufD; srcD.loop = true; srcD.connect(gainD); srcD.start();
+      if (bufB) {
+        gainB = actx.createGain(); gainB.connect(actx.destination);
+        srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
+      }
     }
+    const t = actx.currentTime;
+    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(champMode ? 0 : 1, t, 0.18);
+    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(champMode ? 1 : 0, t, 0.18); }
     music.pause();
+  } else {
+    if (gainD) { try { gainD.gain.value = 0; if (gainB) gainB.gain.value = 0; } catch (e) {} }
+    if (!(music.src || '').includes(want)) music.src = want;
+    music.currentTime = 0; const p = music.play(); if (p && p.catch) p.catch(() => {});
   }
-  /* the sources never stop once created — runs come and go under them;
-     a new run just sets which fader is up */
-  gainD.gain.value = champMode ? 0 : 1;
-  if (gainB) gainB.gain.value = champMode ? 1 : 0;
 }
-function xfade(toHeat) {
-  if (!actx || !gainD || !gainB) return;
-  const t = actx.currentTime;
-  gainD.gain.setTargetAtTime(toHeat ? 0 : 1, t, 0.18);
-  gainB.gain.setTargetAtTime(toHeat ? 1 : 0, t, 0.18);
-}
+function xfade(toHeat) { playTrack(); }
 
 /* ---------- assets ---------- */
 const IMG = {};
@@ -841,10 +847,7 @@ function startRun() {
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = [];
-  if (window.AudioContext || window.webkitAudioContext) {
-    if (bufD) startTracks();   /* decoded already (later runs): instant */
-    ensureAudio().then(() => { if (mode === 'run') startTracks(); });
-  } else startTracks();
+  playTrack(); kickDecode();
 }
 const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
@@ -901,7 +904,7 @@ function gameOver() {
 }
 
 /* ---------- input: ONE button ---------- */
-function press() {
+function press() { kickDecode();
   if (mode === 'title') { if (loadState === 'done') startRun(); return; }
   if (mode !== 'run' || dead) return;
   /* no freeze, no launch: he keeps running while the button is down */
