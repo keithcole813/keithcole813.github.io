@@ -66,9 +66,10 @@
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
+<audio id="steps" src="assets/sfx/steps.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.4 ==============================
+/* ============================== 6LOUD demo v0.8.5 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -762,8 +763,17 @@ function renderBoard() {
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
     (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST');
 }
-/* ALL SFX REMOVED at Keith's order 2026-11-06: the v0.8 sound additions
-   (grunts, then the footstep loop) choked playback on his phone. Music only. */
+/* Footsteps are BACK (Keith 2026-11-06, after the glow-puff build ran
+   smooth): a ~5s loop, louder than the first try (he couldn't hear them),
+   and they STOP every time he launches — airborne = silent. */
+const stepsEl = $('steps');
+stepsEl.volume = 0.55;
+function stepsTick() {
+  const want = mode === 'title' || (mode === 'run' && !!grounded && !dead);
+  if (want && stepsEl.paused) stepsEl.play().catch(() => {});
+  else if (!want && !stepsEl.paused) stepsEl.pause();
+  if (mode === 'run') stepsEl.playbackRate = 1 + Math.min(0.18, Math.max(0, (speed - 620) / 530) * 0.18);
+}
 function gameOver() {
   mode = 'over'; dead = true;
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
@@ -897,7 +907,7 @@ function update(dt) {
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
   if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
-  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 150) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 8 + Math.random() * 6); } }   // foot fog — sparser
+  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 48) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 8 + Math.random() * 6); } }   // foot fog — puffs on his feet the entire run (Keith)
   if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.07; spawnPuff(px - 8, py + 12, 9 + Math.random() * 6); } }   // roll-landing trail — sparser
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
@@ -1061,7 +1071,7 @@ let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
-  update(dt); draw();
+  update(dt); draw(); stepsTick();
   requestAnimationFrame(loop);
 }
 resize();
