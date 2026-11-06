@@ -64,10 +64,9 @@
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
-<audio id="music2" src="assets/battle1000.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.11 ==============================
+/* ============================== 6LOUD demo v0.12 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -78,9 +77,45 @@
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
 const music = $('music');
-const music2 = $('music2');   /* the 1000 FT battle loop (Keith 2026-11-06) */
-let heatMix = 0, heatTarget = 0, heatOn = false;
-music2.load && music2.load();   /* fetch + decode it at the title, long before it's needed */
+/* Music engine (v0.12) — WebAudio gains, because iOS Safari IGNORES the
+   volume property on <audio> elements (media volume is locked to the
+   hardware buttons): v0.11's "silenced second element" played BOTH loops
+   out loud on Keith's iPhone. GainNodes are the level control iOS obeys.
+   Both loops decode to buffers up front; the 1000 FT switch crossfades
+   two already-running buffer sources — no element ever starts, stops or
+   changes volume at the trigger. The <audio> element remains only as a
+   no-WebAudio fallback (daylight track, no heat switch). */
+let actx = null, bufD = null, bufB = null, srcD = null, srcB = null, gainD = null, gainB = null, heatOn = false;
+try {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (AC) {
+    actx = new AC();
+    const loadBuf = (url, set) => fetch(url).then(r => r.arrayBuffer()).then(b => actx.decodeAudioData(b)).then(set).catch(() => {});
+    loadBuf('assets/daylight.mp3', b => { bufD = b; });
+    loadBuf('assets/battle1000.mp3', b => { bufB = b; });
+  }
+} catch (e) { actx = null; }
+function stopTracks() {
+  [srcD, srcB].forEach(x => { if (x) { try { x.stop(); } catch (e) {} } });
+  srcD = srcB = null;
+}
+function startTracks() {
+  if (!actx || !bufD) { music.currentTime = 0; music.play().catch(() => {}); return; }
+  stopTracks();
+  gainD = actx.createGain(); gainD.gain.value = 1; gainD.connect(actx.destination);
+  srcD = actx.createBufferSource(); srcD.buffer = bufD; srcD.loop = true; srcD.connect(gainD); srcD.start();
+  if (bufB) {
+    gainB = actx.createGain(); gainB.gain.value = 0; gainB.connect(actx.destination);
+    srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
+  }
+  music.pause();
+}
+function xfade(toHeat) {
+  if (!actx || !gainD || !gainB) return;
+  const t = actx.currentTime;
+  gainD.gain.setTargetAtTime(toHeat ? 0 : 1, t, 0.18);
+  gainB.gain.setTargetAtTime(toHeat ? 1 : 0, t, 0.18);
+}
 
 /* ---------- assets ---------- */
 const IMG = {};
@@ -747,13 +782,9 @@ function startRun() {
   camX = px - viewW * PLAYER_XF; camY = -560; zoom = 1; shake = 0;
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none';
-  music.currentTime = 0; music.play().catch(() => {});
-  /* both tracks run from the tap — the battle loop plays SILENCED — so
-     the 1000 FT switch later is a pure volume crossfade: nothing loads,
-     nothing decodes, nothing starts at the trigger (no hitch). */
-  heatOn = false; heatTarget = 0; heatMix = 0;
-  music.volume = 1; music2.currentTime = 0; music2.volume = 0;
-  music2.play().catch(() => {});
+  heatOn = false;
+  if (actx && actx.state === 'suspended') actx.resume();
+  startTracks();
 }
 const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
@@ -784,7 +815,7 @@ function renderBoard() {
    ran smooth, every steps build chopped. Music only. */
 function gameOver() {
   mode = 'over'; dead = true;
-  heatTarget = 0;   /* the wipeout screen settles back to the daylight loop */
+  if (heatOn) { heatOn = false; xfade(false); }   /* wipeout settles back to the daylight loop */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
   const myFt = Math.floor(dist / 15.24);   /* the record is FEET (Keith) */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
@@ -851,12 +882,9 @@ function update(dt) {
   runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
   dist += speed * dt;
-  /* 1000 FT: crossfade to the battle loop (Keith). Volumes only. */
-  if (!heatOn && dist >= 15240) { heatOn = true; heatTarget = 1; }
-  if (heatMix !== heatTarget) {
-    heatMix = Math.max(0, Math.min(1, heatMix + (heatTarget > heatMix ? dt / 0.6 : -dt / 0.6)));
-    music.volume = 1 - heatMix; music2.volume = heatMix;
-  }
+  /* 1000 FT: crossfade to the battle loop (Keith) — gain ramps only,
+     both sources have been running since the start of the run. */
+  if (!heatOn && dist >= 15240) { heatOn = true; xfade(true); }
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
