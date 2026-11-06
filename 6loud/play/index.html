@@ -57,7 +57,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.5 ==============================
+/* ============================== 6LOUD demo v0.6 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -497,16 +497,35 @@ const MANIFEST = {
   ]
  }
 };
-const ANIM = {}; let animLoaded = 0, animTotal = 0;
-for (const mv of Object.keys(MANIFEST)) {
-  ANIM[mv] = [];
-  for (let i = 0; i < MANIFEST[mv].n; i++) {
-    animTotal++;
-    const im = new Image();
-    im.onload = im.onerror = () => { animLoaded++; };
-    im.src = 'assets/anim/' + mv + '/f' + String(i).padStart(3, '0') + '.webp';
-    ANIM[mv].push(im);
+/* ---------- asset loader: small batches, timeouts, retries ----------
+   Firing 360 requests at once at a home server over a tunnel leaves most
+   of them hanging forever — that was Keith's stuck-at-15% screen with no
+   images (2026-11-06). Six in flight, 6 s timeout, 2 retries: the queue
+   always drains. Core sets load first and open the start gate; the trick
+   sets stream in behind them. */
+const ANIM = {}; let animLoaded = 0, animTotal = 0, coreLoaded = 0, coreTotal = 0;
+const CORE_MOVES = ['run', 'basic', 'armsopen', 'diveroll'];
+const loadQ = []; let inFlight = 0;
+function queueImg(store, src, core) { animTotal++; if (core) coreTotal++; loadQ.push({ store, src, core, tries: 0 }); }
+function pumpQ() {
+  while (inFlight < 6 && loadQ.length) {
+    const job = loadQ.shift(); inFlight++;
+    const im = new Image(); job.store(im);
+    let settled = false;
+    const done = ok => { if (settled) return; settled = true; clearTimeout(job._to); inFlight--;
+      if (ok) { animLoaded++; if (job.core) coreLoaded++; }
+      else if (job.tries < 2) { job.tries++; loadQ.push(job); }
+      else { animLoaded++; if (job.core) coreLoaded++; }   // gave up: count it, never stall the gate
+      pumpQ(); };
+    job._to = setTimeout(() => { try { im.src = ''; } catch (e) {} done(false); }, 6000);
+    im.onload = () => done(true); im.onerror = () => done(false);
+    im.src = job.src;
   }
+}
+for (const mv of Object.keys(MANIFEST)) {
+  ANIM[mv] = new Array(MANIFEST[mv].n);
+  for (let i = 0; i < MANIFEST[mv].n; i++)
+    queueImg(im => { ANIM[mv][i] = im; }, 'assets/anim/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* cloud platform art: measured surface line (fraction of drawn height) + aspect */
 const CLOUDS = {
@@ -516,7 +535,8 @@ const CLOUDS = {
   '23':{surf:0.113, asp:0.440} };
 const LONGC = ['01','11','14','16','17','24'], ISLAND = ['02','12','18','23'];
 const WISPY = ['06','13','19','22'];
-Object.keys(CLOUDS).concat(WISPY).forEach(n => loadImg('cloud'+n, 'assets/cloud-' + n + '.png'));
+Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n] = im; }, 'assets/cloud-' + n + '.webp', true));
+pumpQ();
 
 /* ---------- world constants (measured) ---------- */
 const CHAR_H = 320;              // 6lade standing height in world units
@@ -680,7 +700,7 @@ function gameOver() {
 
 /* ---------- input: ONE button ---------- */
 function press() {
-  if (mode === 'title') { if (animLoaded >= animTotal) startRun(); return; }
+  if (mode === 'title') { if (coreLoaded >= coreTotal) startRun(); return; }
   if (mode !== 'run' || dead) return;
   /* no freeze, no launch: he keeps running while the button is down */
   held = true; pressT = 0;
@@ -926,7 +946,7 @@ addEventListener('resize', resize);
 let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
-  if (mode === 'title') $('tap').textContent = animLoaded >= animTotal ? 'TAP TO START' : 'LOADING ' + Math.floor(animLoaded / Math.max(1, animTotal) * 100) + '%';
+  if (mode === 'title') $('tap').textContent = coreLoaded >= coreTotal ? 'TAP TO START' : 'LOADING ' + Math.floor(animLoaded / Math.max(1, animTotal) * 100) + '%';
   update(dt); draw();
   requestAnimationFrame(loop);
 }
@@ -936,5 +956,5 @@ if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + be
 requestAnimationFrame(loop);
 </script>
 </body>
-<!-- v0.5 build -->
+<!-- v0.6 build -->
 </html>
