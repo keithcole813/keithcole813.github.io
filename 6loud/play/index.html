@@ -68,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.8 ==============================
+/* ============================== 6LOUD demo v0.8.9 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -673,7 +673,7 @@ const puffImg = (() => { const c = document.createElement('canvas'); c.width = c
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.6, 'rgba(255,255,255,0.38)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
-function spawnPuff(x, y, r) { if (puffs.length < 36)   /* fewer puffs + glow (Keith 2026-11-06) */ puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
+function spawnPuff(x, y, r) { if (puffs.length < 48)   /* some puffs back (Keith 2026-11-06) — still under the choking levels */ puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 function flash(txt) { flashTxt = txt; flashT = 1.6; $('flash').textContent = txt; }
 
@@ -817,7 +817,7 @@ function release() {
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
   /* white puffs kick off the cloud at takeoff */
-  for (let k = 0; k < 6; k++) spawnPuff(px - 25 + k * 10, py + 12, 9 + Math.random() * 8);   // takeoff burst — fewer, glowing (Keith)
+  for (let k = 0; k < 8; k++) spawnPuff(px - 28 + k * 8, py + 12, 9 + Math.random() * 8);   // takeoff burst — 8 of 10 (Keith: some back)
   zoom = Math.min(1.05, zoom + 0.03);
 }
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
@@ -867,7 +867,7 @@ function update(dt) {
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
           else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
           landDur = (landTo - landFrom + 1) / landRate; landT = 0;
-          for (let k = 0; k < 6; k++) spawnPuff(px - 27 + k * 10, py + 12, 10 + Math.random() * 9);   // landing burst — fewer, glowing
+          for (let k = 0; k < 8; k++) spawnPuff(px - 30 + k * 8, py + 12, 10 + Math.random() * 9);   // landing burst — 8 of 10
         }
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         if (hard) { shake = Math.min(14, shake + 9); }
@@ -898,8 +898,8 @@ function update(dt) {
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
   if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
-  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 150) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 8 + Math.random() * 6); } }   // foot fog — back to the v0.8.4 'perfect' rate (Keith: the constant stream choked it)
-  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.07; spawnPuff(px - 8, py + 12, 9 + Math.random() * 6); } }   // roll-landing trail — sparser
+  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 100) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 8 + Math.random() * 6); } }   // foot fog — a step denser than perfect, short of the choking stream
+  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.06; spawnPuff(px - 8, py + 12, 9 + Math.random() * 6); } }   // roll-landing trail
   /* sky trail REMOVED at Keith's order 2026-11-06 (v0.8.7): still chopping with it in. */
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
