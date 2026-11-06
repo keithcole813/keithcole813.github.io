@@ -14,7 +14,6 @@
   #score small { display:block; font-size:11px; font-weight:700; letter-spacing:2px; opacity:.85; }
   #dist { font-size:20px; font-weight:800; text-align:right; line-height:1.15; text-shadow:0 2px 0 rgba(0,0,0,.35); }
   #dist small { display:block; font-size:11px; font-weight:700; letter-spacing:2px; opacity:.85; }
-  #flash { position:absolute; top:22%; width:100%; text-align:center; font-size:44px; font-weight:900; letter-spacing:2px; color:#ffd94d; text-shadow:0 3px 0 #b3541e, 0 6px 18px rgba(0,0,0,.4); opacity:0; }
   #center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:24vh; text-align:center; pointer-events:none; }
   #tap { margin-top:18px; font-size:clamp(20px,4.5vw,30px); font-weight:900; letter-spacing:2px; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.4); animation:pulse 1.1s ease-in-out infinite; }
   #best { margin-top:10px; font-size:16px; font-weight:700; opacity:.92; text-shadow:0 2px 0 rgba(0,0,0,.4); }
@@ -51,7 +50,6 @@
     <div class="hudbox" id="score"><small>SCORE</small>0</div>
     <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
-  <div id="flash"></div>
   <div id="center">
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
@@ -68,7 +66,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.9 ==============================
+/* ============================== 6LOUD demo v0.10 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -643,7 +641,7 @@ let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
 let puffs = [];
 let camX = 0, camY = 0, zoom = 1, shake = 0, time = 0, runTime = 0, lastSeg = -1, lastTier = 1, worldEnd = 0, exitBand = 0;
-let flashTxt = '', flashT = 0, walkT = 0, dead = false;
+let walkT = 0, dead = false;
 const PLAYER_XF = 0.30;        // player screen position (fraction of view width)
 
 /* ---------- sky (independent clock: sunset -> night -> sunrise) ---------- */
@@ -686,7 +684,6 @@ const puffImg = (() => { const c = document.createElement('canvas'); c.width = c
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
 function spawnPuff(x, y, r) { if (puffs.length < 48)   /* some puffs back (Keith 2026-11-06) — still under the choking levels */ puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
-function flash(txt) { flashTxt = txt; flashT = 1.6; $('flash').textContent = txt; }
 
 /* ---------- world building ---------- */
 function addPlat(x, band, lenClass) {
@@ -734,7 +731,6 @@ const CHARGE_FULL = 0.6;    // s of hold for a full-power jump
 const FLIP_ARM = 0.30;      // s of hold that arms the apex flip
 const ROLL_ARM = 0.55;      // s of hold that arms the roll landing
 const FEET = 16;            // his feet sit this deep in the cloud tops
-const FLIP_NAME = { flip: 'FLIP!', diveflip: 'DIVE-ROLL!' };
 
 /* ---------- game flow ---------- */
 function startRun() {
@@ -824,7 +820,7 @@ function release() {
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
   grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0;
-  if (full) { score += 4; flash('RUN, JUMP & ROLL!'); }
+  if (full) { score += 4; }
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
   /* white puffs kick off the cloud at takeoff */
@@ -852,14 +848,14 @@ function update(dt) {
   if (hangPlat) {
     hangT -= dt;
     py = hangPlat.y + 88; vy = 0;
-    if (hangT <= 0) { py = hangPlat.y; grounded = hangPlat; hangPlat = null; flash('SAVED!');
+    if (hangT <= 0) { py = hangPlat.y; grounded = hangPlat; hangPlat = null;
       landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; landDur = (landTo - landFrom + 1) / landRate; landT = 0; }
   } else if (!grounded) {
     vy += GRAV * airGrav * dt; py += vy * dt; airT += dt;
     /* the flip cue: an armed jump converts at the top of the arc */
     if (airMove === 'jump' && flipArmed && !flipped && airT >= 0.26 && vy >= -430) {
       flipped = true; flipMove = rnd(['flip', 'diveflip']); flipT = 0; airMove = flipMove;
-      score += 4; flash(FLIP_NAME[flipMove]);
+      score += 4;
       zoom = Math.min(1.07, zoom + 0.03);
     }
     if (flipped) flipT += dt;
@@ -898,7 +894,7 @@ function update(dt) {
     if (!grounded && !hangPlat && vy > 300) {
       /* near miss: skimming just under a lip we failed to grab */
       for (const p of plats) {
-        if (Math.abs(px + 60 - p.x) < 14 && py > p.y + 96 && py < p.y + 150) { shake = Math.min(10, shake + 5); flash('CLOSE!'); break; }
+        if (Math.abs(px + 60 - p.x) < 14 && py > p.y + 96 && py < p.y + 150) { shake = Math.min(10, shake + 5); break; }
       }
     }
   } else {
@@ -923,7 +919,6 @@ function update(dt) {
   const wantY = py - viewH / zoom * 0.58;
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
-  if (flashT > 0) { flashT -= dt; $('flash').style.opacity = Math.min(1, flashT); }
   $('score').innerHTML = '<small>SCORE</small>' + score;
   $('dist').innerHTML = '<small>DISTANCE</small>' + Math.floor(dist / 15.24) + 'ft';
   if (py - camY > viewH / zoom + 260) gameOver();
@@ -1100,7 +1095,7 @@ function resize() {
   W = innerWidth; H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (W >= H) { S = H / 1150; } else { S = W / 640; }
+  S = Math.min(W, H) / 1150;   // full mockup ratio (Keith 2026-11-06): short side = 1150 units, long side opens up
   viewW = W / S; viewH = H / S;
 }
 addEventListener('resize', resize);
