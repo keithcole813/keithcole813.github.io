@@ -67,11 +67,9 @@
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <audio id="steps" src="assets/sfx/steps.mp3" loop preload="auto"></audio>
-<audio id="gruntJump" src="assets/sfx/grunt-jump.mp3" preload="auto"></audio>
-<audio id="gruntLand" src="assets/sfx/grunt-land.mp3" preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8 ==============================
+/* ============================== 6LOUD demo v0.8.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -765,9 +763,8 @@ function renderBoard() {
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
     (gBoard.length ? gBoard.map(b => b.initials + ' — ' + b.score).join('<br>') : 'NO SCORES YET — SET THE FIRST');
 }
-const stepsEl = $('steps'), gjEl = $('gruntJump'), glEl = $('gruntLand');
+const stepsEl = $('steps');   /* 6lade grunts REMOVED at Keith's order 2026-11-06 (v0.8 choked on his phone) */
 stepsEl.volume = 0.32;
-function grunt(el) { try { el.currentTime = 0; el.play().catch(() => {}); } catch (e) {} }
 /* Keith's rule: footsteps only while he is ON a cloud — the moment he
    leaves the ground (jump, grab, fall) the steps stop. */
 function stepsTick() {
@@ -826,7 +823,6 @@ function release() {
   if (full) { score += 4; flash('RUN, JUMP & ROLL!'); }
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
-  grunt(gjEl);   /* 6lade jumps — his effort grunt (Brawl SFX, Keith 2026-11-06) */
   /* white puffs kick off the cloud at takeoff */
   for (let k = 0; k < 10; k++) spawnPuff(px - 27 + k * 6, py + 12, 8 + Math.random() * 7);   // takeoff burst x2 (Keith 2026-11-06)
   zoom = Math.min(1.05, zoom + 0.03);
@@ -869,7 +865,6 @@ function update(dt) {
       const top = p.y;
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
         py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
-        grunt(glEl);   /* 6lade lands — his effort grunt */
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed) {
