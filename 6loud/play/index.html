@@ -71,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.19.1</div>
+  <div id="ver">v0.19.2</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.19.1 ==============================
+/* ============================== 6LOUD demo v0.19.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -743,11 +743,11 @@ const SKY_KEYS = [ // [top, mid, low, horizon] per phase stop
   { t: 1.00, c: [[43,32,84],[178,74,116],[255,138,76],[255,196,110]], star: 0 }     // back to sunset
 ];
 const SKY_PERIOD = 75; // OLD driver (retired): a 75-second wall clock that ran even on the title screen
-/* Keith v0.19: the sky is driven by his STEPS now — distance. The phase
-   advances only while he runs; one full day = CYCLE_FEET of travel.
-   Slower by a tad, and the sky he gets is the sky he ran for. */
-let skyPh = 0;
-const CYCLE_FEET = 2000;   // Keith's number: one full 24h per 2,000 ft
+/* The steps driver (v0.19-v0.19.1) was REVERTED by Keith (v0.19.2):
+   he watched the cycle carry over after a wipeout, liked that the
+   world clock never resets, and ruled "not steps — keep your original
+   timing." So the sky is back on the 75-second clock, running through
+   title, runs and wipeouts alike. The 2,000-ft idea is parked. */
 let stars = [];
 for (let i = 0; i < 130; i++) stars.push({ x: Math.random(), y: Math.random() * 0.62, r: Math.random() * 1.7 + 0.5, tw: Math.random() * 6.28 });
 let stars2 = [];   /* the deep-night layer (Keith v0.19): fainter, smaller, only out when night is TRUE */
@@ -952,7 +952,6 @@ function update(dt) {
   runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
   dist += speed * dt;
-  skyPh = (skyPh + (speed * dt / 15.24) / CYCLE_FEET) % 1;
   /* THE CROWN MOMENT (Keith, v0.13): the instant this run's feet pass
      the reigning high score, the battle loop crossfades in — and keeps
      going: through the wipeout, into every later run this session. */
@@ -1096,7 +1095,7 @@ function playerAnim() {
   return { move: 'run', idx: Math.floor(walkT * 30) % MANIFEST.run.n };
 }
 function draw() {
-  const ph = skyPh;
+  const ph = (time % SKY_PERIOD) / SKY_PERIOD;
   const sky = skyAt(ph);
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, `rgb(${sky.c[0]})`); g.addColorStop(0.45, `rgb(${sky.c[1]})`);
