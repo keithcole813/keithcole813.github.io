@@ -15,8 +15,7 @@
   #dist { font-size:20px; font-weight:800; text-align:right; line-height:1.15; text-shadow:0 2px 0 rgba(0,0,0,.35); }
   #dist small { display:block; font-size:11px; font-weight:700; letter-spacing:2px; opacity:.85; }
   #flash { position:absolute; top:22%; width:100%; text-align:center; font-size:44px; font-weight:900; letter-spacing:2px; color:#ffd94d; text-shadow:0 3px 0 #b3541e, 0 6px 18px rgba(0,0,0,.4); opacity:0; }
-  #center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
-  #logo { width:min(62vw, 520px); filter:drop-shadow(0 10px 24px rgba(0,0,0,.45)); }
+  #center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:24vh; text-align:center; pointer-events:none; }
   #tap { margin-top:18px; font-size:clamp(20px,4.5vw,30px); font-weight:900; letter-spacing:2px; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.4); animation:pulse 1.1s ease-in-out infinite; }
   #best { margin-top:10px; font-size:16px; font-weight:700; opacity:.92; text-shadow:0 2px 0 rgba(0,0,0,.4); }
   #over { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:rgba(15,8,35,.45); pointer-events:auto; }
@@ -52,7 +51,6 @@
   </div>
   <div id="flash"></div>
   <div id="center">
-    <img id="logo" src="assets/logo-web.jpg" alt="6LOUD">
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
@@ -68,7 +66,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.7 ==============================
+/* ============================== 6LOUD demo v0.7.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
