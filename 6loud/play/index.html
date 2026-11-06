@@ -37,6 +37,7 @@
   .btn { pointer-events:auto; font-family:inherit; font-size:21px; font-weight:900; letter-spacing:1px; color:#3a1503;
          background:linear-gradient(#ffd94d,#ff9d3c); border:0; border-radius:999px; padding:12px 30px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #b3541e; }
+  #ver { position:absolute; left:0; bottom:2.2%; width:100%; text-align:center; font-size:13px; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.55); text-shadow:0 1px 6px rgba(0,0,0,.45); pointer-events:none; }
   #loadbar { position:absolute; left:50%; bottom:11%; transform:translateX(-50%); width:min(78vw,520px);
              text-align:center; pointer-events:none; transition:opacity .45s ease; z-index:5; }
   #loadpct { font-weight:900; letter-spacing:2px; color:#ffe9a8; font-size:19px; margin-bottom:8px;
@@ -61,6 +62,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
+  <div id="ver">v0.13.3</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -73,7 +75,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.13.2 ==============================
+/* ============================== 6LOUD demo v0.13.3 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -795,7 +797,7 @@ function startRun() {
   airGrav = 1; flipArmed = false; rollArmed = false;
   camX = px - viewW * PLAYER_XF; camY = -560; zoom = 1; shake = 0;
   mode = 'run';
-  $('center').style.display = 'none'; $('over').style.display = 'none';
+  $('center').style.display = 'none'; $('over').style.display = 'none'; $('ver').style.display = 'none';
   champMode = false; heatOn = false;   /* every run starts on the original beat (Keith's correction): the battle track is per-run, crown moment to wipeout */
   /* the record this run is chasing: the global #1 when the board has
      loaded, else the local best. No record anywhere = nothing to break. */
