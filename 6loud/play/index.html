@@ -68,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.10 ==============================
+/* ============================== 6LOUD demo v0.8.11 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -564,7 +564,7 @@ Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n]
 pumpQ();
 
 /* ---------- world constants (measured) ---------- */
-const CHAR_H = 320;              // 6lade standing height in world units
+const CHAR_H = 256;              // 6lade standing height in world units — 20% smaller (Keith 2026-11-06: see more clouds above + below)
 const PX2U = CHAR_H / 400;          // the renders' canon: figure is 400 px tall
 const GRAV = 5200;               // units / s^2
 const BAND_Y = [0, -170, -340, -510, -680, -850];  // six cloud levels (Keith 2026-11-06: 3 higher, jump up/down, lower clouds save you)
@@ -1007,13 +1007,13 @@ function draw() {
     }
     if (loadState === 'turn') {
       const ti = Math.min(17, Math.floor((time - turnT0) * 30));
-      const k = 1.5 - 0.5 * smooth01(ti / 17);
+      const k = 1.2 - 0.4 * smooth01(ti / 17);   // title turn eases to the new 0.8 gameplay scale
       ctx.save(); ctx.translate(cxT, fyT); ctx.scale(k, k); ctx.translate(-cxT, -fyT);
       drawAnim('turn', ti, cxT, fyT); ctx.restore();
     } else if (loadState === 'done') {
       drawAnim('run', (18 + Math.floor((time - titleT0) * 30)) % MANIFEST.run.n, cxT, fyT);
     } else {
-      ctx.save(); ctx.translate(cxT, fyT); ctx.scale(1.5, 1.5); ctx.translate(-cxT, -fyT);
+      ctx.save(); ctx.translate(cxT, fyT); ctx.scale(1.2, 1.2); ctx.translate(-cxT, -fyT);   // front-run also 20% smaller
       drawAnim('front', Math.floor(time * 30) % MANIFEST.front.n, cxT, fyT); ctx.restore();
     }
     /* front cloud lip OVER his feet (Keith 2026-11-06): the front-run
