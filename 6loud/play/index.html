@@ -62,7 +62,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.13.4</div>
+  <div id="ver">v0.14</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -75,7 +75,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.13.4 ==============================
+/* ============================== 6LOUD demo v0.14 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1086,6 +1086,38 @@ function draw() {
     const dy = d.y - camY * 0.16 + viewH / zoom * 0.55;
     ctx.save(); ctx.globalAlpha = 0.34 * nightDim;
     ctx.drawImage(img, dx - 575, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+  }
+  /* mountain ridges — Gemini's art direction (via Keith), built our
+     way: procedural silhouettes drawn in code (no asset files), tinted
+     from the LIVE sky palette every frame so they follow sunset ->
+     night -> sunrise, sitting on the world's floor behind the cloud
+     sea. They sink and fade as he climbs — by the top bands he's above
+     them. Three depths, slowest parallax in the game. */
+  {
+    const climb = Math.max(0, -camY - viewH / zoom * 0.42);
+    const mFade = Math.max(0, Math.min(1, 1.15 - climb / 650));
+    if (mFade > 0.01) {
+      const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+      const RIDGES = [
+        { par: 0.08, pv: 0.10, base: 235, amp: 185, f1: 0.0011, f2: 0.0043, p1: 1.7, p2: 0.4, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50 },
+        { par: 0.14, pv: 0.16, base: 195, amp: 135, f1: 0.0016, f2: 0.0058, p1: 4.2, p2: 2.9, col: mixc(sky.c[2], sky.c[0], 0.45), a: 0.72 },
+        { par: 0.22, pv: 0.22, base: 160, amp: 92, f1: 0.0023, f2: 0.0081, p1: 0.6, p2: 5.1, col: mixc(sky.c[1], [10, 6, 20], 0.55), a: 0.92 }
+      ];
+      const vw2 = viewW / zoom, vh2 = viewH / zoom;
+      for (const r of RIDGES) {
+        const baseY = r.base - camY * r.pv + vh2 * 0.55;
+        if (baseY - r.amp > vh2 + 60) continue;
+        ctx.save(); ctx.globalAlpha = r.a * mFade * (1 - 0.35 * sky.star);
+        ctx.fillStyle = `rgb(${r.col})`;
+        ctx.beginPath(); ctx.moveTo(-60, vh2 + 80);
+        for (let sx = -60; sx <= vw2 + 60; sx += 36) {
+          const wx = sx + camX * r.par;
+          const h = r.amp * Math.max(0, (0.55 + 0.45 * Math.sin(wx * r.f1 + r.p1)) * (0.62 + 0.38 * Math.sin(wx * r.f2 + r.p2)) + 0.10 * Math.sin(wx * r.f2 * 3.7 + r.p1));
+          ctx.lineTo(sx, baseY - h);
+        }
+        ctx.lineTo(vw2 + 60, vh2 + 80); ctx.closePath(); ctx.fill(); ctx.restore();
+      }
+    }
   }
   /* middle layer (ChatGPT: ~75%, crisp, slow) */
   for (const d of dressMid) {
