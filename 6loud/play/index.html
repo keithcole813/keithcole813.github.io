@@ -64,9 +64,10 @@
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
+<audio id="music2" src="assets/battle1000.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.10 ==============================
+/* ============================== 6LOUD demo v0.11 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -77,6 +78,9 @@
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
 const music = $('music');
+const music2 = $('music2');   /* the 1000 FT battle loop (Keith 2026-11-06) */
+let heatMix = 0, heatTarget = 0, heatOn = false;
+music2.load && music2.load();   /* fetch + decode it at the title, long before it's needed */
 
 /* ---------- assets ---------- */
 const IMG = {};
@@ -744,6 +748,12 @@ function startRun() {
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none';
   music.currentTime = 0; music.play().catch(() => {});
+  /* both tracks run from the tap — the battle loop plays SILENCED — so
+     the 1000 FT switch later is a pure volume crossfade: nothing loads,
+     nothing decodes, nothing starts at the trigger (no hitch). */
+  heatOn = false; heatTarget = 0; heatMix = 0;
+  music.volume = 1; music2.currentTime = 0; music2.volume = 0;
+  music2.play().catch(() => {});
 }
 const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
@@ -774,6 +784,7 @@ function renderBoard() {
    ran smooth, every steps build chopped. Music only. */
 function gameOver() {
   mode = 'over'; dead = true;
+  heatTarget = 0;   /* the wipeout screen settles back to the daylight loop */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
   const myFt = Math.floor(dist / 15.24);   /* the record is FEET (Keith) */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
@@ -840,6 +851,12 @@ function update(dt) {
   runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
   dist += speed * dt;
+  /* 1000 FT: crossfade to the battle loop (Keith). Volumes only. */
+  if (!heatOn && dist >= 15240) { heatOn = true; heatTarget = 1; }
+  if (heatMix !== heatTarget) {
+    heatMix = Math.max(0, Math.min(1, heatMix + (heatTarget > heatMix ? dt / 0.6 : -dt / 0.6)));
+    music.volume = 1 - heatMix; music2.volume = heatMix;
+  }
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
