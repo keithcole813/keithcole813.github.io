@@ -62,7 +62,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.13.3</div>
+  <div id="ver">v0.13.4</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -75,7 +75,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.13.3 ==============================
+/* ============================== 6LOUD demo v0.13.4 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -96,15 +96,28 @@ const music = $('music');
    no-WebAudio fallback (daylight track, no heat switch). */
 let actx = null, bufD = null, bufB = null, srcD = null, srcB = null, gainD = null, gainB = null, heatOn = false;
 let champMode = false, targetFt = 0;   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
-try {
+let rawD = null, rawB = null;
+/* v0.13.4 — the silent-first-run fix (Keith: "music doesn't start when
+   the game starts; it comes after I die and start over"). Cause: the
+   AudioContext was created at page load, before any tap — iOS keeps a
+   context born outside a user gesture suspended, so the first run's
+   sources played into a frozen context; by the second run it had
+   unlocked. Now: the MP3 bytes are fetched at boot (no context needed),
+   and the context is created + decoded INSIDE the start tap, where iOS
+   lets it run immediately. */
+if (window.fetch) {
+  fetch('assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
+  fetch('assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
+}
+async function ensureAudio() {
   const AC = window.AudioContext || window.webkitAudioContext;
-  if (AC) {
-    actx = new AC();
-    const loadBuf = (url, set) => fetch(url).then(r => r.arrayBuffer()).then(b => actx.decodeAudioData(b)).then(set).catch(() => {});
-    loadBuf('assets/daylight.mp3', b => { bufD = b; });
-    loadBuf('assets/battle1000.mp3', b => { bufB = b; });
-  }
-} catch (e) { actx = null; }
+  if (!AC) return false;
+  if (!actx) { try { actx = new AC(); } catch (e) { return false; } }
+  if (actx.state === 'suspended') { try { await actx.resume(); } catch (e) {} }
+  if (!bufD && rawD) { try { bufD = await actx.decodeAudioData(rawD.slice(0)); } catch (e) {} }
+  if (!bufB && rawB) { try { bufB = await actx.decodeAudioData(rawB.slice(0)); } catch (e) {} }
+  return !!bufD;
+}
 function startTracks() {
   if (!actx || !bufD) {
     /* fallback: ONE element at a time (iOS-safe) — its src is the mode's track */
@@ -803,8 +816,10 @@ function startRun() {
      loaded, else the local best. No record anywhere = nothing to break. */
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = (gBoard && gBoard.length) ? gBoard[0].dist_ft : (lb.length ? lb[0].s : 0);
-  if (actx && actx.state === 'suspended') actx.resume();
-  startTracks();
+  if (window.AudioContext || window.webkitAudioContext) {
+    if (bufD) startTracks();   /* decoded already (later runs): instant */
+    ensureAudio().then(() => { if (mode === 'run') startTracks(); });
+  } else startTracks();
 }
 const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
