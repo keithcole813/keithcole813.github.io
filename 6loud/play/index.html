@@ -68,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.3 ==============================
+/* ============================== 6LOUD demo v0.8.4 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -673,7 +673,7 @@ const puffImg = (() => { const c = document.createElement('canvas'); c.width = c
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.6, 'rgba(255,255,255,0.38)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
-function spawnPuff(x, y, r) { if (puffs.length < 84) puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
+function spawnPuff(x, y, r) { if (puffs.length < 36)   /* fewer puffs + glow (Keith 2026-11-06) */ puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 function flash(txt) { flashTxt = txt; flashT = 1.6; $('flash').textContent = txt; }
 
@@ -816,7 +816,7 @@ function release() {
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
   /* white puffs kick off the cloud at takeoff */
-  for (let k = 0; k < 10; k++) spawnPuff(px - 27 + k * 6, py + 12, 8 + Math.random() * 7);   // takeoff burst x2 (Keith 2026-11-06)
+  for (let k = 0; k < 6; k++) spawnPuff(px - 25 + k * 10, py + 12, 9 + Math.random() * 8);   // takeoff burst — fewer, glowing (Keith)
   zoom = Math.min(1.05, zoom + 0.03);
 }
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
@@ -866,7 +866,7 @@ function update(dt) {
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
           else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
           landDur = (landTo - landFrom + 1) / landRate; landT = 0;
-          for (let k = 0; k < 10; k++) spawnPuff(px - 29 + k * 6, py + 12, 9 + Math.random() * 8);   // landing burst x2
+          for (let k = 0; k < 6; k++) spawnPuff(px - 27 + k * 10, py + 12, 10 + Math.random() * 9);   // landing burst — fewer, glowing
         }
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         if (hard) { shake = Math.min(14, shake + 9); }
@@ -897,8 +897,8 @@ function update(dt) {
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
   if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
-  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 90) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 7 + Math.random() * 6); } }
-  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.045; spawnPuff(px - 8, py + 12, 8 + Math.random() * 6); } }   // roll-landing trail x2 density
+  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 150) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 8 + Math.random() * 6); } }   // foot fog — sparser
+  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.07; spawnPuff(px - 8, py + 12, 9 + Math.random() * 6); } }   // roll-landing trail — sparser
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
   while (worldEnd < camX + viewW + 900) nextSegment();
@@ -1020,7 +1020,11 @@ function draw() {
   }
   /* foot fog puffs (world-anchored, trailing behind him) */
   for (const q of puffs) {
-    ctx.save(); ctx.globalAlpha = 0.5 * Math.max(0, q.life / q.max);
+    const la = Math.max(0, q.life / q.max);
+    ctx.save();
+    ctx.globalAlpha = 0.16 * la;   /* glow halo: the same soft puff stamped big + faint (Keith's glow) */
+    ctx.drawImage(puffImg, q.x - camX - q.r * 2, q.y - camY - q.r * 2, q.r * 4, q.r * 4);
+    ctx.globalAlpha = 0.55 * la;   /* the puff itself */
     ctx.drawImage(puffImg, q.x - camX - q.r, q.y - camY - q.r, q.r * 2, q.r * 2);
     ctx.restore();
   }
