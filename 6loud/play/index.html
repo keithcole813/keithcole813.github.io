@@ -190,10 +190,10 @@ function resetWorld() {
 function pickMove(c) {
   if (c < 0.20) return rnd(['HOP', 'HOP', 'BASIC']);
   if (c < 0.55) return rnd(['BASIC', 'ARMS OPEN', 'RUN JUMP', 'JUMP OVER']);
-  return rnd(['FLYING KICK', 'DIVE-ROLL', 'ROLL DODGE', 'SLAM', 'FLIP']);
+  return rnd(['DIVE-ROLL', 'ROLL DODGE', 'SLAM', 'FLIP']);
 }
 const MOVE_VY = { 'HOP': -1240, 'BASIC': -1660, 'ARMS OPEN': -1740, 'RUN JUMP': -1700,
-  'JUMP OVER': -1800, 'FLYING KICK': -1860, 'DIVE-ROLL': -1820, 'ROLL DODGE': -1760,
+  'JUMP OVER': -1800, 'DIVE-ROLL': -1820, 'ROLL DODGE': -1760,
   'SLAM': -1960, 'FLIP': -1900 };
 let airGrav = 1; // float baked in from the charge: longer hold = lighter gravity
 
@@ -329,7 +329,6 @@ function drawSprite(img, cx, feetY, hWorld, rot, squash) {
   ctx.save();
   ctx.translate(cx, feetY);
   if (rot) ctx.rotate(rot);
-  if (squash) ctx.scale(1 + squash * 0.25, 1 - squash * 0.22);
   ctx.drawImage(img, -w / 2, -hWorld, w, hWorld);
   ctx.restore();
 }
@@ -339,12 +338,11 @@ function playerFrame() {
   if (!grounded) {
     if (vy > 900 && airT > 0.5) return { img: IMG.hurt, rot: 0.2 };
     switch (airMove) {
-      case 'FLYING KICK': return { img: IMG.jump };
       case 'FLIP': return { img: IMG.jump, rot: -spin };
       case 'ROLL DODGE': case 'DIVE-ROLL': return { img: IMG.crouch, rot: spin };
       case 'SLAM': return { img: airT < 0.34 ? IMG.crouch : IMG.special };
       case 'ARMS OPEN': return { img: IMG.idle };
-      default: return { img: IMG.jump };
+      default: return { img: vy < 0 ? IMG.crouch : IMG.idle };
     }
   }
   if (landT > 0) { landT -= 1 / 60; return { img: IMG.crouch }; }
@@ -408,7 +406,7 @@ function draw() {
       ctx.drawImage(img, viewW / zoom * 0.5 - w / 2, viewH / zoom * 0.62 - CHAR_H, w, CHAR_H);
     }
   } else {
-    drawSprite(f.img, cx, fy, CHAR_H * (f.img === IMG.jump ? 0.78 : 1), f.rot || 0, f.squash || 0);
+    drawSprite(f.img, cx, fy, CHAR_H * f.img.naturalHeight / 320, f.rot || 0, 0);
   }
   ctx.restore();
 }
