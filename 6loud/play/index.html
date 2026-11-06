@@ -71,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.17.2</div>
+  <div id="ver">v0.18</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.17.2 ==============================
+/* ============================== 6LOUD demo v0.18 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1185,19 +1185,37 @@ function draw() {
       ctx.drawImage(img, dx - 380, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
     }
   }
-  /* the cloud sea far below — the mockup's signature: big sunset clouds
-     banked along the bottom of the sky, half-parallax scroll */
+  /* the cloud DECK — v0.18 (Keith, pointing at the mockup's bottom):
+     the effect is a CONTINUOUS banked floor of cloud, not scattered
+     sprites — "it didn't happen by just throwing more clouds at it."
+     So: a filled deck whose billowed top edge is drawn from the live
+     sky palette (gap-free by construction), with the puffy photo
+     clouds riding along its top, overlapped tight so their tops form
+     the billow line. The deck rides a little higher as he climbs. */
   {
     const seaSet = ['17', '27', '26', '28', '18'];
     const vw = viewW / zoom, vh = viewH / zoom;
-    const sw = vw * 0.46, span = sw * 0.84 * seaSet.length;
+    const alt = Math.max(0, Math.min(1, (-camY - vh * 0.42) / 700));
+    const base = vh * (0.90 - 0.07 * alt) - camY * 0.06;
+    const billow = wx => base + 18 * Math.sin(wx * 0.006 + 1.3) + 12 * Math.sin(wx * 0.0137 + 4.1) + 7 * Math.sin(wx * 0.031 + 0.7);
+    const mixc2 = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+    ctx.save(); ctx.globalAlpha = 0.98 * (1 - 0.35 * sky.star);
+    const dg = ctx.createLinearGradient(0, base - 30, 0, vh);
+    dg.addColorStop(0, `rgb(${mixc2(sky.c[3], [255, 255, 255], 0.22)})`);
+    dg.addColorStop(0.5, `rgb(${mixc2(sky.c[2], sky.c[3], 0.4)})`);
+    dg.addColorStop(1, `rgb(${mixc2(sky.c[1], sky.c[2], 0.5)})`);
+    ctx.fillStyle = dg;
+    ctx.beginPath(); ctx.moveTo(-60, vh + 80);
+    for (let sx = -60; sx <= vw + 60; sx += 30) ctx.lineTo(sx, billow(sx + camX * 0.5));
+    ctx.lineTo(vw + 60, vh + 80); ctx.closePath(); ctx.fill(); ctx.restore();
+    const sw = vw * 0.52, span = sw * 0.66 * seaSet.length;
     for (let i = 0; i < seaSet.length; i++) {
       const img = BGIMG['m' + seaSet[i]];
       if (!img || !img.naturalWidth) continue;
       const sh = sw * img.naturalHeight / img.naturalWidth;
-      let sx = (i * sw * 0.84 - camX * 0.5) % span; if (sx < -sw) sx += span;
-      ctx.save(); ctx.globalAlpha = 0.96 * (1 - 0.5 * sky.star);
-      ctx.drawImage(img, sx - sw * 0.1, vh - sh * 0.66 - camY * 0.06, sw, sh); ctx.restore();
+      let sx = (i * sw * 0.66 - camX * 0.5) % span; if (sx < -sw) sx += span;
+      ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star);
+      ctx.drawImage(img, sx - sw * 0.1, billow(sx + camX * 0.5 + sw * 0.4) - sh * 0.52, sw, sh); ctx.restore();
     }
   }
   /* player: rendered sequences; on the title he runs in place */
