@@ -30,6 +30,16 @@
   .btn { pointer-events:auto; font-family:inherit; font-size:21px; font-weight:900; letter-spacing:1px; color:#3a1503;
          background:linear-gradient(#ffd94d,#ff9d3c); border:0; border-radius:999px; padding:12px 30px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #b3541e; }
+  #loadbar { position:absolute; left:50%; bottom:11%; transform:translateX(-50%); width:min(78vw,520px);
+             text-align:center; pointer-events:none; transition:opacity .45s ease; z-index:5; }
+  #loadpct { font-weight:900; letter-spacing:2px; color:#ffe9a8; font-size:19px; margin-bottom:8px;
+             text-shadow:0 2px 10px rgba(0,0,0,.55); }
+  #track { position:relative; height:26px; background:rgba(22,11,41,.6); border:2px solid #ffdd67; border-radius:13px; }
+  #fill { height:100%; width:0%; background:linear-gradient(90deg,#ffdd67,#f7b731); border-radius:11px;
+          position:relative; transition:width .15s ease-out; }
+  #cap { position:absolute; right:-18px; top:-17px; width:58px; pointer-events:none;
+         filter:drop-shadow(0 3px 3px rgba(0,0,0,.3)); animation:capbob 1.5s ease-in-out infinite alternate; }
+  @keyframes capbob { from { transform:translateX(0) scale(1); } to { transform:translateX(3px) scale(1.05); } }
   @keyframes pulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.07); opacity:.85; } }
 </style>
 </head>
@@ -46,6 +56,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
+  <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
@@ -57,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.6 ==============================
+/* ============================== 6LOUD demo v0.7 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -76,6 +87,20 @@ function loadImg(name, src){ const i = new Image(); i.src = src; IMG[name] = i; 
    from the renders: cell size, ground-line offset, and each frame's
    lowest-point gap, so a rolling body rests on the surface, never sinks. */
 const MANIFEST = {
+ "front": {
+  "n": 19,
+  "w": 302,
+  "h": 436,
+  "offset": 11,
+  "gaps": [4, 12, 29, 22, 16, 11, 5, 4, 4, 7, 17, 33, 26, 20, 20, 10, 6, 5, 4]
+ },
+ "turn": {
+  "n": 18,
+  "w": 302,
+  "h": 436,
+  "offset": 11,
+  "gaps": [4, 12, 29, 22, 16, 11, 5, 4, 4, 7, 17, 33, 26, 19, 20, 10, 6, 5]
+ },
  "run": {
   "n": 19,
   "w": 302,
@@ -504,7 +529,7 @@ const MANIFEST = {
    always drains. Core sets load first and open the start gate; the trick
    sets stream in behind them. */
 const ANIM = {}; let animLoaded = 0, animTotal = 0, coreLoaded = 0, coreTotal = 0;
-const CORE_MOVES = ['run', 'basic', 'armsopen', 'diveroll'];
+const CORE_MOVES = ['front', 'turn', 'run', 'basic', 'armsopen', 'diveroll'];
 const loadQ = []; let inFlight = 0;
 function queueImg(store, src, core) { animTotal++; if (core) coreTotal++; loadQ.push({ store, src, core, tries: 0 }); }
 function pumpQ() {
@@ -571,6 +596,31 @@ const SEGMENTS = [
 /* ---------- state ---------- */
 let W = 0, H = 0, S = 1, viewW = 0, viewH = 0;
 let mode = 'title';            // title | run | over
+/* loading flow (Keith + Gemini consult, 2026-11-06): he runs AT the camera
+   while the core loads; READY! flashes; he turns to profile (the turn's
+   last frame is the run cycle itself) and the title begins. */
+let loadState = 'loading', readyT = 0, turnT0 = -1, titleT0 = -1;
+const smooth01 = t => t * t * (3 - 2 * t);
+function titleFlow(dt) {
+  if (loadState === 'loading') {
+    const pct = coreTotal ? Math.floor(coreLoaded / coreTotal * 100) : 0;
+    $('fill').style.width = pct + '%';
+    $('loadpct').textContent = 'LOADING ' + pct + '%';
+    $('tap').textContent = '';
+    if (coreLoaded >= coreTotal) { loadState = 'ready'; readyT = 0;
+      $('fill').style.width = '100%'; $('loadpct').textContent = 'READY!'; }
+  } else if (loadState === 'ready') {
+    readyT += dt;
+    if (readyT > 0.3 && Math.floor(time * 30) % MANIFEST.front.n === 0) {
+      loadState = 'turn'; turnT0 = time;
+      $('loadbar').style.opacity = '0';
+      setTimeout(() => { $('loadbar').style.display = 'none'; }, 500);
+    }
+  } else if (loadState === 'turn') {
+    if (time - turnT0 >= 18 / 30) { loadState = 'done'; titleT0 = turnT0 + 18 / 30;
+      $('tap').textContent = 'TAP TO START'; }
+  }
+}
 let plats = [];                // {x, y(top), len, img}
 let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
@@ -700,7 +750,7 @@ function gameOver() {
 
 /* ---------- input: ONE button ---------- */
 function press() {
-  if (mode === 'title') { if (coreLoaded >= coreTotal) startRun(); return; }
+  if (mode === 'title') { if (loadState === 'done') startRun(); return; }
   if (mode !== 'run' || dead) return;
   /* no freeze, no launch: he keeps running while the button is down */
   held = true; pressT = 0;
@@ -903,7 +953,24 @@ function draw() {
   }
   /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
-    drawAnim('run', Math.floor(time * 30) % MANIFEST.run.n, viewW / zoom * 0.5, viewH / zoom * 0.62);
+    const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.62;
+    const cimg = IMG['cloud01'], cd1 = CLOUDS['01'];
+    if (cimg && cimg.naturalWidth) {
+      const cw2 = 430, dh2 = cw2 * cd1.asp;
+      ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24;
+      ctx.drawImage(cimg, cxT - cw2 / 2, fyT - cd1.surf * dh2 + 6, cw2, dh2); ctx.restore();
+    }
+    if (loadState === 'turn') {
+      const ti = Math.min(17, Math.floor((time - turnT0) * 30));
+      const k = 1.5 - 0.5 * smooth01(ti / 17);
+      ctx.save(); ctx.translate(cxT, fyT); ctx.scale(k, k); ctx.translate(-cxT, -fyT);
+      drawAnim('turn', ti, cxT, fyT); ctx.restore();
+    } else if (loadState === 'done') {
+      drawAnim('run', (18 + Math.floor((time - titleT0) * 30)) % MANIFEST.run.n, cxT, fyT);
+    } else {
+      ctx.save(); ctx.translate(cxT, fyT); ctx.scale(1.5, 1.5); ctx.translate(-cxT, -fyT);
+      drawAnim('front', Math.floor(time * 30) % MANIFEST.front.n, cxT, fyT); ctx.restore();
+    }
   } else {
     const pa = playerAnim();
     drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET);
@@ -946,7 +1013,7 @@ addEventListener('resize', resize);
 let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
-  if (mode === 'title') $('tap').textContent = coreLoaded >= coreTotal ? 'TAP TO START' : 'LOADING ' + Math.floor(animLoaded / Math.max(1, animTotal) * 100) + '%';
+  if (mode === 'title') titleFlow(dt);
   update(dt); draw();
   requestAnimationFrame(loop);
 }
@@ -956,5 +1023,4 @@ if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + be
 requestAnimationFrame(loop);
 </script>
 </body>
-<!-- v0.6 build -->
 </html>
