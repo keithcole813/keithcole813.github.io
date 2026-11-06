@@ -57,9 +57,11 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.1 ==============================
-   One-button endless runner. 6lade first. Universal move pool (Keith 2026-11-05):
-   hold to charge, release to jump; the move is picked RANDOMLY per hold tier.
+/* ============================== 6LOUD demo v0.2 ==============================
+   One-button endless runner. 6lade first, animated with true 30 fps rendered
+   sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
+   swords on, no squeeze, no outdated sprites). Universal move pool: hold to
+   charge, release to jump; the move is picked RANDOMLY per hold tier.
    Segments chain from the preset database; the sky runs on its own clock.      */
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
@@ -68,8 +70,392 @@ const music = $('music');
 /* ---------- assets ---------- */
 const IMG = {};
 function loadImg(name, src){ const i = new Image(); i.src = src; IMG[name] = i; return i; }
-['idle','walk0','walk1','walk2','walk3','walk','crouch','jump','hurt','special','win']
-  .forEach(n => loadImg(n, 'assets/' + n + '.png'));
+/* character animation: rendered 30 fps sequences. The manifest is measured
+   from the renders: cell size, ground-line offset, and each frame's
+   lowest-point gap, so a rolling body rests on the surface, never sinks. */
+const MANIFEST = {
+ "run": {
+  "n": 19,
+  "w": 302,
+  "h": 436,
+  "offset": 11,
+  "gaps": [
+   4,
+   12,
+   29,
+   23,
+   16,
+   11,
+   5,
+   4,
+   4,
+   7,
+   17,
+   33,
+   26,
+   20,
+   21,
+   10,
+   6,
+   5,
+   4
+  ]
+ },
+ "basic": {
+  "n": 31,
+  "w": 303,
+  "h": 514,
+  "offset": 5,
+  "gaps": [
+   6,
+   6,
+   6,
+   6,
+   6,
+   8,
+   10,
+   13,
+   17,
+   20,
+   23,
+   26,
+   30,
+   33,
+   31,
+   28,
+   24,
+   20,
+   19,
+   18,
+   18,
+   17,
+   15,
+   13,
+   10,
+   8,
+   8,
+   6,
+   4,
+   4,
+   13
+  ]
+ },
+ "armsopen": {
+  "n": 31,
+  "w": 303,
+  "h": 514,
+  "offset": 5,
+  "gaps": [
+   8,
+   6,
+   4,
+   4,
+   13,
+   28,
+   47,
+   72,
+   104,
+   136,
+   163,
+   180,
+   190,
+   196,
+   197,
+   193,
+   182,
+   167,
+   149,
+   127,
+   105,
+   81,
+   57,
+   35,
+   16,
+   7,
+   9,
+   13,
+   17,
+   19,
+   20
+  ]
+ },
+ "runjump": {
+  "n": 49,
+  "w": 440,
+  "h": 525,
+  "offset": 60,
+  "gaps": [
+   68,
+   75,
+   85,
+   99,
+   115,
+   134,
+   155,
+   178,
+   204,
+   236,
+   242,
+   223,
+   204,
+   185,
+   166,
+   149,
+   130,
+   109,
+   88,
+   67,
+   50,
+   25,
+   6,
+   4,
+   26,
+   33,
+   23,
+   31,
+   51,
+   30,
+   29,
+   30,
+   37,
+   52,
+   62,
+   60,
+   60,
+   60,
+   62,
+   63,
+   65,
+   66,
+   66,
+   67,
+   68,
+   69,
+   71,
+   72,
+   72
+  ]
+ },
+ "diveroll": {
+  "n": 65,
+  "w": 427,
+  "h": 520,
+  "offset": 79,
+  "gaps": [
+   83,
+   86,
+   88,
+   91,
+   106,
+   121,
+   147,
+   169,
+   169,
+   168,
+   168,
+   170,
+   187,
+   233,
+   270,
+   258,
+   244,
+   220,
+   212,
+   224,
+   239,
+   255,
+   277,
+   259,
+   222,
+   180,
+   133,
+   97,
+   79,
+   77,
+   80,
+   83,
+   87,
+   92,
+   97,
+   84,
+   65,
+   51,
+   46,
+   46,
+   34,
+   16,
+   6,
+   4,
+   12,
+   23,
+   38,
+   58,
+   61,
+   59,
+   61,
+   65,
+   73,
+   77,
+   78,
+   79,
+   82,
+   84,
+   86,
+   87,
+   86,
+   85,
+   85,
+   84,
+   83
+  ]
+ },
+ "roll3": {
+  "n": 40,
+  "w": 519,
+  "h": 567,
+  "offset": 96,
+  "gaps": [
+   87,
+   87,
+   87,
+   100,
+   105,
+   94,
+   55,
+   21,
+   0,
+   4,
+   30,
+   61,
+   78,
+   82,
+   88,
+   104,
+   125,
+   118,
+   107,
+   100,
+   99,
+   101,
+   103,
+   102,
+   100,
+   100,
+   100,
+   99,
+   97,
+   95,
+   96,
+   96,
+   96,
+   96,
+   98,
+   98,
+   94,
+   93,
+   93,
+   93
+  ]
+ },
+ "roll4": {
+  "n": 79,
+  "w": 336,
+  "h": 381,
+  "offset": 12,
+  "gaps": [
+   14,
+   19,
+   21,
+   24,
+   32,
+   31,
+   34,
+   42,
+   55,
+   60,
+   65,
+   69,
+   73,
+   74,
+   73,
+   71,
+   71,
+   78,
+   97,
+   123,
+   127,
+   135,
+   132,
+   115,
+   103,
+   93,
+   88,
+   92,
+   99,
+   108,
+   105,
+   103,
+   102,
+   102,
+   99,
+   97,
+   96,
+   95,
+   94,
+   93,
+   90,
+   83,
+   78,
+   75,
+   71,
+   66,
+   61,
+   56,
+   52,
+   50,
+   49,
+   48,
+   48,
+   46,
+   40,
+   35,
+   32,
+   30,
+   27,
+   26,
+   25,
+   24,
+   24,
+   23,
+   22,
+   21,
+   21,
+   20,
+   19,
+   18,
+   17,
+   17,
+   16,
+   16,
+   16,
+   16,
+   15,
+   15,
+   15
+  ]
+ }
+};
+const ANIM = {}; let animLoaded = 0, animTotal = 0;
+for (const mv of Object.keys(MANIFEST)) {
+  ANIM[mv] = [];
+  for (let i = 0; i < MANIFEST[mv].n; i++) {
+    animTotal++;
+    const im = new Image();
+    im.onload = im.onerror = () => { animLoaded++; };
+    im.src = 'assets/anim/' + mv + '/f' + String(i).padStart(3, '0') + '.webp';
+    ANIM[mv].push(im);
+  }
+}
 /* cloud platform art: measured surface line (fraction of drawn height) + aspect */
 const CLOUDS = {
   '01':{surf:0.071, asp:0.264}, '11':{surf:0.191, asp:0.276}, '14':{surf:0.048, asp:0.262},
@@ -81,7 +467,8 @@ const WISPY = ['06','13','19','22'];
 Object.keys(CLOUDS).concat(WISPY).forEach(n => loadImg('cloud'+n, 'assets/cloud-' + n + '.png'));
 
 /* ---------- world constants (measured) ---------- */
-const CHAR_H = 320;              // 6lade standing height, native sprite units
+const CHAR_H = 320;              // 6lade standing height in world units
+const PX2U = CHAR_H / 400;          // the renders' canon: figure is 400 px tall
 const GRAV = 5200;               // units / s^2
 const BAND_Y = [0, -170, -340];  // LOW / MID / HIGH platform heights (relative)
 const GAP = { TAP: 250, HOLD: 430, FULL: 590 };
@@ -184,18 +571,18 @@ function resetWorld() {
 }
 
 /* ---------- move pool (universal — same for every character) ----------
-   Keith's curation 2026-11-05: OUT jumping punch + jump attack.
-   IN: basic, arms open, jump over, slam, run & jump, dive-roll, roll dodges,
-   flying kick, flip. Demo v1 animates the pool with the cel poses + spins. */
+   Keith's curation: OUT jumping punch, jump attack, flying/jump kick
+   (2026-11-05) and slam + jump over (2026-11-06, 'those look wrong').
+   BASIC is the small hop trimmed from Arms Open (Keith 2026-11-06). */
 function pickMove(c) {
-  if (c < 0.20) return rnd(['HOP', 'HOP', 'BASIC']);
-  if (c < 0.55) return rnd(['BASIC', 'ARMS OPEN', 'RUN JUMP', 'JUMP OVER']);
-  return rnd(['DIVE-ROLL', 'ROLL DODGE', 'SLAM', 'FLIP']);
+  if (c < 0.20) return rnd(['basic', 'basic', 'armsopen']);
+  if (c < 0.55) return rnd(['basic', 'armsopen', 'armsopen']);
+  return rnd(['armsopen', 'runjump', 'diveroll', 'roll3', 'roll4']);
 }
-const MOVE_VY = { 'HOP': -1240, 'BASIC': -1660, 'ARMS OPEN': -1740, 'RUN JUMP': -1700,
-  'JUMP OVER': -1800, 'DIVE-ROLL': -1820, 'ROLL DODGE': -1760,
-  'SLAM': -1960, 'FLIP': -1900 };
+const MOVE_VY = { basic: -1560, armsopen: -1780, runjump: -1860, diveroll: -1840, roll3: -1760, roll4: -1800 };
+const MOVE_NAME = { basic: 'BASIC JUMP', armsopen: 'ARMS OPEN', runjump: 'RUN & JUMP', diveroll: 'DIVE-ROLL', roll3: 'ROLL DODGE', roll4: 'ROLL DODGE' };
 let airGrav = 1; // float baked in from the charge: longer hold = lighter gravity
+let airTotal = 1; // estimated airtime of the current jump; the sequence time-scales to it
 
 /* ---------- game flow ---------- */
 function startRun() {
@@ -229,7 +616,7 @@ function gameOver() {
 
 /* ---------- input: ONE button ---------- */
 function press() {
-  if (mode === 'title') { startRun(); return; }
+  if (mode === 'title') { if (animLoaded >= animTotal) startRun(); return; }
   if (mode !== 'run' || dead) return;
   held = true;
   if (grounded && charge < 0) charge = 0;
@@ -241,10 +628,11 @@ function release() {
     const c = Math.min(1, charge);
     airMove = pickMove(c); jumps++; score += 1;
     if (c >= 0.55) score += 4;
-    vy = MOVE_VY[airMove] * (airMove === 'HOP' ? (0.75 + c) : 1);
+    vy = MOVE_VY[airMove];
     airGrav = 1 - 0.32 * c;   // the hold IS the float (spec: hold = longer float)
-    airT = 0; spin = 0; grounded = null; charge = -1;
-    if (c >= 0.55) { zoom = Math.min(1.07, zoom + 0.05); flash(airMove + '!'); }
+    airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);
+    airT = 0; grounded = null; charge = -1;
+    if (c >= 0.55) { zoom = Math.min(1.07, zoom + 0.05); flash(MOVE_NAME[airMove] + '!'); }
   }
 }
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
@@ -270,12 +658,7 @@ function update(dt) {
     py = hangPlat.y + 88; vy = 0;
     if (hangT <= 0) { py = hangPlat.y; grounded = hangPlat; hangPlat = null; flash('SAVED!'); }
   } else if (!grounded) {
-    let g = GRAV * airGrav;
-    if (airMove === 'SLAM' && airT > 0.34) g *= 2.6;     // slam drops hard
-    if (airMove === 'DIVE-ROLL' && airT > 0.55) g *= 1.5;
-    vy += g * dt; py += vy * dt; airT += dt;
-    if (airMove === 'ROLL DODGE' || airMove === 'DIVE-ROLL') spin = Math.min(6.283, spin + dt * 9);
-    if (airMove === 'FLIP') spin = Math.min(6.283, spin + dt * 7.5);
+    vy += GRAV * airGrav * dt; py += vy * dt; airT += dt;
     /* landing (with 16u lip assist) */
     for (const p of plats) {
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
@@ -305,7 +688,8 @@ function update(dt) {
     py = grounded.y;
     if (px - 30 > grounded.x + grounded.len) { grounded = null; vy = 60; airMove = null; airT = 0; spin = 0; }
   }
-  if (grounded) walkT += dt * (0.9 + speed / 620);
+  if (grounded) walkT += dt;
+  if (landT > 0) landT -= dt;
   /* extend the world ahead, prune behind */
   while (worldEnd < camX + viewW + 900) nextSegment();
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
@@ -323,31 +707,32 @@ function update(dt) {
 }
 
 /* ---------- draw ---------- */
-function drawSprite(img, cx, feetY, hWorld, rot, squash) {
+function drawAnim(move, idx, cx, feetY) {
+  const m = MANIFEST[move]; if (!m) return;
+  const img = ANIM[move] && ANIM[move][idx];
   if (!img || !img.complete || !img.naturalWidth) return;
-  const w = hWorld * img.naturalWidth / img.naturalHeight;
-  ctx.save();
-  ctx.translate(cx, feetY);
-  if (rot) ctx.rotate(rot);
-  ctx.drawImage(img, -w / 2, -hWorld, w, hWorld);
-  ctx.restore();
+  const gap = m.gaps[idx];
+  /* the cell row that sits on the feet line: the baked ground line, lifted
+     whenever this frame's body reaches below it (rolls) so he rests ON the
+     surface; airborne frames keep the ground line and float naturally. */
+  const refRow = m.h - m.offset + Math.max(0, m.offset - gap);
+  ctx.drawImage(img, cx - m.w * PX2U / 2, feetY - refRow * PX2U, m.w * PX2U, m.h * PX2U);
 }
-function playerFrame() {
-  if (charge >= 0 && grounded) return { img: IMG.crouch, squash: charge };
-  if (hangPlat) return { img: IMG.crouch, squash: 0 };
+function playerAnim() {
+  if (charge >= 0 && grounded) return { move: 'run', idx: 2, dip: charge * 12 };
+  if (hangPlat) return { move: 'armsopen', idx: 5 };   // arms overhead on the lip
   if (!grounded) {
-    if (vy > 900 && airT > 0.5) return { img: IMG.hurt, rot: 0.2 };
-    switch (airMove) {
-      case 'FLIP': return { img: IMG.jump, rot: -spin };
-      case 'ROLL DODGE': case 'DIVE-ROLL': return { img: IMG.crouch, rot: spin };
-      case 'SLAM': return { img: airT < 0.34 ? IMG.crouch : IMG.special };
-      case 'ARMS OPEN': return { img: IMG.idle };
-      default: return { img: vy < 0 ? IMG.crouch : IMG.idle };
+    if (airMove) {
+      const m = MANIFEST[airMove];
+      const f = Math.min(0.999, airT / Math.max(0.2, airTotal));
+      return { move: airMove, idx: Math.floor(f * m.n) };
     }
+    /* falling without a move (walked off an edge): arms-open descent frames */
+    const m = MANIFEST.armsopen, base = Math.floor(m.n * 0.55);
+    return { move: 'armsopen', idx: base + Math.floor(airT * 10) % (m.n - base) };
   }
-  if (landT > 0) { landT -= 1 / 60; return { img: IMG.crouch }; }
-  const seq = [IMG.walk0, IMG.walk1, IMG.walk2, IMG.walk3, IMG.walk, IMG.walk1];
-  return { img: seq[Math.floor(walkT * 9) % seq.length] };
+  if (landT > 0) return { move: 'basic', idx: MANIFEST.basic.n - 3 };
+  return { move: 'run', idx: Math.floor(walkT * 30) % MANIFEST.run.n };
 }
 function draw() {
   const ph = (time % SKY_PERIOD) / SKY_PERIOD;
@@ -396,17 +781,12 @@ function draw() {
     const dh = p.len * cd.asp;
     ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
   }
-  /* player */
-  const f = playerFrame();
-  const cx = px - camX, fy = py - camY + 6;
+  /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
-    const img = IMG.idle;
-    if (img && img.naturalWidth) {
-      const w = CHAR_H * img.naturalWidth / img.naturalHeight;
-      ctx.drawImage(img, viewW / zoom * 0.5 - w / 2, viewH / zoom * 0.62 - CHAR_H, w, CHAR_H);
-    }
+    drawAnim('run', Math.floor(time * 30) % MANIFEST.run.n, viewW / zoom * 0.5, viewH / zoom * 0.62);
   } else {
-    drawSprite(f.img, cx, fy, CHAR_H * f.img.naturalHeight / 320, f.rot || 0, 0);
+    const pa = playerAnim();
+    drawAnim(pa.move, pa.idx, px - camX, py - camY + 6 + (pa.dip || 0));
   }
   ctx.restore();
 }
@@ -424,6 +804,7 @@ addEventListener('resize', resize);
 let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
+  if (mode === 'title') $('tap').textContent = animLoaded >= animTotal ? 'TAP TO START' : 'LOADING ' + Math.floor(animLoaded / Math.max(1, animTotal) * 100) + '%';
   update(dt); draw();
   requestAnimationFrame(loop);
 }
