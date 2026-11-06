@@ -69,7 +69,7 @@
 <audio id="steps" src="assets/sfx/steps.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.6 ==============================
+/* ============================== 6LOUD demo v0.8.7 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -909,8 +909,7 @@ function update(dt) {
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
   if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 150) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 8 + Math.random() * 6); } }   // foot fog — back to the v0.8.4 'perfect' rate (Keith: the constant stream choked it)
   if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.07; spawnPuff(px - 8, py + 12, 9 + Math.random() * 6); } }   // roll-landing trail — sparser
-  /* sky trail: puffs stream off him while he flips through the air (Keith 2026-11-06) */
-  if (!grounded && flipped && flipMove) { flipPuffT -= dt; if (flipPuffT <= 0) { flipPuffT = 0.04; spawnPuff(px - 6 + Math.random() * 12, py - 70 + Math.random() * 24, 8 + Math.random() * 6); } }
+  /* sky trail REMOVED at Keith's order 2026-11-06 (v0.8.7): still chopping with it in. */
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
   while (worldEnd < camX + viewW + 900) nextSegment();
