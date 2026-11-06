@@ -68,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.11 ==============================
+/* ============================== 6LOUD demo v0.9 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -561,6 +561,13 @@ const CLOUDS = {
 const LONGC = ['01','11','14','16','17','24'], ISLAND = ['02','12','18','23'];
 const WISPY = ['06','13','19','22'];
 Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n] = im; }, 'assets/cloud-' + n + '.webp', true));
+/* decorative background pack — ChatGPT sunset clouds via Keith (2026-11-06):
+   his sheet, cut + compressed by Amy; streamed in, never gates the start */
+const BGMID = ['01','08','09','10','11','13','14','16','17','18','19','22','23','24','26','27','28'];
+const BGFAR = ['02','03','04','05','06','07','12','15','20','21','25'];
+const BGIMG = {};
+BGMID.forEach(n => queueImg(im => { BGIMG['m' + n] = im; }, 'assets/bg/bgm-' + n + '.webp', false));
+BGFAR.forEach(n => queueImg(im => { BGIMG['f' + n] = im; }, 'assets/bg/bgd-' + n + '.webp', false));
 pumpQ();
 
 /* ---------- world constants (measured) ---------- */
@@ -663,9 +670,13 @@ function skyAt(ph) {
   }
   return { c: SKY_KEYS[0].c, star: 0 };
 }
-/* dressing clouds drift on their own slow parallax */
-let dress = [];
-for (let i = 0; i < 7; i++) dress.push({ img: WISPY[i % WISPY.length], x: Math.random() * 2400, y: -80 - Math.random() * 700, w: 380 + Math.random() * 300, sp: 14 + Math.random() * 22 });
+/* decorative cloud fields (ChatGPT's layering, via Keith 2026-11-06):
+   distant = blurred sprites, faint, slowest parallax; middle = crisp,
+   stronger, faster. Both span high above the top band to below the first,
+   so climbing reveals clouds above AND below. */
+let dressFar = [], dressMid = [];
+for (let i = 0; i < 6; i++) dressFar.push({ img: BGFAR[(i * 2 + 1) % BGFAR.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1750, w: 640 + Math.random() * 360 });
+for (let i = 0; i < 8; i++) dressMid.push({ img: BGMID[(i * 2) % BGMID.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1900, w: 340 + Math.random() * 280 });
 
 /* ---------- helpers ---------- */
 let puffAcc = 0, rollPuffT = 0, flipPuffT = 0;
@@ -987,14 +998,41 @@ function draw() {
   const shx = shake ? (Math.random() - 0.5) * shake : 0, shy = shake ? (Math.random() - 0.5) * shake : 0;
   ctx.translate(shx, shy);
   ctx.scale(S * zoom, S * zoom);
-  /* dressing clouds (parallax, phase-tinted) */
-  for (const d of dress) {
-    const img = IMG['cloud' + d.img];
+  /* decorative clouds — distant layer (ChatGPT: ~35% opacity, blurred,
+     very slow). The blur is BAKED into these sprites: live canvas blur on
+     a phone is how you get the chops. All layers sink into the night. */
+  const nightDim = 1 - 0.55 * sky.star;
+  for (const d of dressFar) {
+    const img = BGIMG['f' + d.img];
     if (!img || !img.naturalWidth) continue;
-    let dx = (d.x - camX * 0.25) % (viewW / zoom + 700); if (dx < -700) dx += viewW / zoom + 700;
-    const dy = d.y - camY * 0.25 + viewH / zoom * 0.55;
-    ctx.save(); ctx.globalAlpha = 0.34 + sky.star * 0.1;
-    ctx.drawImage(img, dx - 350, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+    let dx = (d.x - camX * 0.16) % (viewW / zoom + 1150); if (dx < -1150) dx += viewW / zoom + 1150;
+    const dy = d.y - camY * 0.16 + viewH / zoom * 0.55;
+    ctx.save(); ctx.globalAlpha = 0.34 * nightDim;
+    ctx.drawImage(img, dx - 575, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+  }
+  /* middle layer (ChatGPT: ~75%, crisp, slow) */
+  for (const d of dressMid) {
+    const img = BGIMG['m' + d.img];
+    if (!img || !img.naturalWidth) continue;
+    let dx = (d.x - camX * 0.38) % (viewW / zoom + 820); if (dx < -820) dx += viewW / zoom + 820;
+    const dy = d.y - camY * 0.38 + viewH / zoom * 0.55;
+    ctx.save(); ctx.globalAlpha = 0.74 * nightDim;
+    ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+  }
+  /* the cloud sea far below — the mockup's signature: big sunset clouds
+     banked along the bottom of the sky, half-parallax scroll */
+  {
+    const seaSet = ['17', '27', '26', '28', '18'];
+    const vw = viewW / zoom, vh = viewH / zoom;
+    const sw = vw * 0.46, span = sw * 0.84 * seaSet.length;
+    for (let i = 0; i < seaSet.length; i++) {
+      const img = BGIMG['m' + seaSet[i]];
+      if (!img || !img.naturalWidth) continue;
+      const sh = sw * img.naturalHeight / img.naturalWidth;
+      let sx = (i * sw * 0.84 - camX * 0.5) % span; if (sx < -sw) sx += span;
+      ctx.save(); ctx.globalAlpha = 0.96 * (1 - 0.5 * sky.star);
+      ctx.drawImage(img, sx - sw * 0.1, vh - sh * 0.66 - camY * 0.06, sw, sh); ctx.restore();
+    }
   }
   /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
