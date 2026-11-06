@@ -66,10 +66,9 @@
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
-<audio id="steps" src="assets/sfx/steps.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.7 ==============================
+/* ============================== 6LOUD demo v0.8.8 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -763,17 +762,9 @@ function renderBoard() {
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
     (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST');
 }
-/* Footsteps are BACK (Keith 2026-11-06, after the glow-puff build ran
-   smooth): a ~5s loop, louder than the first try (he couldn't hear them),
-   and they STOP every time he launches — airborne = silent. */
-const stepsEl = $('steps');
-stepsEl.volume = 0.55;
-function stepsTick() {
-  const want = mode === 'title' || (mode === 'run' && !!grounded && !dead);
-  if (want && stepsEl.paused) stepsEl.play().catch(() => {});
-  else if (!want && !stepsEl.paused) stepsEl.pause();
-  if (mode === 'run') stepsEl.playbackRate = 1 + Math.min(0.18, Math.max(0, (speed - 620) / 530) * 0.18);
-}
+/* Footsteps audio REMOVED for good (Keith 2026-11-06): his isolation
+   tests pinned the chop on the steps audio itself — every no-steps build
+   ran smooth, every steps build chopped. Music only. */
 function gameOver() {
   mode = 'over'; dead = true;
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
@@ -1072,7 +1063,7 @@ let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
-  update(dt); draw(); stepsTick();
+  update(dt); draw();
   requestAnimationFrame(loop);
 }
 resize();
