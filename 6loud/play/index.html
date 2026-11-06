@@ -57,7 +57,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.4 ==============================
+/* ============================== 6LOUD demo v0.5 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -556,7 +556,7 @@ let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
-let airGrav = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
+let airGrav = 1, airTotal = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
 let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
 let puffs = [];
@@ -694,9 +694,12 @@ function release() {
   const c = Math.min(1, pressT / CHARGE_FULL);
   vy = -(1500 + 400 * c);            // tap hop .. full launch
   airGrav = 1 - 0.30 * c;            // a longer hold floats longer
-  flipArmed = pressT >= FLIP_ARM;    // the cues ride the ground hold now
-  rollArmed = pressT >= ROLL_ARM;
-  grounded = null; airMove = 'jump'; airT = 0;
+  airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);
+  const full = pressT >= ROLL_ARM;
+  flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
+  rollArmed = flipArmed;
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0;
+  if (full) { score += 4; flash('RUN, JUMP & ROLL!'); }
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
   /* white puffs kick off the cloud at takeoff */
@@ -742,7 +745,8 @@ function update(dt) {
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
         py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
         {
-          if (rollArmed) {
+          if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
+          else if (rollArmed) {
             landMove = rnd(['roll3', 'roll4']);
             landFrom = landMove === 'roll3' ? 3 : 4; landTo = landMove === 'roll3' ? 36 : 56;
             landRate = 45; score += 2;
@@ -818,6 +822,11 @@ function playerAnim() {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
     if (flipped && flipMove && flipT < MANIFEST[flipMove].n / 30)
       return { move: flipMove, idx: Math.min(MANIFEST[flipMove].n - 1, Math.floor(flipT * 30)) };
+    if (airMove === 'runjumproll') {
+      /* the motion's own airborne span, stretched over this jump's airtime */
+      const f = Math.min(0.999, airT / Math.max(0.3, airTotal));
+      return { move: 'diveroll', idx: Math.floor(f * 28) };
+    }
     if (airMove) {
       /* takeoff: the launch bend and the arms-out rise, at true 30 fps */
       if (airT < 0.30) return { move: 'armsopen', idx: Math.min(9, Math.floor(airT * 30)) };
@@ -927,5 +936,5 @@ if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + be
 requestAnimationFrame(loop);
 </script>
 </body>
-<!-- v0.4 build -->
+<!-- v0.5 build -->
 </html>
