@@ -136,6 +136,13 @@ input[type=range]{accent-color:var(--gold)}
 .rollnote.sel{outline:2px solid #fff;outline-offset:0;z-index:4}
 .rollnote .rz{position:absolute;top:0;right:0;bottom:0;width:10px;cursor:ew-resize}
 .rollnote .rz::after{content:"";position:absolute;top:2px;bottom:2px;right:2px;width:3px;border-radius:2px;background:rgba(0,0,0,.35)}
+/* Piano roll tools (Eraser / Splitter): with a tool active the grid owns
+   the gesture — touch-action:none keeps a finger drag from scrolling the
+   roll wrap or being hijacked by the browser mid-sweep / mid-slice. */
+.rollgrid.tool-erase,.rollgrid.tool-split{touch-action:none}
+.rollgrid.tool-erase .rollnote{cursor:pointer}
+.rollgrid.tool-split .rollnote,.rollgrid.tool-split .rollcell{cursor:crosshair}
+.sliceline{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--red);box-shadow:0 0 6px rgba(0,0,0,.55);z-index:6;pointer-events:none}
 .hlabel{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:900;letter-spacing:.6px;color:var(--dim);text-transform:uppercase}
 .hlabel select{max-width:170px}
 #rollSelInfo{margin:0 0 8px;color:var(--gold);font-family:"JetBrains Mono",monospace;font-size:12px;min-height:16px}
@@ -629,11 +636,14 @@ a{color:var(--teal)}
               <option value="0.666667">1/16 triplet</option>
               <option value="0">Off (free)</option>
             </select></label>
+            <button class="btn sm on" id="rollToolDraw" title="Draw tool — tap an empty cell to add a note, drag a note to move it, drag its right edge to resize">Draw</button>
+            <button class="btn sm" id="rollToolErase" title="Eraser — tap a note to delete it, or drag across a run of notes to clear them. No long-press needed">Eraser</button>
+            <button class="btn sm" id="rollToolSplit" title="Splitter — tap a note to cut it in two at that spot, or drag a line across stacked notes to cut them all at the same column">Split</button>
             <button class="btn sm" id="btnClearRoll">Clear notes</button>
           </span>
         </h2>
         <div id="rollSelInfo">No note selected — click a note block to select it.</div>
-        <div class="small" style="margin-bottom:8px">FL-style editing: click an empty cell to add a note · drag a note to move it (up/down = pitch, auditioned as you drag on pitched channels) · drag its right edge to change its length · right-click or long-press a note to delete it. Drum channels get the same treatment — their step-grid hits show as dashed blocks and become full notes the moment you drag, resize or set their velocity. In-key rows are tinted, roots are gold, out-of-key notes flag red on the 808.</div>
+        <div class="small" style="margin-bottom:8px">FL-style editing: click an empty cell to add a note · drag a note to move it (up/down = pitch, auditioned as you drag on pitched channels) · drag its right edge to change its length · right-click or long-press a note to delete it. Drum channels get the same treatment — their step-grid hits show as dashed blocks and become full notes the moment you drag, resize or set their velocity. In-key rows are tinted, roots are gold, out-of-key notes flag red on the 808. Tools (top right of the Piano Roll): Draw is the editing above. Eraser — tap a note to delete it, or drag across a run of notes to clear them all; no long-press needed, which is the reliable way to delete on a phone browser. Splitter — tap a note to cut it in two at the tapped spot, or drag a vertical line across stacked notes to cut every note it crosses at that same column; the cut follows the Snap setting (Snap on = nearest grid line, Snap off = the exact sub-step position tapped), both halves keep the original pitch and velocity, notes too short to split are left alone, and each tap or drag is a single undo step.</div>
         <div class="rollwrap" id="rollWrap"><div class="rollgrid" id="rollGrid"></div></div>
         <div class="velwrap"><div class="vellane" id="velLane"></div></div>
         <div class="vellabel"><span>Velocity lane</span><span class="mono" id="velReadout">Drag a bar to set that note’s velocity (1–127).</span></div>
@@ -1068,9 +1078,9 @@ function scheduleStep(step, t){
   });
 }
 function scheduler(){
-  while(nextStepTime < AC.currentTime + 0.12){
+  while(nextStepTime < AC.currentTime + 0.25){ /* phone fix: 0.25 s lookahead (was 0.12) so a busy main thread can't eat the whole buffer on an iPhone */
     let t=nextStepTime; /* swing is per-channel now — applied inside scheduleStep */
-    scheduleStep(curStep, t);
+    if(t >= AC.currentTime - 0.05) scheduleStep(curStep, t); /* after a stall, stale steps are skipped silently instead of burst-firing bunched-up and late */
     uiStep=curStep;
     nextStepTime += stepDurSec();
     curStep=(curStep+1)%16; if(curStep===0){ barCount++; advanceSong(); }
@@ -1140,14 +1150,48 @@ function buildRack(){
   });
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function refreshStepLights(){
-  const nowAbs=seqBarPos*16+uiStep;
-  document.querySelectorAll("#rack .step").forEach(b=>{
-    const ch=S.channels[b.dataset.ch]; b.classList.toggle("on", !!ch.patterns[S.pattern].steps[+b.dataset.step]);
-    b.classList.toggle("now", S.playing && nowAbs===+b.dataset.step);
+/* Phone-performance fix (Keith: "really choppy on my iPhone even with just
+   1 hh loop"): the old version ran three querySelectorAll walks and toggled
+   classes on EVERY rack step, EVERY piano-roll cell (36 rows × up to 64
+   steps ≈ 2,300 elements) and every slice step on every step change —
+   thousands of DOM touches ~10×/s, which starved the 25 ms scheduler timer
+   on phone CPUs and ate the lookahead. Now the element lists are cached
+   (rebuilt only when a container's structure changes or its elements are
+   replaced), the "now" highlight moves by touching only the elements that
+   were lit plus the ones lighting up, the rack's "on" state still resyncs
+   from pattern data on every call over the cached list, and when none of
+   the three grids is on screen (e.g. playing from the Edit or Modules
+   view) the whole refresh is skipped — switching views re-runs it. */
+let _rslSig="", _rslRack=[], _rslRollByStep={}, _rslSlice=[], _rslLit=[], _rslFirst=null;
+function _rslRebuild(rack, grid, slice){
+  _rslRack=Array.prototype.slice.call(rack.querySelectorAll(".step"));
+  _rslRollByStep={};
+  Array.prototype.forEach.call(grid.querySelectorAll(".rollcell"), c=>{
+    const s=c.dataset.step; (_rslRollByStep[s]||(_rslRollByStep[s]=[])).push(c);
   });
-  document.querySelectorAll("#rollGrid .rollcell").forEach(c=>{ c.classList.toggle("now", S.playing && nowAbs===+c.dataset.step); });
-  document.querySelectorAll("#sliceSteps .step").forEach(b=>{ b.classList.toggle("now", S.playing && seqBarPos===0 && uiStep===+b.dataset.step); });
+  _rslSlice=slice? Array.prototype.slice.call(slice.querySelectorAll(".step")) : [];
+  _rslFirst=_rslRack[0]||(grid.querySelector(".rollcell"))||_rslSlice[0]||null;
+  _rslLit=[];
+}
+function refreshStepLights(){
+  const rack=$("rack"), grid=$("rollGrid"), slice=$("sliceSteps");
+  if(!rack || !grid) return;
+  const sig=S.order.length+"/"+totalSteps()+"/"+(S.rollChannel||"")+"/"+grid.childElementCount+"/"+(slice? slice.childElementCount : -1);
+  if(sig!==_rslSig || (_rslFirst && !_rslFirst.isConnected)){ _rslSig=sig; _rslRebuild(rack, grid, slice); }
+  if(rack.getClientRects().length===0 && grid.getClientRects().length===0 && (!slice || slice.getClientRects().length===0)){
+    for(let i=0;i<_rslLit.length;i++) _rslLit[i].classList.remove("now");
+    _rslLit=[]; return; /* no step grid on screen — nothing to paint */
+  }
+  const nowAbs=seqBarPos*16+uiStep;
+  for(let i=0;i<_rslRack.length;i++){ const b=_rslRack[i]; const ch=S.channels[b.dataset.ch];
+    if(ch) b.classList.toggle("on", !!ch.patterns[S.pattern].steps[+b.dataset.step]); }
+  for(let i=0;i<_rslLit.length;i++) _rslLit[i].classList.remove("now");
+  _rslLit=[];
+  if(S.playing){
+    for(let i=0;i<_rslRack.length;i++){ const b=_rslRack[i]; if(+b.dataset.step===nowAbs){ b.classList.add("now"); _rslLit.push(b); } }
+    const cells=_rslRollByStep[nowAbs]; if(cells) for(let i=0;i<cells.length;i++){ cells[i].classList.add("now"); _rslLit.push(cells[i]); }
+    if(seqBarPos===0) for(let i=0;i<_rslSlice.length;i++){ const b=_rslSlice[i]; if(+b.dataset.step===uiStep){ b.classList.add("now"); _rslLit.push(b); } }
+  }
 }
 /* MPC Loops fix: this loop used to allocate fresh analyser arrays and re-scan
    every step light on EVERY frame, playing or not — the same main-thread
@@ -1525,7 +1569,7 @@ function scaleSet(){ const root=S.projectKey.root, mode=S.projectKey.mode;
      blocks on the channel's root row. Any real edit (drag, resize,
      velocity) materializes a step hit into a full note and clears the
      step, so after an edit there is one source of truth. */
-var rollEdit={ snap:1, sel:null, geom:null, items:[] };
+var rollEdit={ snap:1, sel:null, geom:null, items:[], tool:"draw" };
 function rollSnapPos(p){ if(!rollEdit.snap) return Math.round(p*10000)/10000;
   return Math.round((Math.round(p/rollEdit.snap)*rollEdit.snap)*10000)/10000; }
 function rollNotePos(n){ return n.step+(n.off||0); }
@@ -1607,6 +1651,7 @@ function setRollChannel(id, jump){
 }
 function openRollFor(id){ selectChannel(id); setRollChannel(id, true); }
 function rollCellAdd(midi, s, ev){
+  if(rollEdit.tool && rollEdit.tool!=="draw") return; /* Eraser / Splitter own the grid — an empty-cell tap adds nothing */
   const ch=S.channels[S.rollChannel], pat=ch.patterns[S.pattern];
   let pos=s;
   if(rollEdit.snap && rollEdit.snap<1 && ev && ev.offsetX!=null && ev.currentTarget && ev.currentTarget.offsetWidth)
@@ -1675,9 +1720,110 @@ function rollBindNote(d, it, rows){
     d.addEventListener("pointercancel", onUp);
   });
 }
+/* ---------------- Piano roll tools: Draw / Eraser / Splitter ----------------
+   Keith (2026-11-06): long-press delete doesn't work well in a phone
+   browser, so the roll gets real tools. Draw keeps the FL editing above.
+   Eraser: tap deletes on the spot, drag sweeps a run. Splitter works
+   like FL Studio's slice tool: tap a note to cut it at the tapped
+   position, drag to draw a vertical slice line that cuts EVERY note it
+   crosses at that same column. Cuts honour Snap (on = nearest grid
+   position, off = exact free sub-step position), both halves keep the
+   original pitch / velocity / properties, notes too short to split are
+   left alone, and a whole gesture lands as ONE history entry: every
+   mutation happens in a single synchronous pass before the one
+   rollAfterEdit → markDirty, which the snapshot history debounces
+   into a single undo point. */
+function rollSetTool(t, silent){
+  rollEdit.tool=t;
+  [["rollToolDraw","draw"],["rollToolErase","erase"],["rollToolSplit","split"]].forEach(pair=>{
+    const b=$(pair[0]); if(b) b.classList.toggle("on", t===pair[1]);
+  });
+  const grid=$("rollGrid");
+  if(grid){ grid.classList.toggle("tool-erase", t==="erase"); grid.classList.toggle("tool-split", t==="split"); }
+  if(silent) return;
+  if(t==="erase") setStatus("Piano Roll — Eraser: tap a note to delete it, or drag across a run of notes to clear them. No holding needed.");
+  else if(t==="split") setStatus("Piano Roll — Splitter: tap a note to cut it at that spot, or drag a line across stacked notes to cut them all at the same column. Cuts follow the Snap setting.");
+  else setStatus("Piano Roll — Draw: tap an empty cell to add a note, drag a note to move it, drag its right edge to resize it.");
+}
+function rollSliceItems(list, cut){
+  const ch=S.channels[S.rollChannel]; if(!ch) return;
+  const pat=ch.patterns[S.pattern];
+  const minSeg= rollEdit.snap? rollEdit.snap : 0.1;
+  let count=0;
+  list.forEach(it=>{
+    const start=it.pos, end=it.pos+(it.len||1);
+    if(cut-start<minSeg-1e-9 || end-cut<minSeg-1e-9) return; /* cut outside the note, or a half would come out shorter than the minimum — left alone */
+    let n=null;
+    if(it.kind==="step"){ n=rollMaterialize(it, pat); }
+    else if(it.kind==="hit"){
+      const arr=pat.hits||[]; const i=arr.indexOf(it.ref); if(i<0) return; arr.splice(i,1);
+      n={ step:0, midi:it.midi, vel:it.vel }; rollSetPos(n, it.pos);
+      if(it.len && Math.abs(it.len-1)>1e-9) n.len=Math.round(it.len*10000)/10000;
+      pat.notes.push(n); it.kind="note"; it.ref=n;
+      if(ch.type==="drum" && pat.steps[Math.floor(it.pos)]) pat.steps[Math.floor(it.pos)]=0;
+    } else n=it.ref;
+    if(!n) return;
+    const firstLen=Math.round((cut-start)*10000)/10000, secondLen=Math.round((end-cut)*10000)/10000;
+    if(Math.abs(firstLen-1)>1e-9) n.len=firstLen; else delete n.len;
+    const n2={ step:0, midi:it.midi, vel:it.vel }; rollSetPos(n2, cut);
+    if(Math.abs(secondLen-1)>1e-9) n2.len=secondLen;
+    pat.notes.push(n2);
+    count++;
+  });
+  if(!count){ setStatus("Splitter: nothing cut — the cut has to land inside a note, with room on both sides."); return; }
+  rollAfterEdit(ch);
+  setStatus("Split "+count+" note"+(count===1?"":"s")+" at step "+(Math.floor(cut)+1)+((cut%1)>0.001? " + "+(cut%1).toFixed(2).replace(/^0/,"") : "")+" on "+ch.name+" — one edit, so one Undo brings it all back.");
+}
+function rollPosAt(grid, gg, clientX){
+  const r=grid.getBoundingClientRect();
+  return clamp((clientX-r.left-gg.x0)/gg.pitchX, 0, 16*seqBarsOf(S.pattern));
+}
+function rollSplitGesture(e){
+  const grid=$("rollGrid"); if(!grid) return;
+  const gg=rollEdit.geom||{ x0:52, pitchX:24 };
+  const noteEl= e.target && e.target.closest? e.target.closest(".rollnote") : null;
+  const targetItem= noteEl? noteEl._item : null;
+  const startX=e.clientX, startY=e.clientY;
+  let moved=false, cut=rollSnapPos(rollPosAt(grid, gg, e.clientX));
+  const line=document.createElement("div"); line.className="sliceline";
+  line.style.left=(gg.x0+cut*gg.pitchX)+"px";
+  grid.appendChild(line);
+  const mv=ev=>{
+    if(Math.abs(ev.clientX-startX)+Math.abs(ev.clientY-startY)>6) moved=true;
+    cut=rollSnapPos(rollPosAt(grid, gg, ev.clientX));
+    line.style.left=(gg.x0+cut*gg.pitchX)+"px";
+  };
+  const up=()=>{
+    document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up);
+    line.remove();
+    if(!moved){
+      if(targetItem) rollSliceItems([targetItem], cut);
+      else setStatus("Splitter: tap on a note to cut it, or drag a line across stacked notes to cut them all at one column.");
+    } else {
+      rollSliceItems(rollEdit.items.filter(it=> cut>it.pos && cut<it.pos+(it.len||1)), cut);
+    }
+  };
+  document.addEventListener("pointermove", mv);
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointercancel", up);
+}
+function rollEraseGesture(e){
+  const hitAt=ev=>{
+    const el=document.elementFromPoint(ev.clientX, ev.clientY);
+    const n= el && el.closest? el.closest(".rollnote") : null;
+    if(n && n._item) rollDeleteItem(n._item);
+  };
+  hitAt(e);
+  const mv=ev=>hitAt(ev);
+  const up=()=>{ document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up); };
+  document.addEventListener("pointermove", mv);
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointercancel", up);
+}
 function rollBindVelBar(b, it){
   b.addEventListener("pointerdown", e=>{
     e.preventDefault(); e.stopPropagation();
+    if(rollEdit.tool==="erase"){ rollDeleteItem(it); return; }
     rollSelect(it);
     const lane=$("velLane"); if(!lane) return; const rect=lane.getBoundingClientRect();
     let changed=false;
@@ -1770,7 +1916,7 @@ function buildRoll(){
     if(geom){ d.style.left=(geom.x0+it.pos*geom.pitchX)+"px"; d.style.top=geom.rowTops[ri]+"px";
       d.style.width=Math.max(6, it.len*geom.pitchX-2)+"px"; d.style.height=geom.cellH+"px"; }
     else { d.style.left=(52+it.pos*24)+"px"; d.style.top=(30+ri*19)+"px"; d.style.width=Math.max(6, it.len*24-2)+"px"; d.style.height="17px"; }
-    d.title=(ch.type==="chop"? "Slice "+(it.midi+1) : noteName(it.midi))+" · step "+(Math.floor(it.pos)+1)+" · vel "+rollVel127(it)+" — drag to move, right edge to resize, right-click / long-press to delete";
+    d.title=(ch.type==="chop"? "Slice "+(it.midi+1) : noteName(it.midi))+" · step "+(Math.floor(it.pos)+1)+" · vel "+rollVel127(it)+(rollEdit.tool==="erase"? " — tap to erase" : rollEdit.tool==="split"? " — tap to split here, or drag a line to split every note it crosses" : " — drag to move, right edge to resize, right-click / long-press to delete");
     const rz=document.createElement("span"); rz.className="rz"; d.appendChild(rz);
     d._item=it;
     rollBindNote(d, it, rows);
@@ -1790,6 +1936,25 @@ function buildRoll(){
   if(snapEl) snapEl.onchange=()=>{ rollEdit.snap=parseFloat(snapEl.value)||0;
     setStatus("Piano roll snap: "+snapEl.options[snapEl.selectedIndex].text+(rollEdit.snap? " — added notes, drags and resizes land on that grid." : " — free micro-timing: notes keep sub-step positions and playback honors them.")); };
   $("btnClearRoll").onclick=()=>{ S.channels[S.rollChannel].patterns[S.pattern].notes=[]; if(rollEdit.sel && rollEdit.sel.kind==="note") rollEdit.sel=null; buildRoll(); buildSliceSteps(); markDirty(); };
+  /* Piano roll tools: the Draw / Eraser / Split buttons, plus ONE
+     capture-phase pointerdown on the grid. With Eraser or Split active
+     it claims the gesture (stopPropagation in the capture phase) before
+     the notes' own Draw handlers can start a move / long-press, and
+     runs the tool gesture instead. The listener lives on the grid
+     element itself, so buildRoll's innerHTML rebuilds never drop it. */
+  [["rollToolDraw","draw"],["rollToolErase","erase"],["rollToolSplit","split"]].forEach(pair=>{
+    const b=$(pair[0]); if(b) b.onclick=()=>rollSetTool(pair[1]);
+  });
+  const rollGridEl=$("rollGrid");
+  if(rollGridEl && !rollGridEl._toolBound){ rollGridEl._toolBound=true;
+    rollGridEl.addEventListener("pointerdown", e=>{
+      const t=rollEdit.tool;
+      if(!t || t==="draw" || e.button===2) return;
+      e.preventDefault(); e.stopPropagation();
+      if(t==="erase") rollEraseGesture(e); else if(t==="split") rollSplitGesture(e);
+    }, true);
+  }
+  rollSetTool("draw", true);
   document.addEventListener("keydown", e=>{
     if((e.key==="Delete"||e.key==="Backspace") && rollEdit.sel){
       const t=e.target, tag=((t&&t.tagName)||"").toLowerCase();
@@ -2776,6 +2941,7 @@ function updateLayoutInfo(){
 let _wavePhLastX=null; /* MPC Loops fix: repaint the playhead only when it crosses into a new pixel */
 function updatePlayhead(){
   const ph=$("layoutPlayhead"); if(!ph) return;
+  if(ph.getClientRects().length===0){ _wavePhLastX=null; return; } /* phone fix: layout view off-screen — skip the per-frame clientWidth read that forced reflow from every tab */
   if(!S.playing || playT0==null || typeof AC==="undefined" || !AC){ if(_wavePhLastX!==null){ _wavePhLastX=null; ph.style.opacity="0"; } return; }
   const pos=(AC.currentTime-playT0)/stepDurSec(); if(pos<0){ if(_wavePhLastX!==null){ _wavePhLastX=null; ph.style.opacity="0"; } return; }
   const ts=totalSteps(), tl=((pos%ts)+ts)%ts;
@@ -6094,10 +6260,10 @@ function blStartRollPreview(){
   blRpTimer=setInterval(()=>{
     const ch2=S.channels[S.rollChannel];
     if(!ch2 || !liveNodes[ch2.id]){ blStopRollPreview(); return; }
-    while(blRpNext < AC.currentTime+0.12){
+    while(blRpNext < AC.currentTime+0.25){ /* phone fix: same lookahead + stale-skip as the main scheduler */
       const pat=ch2.patterns[S.pattern], step=blRpStep;
       let t=blRpNext; if(step%2===1) t+=blSwingOf(ch2)*stepDurSec();
-      if(pat){
+      if(pat && blRpNext >= AC.currentTime-0.05){
         const prev=BL_T; BL_T=blRollT();
         try{
           if(pat.steps[step]) triggerChannel(AC, liveNodes[ch2.id], ch2, t, {vel:0.92, fromStep:true});
@@ -6778,7 +6944,7 @@ setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start b
     mxWarmth:"Master warmth — console", mxSuiteSel:"Master suite preset", mxSuiteBypass:"Master suite bypass", mxFader:"Master fader" };
   function labelFor(el){
     if(!el || !el.closest) return null;
-    if(el.closest(".rollnote")) return "Piano roll — note moved / resized";
+    if(el.closest(".rollnote")) return (typeof rollEdit!=="undefined" && rollEdit.tool==="split")? "Piano roll — split note" : (typeof rollEdit!=="undefined" && rollEdit.tool==="erase")? "Piano roll — erase note" : "Piano roll — note moved / resized";
     if(el.closest(".velbar")) return "Piano roll — velocity";
     if(el.closest(".wclip")) return "Wave clip — move / trim";
     if(el.closest(".aclip")) return "Audio clip — move / trim";
@@ -8983,7 +9149,7 @@ setPlaying=function(on){
 const _lpSchedTailPrev=scheduler;
 scheduler=function(){
   let stopOnce=false;
-  while(nextStepTime < AC.currentTime + 0.12){
+  while(nextStepTime < AC.currentTime + 0.25){ /* phone fix: 0.25 s lookahead (was 0.12) — see the base scheduler note */
     if(lpLoopActive()){
       const arrNext=barCount*16+curStep;
       if(arrNext>=lpOutAudio()){
@@ -8996,7 +9162,7 @@ scheduler=function(){
       }
     }
     let t=nextStepTime; /* swing is per-channel now — applied inside scheduleStep */
-    scheduleStep(curStep, t);
+    if(t >= AC.currentTime - 0.05) scheduleStep(curStep, t); /* stale steps after a main-thread stall are skipped, not burst-fired late */
     uiStep=curStep;
     nextStepTime += stepDurSec();
     curStep=(curStep+1)%16; if(curStep===0){ barCount++; advanceSong(); }
@@ -9028,18 +9194,30 @@ currentTlStep=function(){
   }
   return _lpCtsPrev();
 };
-let lpLastPlayGlyph=null;
+let lpLastPlayGlyph=null, lpLastPhX=-1;
 const _lpPphPrev=ptPositionPlayhead;
 ptPositionPlayhead=function(){
   const ph=document.getElementById("ptPlayhead"); if(!ph) return;
-  if(!S.playing || playT0==null || typeof AC==="undefined" || !AC){ ph.style.opacity="0"; lpSyncPlayGlyph(); return; }
-  if(lpFirstStepTime!=null && AC.currentTime<lpFirstStepTime-0.001){ ph.style.opacity="0"; return; }
-  const g=ptGeom(); if(!g || !g.ts){ ph.style.opacity="0"; return; }
+  /* Phone fix: this runs on every animation frame from EVERY view, and the
+     old body read layout geometry (ptGeom → clientWidth) then wrote
+     style.left unconditionally — a forced full-page reflow 60×/s that
+     starved the audio scheduler on iPhones. When the Edit view isn't on
+     screen there is nothing to draw, so bail before any geometry read;
+     when it is, only write the position when it crosses a new pixel. The
+     bar-position readout wrapper still runs either way. */
+  if(ph.getClientRects().length===0){ lpSyncPlayGlyph(); return; }
+  if(!S.playing || playT0==null || typeof AC==="undefined" || !AC){ if(ph.style.opacity!=="0") ph.style.opacity="0"; lpLastPhX=-1; lpSyncPlayGlyph(); return; }
+  if(lpFirstStepTime!=null && AC.currentTime<lpFirstStepTime-0.001){ if(ph.style.opacity!=="0") ph.style.opacity="0"; return; }
+  const g=ptGeom(); if(!g || !g.ts){ if(ph.style.opacity!=="0") ph.style.opacity="0"; return; }
   const pos=currentTlStep();
   const x=g.headW + pos/g.ts*(g.w-g.headW);
-  ph.style.opacity="1"; ph.style.left=x+"px";
-  const vp=$("ptViewport");
-  if(vp && S.tlFollow!==false && x-vp.scrollLeft>vp.clientWidth-30) vp.scrollLeft=Math.max(0, x-g.headW-60);
+  if(ph.style.opacity!=="1") ph.style.opacity="1";
+  const xi=Math.round(x);
+  if(xi!==lpLastPhX){
+    lpLastPhX=xi; ph.style.left=xi+"px";
+    const vp=$("ptViewport");
+    if(vp && S.tlFollow!==false && x-vp.scrollLeft>vp.clientWidth-30) vp.scrollLeft=Math.max(0, x-g.headW-60);
+  }
   lpSyncPlayGlyph();
 };
 function lpSyncPlayGlyph(){
@@ -13026,15 +13204,48 @@ syncFxPanel=function(){
 })();
 
 /* ---------------- 2 · Step sequencer → top of the Piano Roll ---------------- */
-refreshStepLights=function(){
-  const nowAbs=seqBarPos*16+uiStep;
-  document.querySelectorAll("#rackSteps .step").forEach(b=>{
-    const ch=S.channels[b.dataset.ch]; if(!ch) return;
-    b.classList.toggle("on", !!ch.patterns[S.pattern].steps[+b.dataset.step]);
-    b.classList.toggle("now", S.playing && nowAbs===+b.dataset.step);
+/* Phone-performance fix (Keith: "really choppy on my iPhone even with just
+   1 hh loop"): this reassignment is the LIVE step-light refresh, and the old
+   body re-ran three querySelectorAll walks and toggled classes on every
+   step button and every piano-roll cell (36 rows × up to 64 steps ≈ 2,300
+   elements) on every step change — thousands of DOM touches ~10×/s that
+   starved the scheduler timer on phone CPUs. Same treatment as the base
+   version: cached element lists (rebuilt only when a container's structure
+   changes or its elements are replaced), the "now" highlight moved by
+   touching only the previously lit and newly lit elements, the rack "on"
+   state still resynced from pattern data on every call over the cached
+   list, and a full skip when no step grid is on screen. */
+let _rsl2Sig="", _rsl2Steps=[], _rsl2RollByStep={}, _rsl2Slice=[], _rsl2Lit=[], _rsl2First=null;
+function _rsl2Rebuild(box, grid, slice){
+  _rsl2Steps=box? Array.prototype.slice.call(box.querySelectorAll(".step")) : [];
+  _rsl2RollByStep={};
+  Array.prototype.forEach.call(grid.querySelectorAll(".rollcell"), c=>{
+    const s=c.dataset.step; (_rsl2RollByStep[s]||(_rsl2RollByStep[s]=[])).push(c);
   });
-  document.querySelectorAll("#rollGrid .rollcell").forEach(c=>{ c.classList.toggle("now", S.playing && nowAbs===+c.dataset.step); });
-  document.querySelectorAll("#sliceSteps .step").forEach(b=>{ b.classList.toggle("now", S.playing && seqBarPos===0 && uiStep===+b.dataset.step); });
+  _rsl2Slice=slice? Array.prototype.slice.call(slice.querySelectorAll(".step")) : [];
+  _rsl2First=_rsl2Steps[0]||(grid.querySelector(".rollcell"))||_rsl2Slice[0]||null;
+  _rsl2Lit=[];
+}
+refreshStepLights=function(){
+  const box=$("rackSteps"), grid=$("rollGrid"), slice=$("sliceSteps");
+  if(!grid) return;
+  const sig=(box? box.childElementCount : -1)+"/"+S.order.length+"/"+totalSteps()+"/"+(S.rollChannel||"")+"/"+grid.childElementCount+"/"+(slice? slice.childElementCount : -1);
+  if(sig!==_rsl2Sig || (_rsl2First && !_rsl2First.isConnected)){ _rsl2Sig=sig; _rsl2Rebuild(box, grid, slice); }
+  const boxShown=!!(box && box.getClientRects().length>0), gridShown=grid.getClientRects().length>0, sliceShown=!!(slice && slice.getClientRects().length>0);
+  if(!boxShown && !gridShown && !sliceShown){
+    for(let i=0;i<_rsl2Lit.length;i++) _rsl2Lit[i].classList.remove("now");
+    _rsl2Lit=[]; return; /* no step grid on screen — nothing to paint */
+  }
+  const nowAbs=seqBarPos*16+uiStep;
+  for(let i=0;i<_rsl2Steps.length;i++){ const b=_rsl2Steps[i]; const ch=S.channels[b.dataset.ch]; if(!ch) continue;
+    b.classList.toggle("on", !!ch.patterns[S.pattern].steps[+b.dataset.step]); }
+  for(let i=0;i<_rsl2Lit.length;i++) _rsl2Lit[i].classList.remove("now");
+  _rsl2Lit=[];
+  if(S.playing){
+    for(let i=0;i<_rsl2Steps.length;i++){ const b=_rsl2Steps[i]; if(+b.dataset.step===nowAbs){ b.classList.add("now"); _rsl2Lit.push(b); } }
+    const cells=_rsl2RollByStep[nowAbs]; if(cells) for(let i=0;i<cells.length;i++){ cells[i].classList.add("now"); _rsl2Lit.push(cells[i]); }
+    if(seqBarPos===0) for(let i=0;i<_rsl2Slice.length;i++){ const b=_rsl2Slice[i]; if(+b.dataset.step===uiStep){ b.classList.add("now"); _rsl2Lit.push(b); } }
+  }
 };
 function blSynthBadgeEl(ch){
   if(!ch || !ch.synthMap) return null;
@@ -18253,6 +18464,147 @@ if(typeof triggerChannel==="function"){
     return _blTrigEnsurePrev(ctx, bundle, ch, t, opts);
   };
 }
+</script>
+<style>
+/* ================================================================
+   MOBILE TITLE CARD SCROLLS AWAY + HELP PANEL (Keith, 2026-11-06)
+   The title/transport card (.transport — BEAT LAB wordmark, project
+   name, BPM, status line) sticks under the fixed view-tab bar at
+   every width today, so on a phone it eats a tall band of screen
+   for the whole session. On phone / small-tablet widths it stops
+   sticking and scrolls away with the page like normal content; the
+   fixed tab bar above it (transport buttons + view tabs) is
+   untouched, and desktop keeps the stuck card exactly as before.
+   ================================================================ */
+@media (max-width:768px){
+  .transport{position:static !important;top:auto !important}
+}
+#blHelpPanel .blhelpitem{border-top:1px solid var(--line);padding:10px 0}
+#blHelpPanel .blhelpitem:first-of-type{border-top:none;padding-top:2px}
+#blHelpPanel .blhelpitem h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+#blHelpPanel .blhelptext{font-size:12.5px;line-height:1.55;color:var(--dim)}
+#blHelpPanel .blhelptext b{color:var(--ink)}
+#blHelpPanel .blhelpempty{font-size:12.5px;color:var(--dim)}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   ALL HELP TEXT → OPTIONS → HELP (Keith, 2026-11-06)
+   Every static explanatory / instructional text block in the app —
+   the .small paragraphs on the panels, the Sound Browser's srcbox,
+   the footer note, the History note, the Modules / Triton intros,
+   the FX / Master side-notes and the rest — is collected into one
+   Help panel on the Options tab, grouped under the panel it came
+   from, and removed from its old spot. What stays behind is only
+   what is NOT static help:
+   · anything with an id (live readouts / status lines JS writes to:
+     #ptInfo, #ptSelInfo, #rollSelInfo, #pvTarget, #weDur,
+     #midiStatus, #starterInfo, #statusLine, module blockstats…)
+   · anything holding a control (labels wrapped around inputs,
+     octave clusters, selects…)
+   · short labels and dynamic bits under 38 characters
+   · dropzones keep working as drop targets: their long text is
+     copied into Help and the zone itself keeps a short label.
+   Panels re-render as you work (FX notes, module intros, master
+   notes), so a MutationObserver re-runs the sweep; a text-key set
+   keeps Help free of duplicates — re-rendered help is stripped
+   again without being added twice.
+   Completion pass: the Sampler tab's MPC Loops texts use .sub /
+   .note classes (not .small), and two of its help blocks hide
+   behind ids — #mlGridStat is pure static instruction (no script
+   ever writes to it) and #mlDrop is its drop target; both join
+   Help here, the drop target keeping a short label like the wave
+   editor's dropzone. The Linear Clip panel's per-clip note stays:
+   its tail carries live source-window times, not static help.
+   ================================================================ */
+(function blHelpRelocation(){
+  var holder=document.getElementById("blViewOptions");
+  var wrap=document.querySelector(".wrap");
+  var panel=document.createElement("section");
+  panel.className="panel"; panel.id="blHelpPanel";
+  panel.innerHTML="<h2>Help</h2>";
+  var body=document.createElement("div"); body.id="blHelpBody"; panel.appendChild(body);
+  var empty=document.createElement("div"); empty.className="blhelpempty"; empty.textContent="No help entries."; body.appendChild(empty);
+  if(holder) holder.appendChild(panel); else if(wrap) wrap.appendChild(panel);
+
+  var seen={};
+  function topicOf(el){
+    if(el.classList.contains("footer-note")) return "Getting started & shortcuts";
+    if(el.classList.contains("srcbox")) return "Sound Browser";
+    if(el.classList.contains("histnote")) return "History & autosave";
+    if(el.classList.contains("dropzone")) return "Wave Editor";
+    var t="";
+    var panelEl=el.closest("section.panel");
+    if(panelEl){ var h2=panelEl.querySelector("h2"); if(h2) t=(h2.textContent||"").replace(/\s+/g," ").trim(); }
+    var ctl=el.closest(".ctl, .fx, .mgroup");
+    if(ctl){ var h3=ctl.querySelector("h3"); if(h3) t=(t? t+" — ":"")+(h3.textContent||"").replace(/\s+/g," ").trim(); }
+    return (t||"General").slice(0,64);
+  }
+  function addHelp(topic, html, key){
+    if(seen[key]) return;
+    seen[key]=1;
+    if(empty.parentNode) empty.remove();
+    var item=document.createElement("div"); item.className="blhelpitem";
+    var h=document.createElement("h3"); h.textContent=topic; item.appendChild(h);
+    var d=document.createElement("div"); d.className="blhelptext"; d.innerHTML=html; item.appendChild(d);
+    body.appendChild(item);
+  }
+  var sweeping=false;
+  function sweep(){
+    if(sweeping) return; sweeping=true;
+    try{
+      var els=Array.prototype.slice.call(document.querySelectorAll("div.small, span.small, .srcbox, .footer-note, .histnote, .dropzone, #page-sampler .sub, #page-sampler .note, #mlGridStat, #mlDrop"));
+      els.forEach(function(el){
+        if(!el.parentNode) return;
+        if(el.closest("#blHelpPanel")) return;
+        if(el.closest(".histlog, .log, #playlistList, #blModal")) return;
+        if(el.classList.contains("blockstat")||el.classList.contains("editstate")||el.classList.contains("savestate")) return;
+        var text=(el.textContent||"").replace(/\s+/g," ").trim();
+        if(el.id==="mlDrop"){
+          if(text.length>=40){ addHelp("Sampler — MPC Loops", el.innerHTML, "dz:mlDrop"); el.textContent="Drop an audio file here — or tap to pick one"; }
+          return;
+        }
+        if(el.id==="mlGridStat"){
+          if(text.length>=38){ addHelp("Sampler — MPC Loops", el.innerHTML, "mlgrid:"+text.slice(0,140)); el.textContent=""; el.style.display="none"; }
+          return;
+        }
+        if(el.closest("#linClipPanel") && text.indexOf("Drop a vocal acapella")!==0) return;
+        if(el.classList.contains("dropzone")){
+          if(text.length>=40){ addHelp(topicOf(el), el.innerHTML, "dz:"+text.slice(0,140)); el.textContent="Drop an audio file here"; }
+          return;
+        }
+        if(el.id) return;
+        if(el.querySelector("input, select, textarea, button")) return;
+        if(text.length<38) return;
+        addHelp(topicOf(el), el.innerHTML, text.slice(0,140));
+        el.remove();
+      });
+    }catch(e){}
+    sweeping=false;
+  }
+  window.blCollectHelp=sweep;
+  sweep();
+  setTimeout(sweep,600); setTimeout(sweep,1800);
+  var pending=null;
+  function queueSweep(){
+    if(pending) return;
+    pending=setTimeout(function(){ pending=null;
+      /* phone fix: during playback the position readout's text changes
+         retrigger this observer (and the sweep's own removals do too), so
+         the whole-document scan re-ran ~3×/s mid-playback and competed
+         with the audio scheduler. Help collection simply waits until the
+         transport stops — the sweep still lands, just not mid-loop. */
+      var playing=false; try{ playing=!!S.playing; }catch(e){}
+      if(playing){ queueSweep(); return; }
+      sweep();
+    },300);
+  }
+  if(window.MutationObserver){
+    var mo=new MutationObserver(queueSweep);
+    mo.observe(document.body,{childList:true,subtree:true});
+  }
+})();
+setStatus("Beat Lab ready — help text lives under Options → Help; on phones the BPM title card scrolls away with the page.");
 </script>
 </body>
 </html>
