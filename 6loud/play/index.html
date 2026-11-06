@@ -66,7 +66,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.12 ==============================
+/* ============================== 6LOUD demo v0.13 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -86,6 +86,7 @@ const music = $('music');
    changes volume at the trigger. The <audio> element remains only as a
    no-WebAudio fallback (daylight track, no heat switch). */
 let actx = null, bufD = null, bufB = null, srcD = null, srcB = null, gainD = null, gainB = null, heatOn = false;
+let champMode = false, targetFt = 0;   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going */
 try {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (AC) {
@@ -95,20 +96,26 @@ try {
     loadBuf('assets/battle1000.mp3', b => { bufB = b; });
   }
 } catch (e) { actx = null; }
-function stopTracks() {
-  [srcD, srcB].forEach(x => { if (x) { try { x.stop(); } catch (e) {} } });
-  srcD = srcB = null;
-}
 function startTracks() {
-  if (!actx || !bufD) { music.currentTime = 0; music.play().catch(() => {}); return; }
-  stopTracks();
-  gainD = actx.createGain(); gainD.gain.value = 1; gainD.connect(actx.destination);
-  srcD = actx.createBufferSource(); srcD.buffer = bufD; srcD.loop = true; srcD.connect(gainD); srcD.start();
-  if (bufB) {
-    gainB = actx.createGain(); gainB.gain.value = 0; gainB.connect(actx.destination);
-    srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
+  if (!actx || !bufD) {
+    /* fallback: ONE element at a time (iOS-safe) — its src is the mode's track */
+    const want = champMode ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
+    if (!(music.src || '').includes(want)) music.src = want;
+    music.currentTime = 0; music.play().catch(() => {}); return;
   }
-  music.pause();
+  if (!srcD) {
+    gainD = actx.createGain(); gainD.connect(actx.destination);
+    srcD = actx.createBufferSource(); srcD.buffer = bufD; srcD.loop = true; srcD.connect(gainD); srcD.start();
+    if (bufB) {
+      gainB = actx.createGain(); gainB.connect(actx.destination);
+      srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
+    }
+    music.pause();
+  }
+  /* the sources never stop once created — runs come and go under them;
+     a new run just sets which fader is up */
+  gainD.gain.value = champMode ? 0 : 1;
+  if (gainB) gainB.gain.value = champMode ? 1 : 0;
 }
 function xfade(toHeat) {
   if (!actx || !gainD || !gainB) return;
@@ -782,7 +789,11 @@ function startRun() {
   camX = px - viewW * PLAYER_XF; camY = -560; zoom = 1; shake = 0;
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none';
-  heatOn = false;
+  heatOn = champMode;
+  /* the record this run is chasing: the global #1 when the board has
+     loaded, else the local best. No record anywhere = nothing to break. */
+  const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
+  targetFt = (gBoard && gBoard.length) ? gBoard[0].dist_ft : (lb.length ? lb[0].s : 0);
   if (actx && actx.state === 'suspended') actx.resume();
   startTracks();
 }
@@ -815,7 +826,6 @@ function renderBoard() {
    ran smooth, every steps build chopped. Music only. */
 function gameOver() {
   mode = 'over'; dead = true;
-  if (heatOn) { heatOn = false; xfade(false); }   /* wipeout settles back to the daylight loop */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
   const myFt = Math.floor(dist / 15.24);   /* the record is FEET (Keith) */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
@@ -882,9 +892,12 @@ function update(dt) {
   runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
   dist += speed * dt;
-  /* 1000 FT: crossfade to the battle loop (Keith) — gain ramps only,
-     both sources have been running since the start of the run. */
-  if (!heatOn && dist >= 15240) { heatOn = true; xfade(true); }
+  /* THE CROWN MOMENT (Keith, v0.13): the instant this run's feet pass
+     the reigning high score, the battle loop crossfades in — and keeps
+     going: through the wipeout, into every later run this session. */
+  if (!champMode && targetFt > 0 && Math.floor(dist / 15.24) > targetFt) {
+    champMode = true; heatOn = true; xfade(true);
+  }
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
