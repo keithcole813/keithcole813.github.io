@@ -68,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.9 ==============================
+/* ============================== 6LOUD demo v0.8.10 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1015,6 +1015,13 @@ function draw() {
     } else {
       ctx.save(); ctx.translate(cxT, fyT); ctx.scale(1.5, 1.5); ctx.translate(-cxT, -fyT);
       drawAnim('front', Math.floor(time * 30) % MANIFEST.front.n, cxT, fyT); ctx.restore();
+    }
+    /* front cloud lip OVER his feet (Keith 2026-11-06): the front-run
+       ankles read twisted — sink his feet into the cloud and hide them. */
+    if (cimg && cimg.naturalWidth) {
+      const cw3 = 478, dh3 = cw3 * cd1.asp;
+      ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24;
+      ctx.drawImage(cimg, cxT - cw3 / 2 - 6, fyT - 58 - cd1.surf * dh3, cw3, dh3); ctx.restore();
     }
   } else {
     const pa = playerAnim();
