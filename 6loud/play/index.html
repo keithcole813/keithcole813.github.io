@@ -22,6 +22,8 @@
   #over h1 { margin:0 0 4px; font-size:clamp(34px,8vw,58px); font-weight:900; letter-spacing:2px; color:#ffd94d; text-shadow:0 3px 0 #b3541e; }
   #overStats { font-size:20px; font-weight:800; margin-bottom:14px; text-shadow:0 2px 0 rgba(0,0,0,.5); }
   #board { font-size:17px; font-weight:700; line-height:1.5; margin-bottom:16px; text-shadow:0 2px 0 rgba(0,0,0,.5); }
+  #board.global { font-size:16px; line-height:1.32; }
+  .boardTitle { color:#ffdd67; font-size:13px; letter-spacing:2px; margin-bottom:4px; }
   #nameRow { display:none; align-items:center; gap:8px; margin-bottom:16px; }
   #nameRow span { font-weight:900; letter-spacing:1px; }
   #ini { pointer-events:auto; width:110px; font-size:26px; font-weight:900; letter-spacing:6px; text-align:center; text-transform:uppercase;
@@ -64,9 +66,12 @@
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
+<audio id="steps" src="assets/sfx/steps.mp3" loop preload="auto"></audio>
+<audio id="gruntJump" src="assets/sfx/grunt-jump.mp3" preload="auto"></audio>
+<audio id="gruntLand" src="assets/sfx/grunt-land.mp3" preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.7.2 ==============================
+/* ============================== 6LOUD demo v0.8 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -565,7 +570,7 @@ pumpQ();
 const CHAR_H = 320;              // 6lade standing height in world units
 const PX2U = CHAR_H / 400;          // the renders' canon: figure is 400 px tall
 const GRAV = 5200;               // units / s^2
-const BAND_Y = [0, -170, -340];  // LOW / MID / HIGH platform heights (relative)
+const BAND_Y = [0, -170, -340, -510, -680, -850];  // six cloud levels (Keith 2026-11-06: 3 higher, jump up/down, lower clouds save you)
 const GAP = { TAP: 250, HOLD: 430, FULL: 590 };
 const LEN = { LONG: 880, MED: 520, SHORT: 330, NEEDLE: 185 };
 
@@ -588,7 +593,12 @@ const SEGMENTS = [
   {n:'Cloud Ladder', t:3, e:0, steps:[[null,'SHORT',0],['HOLD','SHORT',1],['HOLD','SHORT',2],['FULL','LONG',0]]},
   {n:'Needle Island',t:3, e:1, steps:[[null,'MED',1],['FULL','NEEDLE',1],['FULL','MED',1]]},
   {n:'Peak to Peak', t:3, e:2, steps:[[null,'ISLE',2],['FULL','ISLE',2],['HOLD','MED',1]]},
-  {n:'Final Float',  t:3, e:1, steps:[[null,'LONG',1],['HOLD','SHORT',2],['FULL','SHORT',1],['HOLD','MED',2],['FULL','LONG',1]]}
+  {n:'Final Float',  t:3, e:1, steps:[[null,'LONG',1],['HOLD','SHORT',2],['FULL','SHORT',1],['HOLD','MED',2],['FULL','LONG',1]]},
+  {n:'Sky Stairs',   t:2, e:2, steps:[[null,'MED',2],['TAP','MED',3],['TAP','MED',4],['TAP','MED',3],['TAP','LONG',2]]},
+  {n:'Cloud Nine',   t:3, e:2, steps:[[null,'LONG',2],['HOLD','MED',3],['TAP','SHORT',4],['TAP','SHORT',5],['TAP','SHORT',4],['HOLD','MED',3],['TAP','LONG',2]]},
+  {n:'Summit Run',   t:3, e:2, steps:[[null,'MED',2],['HOLD','MED',3],['HOLD','LONG',4],['TAP','LONG',5],['TAP','LONG',4],['TAP','MED',3],['TAP','MED',2]]},
+  {n:'High Dive',    t:2, e:2, steps:[[null,'MED',2],['TAP','SHORT',3],['TAP','SHORT',4],['FULL','LONG',2],['TAP','LONG',2]]},
+  {n:'Stratosphere', t:3, e:2, steps:[[null,'SHORT',2],['HOLD','SHORT',3],['HOLD','MED',4],['HOLD','MED',5],['TAP','MED',4],['TAP','MED',3],['HOLD','LONG',2]]}
 ];
 
 /* ---------- state ---------- */
@@ -666,7 +676,7 @@ const puffImg = (() => { const c = document.createElement('canvas'); c.width = c
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.6, 'rgba(255,255,255,0.38)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
-function spawnPuff(x, y, r) { if (puffs.length < 42) puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
+function spawnPuff(x, y, r) { if (puffs.length < 84) puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 function flash(txt) { flashTxt = txt; flashT = 1.6; $('flash').textContent = txt; }
 
@@ -684,11 +694,15 @@ function buildSegment(seg) {
     if (i > 0) x += GAP[st[0]];
     x = addPlat(x, st[2], st[1]);
   });
-  worldEnd = x; exitBand = seg.e; lastTier = seg.t;
+  worldEnd = x; exitBand = seg.steps[seg.steps.length - 1][2]; lastTier = seg.t;
 }
 function nextSegment() {
+  /* chain on PHYSICAL bands: next segment's first platform may climb at
+     most 2 bands (a charged leap) or drop any amount (a lower cloud saves
+     you). The old e-code match could never leave the entry tier — most of
+     the database was unreachable (found by bandprobe, 2026-11-06). */
   const pool = SEGMENTS.map((s, i) => ({ s, i })).filter(o =>
-    o.i !== lastSeg && o.s.e === exitBand &&
+    o.i !== lastSeg && o.s.steps[0][2] <= exitBand + 2 && o.s.steps[0][2] >= exitBand - 3 &&
     (runTime < 18 ? o.s.t === 1 : runTime < 45 ? o.s.t <= 2 : true) &&
     !(lastTier === 3 && o.s.t === 3));
   const o = rnd(pool.length ? pool : [{ s: SEGMENTS[0], i: 0 }]);
@@ -727,20 +741,62 @@ function startRun() {
   $('center').style.display = 'none'; $('over').style.display = 'none';
   music.currentTime = 0; music.play().catch(() => {});
 }
+const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
+let gBoard = null;   /* null = not loaded / unreachable; the local board renders meanwhile */
+async function fetchBoard() {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/scores?select=initials,score&order=score.desc&limit=10',
+      { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
+    if (r.ok) { gBoard = await r.json(); if (mode === 'over') renderBoard(); }
+  } catch (e) { /* offline — local board stands */ }
+}
+async function postScore(n, sc, d, j) {
+  try {
+    await fetch(SB_URL + '/rest/v1/scores', { method: 'POST',
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ initials: n, score: sc, dist_ft: d, jumps: j }) });
+    fetchBoard();
+  } catch (e) { /* offline — the local save already kept it */ }
+}
+function renderBoard() {
+  if (!gBoard) return;
+  $('board').classList.add('global');
+  $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
+    (gBoard.length ? gBoard.map(b => b.initials + ' — ' + b.score).join('<br>') : 'NO SCORES YET — SET THE FIRST');
+}
+const stepsEl = $('steps'), gjEl = $('gruntJump'), glEl = $('gruntLand');
+stepsEl.volume = 0.32;
+function grunt(el) { try { el.currentTime = 0; el.play().catch(() => {}); } catch (e) {} }
+/* Keith's rule: footsteps only while he is ON a cloud — the moment he
+   leaves the ground (jump, grab, fall) the steps stop. */
+function stepsTick() {
+  const want = mode === 'title' || (mode === 'run' && !!grounded && !dead);
+  if (want && stepsEl.paused) stepsEl.play().catch(() => {});
+  else if (!want && !stepsEl.paused) stepsEl.pause();
+  if (mode === 'run') stepsEl.playbackRate = 1 + Math.min(0.18, Math.max(0, (speed - 620) / 530) * 0.18);
+}
 function gameOver() {
   mode = 'over'; dead = true;
   const best = JSON.parse(localStorage.getItem('sixloud_scores') || '[]');
-  const qualifies = best.length < 5 || score > best[best.length - 1].s;
+  const qualifiesLocal = best.length < 5 || score > best[best.length - 1].s;
+  const qualifiesGlobal = gBoard ? (gBoard.length < 10 || score > gBoard[gBoard.length - 1].score) : false;
+  const qualifies = qualifiesLocal || qualifiesGlobal;
   $('overStats').textContent = 'SCORE ' + score + '  ·  ' + Math.floor(dist / 15.24) + 'ft  ·  ' + jumps + ' JUMPS';
   $('board').innerHTML = best.map(b => b.n + ' — ' + b.s).join('<br>') || 'NO SCORES YET';
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('over').style.display = 'flex';
   if (qualifies) { $('ini').value = ''; setTimeout(() => $('ini').focus(), 60); }
+  renderBoard();   /* global board swaps in when it has loaded */
+  fetchBoard();      /* and a fresh pull re-renders it when it lands */
   $('again').onclick = () => {
     if (qualifies) {
       const n = ($('ini').value || 'ACE').toUpperCase().slice(0, 3).padEnd(3, '·');
-      best.push({ n, s: score }); best.sort((a, b) => b.s - a.s);
-      localStorage.setItem('sixloud_scores', JSON.stringify(best.slice(0, 5)));
+      if (qualifiesLocal) {
+        best.push({ n, s: score }); best.sort((a, b) => b.s - a.s);
+        localStorage.setItem('sixloud_scores', JSON.stringify(best.slice(0, 5)));
+      }
+      if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, Math.floor(dist / 15.24), jumps);
     }
     startRun();
   };
@@ -770,8 +826,9 @@ function release() {
   if (full) { score += 4; flash('RUN, JUMP & ROLL!'); }
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
+  grunt(gjEl);   /* 6lade jumps — his effort grunt (Brawl SFX, Keith 2026-11-06) */
   /* white puffs kick off the cloud at takeoff */
-  for (let k = 0; k < 5; k++) spawnPuff(px - 24 + k * 12, py + 12, 8 + Math.random() * 7);
+  for (let k = 0; k < 10; k++) spawnPuff(px - 27 + k * 6, py + 12, 8 + Math.random() * 7);   // takeoff burst x2 (Keith 2026-11-06)
   zoom = Math.min(1.05, zoom + 0.03);
 }
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
@@ -812,6 +869,7 @@ function update(dt) {
       const top = p.y;
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
         py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
+        grunt(glEl);   /* 6lade lands — his effort grunt */
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed) {
@@ -821,7 +879,7 @@ function update(dt) {
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
           else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
           landDur = (landTo - landFrom + 1) / landRate; landT = 0;
-          for (let k = 0; k < 5; k++) spawnPuff(px - 26 + k * 13, py + 12, 9 + Math.random() * 8);
+          for (let k = 0; k < 10; k++) spawnPuff(px - 29 + k * 6, py + 12, 9 + Math.random() * 8);   // landing burst x2
         }
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         if (hard) { shake = Math.min(14, shake + 9); }
@@ -853,7 +911,7 @@ function update(dt) {
   if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
   if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 90) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 7 + Math.random() * 6); } }
-  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.09; spawnPuff(px - 8, py + 12, 8 + Math.random() * 6); } }
+  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.045; spawnPuff(px - 8, py + 12, 8 + Math.random() * 6); } }   // roll-landing trail x2 density
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
   while (worldEnd < camX + viewW + 900) nextSegment();
@@ -1012,12 +1070,13 @@ let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
-  update(dt); draw();
+  update(dt); draw(); stepsTick();
   requestAnimationFrame(loop);
 }
 resize();
 const best0 = JSON.parse(localStorage.getItem('sixloud_scores') || '[]');
 if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + best0[0].s;
+fetchBoard();
 requestAnimationFrame(loop);
 </script>
 </body>
