@@ -6,7 +6,7 @@
 <title>6loud — The Endless Cloud Runner</title>
 <meta name="description" content="6loud is an endless runner: the Shinobi Brawl cast, shrunk down, sprinting across real clouds. One jump button. Every jump scores. Named for the song '6loud' — 6lade, on cloud 9.">
 <meta property="og:title" content="6loud — The Endless Cloud Runner">
-<meta property="og:description" content="The Shinobi Brawl cast, shrunk down, running on cloud 9. One button. Every jump scores. Coming soon.">
+<meta property="og:description" content="The Shinobi Brawl cast, shrunk down, running on cloud 9. One button. Every jump scores. Play free in your browser — no download.">
 <meta property="og:image" content="logo.png">
 <link rel="icon" type="image/png" href="icon.png">
 <style>
@@ -57,6 +57,10 @@
   .card p{font-size:.95rem; color:var(--dim); line-height:1.55}
   ul{margin:4px 0 0 20px; line-height:1.7; color:var(--text)}
   ul li::marker{color:var(--gold)}
+  .playbtn{display:inline-block; margin-top:24px; padding:16px 44px; border-radius:999px;
+    background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#3a1503; text-decoration:none;
+    font-size:1.3rem; font-weight:900; letter-spacing:.06em; box-shadow:0 10px 30px rgba(247,181,0,.35)}
+  .playbtn:hover{filter:brightness(1.07)}
   .status{text-align:center}
   .status .big{font-size:1.12rem; font-weight:700}
   footer{text-align:center; color:var(--dim); font-size:.9rem; padding:30px 16px 36px}
@@ -71,11 +75,14 @@
 
   <div class="hero">
     <img class="logo" src="logo.png" alt="6loud logo — a chibi ninja sprinting across a cloud under the 6LOUD wordmark">
-    <div><span class="pill">Coming Soon</span></div>
+    <div><span class="pill">Play Now — Free in Your Browser</span></div>
     <div class="tagline">The Shinobi Brawl cast. Shrunk down.<br>Running on <span class="g">cloud 9</span>.</div>
     <p class="sub">6loud is an endless runner played in the browser. Your fighter sprints across
     real clouds on their own — all you control is the jump. No levels, no finish line:
     the run just gets faster the longer you stay in it.</p>
+    <div><a class="playbtn" href="play/">▶ &nbsp;PLAY 6LOUD</a></div>
+    <p class="dim" style="margin-top:12px; font-size:.92rem">Runs right in your browser — no download, no install.
+    On iPhone: open it in Safari, tap Share, then “Add to Home Screen” to play it like an app.</p>
   </div>
 
   <img class="strip" src="clouds-strip.png" alt="A row of real clouds — the platforms of 6loud">
@@ -93,7 +100,7 @@
       <div class="card"><h3><span class="ic">▶</span>One button</h3>
         <p>Your runner auto-runs. The only control is the jump button — easy to learn, hard to master.</p></div>
       <div class="card"><h3><span class="ic">☁</span>Tap or hold</h3>
-        <p>A tap is a short hop. Hold the button and you float higher and longer — the gap decides which one you need.</p></div>
+        <p>A tap is a short hop. Hold and you float higher and longer — hold longer still and the hop turns into a flip, then a full dive-roll. The gap decides which one you need.</p></div>
       <div class="card"><h3><span class="ic">✊</span>The ledge grab</h3>
         <p>Come up just short and your runner grabs the edge of the next cloud and pulls up. Close counts.</p></div>
       <div class="card"><h3><span class="ic">★</span>Every jump scores</h3>
@@ -110,7 +117,7 @@
     <ul>
       <li><strong>Real clouds.</strong> The platforms are real-looking clouds in all shapes — long runners and short islands, at different heights, with gaps between them.</li>
       <li><strong>Built from segments.</strong> The run is chained together from a database of hand-designed segments, so every jump is fair and every stretch can be learned — even though no two runs come in the same order.</li>
-      <li><strong>Mountain &amp; tree tops.</strong> In the harder stretches, peaks and treetops push up through the clouds — land on them and bounce off to keep the run alive.</li>
+      <li><strong>Mountains on the horizon.</strong> Ridge lines roll behind the cloud sea, tinted by the sky itself — and as you climb into the high bands, you rise above them and leave them below.</li>
       <li><strong>A sky on its own clock.</strong> The background fades sunset → night → sunrise as your run goes on, all on its own timer. At night: shooting stars and a sparkling sky.</li>
       <li><strong>Handy-cam feel.</strong> The camera zooms in and out and shakes like a handheld shot — punching in on a ledge grab, easing out as the speed climbs.</li>
     </ul>
@@ -123,11 +130,20 @@
     nothing redrawn, the same fighters in a whole new kind of fight: against the fall.</p>
   </section>
 
+  <section>
+    <h2>Beat your best — take the crown</h2>
+    <p>The moment your run passes <strong>your own best distance</strong>, the sky celebrates: the screen
+    flashes, <strong>NEW HIGH SCORE</strong> lights up, the battle beat drops in — and 6lade charges blue,
+    sparks rising off him, for the rest of the run. Every run starts on the daylight beat. The crown has to be earned again.</p>
+    <p style="margin-top:10px">Your best also goes up against the world: the <strong>global leaderboard</strong> tracks
+    the top 10 distances from every player, live. Take the crown at home — then take the board.</p>
+  </section>
+
   <section class="status">
-    <h2>Release status</h2>
-    <p class="big">In design — coming after Shinobi Brawl.</p>
-    <p class="dim" style="margin-top:8px">6loud is being designed now and enters production once Shinobi Brawl ships.
-    It will play right in the browser, built light for phones. This page is where the date lands first.</p>
+    <h2>Play it now</h2>
+    <p class="big">6loud is live — free, in your browser.</p>
+    <div><a class="playbtn" href="play/">▶ &nbsp;PLAY 6LOUD</a></div>
+    <p class="dim" style="margin-top:12px">Built light for phones. New beats, boards and celebrations land here as the game grows.</p>
   </section>
 
   <footer>
