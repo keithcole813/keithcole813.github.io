@@ -17,10 +17,19 @@
   #ui { position:fixed; inset:0; pointer-events:none; font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif; color:#fff; }
   #hud { position:absolute; top:calc(10px + env(safe-area-inset-top)); left:14px; right:14px; display:flex; justify-content:space-between; align-items:flex-start; }
   .hudbox { background:rgba(20,10,40,.38); border:2px solid rgba(255,255,255,.35); border-radius:12px; padding:6px 12px; }
-  #score { font-size:30px; font-weight:900; letter-spacing:1px; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.35); }
-  #score small { display:block; font-size:11px; font-weight:700; letter-spacing:2px; opacity:.85; }
-  #dist { font-size:20px; font-weight:800; text-align:right; line-height:1.15; text-shadow:0 2px 0 rgba(0,0,0,.35); }
-  #dist small { display:block; font-size:11px; font-weight:700; letter-spacing:2px; opacity:.85; }
+  /* v0.16 — distance is the hero (Keith: "I don't even care about the
+     score, to me distance is more important"): the mockup's plaque —
+     cut corners, deep-navy face, glowing violet edge, big gold feet.
+     Score is demoted to a small quiet readout. */
+  #score { font-size:19px; font-weight:800; letter-spacing:.5px; line-height:1; opacity:.85; padding:5px 10px; }
+  #score small { display:block; font-size:9px; font-weight:700; letter-spacing:2px; opacity:.8; }
+  #dist { font-size:34px; font-weight:900; text-align:center; line-height:1.05; min-width:158px;
+    padding:8px 18px 10px; color:#ffd83d; letter-spacing:.5px;
+    background:rgba(15,9,44,.85); border:none; border-radius:0;
+    clip-path:polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    filter:drop-shadow(0 0 7px rgba(178,92,255,.85)) drop-shadow(0 3px 8px rgba(0,0,0,.4));
+    text-shadow:0 2px 0 #c25e10, 0 0 16px rgba(255,180,0,.35); }
+  #dist small { display:block; font-size:11px; font-weight:800; letter-spacing:3px; color:#fff; opacity:.95; text-shadow:0 1px 0 rgba(0,0,0,.5); }
   #center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:24vh; text-align:center; pointer-events:none; }
   #tap { margin-top:18px; font-size:clamp(20px,4.5vw,30px); font-weight:900; letter-spacing:2px; color:#fff; text-shadow:0 2px 0 rgba(0,0,0,.4); animation:pulse 1.1s ease-in-out infinite; }
   #best { margin-top:10px; font-size:16px; font-weight:700; opacity:.92; text-shadow:0 2px 0 rgba(0,0,0,.4); }
@@ -62,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.15.1</div>
+  <div id="ver">v0.16.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -75,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.15.1 ==============================
+/* ============================== 6LOUD demo v0.16.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1170,11 +1179,10 @@ function draw() {
   if (mode === 'title') {
     const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.62;
     const cimg = IMG['cloud01'], cd1 = CLOUDS['01'];
-    if (cimg && cimg.naturalWidth) {
-      const cw2 = 430, dh2 = cw2 * cd1.asp;
-      ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24;
-      ctx.drawImage(cimg, cxT - cw2 / 2, fyT - cd1.surf * dh2 + 6, cw2, dh2); ctx.restore();
-    }
+    /* v0.16.1 (Keith: "remove the double cloud") — the title drew cloud-01
+       TWICE (a base copy + the front lip) and the two offset copies read
+       as two stacked clouds. Only the lip remains: one cloud, and it
+       still sinks his feet the 58 units that hide the front-run ankles. */
     if (loadState === 'turn') {
       const ti = Math.min(17, Math.floor((time - turnT0) * 30));
       const k = 1.2 - 0.4 * smooth01(ti / 17);   // title turn eases to the new 0.8 gameplay scale
