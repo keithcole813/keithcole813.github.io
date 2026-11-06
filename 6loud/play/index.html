@@ -71,7 +71,7 @@
     <div id="tap">TAP TO START</div>
     <div id="best"></div>
   </div>
-  <div id="ver">v0.17.1</div>
+  <div id="ver">v0.17.2</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -84,7 +84,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.17.1 ==============================
+/* ============================== 6LOUD demo v0.17.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -767,7 +767,7 @@ for (let i = 0; i < 8; i++) dressMid.push({ img: BGMID[(i * 2) % BGMID.length], 
    lower view shouldn't empty out — a far-below cloud layer fades in
    with altitude and fills the bottom of the frame */
 let dressLow = [];
-for (let i = 0; i < 7; i++) dressLow.push({ img: BGMID[(i * 3 + 2) % BGMID.length], x: Math.random() * 3000, fy: 0.52 + (i % 4) * 0.11 + Math.random() * 0.05, w: 400 + Math.random() * 260 });
+for (let i = 0; i < 4; i++) dressLow.push({ img: BGFAR[(i * 3 + 1) % BGFAR.length], x: Math.random() * 3000, fy: 0.66 + (i % 3) * 0.12 + Math.random() * 0.04, w: 540 + Math.random() * 220 });
 
 /* ---------- helpers ---------- */
 let puffAcc = 0, rollPuffT = 0, flipPuffT = 0;
@@ -1177,11 +1177,11 @@ function draw() {
     const climbL = Math.max(0, -camY - viewH / zoom * 0.42);
     const lowA = Math.max(0, Math.min(1, (climbL - 60) / 500));
     if (lowA > 0.01) for (const d of dressLow) {
-      const img = BGIMG['m' + d.img];
+      const img = BGIMG['f' + d.img];
       if (!img || !img.naturalWidth) continue;
       let dx = (d.x - camX * 0.30) % (viewW / zoom + 760); if (dx < -760) dx += viewW / zoom + 760;
       const dy = viewH / zoom * d.fy - camY * 0.05;
-      ctx.save(); ctx.globalAlpha = 0.58 * lowA * nightDim;
+      ctx.save(); ctx.globalAlpha = 0.34 * lowA * nightDim;
       ctx.drawImage(img, dx - 380, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
     }
   }
