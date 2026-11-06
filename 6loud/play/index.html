@@ -66,7 +66,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.13 ==============================
+/* ============================== 6LOUD demo v0.13.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -86,7 +86,7 @@ const music = $('music');
    changes volume at the trigger. The <audio> element remains only as a
    no-WebAudio fallback (daylight track, no heat switch). */
 let actx = null, bufD = null, bufB = null, srcD = null, srcB = null, gainD = null, gainB = null, heatOn = false;
-let champMode = false, targetFt = 0;   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going */
+let champMode = false, targetFt = 0;   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
 try {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (AC) {
@@ -789,7 +789,7 @@ function startRun() {
   camX = px - viewW * PLAYER_XF; camY = -560; zoom = 1; shake = 0;
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none';
-  heatOn = champMode;
+  champMode = false; heatOn = false;   /* every run starts on the original beat (Keith's correction): the battle track is per-run, crown moment to wipeout */
   /* the record this run is chasing: the global #1 when the board has
      loaded, else the local best. No record anywhere = nothing to break. */
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
