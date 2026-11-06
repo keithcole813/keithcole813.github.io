@@ -57,11 +57,13 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.2 ==============================
+/* ============================== 6LOUD demo v0.3 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
-   swords on, no squeeze, no outdated sprites). Universal move pool: hold to
-   charge, release to jump; the move is picked RANDOMLY per hold tier.
+   swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
+   press = jump NOW, the animation never stops; hold in the air = float and
+   the air animation loops; still holding at the flip cue converts the jump
+   to a spliced flip; a long hold converts the landing to a roll.
    Segments chain from the preset database; the sky runs on its own clock.      */
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
@@ -443,6 +445,56 @@ const MANIFEST = {
    15,
    15
   ]
+ },
+ "flip": {
+  "n": 16,
+  "w": 440,
+  "h": 525,
+  "offset": 60,
+  "gaps": [
+   178,
+   204,
+   236,
+   242,
+   223,
+   204,
+   185,
+   166,
+   149,
+   130,
+   109,
+   88,
+   67,
+   50,
+   25,
+   6
+  ]
+ },
+ "diveflip": {
+  "n": 18,
+  "w": 427,
+  "h": 520,
+  "offset": 79,
+  "gaps": [
+   169,
+   168,
+   168,
+   170,
+   187,
+   233,
+   270,
+   258,
+   244,
+   220,
+   212,
+   224,
+   239,
+   255,
+   277,
+   259,
+   222,
+   180
+  ]
  }
 };
 const ANIM = {}; let animLoaded = 0, animTotal = 0;
@@ -503,7 +555,10 @@ let plats = [];                // {x, y(top), len, img}
 let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
-let charge = -1, held = false, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
+let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
+let floatUsed = 0, cutDone = false, flipped = false, flipMove = null, flipT = 0;
+let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
+let puffs = [];
 let camX = 0, camY = 0, zoom = 1, shake = 0, time = 0, runTime = 0, lastSeg = -1, lastTier = 1, worldEnd = 0, exitBand = 0;
 let flashTxt = '', flashT = 0, walkT = 0, dead = false;
 const PLAYER_XF = 0.30;        // player screen position (fraction of view width)
@@ -537,6 +592,12 @@ let dress = [];
 for (let i = 0; i < 7; i++) dress.push({ img: WISPY[i % WISPY.length], x: Math.random() * 2400, y: -80 - Math.random() * 700, w: 380 + Math.random() * 300, sp: 14 + Math.random() * 22 });
 
 /* ---------- helpers ---------- */
+let puffAcc = 0, rollPuffT = 0;
+const puffImg = (() => { const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
+  gr.addColorStop(0, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.6, 'rgba(255,255,255,0.38)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
+function spawnPuff(x, y, r) { if (puffs.length < 42) puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 function flash(txt) { flashTxt = txt; flashT = 1.6; $('flash').textContent = txt; }
 
@@ -570,26 +631,26 @@ function resetWorld() {
   buildSegment(SEGMENTS[0]); nextSegment(); nextSegment();
 }
 
-/* ---------- move pool (universal — same for every character) ----------
-   Keith's curation: OUT jumping punch, jump attack, flying/jump kick
-   (2026-11-05) and slam + jump over (2026-11-06, 'those look wrong').
-   BASIC is the small hop trimmed from Arms Open (Keith 2026-11-06). */
-function pickMove(c) {
-  if (c < 0.20) return rnd(['basic', 'basic', 'armsopen']);
-  if (c < 0.55) return rnd(['basic', 'armsopen', 'armsopen']);
-  return rnd(['armsopen', 'runjump', 'diveroll', 'roll3', 'roll4']);
-}
-const MOVE_VY = { basic: -1560, armsopen: -1780, runjump: -1860, diveroll: -1840, roll3: -1760, roll4: -1800 };
-const MOVE_NAME = { basic: 'BASIC JUMP', armsopen: 'ARMS OPEN', runjump: 'RUN & JUMP', diveroll: 'DIVE-ROLL', roll3: 'ROLL DODGE', roll4: 'ROLL DODGE' };
-let airGrav = 1; // float baked in from the charge: longer hold = lighter gravity
-let airTotal = 1; // estimated airtime of the current jump; the sequence time-scales to it
+/* ---------- jump control (Keith's model, 2026-11-06) ----------
+   One button. Press = launch immediately, animation never stops. Holding
+   in the air floats him and loops the air animation. Two cues read the
+   same hold: still holding at FLIP_CUE converts the jump into a spliced
+   flip; a hold of ROLL_CUE or more converts the landing into a roll.
+   Touchdown always wins: any animation cuts to the landing. */
+const JUMP_VY = -1790;      // launch velocity for every jump
+const FLIP_CUE = 0.25;      // s of hold in the air that converts jump -> flip
+const ROLL_CUE = 0.6;       // s of total hold that converts landing -> roll
+const FLOAT_MAX = 0.95;     // s of float assist per jump
+const FEET = 16;            // his feet sit this deep in the cloud tops
+const FLIP_NAME = { flip: 'FLIP!', diveflip: 'DIVE-ROLL!' };
 
 /* ---------- game flow ---------- */
 function startRun() {
   resetWorld();
   px = 60; py = BAND_Y[0]; vy = 0; grounded = plats[0];
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
-  charge = -1; airMove = null; dead = false; hangPlat = null;
+  airMove = null; dead = false; hangPlat = null; held = false; pressT = 0; lastHold = 0;
+  flipped = false; flipMove = null; landMove = null; landT = 0; puffs = [];
   camX = px - viewW * PLAYER_XF; camY = -560; zoom = 1; shake = 0;
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none';
@@ -618,22 +679,22 @@ function gameOver() {
 function press() {
   if (mode === 'title') { if (animLoaded >= animTotal) startRun(); return; }
   if (mode !== 'run' || dead) return;
-  held = true;
-  if (grounded && charge < 0) charge = 0;
+  held = true; pressT = 0;
+  if (grounded) {
+    /* launch NOW: takeoff motion flows straight into the jump, no freeze */
+    vy = JUMP_VY; grounded = null; airMove = 'jump';
+    airT = 0; floatUsed = 0; cutDone = false; flipped = false; flipMove = null;
+    landMove = null; landT = 0;
+    jumps++; score += 1;
+    zoom = Math.min(1.05, zoom + 0.03);
+  }
 }
 function release() {
+  if (held) lastHold = pressT;
   held = false;
   if (mode !== 'run' || dead) return;
-  if (grounded && charge >= 0) {
-    const c = Math.min(1, charge);
-    airMove = pickMove(c); jumps++; score += 1;
-    if (c >= 0.55) score += 4;
-    vy = MOVE_VY[airMove];
-    airGrav = 1 - 0.32 * c;   // the hold IS the float (spec: hold = longer float)
-    airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);
-    airT = 0; grounded = null; charge = -1;
-    if (c >= 0.55) { zoom = Math.min(1.07, zoom + 0.05); flash(MOVE_NAME[airMove] + '!'); }
-  }
+  /* letting go while rising ends the float: he starts coming down */
+  if (!grounded && !hangPlat && vy < 0 && !cutDone) { vy *= 0.45; cutDone = true; }
 }
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
 addEventListener('keyup', e => { if (e.code === 'Space') release(); });
@@ -649,22 +710,44 @@ function update(dt) {
   speed = Math.min(1150, 620 + runTime * 9);
   dist += speed * dt;
   const prevFeet = py;
-  if (charge >= 0 && grounded) charge = Math.min(1, charge + dt / 0.55);
+  if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
   px += speed * dt;
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
     py = hangPlat.y + 88; vy = 0;
-    if (hangT <= 0) { py = hangPlat.y; grounded = hangPlat; hangPlat = null; flash('SAVED!'); }
+    if (hangT <= 0) { py = hangPlat.y; grounded = hangPlat; hangPlat = null; flash('SAVED!');
+      landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; landDur = (landTo - landFrom + 1) / landRate; landT = 0; }
   } else if (!grounded) {
-    vy += GRAV * airGrav * dt; py += vy * dt; airT += dt;
+    let g = GRAV;
+    if (held && floatUsed < FLOAT_MAX) { g *= 0.45; floatUsed += dt; }  // the hold IS the float
+    vy += g * dt; py += vy * dt; airT += dt;
+    /* the flip cue: still holding at the top of the arc converts the jump */
+    if (airMove === 'jump' && !flipped && held && pressT >= FLIP_CUE) {
+      flipped = true; flipMove = rnd(['flip', 'diveflip']); flipT = 0; airMove = flipMove;
+      score += 4; flash(FLIP_NAME[flipMove]);
+      zoom = Math.min(1.07, zoom + 0.03);
+    }
+    if (flipped) flipT += dt;
     /* landing (with 16u lip assist) */
     for (const p of plats) {
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
       const top = p.y;
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
-        py = top; const hard = vy > 2100; vy = 0; grounded = p; airMove = null; landT = 0.14;
+        py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
+        const totalHold = held ? pressT : lastHold;
+        if (airMove) {
+          if (totalHold >= ROLL_CUE) {
+            landMove = rnd(['roll3', 'roll4']);
+            landFrom = landMove === 'roll3' ? 3 : 4; landTo = landMove === 'roll3' ? 36 : 56;
+            landRate = 45; score += 2;
+          } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
+          else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
+          landDur = (landTo - landFrom + 1) / landRate; landT = 0;
+          for (let k = 0; k < 5; k++) spawnPuff(px - 26 + k * 13, py + 12, 9 + Math.random() * 8);
+        }
+        airMove = null; flipped = false; flipMove = null;
         if (hard) { shake = Math.min(14, shake + 9); }
         break;
       }
@@ -675,6 +758,7 @@ function update(dt) {
       const top = p.y;
       if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
         hangPlat = p; hangT = 0.30; score += 2; shake = Math.min(10, shake + 4);
+        airMove = null; flipped = false; flipMove = null;
         break;
       }
     }
@@ -686,10 +770,15 @@ function update(dt) {
     }
   } else {
     py = grounded.y;
-    if (px - 30 > grounded.x + grounded.len) { grounded = null; vy = 60; airMove = null; airT = 0; spin = 0; }
+    if (px - 30 > grounded.x + grounded.len) { grounded = null; vy = 60; airMove = null; airT = 0; landMove = null; }
   }
   if (grounded) walkT += dt;
-  if (landT > 0) landT -= dt;
+  /* landing animation clock (bend or roll-out); a fresh press interrupts it */
+  if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
+  /* foot fog: a puff every 90 units of running, a wisp while rolling out */
+  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 90) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 7 + Math.random() * 6); } }
+  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.09; spawnPuff(px - 8, py + 12, 8 + Math.random() * 6); } }
+  for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
   while (worldEnd < camX + viewW + 900) nextSegment();
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
@@ -718,20 +807,27 @@ function drawAnim(move, idx, cx, feetY) {
   const refRow = m.h - m.offset + Math.max(0, m.offset - gap);
   ctx.drawImage(img, cx - m.w * PX2U / 2, feetY - refRow * PX2U, m.w * PX2U, m.h * PX2U);
 }
+const pingpong = (x, n) => { const p = x % (2 * n); return p < n ? p : 2 * n - 1 - p; };
 function playerAnim() {
-  if (charge >= 0 && grounded) return { move: 'run', idx: 2, dip: charge * 12 };
   if (hangPlat) return { move: 'armsopen', idx: 5 };   // arms overhead on the lip
   if (!grounded) {
+    /* a spliced flip plays once, at true speed, wherever the cue caught it */
+    if (flipped && flipMove && flipT < MANIFEST[flipMove].n / 30)
+      return { move: flipMove, idx: Math.min(MANIFEST[flipMove].n - 1, Math.floor(flipT * 30)) };
     if (airMove) {
-      const m = MANIFEST[airMove];
-      const f = Math.min(0.999, airT / Math.max(0.2, airTotal));
-      return { move: airMove, idx: Math.floor(f * m.n) };
+      /* takeoff: the launch bend and the arms-out rise, at true 30 fps */
+      if (airT < 0.30) return { move: 'armsopen', idx: Math.min(9, Math.floor(airT * 30)) };
+      /* held at the top: the apex frames loop while he floats */
+      if (vy <= 350) return { move: 'armsopen', idx: 9 + pingpong(Math.floor((airT - 0.30) * 30), 6) };
     }
-    /* falling without a move (walked off an edge): arms-open descent frames */
-    const m = MANIFEST.armsopen, base = Math.floor(m.n * 0.55);
-    return { move: 'armsopen', idx: base + Math.floor(airT * 10) % (m.n - base) };
+    /* descent: later arms-open frames as he gathers speed downward */
+    return { move: 'armsopen', idx: 15 + Math.max(0, Math.min(9, Math.floor((vy - 350) / 260))) };
   }
-  if (landT > 0) return { move: 'basic', idx: MANIFEST.basic.n - 3 };
+  /* grounded: a landing (bend or roll-out) plays before the run resumes */
+  if (landMove) {
+    const idx = Math.min(landTo, landFrom + Math.floor(landT * landRate));
+    return { move: landMove, idx };
+  }
   return { move: 'run', idx: Math.floor(walkT * 30) % MANIFEST.run.n };
 }
 function draw() {
@@ -779,14 +875,27 @@ function draw() {
     const sx = p.x - camX, sy = p.y - camY;
     if (sx + p.len < -200 || sx > viewW / zoom + 200) continue;
     const dh = p.len * cd.asp;
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24;
     ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
+    ctx.restore();
+  }
+  /* a low fog band softens everything the clouds sit in */
+  const fogG = ctx.createLinearGradient(0, viewH / zoom * 0.55, 0, viewH / zoom);
+  fogG.addColorStop(0, 'rgba(255,255,255,0)'); fogG.addColorStop(1, 'rgba(255,255,255,0.13)');
+  ctx.fillStyle = fogG; ctx.fillRect(0, viewH / zoom * 0.55, viewW / zoom, viewH / zoom * 0.45);
+  /* foot fog puffs (world-anchored, trailing behind him) */
+  for (const q of puffs) {
+    ctx.save(); ctx.globalAlpha = 0.5 * Math.max(0, q.life / q.max);
+    ctx.drawImage(puffImg, q.x - camX - q.r, q.y - camY - q.r, q.r * 2, q.r * 2);
+    ctx.restore();
   }
   /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
     drawAnim('run', Math.floor(time * 30) % MANIFEST.run.n, viewW / zoom * 0.5, viewH / zoom * 0.62);
   } else {
     const pa = playerAnim();
-    drawAnim(pa.move, pa.idx, px - camX, py - camY + 6 + (pa.dip || 0));
+    drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET);
   }
   ctx.restore();
 }
@@ -814,5 +923,4 @@ if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + be
 requestAnimationFrame(loop);
 </script>
 </body>
-<!-- v0.2 build -->
 </html>
