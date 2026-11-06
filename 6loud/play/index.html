@@ -68,7 +68,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.8.2 ==============================
+/* ============================== 6LOUD demo v0.8.3 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -743,7 +743,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let gBoard = null;   /* null = not loaded / unreachable; the local board renders meanwhile */
 async function fetchBoard() {
   try {
-    const r = await fetch(SB_URL + '/rest/v1/scores?select=initials,score&order=score.desc&limit=10',
+    const r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=10',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
     if (r.ok) { gBoard = await r.json(); if (mode === 'over') renderBoard(); }
   } catch (e) { /* offline — local board stands */ }
@@ -760,18 +760,19 @@ function renderBoard() {
   if (!gBoard) return;
   $('board').classList.add('global');
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
-    (gBoard.length ? gBoard.map(b => b.initials + ' — ' + b.score).join('<br>') : 'NO SCORES YET — SET THE FIRST');
+    (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST');
 }
 /* ALL SFX REMOVED at Keith's order 2026-11-06: the v0.8 sound additions
    (grunts, then the footstep loop) choked playback on his phone. Music only. */
 function gameOver() {
   mode = 'over'; dead = true;
-  const best = JSON.parse(localStorage.getItem('sixloud_scores') || '[]');
-  const qualifiesLocal = best.length < 5 || score > best[best.length - 1].s;
-  const qualifiesGlobal = gBoard ? (gBoard.length < 10 || score > gBoard[gBoard.length - 1].score) : false;
+  const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
+  const myFt = Math.floor(dist / 15.24);   /* the record is FEET (Keith) */
+  const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
+  const qualifiesGlobal = gBoard ? (gBoard.length < 10 || myFt > gBoard[gBoard.length - 1].dist_ft) : false;
   const qualifies = qualifiesLocal || qualifiesGlobal;
   $('overStats').textContent = 'SCORE ' + score + '  ·  ' + Math.floor(dist / 15.24) + 'ft  ·  ' + jumps + ' JUMPS';
-  $('board').innerHTML = best.map(b => b.n + ' — ' + b.s).join('<br>') || 'NO SCORES YET';
+  $('board').innerHTML = best.map(b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT').join('<br>') || 'NO SCORES YET';
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('over').style.display = 'flex';
   if (qualifies) { $('ini').value = ''; setTimeout(() => $('ini').focus(), 60); }
@@ -781,10 +782,10 @@ function gameOver() {
     if (qualifies) {
       const n = ($('ini').value || 'ACE').toUpperCase().slice(0, 3).padEnd(3, '·');
       if (qualifiesLocal) {
-        best.push({ n, s: score }); best.sort((a, b) => b.s - a.s);
-        localStorage.setItem('sixloud_scores', JSON.stringify(best.slice(0, 5)));
+        best.push({ n, s: myFt }); best.sort((a, b) => b.s - a.s);
+        localStorage.setItem('sixloud_scores_ft', JSON.stringify(best.slice(0, 5)));
       }
-      if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, Math.floor(dist / 15.24), jumps);
+      if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, myFt, jumps);
     }
     startRun();
   };
@@ -1060,8 +1061,8 @@ function loop(ts) {
   requestAnimationFrame(loop);
 }
 resize();
-const best0 = JSON.parse(localStorage.getItem('sixloud_scores') || '[]');
-if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + best0[0].s;
+const best0 = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
+if (best0.length) $('best').textContent = 'BEST — ' + best0[0].n + ' · ' + Number(best0[0].s).toLocaleString('en-US') + ' FT';
 fetchBoard();
 requestAnimationFrame(loop);
 </script>
