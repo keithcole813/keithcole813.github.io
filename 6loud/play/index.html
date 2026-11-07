@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.40</div>
+  <div id="ver">v0.41</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.40 ==============================
+/* ============================== 6LOUD demo v0.41 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -109,7 +109,8 @@ let flareT = 0;   /* the blue charge, borrowed: passing the ghost + full-charge 
 let surgeFlash = 0;   /* LaShmoove's surge: the whole-screen flash of light (Keith v0.32) */
 function chargeFx(dur) { flareT = Math.max(flareT, dur); }
 let altSm = 0, vhNow = 1150;
-let camSmY = 0;   /* slow camera (v0.21): terrain + deep layers follow THIS, so hops don't pump them */   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
+let camSmY = 0;   /* slow camera (v0.21): terrain + deep layers follow THIS, so hops don't pump them */
+let camBgY = 0;   /* SLOWEST camera (v0.41): the background CLOUD layers follow this one — a ~4.5 s constant, so a hop can't move them at all; only a sustained climb can (Keith's rule, third report) */   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
 let rawD = null, rawB = null, rawS = null, bufS = null, srcS = null, gainS = null, decS = null;
 /* AUDIO SCENES (Keith v0.34): every run OPENS on the footsteps — his snow-run
    loop — with NO bg music under them. At 1000 ft, or the moment 6lade starts
@@ -1146,7 +1147,7 @@ function startRun() {
   airMove = null; dead = false; hangPlat = null; slipPlat = null; slipT = 0; struggleTaps = 0; held = false; pressT = 0; lastHold = 0;
   flipped = false; flipMove = null; landMove = null; landT = 0; puffs = []; trail = [];
   airGrav = 1; flipArmed = false; rollArmed = false;
-  camX = px - viewW * PLAYER_XF; camY = -560; camSmY = -560; zoom = 1; shake = 0;
+  camX = px - viewW * PLAYER_XF; camY = -560; camSmY = -560; camBgY = -560; zoom = 1; shake = 0;
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none'; $('ver').style.display = 'none';
   champMode = false; heatOn = false;   /* every run starts on the original beat (Keith's correction): the battle track is per-run, crown moment to wipeout */
@@ -1292,8 +1293,9 @@ function update(dt) {
     if (mode === 'run' && mScene !== 'battle' && pf) { mScene = 'battle'; playTrack(); } }
   if (crownFlash > 0) crownFlash = Math.max(0, crownFlash - dt / 0.5);
   if (surgeFlash > 0) surgeFlash = Math.max(0, surgeFlash - dt / 0.85);   /* the flash lasts a little longer (Keith v0.37 — at 0.45 s he could barely tell) */
-  { const altT = Math.max(0, Math.min(1, (-camY - vhNow * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 1.4); }
+  { const altT = Math.max(0, Math.min(1, (-camY - viewH * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 0.30); }   /* v0.41: zoom-free target + a ~3.3 s constant (was 1.4/s on a zoom-coupled target — the deck still bobbed ~10 px per hop) */
   camSmY += (camY - camSmY) * Math.min(1, dt * 0.9);
+  camBgY += (camY - camBgY) * Math.min(1, dt * 0.22);   /* the background clouds' camera: hops average out to nothing */
   if (bannerT > 0) bannerT -= dt;
   if (flareT > 0) flareT -= dt;
   /* while crowned he CHARGES: blue sparks rise off him (Keith v0.15) */
@@ -1595,7 +1597,7 @@ function draw() {
     const img = BGIMG['f' + d.img];
     if (!img || !img.naturalWidth) continue;
     let dx = (((d.x - camX * 0.16) % 3450) + 3450) % 3450 - 1150;   /* FIXED wrap period (v0.39): the old span divided by zoom, so every zoom breath dragged these clouds sideways — Keith's circled cloud sweeping in his video */
-    const dy = d.y - camY * 0.16 + viewH / zoom * 0.55;
+    const dy = d.y - camBgY * 0.16 + viewH / zoom * 0.55;   /* slow background camera (v0.41) — was instant camY: these clouds hopped at 84% strength */
     ctx.save(); ctx.globalAlpha = (0.34 + 0.24 * warmBg) * nightDim;
     ctx.drawImage(img, dx - 575, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
@@ -1640,7 +1642,7 @@ function draw() {
     const img = BGIMG['m' + d.img];
     if (!img || !img.naturalWidth) continue;
     let dx = (((d.x - camX * 0.38) % 3450) + 3450) % 3450 - 820;   /* same fixed wrap — the mid layer was the worst sweeper (72 units of drag across the normal speed zoom-out alone) */
-    const dy = d.y - camY * 0.38 + viewH / zoom * 0.55;
+    const dy = d.y - camBgY * 0.38 + viewH / zoom * 0.55;   /* slow background camera (v0.41) — was instant camY: the mid clouds hopped with every jump */
     ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim;
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
