@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.27</div>
+  <div id="ver">v0.27.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.27 ==============================
+/* ============================== 6LOUD demo v0.27.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -871,10 +871,10 @@ function ghostReset(entering) {
   if (RACE) {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
     for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
-    GR = { frames: RACE.frames, cum, st: 0, stT: 0, pyS: RACE.frames[0][1] };
+    GR = { frames: RACE.frames, cum, st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null };
   }
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: GR ? 'race' : 'sea',
-        animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
+        animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
 }
 function ghostFeetY() {
   const base = viewH / zoom * 0.36 - camY * GPAR;
@@ -913,15 +913,27 @@ function ghostUpdate(dt) {
     const totalU = gTarget * 15.24;
     const p = Math.max(0, Math.min(1.12, dist / totalU));
     const oS = Math.max(0.25, Math.min(1, totalU / 12000));   /* short records run a tighter race — the lead can't swallow the course */
-    let oT = -350 * oS;
-    for (let k = 0; k < RACE_KEYS.length - 1; k++) {
-      const a = RACE_KEYS[k], b = RACE_KEYS[k + 1];
-      if (p >= a[0] && p <= b[0]) { const f = (p - a[0]) / ((b[0] - a[0]) || 1); oT = (a[1] + (b[1] - a[1]) * (f * f * (3 - 2 * f))) * oS; break; }
+    if (GR.perfD === null || GR.perfD === undefined) GR.perfD = dist + G.oArc;
+    if (hangPlat || slipPlat) {
+      /* Keith (v0.27.1): LaShmoove KEEPS RUNNING through the ledge beat —
+         his performance clock runs on speed while 6lade's world is frozen.
+         If 6lade is beating the record he'll pass him anyway; after the
+         beat the arc eases the ghost back into the race shape. */
+      GR.perfD += speed * dt;
+      G.oArc = GR.perfD - dist;
+    } else {
+      let oT = -350 * oS;
+      for (let k = 0; k < RACE_KEYS.length - 1; k++) {
+        const a = RACE_KEYS[k], b = RACE_KEYS[k + 1];
+        if (p >= a[0] && p <= b[0]) { const f = (p - a[0]) / ((b[0] - a[0]) || 1); oT = (a[1] + (b[1] - a[1]) * (f * f * (3 - 2 * f))) * oS; break; }
+      }
+      const oRate = 200 + 300 * oS;
+      G.oArc += Math.max(-oRate * dt, Math.min(oRate * dt, oT - G.oArc));
+      GR.perfD = dist + G.oArc;
     }
-    const oRate = 200 + 300 * oS;
-    G.o += Math.max(-oRate * dt, Math.min(oRate * dt, oT - G.o));
-    G.dG = dist + G.o;
-    const sm = grSample(G.dG);
+    G.o = GR.perfD - dist;
+    G.dG = GR.perfD;
+    const sm = grSample(GR.perfD);
     if (sm.st !== GR.st) { GR.st = sm.st; GR.stT = 0; }
     GR.stT += dt;
     GR.pyS += (sm.py - GR.pyS) * Math.min(1, dt * 18);
@@ -931,7 +943,7 @@ function ghostUpdate(dt) {
     }
     if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.17; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 8); } }
     GR.prevSt = GR.st;
-    if (G.dG >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
+    if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
   }
   /* no replay: the sea-runner theater (v0.23) */
