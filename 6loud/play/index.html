@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.30.1</div>
+  <div id="ver">v0.30.2</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.30.1 ==============================
+/* ============================== 6LOUD demo v0.30.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -855,6 +855,14 @@ function prepRace() {
     if (rp && rp.frames && rp.frames.length > 10 && rp.plats && rp.plats.length) { RACE = rp; gTarget = rp.total || src.total; }
   } catch (e) { /* a bad replay never breaks the race */ }
 }
+function grSpeedAt(d) {   /* the pace HE was traveling at distance d of his run (units/sec, from the recording's own deltas) */
+  const C = GR.cum, S = GR.spd;
+  if (d <= 0) return S[0];
+  if (d >= C[C.length - 1]) return S[S.length - 1];
+  let lo = 0, hi = C.length - 1;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (C[mid] <= d) lo = mid; else hi = mid; }
+  return S[lo];
+}
 function grSample(d) {   /* the recorded run, read by DISTANCE: {py, st} at d units */
   const F = GR.frames, C = GR.cum;
   if (d <= 0) return { py: F[0][1], st: F[0][2], chg: F[0][3] || 0 };
@@ -884,7 +892,7 @@ function ghostReset(entering) {
   if (RACE) {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
     for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
-    GR = { frames: RACE.frames, cum, st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false };
+    GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false };
   }
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: GR ? 'race' : 'sea',
         animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
@@ -928,11 +936,12 @@ function ghostUpdate(dt) {
     const oS = Math.max(0.25, Math.min(1, totalU / 12000));   /* short records run a tighter race — the lead can't swallow the course */
     if (GR.perfD === null || GR.perfD === undefined) GR.perfD = dist + G.oArc;
     if (hangPlat || slipPlat) {
-      /* Keith (v0.27.1): LaShmoove KEEPS RUNNING through the ledge beat —
-         his performance clock runs on speed while 6lade's world is frozen.
-         If 6lade is beating the record he'll pass him anyway; after the
-         beat the arc eases the ghost back into the race shape. */
-      GR.perfD += speed * dt;
+      /* Keith (v0.27.1): LaShmoove KEEPS RUNNING through the ledge beat.
+         But his clock is HIS OWN recorded pace (v0.30.2, Keith: "he should
+         know where the clouds are even without the camera") — the old
+         clock ran him at 6lade's current speed, lending him distance his
+         run never covered and dropping him out of his own sky. */
+      GR.perfD += grSpeedAt(GR.perfD) * dt;
       G.oArc = GR.perfD - dist;
     } else {
       let oT = -350 * oS;
@@ -956,7 +965,7 @@ function ghostUpdate(dt) {
     if (GR.fireT > 0) GR.fireT -= dt;
     GR.chgSm = Math.min(1, Math.max(0, (GR.chgSm || 0) + (((GR.fireT > 0 || GR.st === 7) ? 1 : 0) - (GR.chgSm || 0)) * Math.min(1, dt * 10)));   /* burns on the pass burst and through his held jumps (code 7) */
     GR.stT += dt;
-    GR.pyS += (sm.py - GR.pyS) * Math.min(1, dt * 18);
+    GR.pyS = sm.py;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
       for (let k = 0; k < 4; k++) spawnPuff(px + G.o - 12 + Math.random() * 20, GR.pyS + GSINK + 4, 8 + Math.random() * 5);
