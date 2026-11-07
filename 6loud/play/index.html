@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.38</div>
+  <div id="ver">v0.39</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.38 ==============================
+/* ============================== 6LOUD demo v0.39 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1594,7 +1594,7 @@ function draw() {
   for (const d of dressFar) {
     const img = BGIMG['f' + d.img];
     if (!img || !img.naturalWidth) continue;
-    let dx = (d.x - camX * 0.16) % (viewW / zoom + 1150); if (dx < -1150) dx += viewW / zoom + 1150;
+    let dx = (((d.x - camX * 0.16) % 3450) + 3450) % 3450 - 1150;   /* FIXED wrap period (v0.39): the old span divided by zoom, so every zoom breath dragged these clouds sideways — Keith's circled cloud sweeping in his video */
     const dy = d.y - camY * 0.16 + viewH / zoom * 0.55;
     ctx.save(); ctx.globalAlpha = (0.34 + 0.24 * warmBg) * nightDim;
     ctx.drawImage(img, dx - 575, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
@@ -1639,7 +1639,7 @@ function draw() {
   for (const d of dressMid) {
     const img = BGIMG['m' + d.img];
     if (!img || !img.naturalWidth) continue;
-    let dx = (d.x - camX * 0.38) % (viewW / zoom + 820); if (dx < -820) dx += viewW / zoom + 820;
+    let dx = (((d.x - camX * 0.38) % 3450) + 3450) % 3450 - 820;   /* same fixed wrap — the mid layer was the worst sweeper (72 units of drag across the normal speed zoom-out alone) */
     const dy = d.y - camY * 0.38 + viewH / zoom * 0.55;
     ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim;
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
