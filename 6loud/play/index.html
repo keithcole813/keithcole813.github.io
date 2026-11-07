@@ -72,7 +72,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.50</div>
+  <div id="ver">v0.51</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -85,7 +85,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.50 ==============================
+/* ============================== 6LOUD demo v0.51 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1335,7 +1335,8 @@ function release() {
     airMove = 'jump'; airT = 0;
     flipArmed = false; rollArmed = false; flipped = false; flipMove = null; landMove = null; landT = 0;
     jumps++; score += 1;
-    for (let k = 0; k < 9; k++) spawnPuff(px - 30 + k * 7, py + 12, 10 + Math.random() * 8);   /* the invisible cloud he pushes off */
+    for (let k = 0; k < 20; k++) spawnPuff(px - 46 + k * 5, py + 12, 11 + Math.random() * 9);   /* a GOOD burst off the invisible cloud (Keith v0.51) — he really pushes off something */
+    playBoom();   /* and it BOOMS like a charged landing (Keith v0.51) */
     return;
   }
   /* grounded, or a hair past the edge (coyote): the charge was earned running */
