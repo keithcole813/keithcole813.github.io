@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.29</div>
+  <div id="ver">v0.29.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.29 ==============================
+/* ============================== 6LOUD demo v0.29.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -813,7 +813,7 @@ let REC = null, lastReplay = null;
 function recStart() { REC = { acc: 0, lastDist: 0, frames: [], plats: [] }; }
 function recSample() {
   const mv = playerAnim().move;
-  let code = mv === 'run' ? 0 : mv === 'runjump' || mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
+  let code = mv === 'run' ? 0 : mv === 'runjump' ? 7 : mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
   if (slipPlat) code = 5; else if (!grounded && !airMove && !hangPlat && vy > 260) code = 6;   /* 5 = ledge slip, 6 = Fall 2 plunge */
   REC.frames.push([Math.round(dist - REC.lastDist), Math.round(py), code]);
   REC.lastDist = dist;
@@ -882,7 +882,7 @@ function ghostReset(entering) {
   if (RACE) {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
     for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
-    GR = { frames: RACE.frames, cum, st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false };
+    GR = { frames: RACE.frames, cum, st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0 };
   }
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: GR ? 'race' : 'sea',
         animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
@@ -948,7 +948,7 @@ function ghostUpdate(dt) {
     if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; }   /* THE PASS (Keith v0.28) */
     G.prevO = G.o;
     const sm = grSample(GR.perfD);
-    if (sm.st !== GR.st) { GR.st = sm.st; GR.stT = 0; }
+    if (sm.st !== GR.st) { GR.st = sm.st; GR.stT = 0; GR.pick = ((GR.pick || 0) + 1) % 2; }
     GR.stT += dt;
     GR.pyS += (sm.py - GR.pyS) * Math.min(1, dt * 18);
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
@@ -1355,6 +1355,22 @@ function playerAnim() {
   }
   return { move: 'run', idx: Math.floor(walkT * 30) % MANIFEST.run.n };
 }
+/* what LaShmoove plays for the recorded state he's in — the same visual
+   grammar as the player (v0.29.1: flips were folded into diveroll's
+   run-up and the slip/plunge fell through to the run cycle — he read as
+   floating and running on air; Keith caught it) */
+function ghostMove() {
+  if (G.state === 'fall') return { mv: 'armsopen', idx: pingpong(Math.floor(G.animT * 10), GMAN2.armsopen.n) };
+  const st = GR.st, t = GR.stT;   /* every pick below is guarded where it's used: GANIM2 loads per-move, a missing set simply doesn't draw that beat */
+  if (st === 1) return { mv: 'basic', idx: Math.min(GMAN2.basic.n - 1, Math.floor(t * 30)) };
+  if (st === 7) return { mv: 'runjump', idx: Math.min(GMAN2.runjump.n - 1, Math.floor(t * 30)) };
+  if (st === 2) { const mv = GR.pick ? 'diveflip' : 'flip'; return { mv, idx: Math.min(GMAN2[mv].n - 1, Math.floor(t * 30)) }; }
+  if (st === 3) { const mv = GR.pick ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GMAN2[mv].n - 1, Math.floor(t * 45)) }; }
+  if (st === 4) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10), GMAN2.armsopen.n) };
+  if (st === 5) return { mv: 'armsopen', idx: Math.min(GMAN2.armsopen.n - 1, Math.floor(t * 30)) };
+  if (st === 6) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10), GMAN2.armsopen.n) };
+  return { mv: 'run', idx: Math.floor(G.animT * 30) % GMAN2.run.n };
+}
 function draw() {
   const ph = (time % SKY_PERIOD) / SKY_PERIOD;
   const sky = skyAt(ph);
@@ -1523,11 +1539,7 @@ function draw() {
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
   if (G && GR && GMAN2) {   /* LaShmoove, racing on the same clouds, slightly off 6lade's plane (Keith, v0.25) */
-    let mv = 'run', idx = Math.floor(G.animT * 30) % GMAN2.run.n;
-    if (G.state === 'fall') { mv = 'armsopen'; idx = pingpong(Math.floor(G.animT * 10), GMAN2.armsopen.n); }
-    else if (GR.st === 1) { mv = 'runjump'; idx = Math.min(GMAN2.runjump.n - 1, Math.floor(GR.stT * 30)); }
-    else if (GR.st === 2 || GR.st === 3) { mv = 'diveroll'; idx = Math.min(GMAN2.diveroll.n - 1, Math.floor(GR.stT * 30)); }
-    else if (GR.st === 4) { mv = 'armsopen'; idx = pingpong(Math.floor(GR.stT * 10), GMAN2.armsopen.n); }
+    const gm = ghostMove(); const mv = gm.mv, idx = gm.idx;
     const m = GMAN2[mv], frames = GANIM2[mv], gimg = frames && frames[idx];
     if (gimg && gimg.naturalWidth) {
       const gap = (m.gaps && m.gaps[idx]) || 0;
