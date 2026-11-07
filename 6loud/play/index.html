@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.33.4</div>
+  <div id="ver">v0.33.5</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.33.4 ==============================
+/* ============================== 6LOUD demo v0.33.5 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -759,7 +759,7 @@ function gripOf(p) { const cd = CLOUDS[p.img]; return { x: p.x + p.len * GRIP_DX
 let airGrav = 1, airTotal = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
 let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
-let puffs = [];
+let puffs = []; let pTrailAcc = 0, gTrailAcc = 0;
 let camX = 0, camY = 0, zoom = 1, shake = 0, time = 0, runTime = 0, lastSeg = -1, lastTier = 1, worldEnd = 0, exitBand = 0;
 let walkT = 0, dead = false;
 const PLAYER_XF = 0.30;        // player screen position (fraction of view width)
@@ -1029,6 +1029,7 @@ function ghostUpdate(dt) {
       for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6);
     }
     if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.125; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 10); } }
+    else { gTrailAcc -= dt; if (gTrailAcc <= 0) { gTrailAcc = 0.024; pushTrail(px + G.o, GR.pyS + GSINK - 92, false); } }   /* his jumps trail light too */
     if (GR.st === 0) { const gp = plats.find(q => GR.perfD >= q.x - 20 && GR.perfD <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29) */
     GR.prevSt = GR.st;
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
@@ -1055,13 +1056,21 @@ const puffImgB = (() => { const c = document.createElement('canvas'); c.width = 
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(170,215,255,0.95)'); gr.addColorStop(0.6, 'rgba(80,160,255,0.45)'); gr.addColorStop(1, 'rgba(60,140,255,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
+function onCam(x, y) { const hw = W / 2 / (S * zoom) + 240, hh = H / 2 / (S * zoom) + 240; return Math.abs(x - px) <= hw && Math.abs(y - camY) <= hh; }
+/* THE JUMP LIGHT-TRAIL (Keith v0.33.5): the takeoff puff stays, then a short chem trail of soft
+   light hangs along the arc — about 3 ft of it — and dissolves. Dots are world-fixed (the arc
+   draws itself as he moves), stamped from the pre-rendered puff sprite: no shadowBlur, ~7 alive
+   per jumper, so it stays light on the phone (the v0.8.6 sky-trail was puff-stream based and
+   heavy; this one is built cheap from the start). Blue while 6lade is lit. */
+const TRAIL_LIFE = 0.17;
+let trail = [];
+function pushTrail(x, y, blue) { if (trail.length >= 130 || !onCam(x, y)) return; trail.push({ x, y, life: TRAIL_LIFE, max: TRAIL_LIFE, blue: !!blue }); }
 function spawnPuff(x, y, r) {
   if (puffs.length >= 68) return;   /* a little more puff (Keith v0.32) — still under the choking levels */
   /* OFFSCREEN CULL (Keith v0.33.4: "is lashmoove drawing puffs offscreen?" — he WAS: his stride fog and
      bursts fired wherever he ran on his course, bands above the camera and off the sides, all drawn every
      frame and eating pool slots. A puff nobody can see never spawns now; nothing on screen changes.) */
-  const hw = W / 2 / (S * zoom) + 240, hh = H / 2 / (S * zoom) + 240;
-  if (Math.abs(x - px) > hw || Math.abs(y - camY) > hh) return;
+  if (!onCam(x, y)) return;
   puffs.push({ x, y, r, life: 0.58, max: 0.58 });
 }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
@@ -1133,7 +1142,7 @@ function startRun() {
   px = 60; py = BAND_Y[2]; vy = 0; grounded = plats[0];
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
   airMove = null; dead = false; hangPlat = null; slipPlat = null; slipT = 0; struggleTaps = 0; held = false; pressT = 0; lastHold = 0;
-  flipped = false; flipMove = null; landMove = null; landT = 0; puffs = [];
+  flipped = false; flipMove = null; landMove = null; landT = 0; puffs = []; trail = [];
   airGrav = 1; flipArmed = false; rollArmed = false;
   camX = px - viewW * PLAYER_XF; camY = -560; camSmY = -560; zoom = 1; shake = 0;
   mode = 'run';
@@ -1380,8 +1389,10 @@ function update(dt) {
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
   if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 74) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 10 + Math.random() * 7); } }   // foot fog — a little denser (Keith v0.32), short of the choking stream
   if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.05; spawnPuff(px - 8, py + 12, 11 + Math.random() * 6); } }   // roll-landing trail
+  if (!grounded && !hangPlat && !slipPlat && mode === 'run') { pTrailAcc -= dt; if (pTrailAcc <= 0) { pTrailAcc = 0.024; pushTrail(px - 6, py - 100, champMode || flareT > 0); } }   /* airborne: the light trail lays along his arc */
   /* sky trail REMOVED at Keith's order 2026-11-06 (v0.8.7): still chopping with it in. */
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
+  for (let i = trail.length - 1; i >= 0; i--) { const q = trail[i]; q.life -= dt; if (q.life <= 0) trail.splice(i, 1); }   /* trail dots hang in the world and dissolve */
   /* extend the world ahead, prune behind */
   while (worldEnd < camX + viewW + 900) nextSegment();
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
@@ -1632,6 +1643,8 @@ function draw() {
     ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim;
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
+  for (const q of trail) { const la = Math.max(0, q.life / q.max); const r = 12 + 30 * (1 - la);
+    ctx.save(); ctx.globalAlpha = 0.5 * la; ctx.drawImage(q.blue ? puffImgB : puffImg, q.x - camX - r, q.y - camY - r, r * 2, r * 2); ctx.restore(); }   /* the light trail, behind the runners */
   if (G && GR && GMAN2) {   /* LaShmoove, racing on the same clouds, slightly off 6lade's plane (Keith, v0.25) */
     const gm = ghostMove(); const mv = gm.mv, idx = gm.idx;
     const m = GMAN2[mv], frames = GANIM2[mv], gimg = frames && frames[idx];
