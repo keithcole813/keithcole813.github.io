@@ -2072,6 +2072,19 @@ function htChord(tok, cx){
   return notes;
 }
 function genProg(){
+  /* PRESET SWITCH = CLEAR FIRST (Keith, 2026-11-07): applying a progression
+     preset through this generator FIRST clears ALL of the target channel's
+     notes in the current sequence across its full length (bars*16 steps),
+     THEN writes the new preset — switching presets never leaves notes from
+     the previous one behind, not even in the tail of a shorter progression.
+     Only the roll-loaded channel in the current sequence is cleared; other
+     channels and sequences are untouched, and notes parked beyond the
+     sequence's current length (kept when a sequence is shortened) survive.
+     Clear + generate is one synchronous edit under a single markDirty, so
+     it lands as ONE undo step — one undo restores what was there before
+     the switch. This rule lives in generation only: merely changing the
+     Feel dropdown (which generates nothing) clears nothing, and the
+     single-chord stamp is unaffected. */
   const ch=S.channels[S.rollChannel]; if(!ch){ setStatus("No channel loaded in the Piano Roll — pick a channel first (step-row name, mixer Select, or a multitrack lane), or add one, then generate."); return; }
   if(ch.type==="chop"){ setStatus("Progression needs a pitched channel — pick 808, Sample or Synth."); return; }
   const styleKey=$("progStyle").value, cx=+$("progCx").value, pat=ch.patterns[S.pattern];
@@ -2138,20 +2151,23 @@ function genProg(){
   if(HT_PROGS[styleKey]){
     const hp=HT_PROGS[styleKey], n=hp.toks.length;
     const base=hp.toks.map((t,i)=>Math.floor(i*16/n));
-    const slots=[]; for(let b=0;b<bars;b++) base.forEach(s=>slots.push(s+b*16));
-    pat.notes=pat.notes.filter(nt=>slots.indexOf(nt.step)<0);
+    /* clear ALL notes across the full sequence length first (see genProg
+       header) — the old slot-only filter left the previous preset's chords
+       standing at steps the new preset doesn't use */
+    pat.notes=pat.notes.filter(nt=>rollNotePos(nt)>=bars*16);
     for(let b=0;b<bars;b++) hp.toks.forEach((t,i)=>{ htChord(t,cx).forEach(m=>pat.notes.push({step:base[i]+b*16, midi:m, vel:0.85})); });
-    buildRoll();
-    setStatus("Progression generated in "+keyLabel(S.projectKey.root,S.projectKey.mode)+" on "+ch.name+" — "+hp.t+" (Hooktheory Popular)"+(bars>1? ", spanning all "+bars+" bars" : "")+". All notes editable.");
+    buildRoll(); markDirty();
+    setStatus("Progression generated in "+keyLabel(S.projectKey.root,S.projectKey.mode)+" on "+ch.name+" — "+hp.t+" (Hooktheory Popular)"+(bars>1? ", spanning all "+bars+" bars" : "")+". Previous notes on this channel were cleared first; all notes editable.");
     return;
   }
   const p=PROGS[styleKey];
-  // progression replaces this channel's notes in this pattern (kept editable)
-  const slots=[]; for(let b=0;b<bars;b++) [0,4,8,12].forEach(s=>slots.push(s+b*16));
-  pat.notes = pat.notes.filter(n=>slots.indexOf(n.step)<0);
+  // progression REPLACES this channel's notes in this pattern: clear ALL of
+  // them across the full sequence length first (see genProg header), then
+  // write the new preset (kept editable)
+  pat.notes = pat.notes.filter(n=>rollNotePos(n)>=bars*16);
   for(let b=0;b<bars;b++) p.degs.forEach((deg,i)=>{ degreeChord(deg,cx).forEach(m=>pat.notes.push({step:i*4+b*16, midi:m, vel:0.85})); });
-  buildRoll();
-  setStatus("Progression generated in "+keyLabel(S.projectKey.root,S.projectKey.mode)+" on "+ch.name+(bars>1? ", spanning all "+bars+" bars" : "")+" — all notes editable.");
+  buildRoll(); markDirty();
+  setStatus("Progression generated in "+keyLabel(S.projectKey.root,S.projectKey.mode)+" on "+ch.name+(bars>1? ", spanning all "+bars+" bars" : "")+" — previous notes on this channel were cleared first; all notes editable.");
 }
 $("btnProg").onclick=genProg; $("btnProgReroll").onclick=genProg;
 /* btnRollHelper retired with the helper panel (MIDI Templates replaced it) — bind only if present */
@@ -10007,29 +10023,18 @@ blDuplicateChannel=function(cid){
   if(ch && src) ch.swing=blSwingOf(src);
   return ch;
 };
-/* every MIDI lane header gains its channel's Swing control */
+/* MOVED (Keith, 2026-11-07): the Swing control no longer lives in
+   the Edit view's MIDI lane headers — it sits beside each channel
+   name in the step sequencer now (see the last script block of the
+   page). This wrapper stays in the chain only to keep the
+   per-channel default initialisation the lane used to do; it adds
+   NO control to the lane. Quantize is untouched and stays here. */
 const _blSwingLanePrev=ptBuildMidiLane;
 ptBuildMidiLane=function(cid, idx, ts){
   const lane=_blSwingLanePrev(cid, idx, ts);
   if(!lane) return lane;
   const ch=S.channels[cid]; if(!ch) return lane;
   if(ch.swing==null) ch.swing=clamp(+S.swing||0, 0, 0.6);
-  const head=lane.querySelector(".ptHead"); if(!head) return lane;
-  const row=document.createElement("div"); row.className="blSwingRow";
-  const lab=document.createElement("span"); lab.className="blSwingLab"; lab.textContent="Swing"; row.appendChild(lab);
-  const slider=document.createElement("input");
-  slider.type="range"; slider.min="0"; slider.max="60"; slider.step="1";
-  slider.value=String(Math.round(blSwingOf(ch)*100));
-  slider.title="Swing — "+ch.name+" only: this channel's odd 16ths delay by this % of a step. Wave clips are never swung, and no other channel is affected.";
-  const val=document.createElement("span"); val.className="blSwingVal mono";
-  val.textContent=Math.round(blSwingOf(ch)*100)+"%";
-  slider.addEventListener("pointerdown", e=>e.stopPropagation());
-  slider.addEventListener("click", e=>e.stopPropagation());
-  slider.addEventListener("dblclick", e=>e.stopPropagation());
-  slider.oninput=()=>{ ch.swing=+slider.value/100; val.textContent=slider.value+"%"; markDirty(); };
-  slider.onchange=()=>setStatus(ch.name+" swing: "+slider.value+"% — its odd 16ths sit "+slider.value+"% of a step late in playback, renders and .mid export. Every other channel keeps its own swing; wave clips never swing.");
-  row.appendChild(slider); row.appendChild(val);
-  head.appendChild(row);
   return lane;
 };
 /* ---------------- Persistence + legacy migration ---------------- */
@@ -12534,7 +12539,15 @@ function analyze(){
   refreshStats(); scheduleKey(); enableTransport(true);
 }
 function enableTransport(on){
-  ["toStart","playFull","stopBtn","playLoop","playOnce","sendWave","sendSeq"].forEach(function(id){ $(id).disabled = !on; });
+  /* Sampler transport fix: the buttons' real ids carry the "ml" prefix
+     (mlPlayFull, mlStopBtn, …). The old list used bare names, so every
+     lookup returned null, the assignment threw, and the throw aborted
+     analyze() AFTER the wave had drawn — leaving all transport + send
+     buttons disabled forever (Play did nothing, playhead never moved)
+     and making loadArrayBuffer's .catch misreport a good decode as
+     "Couldn't decode that audio". Null-safe now, so a missing element
+     can never take the whole load down again. */
+  ["mlToStart","mlPlayFull","mlStopBtn","mlPlayLoop","mlPlayOnce","mlSendWave","mlSendSeq"].forEach(function(id){ var el = $(id); if (el) el.disabled = !on; });
 }
 
 function stopPlayback(){
@@ -19600,6 +19613,261 @@ if(typeof blResetSounds==="function"){
     return _blSpellResetPrev();
   };
 }
+</script>
+<style>
+/* ---------- Swing in the step sequencer: one row inside each channel's name cell,
+   directly under its name (above the sound dropdown / instrument label) ---------- */
+#rackSteps .steprow .blStepSwing{flex:1 1 100%;order:2;width:100%;min-width:0}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   SWING MOVES TO THE PIANO ROLL (Keith, 2026-11-07: "i found it,
+   on the editor track. it needs to goto the piano roll. next to
+   each channel name in the step sequencer").
+   A MOVE, not a copy: the Edit (multitrack) lane header no longer
+   carries a Swing control — the injection up in the per-channel
+   swing block now initialises the value only. Here, every step
+   sequencer row gains its channel's own Swing slider inside its
+   name cell, directly under the channel name — the same cell that
+   already hosts the row's sound dropdown / instrument label, so
+   name, sound and swing for one channel live in one place.
+   Everything else about swing is unchanged: still per-channel
+   (ch.swing, 0–60%, no global swing returns), the same stored
+   value the lane control wrote, the same playback maths in live
+   play, renders and .mid export, the same label and readout.
+   Quantize does NOT move — it stays per-track in the multitrack.
+   Rows are rebuilt from scratch by every buildRack, and this
+   wrapper is defined last so it runs after the sequence-membership
+   filter: only rows actually shown get a control, the blank
+   template's kick / snare / hihat / omnisphere included, and any
+   channel added later gets one on its first row build. The slider
+   writes ch.swing directly (never through the Piano Roll's loaded
+   channel), so switching the roll's channel can't disturb any
+   row's value; persistence already rides projectJSON per channel.
+   ================================================================ */
+if(typeof buildRack==="function"){
+  const _blSwingStepPrev=buildRack;
+  buildRack=function(){
+    _blSwingStepPrev();
+    document.querySelectorAll("#rackSteps .steprow").forEach(row=>{
+      const wrap=row.querySelector(".stepchwrap"); if(!wrap) return;
+      if(wrap.querySelector(".blStepSwing")) return;
+      const ch=S.channels[row.dataset.ch]; if(!ch) return;
+      if(ch.swing==null) ch.swing=clamp(+S.swing||0, 0, 0.6);
+      const srow=document.createElement("div"); srow.className="blSwingRow blStepSwing";
+      const lab=document.createElement("span"); lab.className="blSwingLab"; lab.textContent="Swing"; srow.appendChild(lab);
+      const slider=document.createElement("input");
+      slider.type="range"; slider.min="0"; slider.max="60"; slider.step="1";
+      slider.value=String(Math.round(blSwingOf(ch)*100));
+      slider.title="Swing — "+ch.name+" only: this channel's odd 16ths delay by this % of a step. Wave clips are never swung, and no other channel is affected.";
+      slider.setAttribute("aria-label","Swing for channel "+ch.name);
+      const val=document.createElement("span"); val.className="blSwingVal mono";
+      val.textContent=Math.round(blSwingOf(ch)*100)+"%";
+      slider.addEventListener("pointerdown", e=>e.stopPropagation());
+      slider.addEventListener("click", e=>e.stopPropagation());
+      slider.addEventListener("dblclick", e=>e.stopPropagation());
+      slider.oninput=()=>{ ch.swing=+slider.value/100; val.textContent=slider.value+"%"; markDirty(); };
+      slider.onchange=()=>setStatus(ch.name+" swing: "+slider.value+"% — its odd 16ths sit "+slider.value+"% of a step late in playback, renders and .mid export. Every other channel keeps its own swing; wave clips never swing.");
+      srow.appendChild(slider); srow.appendChild(val);
+      wrap.appendChild(srow);
+    });
+  };
+  try{ buildRack(); }catch(e){}
+}
+</script>
+<style>
+/* External-MIDI key light: an externally played key carries BOTH the
+   keyboards' own "on" class (so it looks exactly like a key you pressed
+   yourself) and this "exton" marker (so the light survives other code
+   that toggles "on" — e.g. Chord Lock's timed flash — and can always be
+   found and cleared). The style is the keyboards' own lit colour. */
+.kb .wk.exton,.kb .bk.exton{background:var(--gold)}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   EXTERNAL MIDI LIGHTS THE KEYS IT PLAYS (Keith, 2026-11-07:
+   "Make external MIDI light up the on-screen keys it plays" —
+   his MPK mini audibly played an instrument but no keyboard lit,
+   so he could not tell whether the Piano Roll or the Modules were
+   answering).
+   VISUAL ECHO ONLY. This pass wraps the app's MIDI input handler
+   (onMidiMessage) the same way the diagnostics tap does: it reads
+   each external message, works out which destination actually
+   sounds it — mirroring the real routing, never changing it — and
+   lights that destination's keyboard. Routing, sound, recording
+   and the transport MIDI activity light are all untouched, and
+   internal playing (pointer / typing keys) never passes through
+   onMidiMessage, so it is never double-processed here.
+   THE ROUTING MIRROR (same order the real handlers apply):
+   · A note on MIDI channel N (1-based) with a live module in
+     stack position N is consumed by that module (blBlockMidiOn) —
+     it sounds the MODULE, so the Modules AUDITION KEYBOARD
+     (#blSharedKb, plus the legacy #mkKeys if present) lights.
+     The roll never hears it, so the roll keyboard stays dark.
+   · Otherwise the message reaches the note funnel (blNoteOn):
+     MIDI-Learn captures, mapped trigger functions, chop-slice
+     pads and GM-mapped drum notes all sound something that is
+     NOT a keyboard key — no light. Anything else sounds the
+     Piano Roll's loaded channel, so the roll's BOTTOM KEYBOARD
+     (#rollKb) lights. No channel loaded → nothing sounds → dark.
+   · CHORD LOCK: with the lock on (and the roll channel not a chop
+     channel) one press sounds the generated chord — every chord
+     tone lights on the roll keyboard, not just the pressed root.
+     The tones are remembered per press, so Note Off releases
+     exactly what lit even if the chord settings change mid-hold.
+   Note Off (0x80, or 0x90 velocity 0) releases the light. Lights
+   are reference-counted per tone, carry a dedicated "exton" class
+   alongside the keyboards' own "on", and a watchdog clears them
+   all on device disconnect, on destination change (roll channel,
+   module stack, keyboard module pick, roll octave), on window
+   blur, and re-asserts them after a keyboard rebuild — no stuck
+   keys. Notes outside a keyboard's visible range find no key
+   element and light nothing, without error.
+   ================================================================ */
+(function blExtMidiLights(){
+  var pressMap={};                 /* "dest|chan|note" -> {dest, tones:[midi]} */
+  var toneCount={ mod:{}, roll:{} };
+
+  function kbEls(dest){
+    var out=[];
+    if(dest==="mod"){
+      ["blSharedKb","mkKeys"].forEach(function(id){ var e=document.getElementById(id); if(e) out.push(e); });
+    } else {
+      var e=document.getElementById("rollKb"); if(e) out.push(e);
+    }
+    return out;
+  }
+  function paint(dest, tone){
+    var on=(toneCount[dest][tone]||0)>0;
+    kbEls(dest).forEach(function(kb){
+      var k=kb.querySelector('[data-midi="'+tone+'"]');
+      if(k){ k.classList.toggle("on", on); k.classList.toggle("exton", on); }
+    });
+  }
+  function bump(dest, tones, d){
+    tones.forEach(function(t){
+      toneCount[dest][t]=Math.max(0,(toneCount[dest][t]||0)+d);
+      if(!toneCount[dest][t]) delete toneCount[dest][t];
+      paint(dest, t);
+    });
+  }
+  function clearAll(){
+    pressMap={}; toneCount={ mod:{}, roll:{} };
+    document.querySelectorAll(".kb .exton").forEach(function(k){ k.classList.remove("exton"); k.classList.remove("on"); });
+  }
+
+  /* ---- destination mirror ---- */
+  function moduleSounds(chan){ /* chan is 1-based */
+    try{
+      if(typeof BL_STACK==="undefined" || typeof BL_ENGINES==="undefined") return false;
+      if(chan<1 || chan>BL_STACK.length) return false;
+      var b=BL_STACK[chan-1];
+      return !!(b && BL_ENGINES[b.engine]);
+    }catch(e){ return false; }
+  }
+  function rollTones(chan, note){ /* chan 1-based; returns sounding tones or null */
+    try{
+      if(typeof S==="undefined" || !S.channels) return null;
+      if(S.learnTarget) return null; /* captured by MIDI Learn — nothing sounds */
+      var selCh=S.channels[S.selected];
+      if(selCh && selCh.type==="chop" && note>=36 && note<=51) return null; /* chop pads, not keys */
+      if(typeof findAssign==="function" && typeof fnKind==="function"){
+        var fn=findAssign("note", note, chan-1);
+        if(fn && fnKind(fn)==="t") return null; /* mapped trigger function — not a key */
+      }
+      if(typeof GM_MAP!=="undefined" && GM_MAP[note] && S.channels[GM_MAP[note]]) return null; /* GM drum step, not the roll channel */
+      var rollCh=S.channels[S.rollChannel];
+      if(!rollCh) return null; /* nothing loaded in the roll — nothing sounds */
+      if(S.chordLock && rollCh.type!=="chop" && typeof blChordTones==="function") return blChordTones(note);
+      return [note];
+    }catch(e){ return null; }
+  }
+
+  function noteOn(chan, note){
+    if(moduleSounds(chan)){
+      var mk="mod|"+chan+"|"+note;
+      if(pressMap[mk]) bump("mod", pressMap[mk].tones, -1);
+      pressMap[mk]={ dest:"mod", tones:[note] };
+      bump("mod", [note], 1);
+      return;
+    }
+    var tones=rollTones(chan, note);
+    if(tones && tones.length){
+      var rk="roll|"+chan+"|"+note;
+      if(pressMap[rk]) bump("roll", pressMap[rk].tones, -1);
+      pressMap[rk]={ dest:"roll", tones:tones.slice() };
+      bump("roll", tones, 1);
+    }
+  }
+  function noteOff(chan, note){
+    [["mod","mod|"],["roll","roll|"]].forEach(function(pair){
+      var key=pair[1]+chan+"|"+note, p=pressMap[key];
+      if(p){ delete pressMap[key]; bump(p.dest, p.tones, -1); }
+    });
+  }
+  function handle(msg){
+    var d=msg && msg.data;
+    if(!d || d.length<3) return;
+    var cmd=d[0]&0xf0, chan=(d[0]&0x0f)+1, note=d[1], vel=d[2];
+    if(cmd===0x90){ if(vel>0) noteOn(chan, note); else noteOff(chan, note); }
+    else if(cmd===0x80){ noteOff(chan, note); }
+  }
+
+  /* RAW tap: wrap the input handler itself — every external device
+     message is seen here, before any routing consumes it (module
+     channels return early downstream and their Note Offs are
+     dropped by the note funnel, so the tap is the only place both
+     halves of every destination's notes are visible). Lighting is
+     applied first so the key is lit synchronously with the sound. */
+  try{
+    if(typeof onMidiMessage==="function" && !onMidiMessage._blExtLightWrapped){
+      var _extPrev=onMidiMessage;
+      var _extWrap=function(msg){ try{ handle(msg); }catch(e){} return _extPrev.apply(this, arguments); };
+      _extWrap._blExtLightWrapped=true;
+      onMidiMessage=_extWrap;
+      /* inputs enabled before this pass would hold the old reference */
+      try{ var acc0=(typeof midiAccess!=="undefined")? midiAccess : null;
+        if(acc0) acc0.inputs.forEach(function(inp){ inp.onmidimessage=onMidiMessage; }); }catch(e){}
+    }
+  }catch(e){}
+
+  /* ---- no stuck keys: disconnect + destination change + blur ---- */
+  function destSig(){
+    try{
+      var stack=(typeof BL_STACK!=="undefined")? BL_STACK.map(function(b){ return b.id+":"+b.engine; }).join(",") : "";
+      var sel=""; try{ sel=String(BL_KB_SEL); }catch(e){}
+      return stack+"|"+S.rollChannel+"|"+S.kbBase+"|"+sel+"|"+(S.chordLock?1:0);
+    }catch(e){ return ""; }
+  }
+  var lastSig=destSig();
+  function hookAccess(){
+    try{
+      var acc=(typeof midiAccess!=="undefined")? midiAccess : null;
+      if(!acc || acc._blExtHooked) return;
+      acc._blExtHooked=true;
+      var prevFn=acc.onstatechange;
+      acc.onstatechange=function(ev){
+        try{ if(ev && ev.port && (ev.port.state==="disconnected" || ev.port.connection==="closed")) clearAll(); }catch(e){}
+        if(prevFn) return prevFn.apply(this, arguments);
+      };
+    }catch(e){}
+  }
+  window.addEventListener("blur", clearAll);
+  setInterval(function(){
+    hookAccess();
+    var sig=destSig();
+    if(sig!==lastSig){ lastSig=sig; if(Object.keys(pressMap).length) clearAll(); return; }
+    /* re-assert held lights: a keyboard rebuild (new key elements)
+       or another feature's timed "on" toggle must not strand or
+       steal an externally held key */
+    Object.keys(toneCount).forEach(function(dest){
+      Object.keys(toneCount[dest]).forEach(function(t){ paint(dest, +t); });
+    });
+  }, 200);
+  window.blExtMidiLights={ clear:clearAll, counts:function(){ return JSON.parse(JSON.stringify(toneCount)); } };
+})();
 </script>
 </body>
 </html>
