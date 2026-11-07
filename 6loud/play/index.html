@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.33.3</div>
+  <div id="ver">v0.33.4</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.33.3 ==============================
+/* ============================== 6LOUD demo v0.33.4 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -919,6 +919,7 @@ function ghostFeetY() {
 }
 function ghostPuff(big) {
   if (!G || G.puffs.length > 10) return;
+  if (G.sx < -80 || G.sx > W + 80) return;   /* the sea-runner's trail too: no puffs while he's offstage (v0.33.4) */
   G.puffs.push({ sx: G.sx - 14, sy: ghostFeetY() + 3, r: big ? 15 : 10, life: 0.5, max: 0.5 });
 }
 function ghostFall() {
@@ -983,7 +984,7 @@ function ghostUpdate(dt) {
         GR.fireT = Math.max(GR.fireT, 0.45);
         if (GR.surgeT >= SURGE_CHARGE_DUR) { GR.phase = 'burst'; GR.fireT = Math.max(GR.fireT, 1.8); }
       } else if (GR.phase === 'burst') {
-        oT = RACE_LEAD_O * oS; oRate = 1500 + 350 * oS;   /* the burst of speed (softened a touch — the scrub carries the read now) */
+        oT = RACE_LEAD_O * oS; oRate = 1150 + 260 * oS;   /* the burst of speed (Keith v0.33.4: the run-by was still a little too fast — eased ~25%; the scrub carries the read) */
         GR.fireT = Math.max(GR.fireT, 0.8);
       } else if (GR.phase === 'lead') {
         oT = RACE_LEAD_O * oS;   /* a good amount ahead, still on screen: same pace as 6lade */
@@ -1006,7 +1007,7 @@ function ghostUpdate(dt) {
        so a burst reads as sprinting, not skipping. */
     const dPerf = GR.prevPerfD === undefined ? 0 : GR.perfD - GR.prevPerfD;
     GR.prevPerfD = GR.perfD;
-    GR.scrub = Math.max(0.6, Math.min(3.2, dt > 0 ? (dPerf / dt) / Math.max(120, grSpeedAt(GR.perfD)) : 1));
+    GR.scrub = Math.max(0.6, Math.min(2.7, dt > 0 ? (dPerf / dt) / Math.max(120, grSpeedAt(GR.perfD)) : 1));   /* cap eased with the slower burst (v0.33.4) */
     if (G.o > 150) GR.wasAhead = true;
     if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; }   /* THE PASS (Keith v0.28) */
     if (G.o < -150) GR.passArm = true;
@@ -1054,7 +1055,15 @@ const puffImgB = (() => { const c = document.createElement('canvas'); c.width = 
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(170,215,255,0.95)'); gr.addColorStop(0.6, 'rgba(80,160,255,0.45)'); gr.addColorStop(1, 'rgba(60,140,255,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
-function spawnPuff(x, y, r) { if (puffs.length < 68)   /* a little more puff (Keith v0.32) — still under the choking levels */ puffs.push({ x, y, r, life: 0.58, max: 0.58 }); }
+function spawnPuff(x, y, r) {
+  if (puffs.length >= 68) return;   /* a little more puff (Keith v0.32) — still under the choking levels */
+  /* OFFSCREEN CULL (Keith v0.33.4: "is lashmoove drawing puffs offscreen?" — he WAS: his stride fog and
+     bursts fired wherever he ran on his course, bands above the camera and off the sides, all drawn every
+     frame and eating pool slots. A puff nobody can see never spawns now; nothing on screen changes.) */
+  const hw = W / 2 / (S * zoom) + 240, hh = H / 2 / (S * zoom) + 240;
+  if (Math.abs(x - px) > hw || Math.abs(y - camY) > hh) return;
+  puffs.push({ x, y, r, life: 0.58, max: 0.58 });
+}
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 
 /* ---------- world building ---------- */
