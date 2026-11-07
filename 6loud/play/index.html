@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.26.1</div>
+  <div id="ver">v0.27</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.26.1 ==============================
+/* ============================== 6LOUD demo v0.27 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1144,9 +1144,15 @@ addEventListener('pointercancel', () => release());
 function update(dt) {
   time += dt;
   if (mode !== 'run') return;
-  runTime += dt;
+  /* LEDGE BEAT (Keith, v0.27): on a catch the screen STOPS and the camera
+     zooms in on him dangling, handy-cam alive; save or slip zooms back out
+     and the roll resumes. Freezing dist can't desync LaShmoove — his whole
+     performance is a function of dist, so he pauses and resumes on the
+     exact frame, like the recording was never interrupted. */
+  const frozen = !!(hangPlat || slipPlat);
+  if (!frozen) runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
-  dist += speed * dt;
+  if (!frozen) dist += speed * dt;
   /* THE CROWN MOMENT (Keith, v0.13): the instant this run's feet pass
      the reigning high score, the battle loop crossfades in — and keeps
      going: through the wipeout, into every later run this session. */
@@ -1172,7 +1178,7 @@ function update(dt) {
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
-  px += speed * dt;
+  if (!frozen) px += speed * dt;   /* frozen on the ledge beat: he hangs on the lip, the lip hangs on the world */
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
@@ -1249,8 +1255,10 @@ function update(dt) {
   while (worldEnd < camX + viewW + 900) nextSegment();
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
   /* camera: follows, eases out as speed climbs, shake decays */
-  const targetZoom = 1 - Math.min(0.12, (speed - 620) / 4400);
-  zoom += (targetZoom - zoom) * Math.min(1, dt * 2.2);
+  const ledgeBeat = hangPlat || slipPlat;
+  const targetZoom = ledgeBeat ? 1.5 + Math.sin(time * 1.3) * 0.02 : 1 - Math.min(0.12, (speed - 620) / 4400);
+  zoom += (targetZoom - zoom) * Math.min(1, dt * (ledgeBeat ? 5 : 2.2));
+  if (ledgeBeat) shake = Math.max(shake, 1.8);   /* handy-cam tremble: the close-up is alive, never a locked frame */
   camX = px - (viewW / zoom) * PLAYER_XF;
   const wantY = py - viewH / zoom * 0.58;
   camY += (wantY - camY) * Math.min(1, dt * 5);
