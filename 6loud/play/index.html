@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.43</div>
+  <div id="ver">v0.44</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.43 ==============================
+/* ============================== 6LOUD demo v0.44 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1122,27 +1122,32 @@ function resetWorld() {
     return;
   }
   addPlat(-300, 2, 'LONG'); worldEnd = -300 + LEN.LONG;
-  /* THE OPENING STAIRCASE (Keith v0.43 — the game is about to go out to
-     6lade and the kids): long clouds stepping DOWN ahead of the course,
-     close together, so a brand-new player who never touches the button
-     still lands on the next cloud and learns the run first. Geometry is
-     no-jump proof at starting speed: 90-unit gaps (a fall of ~55) against
-     85-unit steps down. It ends at the lowest band, then Low Road — the
-     gentlest designed segment — walks him back up with easy jumps before
-     the chained course takes over. Race runs keep the champion's own
+  /* THE OPENING STAIRCASE (Keith v0.43, reshaped v0.44 from his phone
+     video: he fell behind the 2nd cloud's lip — it sat too far and too
+     high to catch him): the first clouds step down AHEAD of the course,
+     LONG and close, so a brand-new player survives the first three
+     clouds no matter what — no jump still lands, a small jump still
+     lands. Clouds 2 and 3 sit closer (30-unit gaps) and deeper under
+     the fall line (130 down); the third step (90 gap, 80 down) lands
+     him on the lowest band, Low Road walks him back up with easy
+     jumps, and Long Bridge gives one more flat breather before the
+     chained course takes over. Race runs keep the champion's own
      course untouched (above). */
   {
     let sx = worldEnd;
-    for (let i = 1; i <= 4; i++) {
-      sx += 90;
-      const len = 700, img = rnd(LONGC), y = i * 85;
+    const stairs = [[30, 130, 800], [30, 260, 800], [90, 340, 700]];
+    for (const [gap, y, len] of stairs) {
+      sx += gap;
+      const img = rnd(LONGC);
       plats.push({ x: sx, y, len, img });
       if (REC) REC.plats.push([sx, y, len, img]);
       sx += len;
     }
     worldEnd = sx; exitBand = 0; openerEnd = sx;
   }
-  buildSegment(SEGMENTS.find(sg => sg.n === 'Low Road')); nextSegment(); nextSegment();
+  buildSegment(SEGMENTS.find(sg => sg.n === 'Low Road'));
+  buildSegment(SEGMENTS.find(sg => sg.n === 'Long Bridge'));   /* one more flat breather before the chain (Keith v0.44: the opening felt harder than before) */
+  nextSegment(); nextSegment();
 }
 
 /* ---------- jump control (Keith's model, v0.4 rulings 2026-11-06) ----------
