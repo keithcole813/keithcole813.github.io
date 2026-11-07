@@ -112,21 +112,21 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.63</div>
+  <div id="ver">v0.64</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
     <div id="board"></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
-    <button class="btn" id="again">RUN AGAIN</button>
-    <button class="btn" id="titleBtn" style="margin-top:10px;">CHANGE RUNNER</button>
+    <button class="btn" id="again">TRY AGAIN</button>
+    <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.63 ==============================
+/* ============================== 6LOUD demo v0.64 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -173,6 +173,7 @@ function toggleMute() {
   $('muteBtn').textContent = muted ? '🔇' : '🔊';
   if (mode !== 'title' || titleMusicOn) playTrack();   /* re-apply at once when audio is live — at title too, once the select music is playing (v0.63) */
 }
+let pendingSave = null;   /* set by gameOver: saves a qualifying score before EITHER exit from the board screen (v0.64) */
 let titleMusicOn = false;
 function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "Put bg1 at character selection screen since we have one now"). Browsers gate sound behind a gesture, so this is poked from the title's taps; the load-complete attempt is harmless where autoplay is blocked. */
   if (mode !== 'title') return;
@@ -1389,7 +1390,8 @@ function renderBoard() {
 /* Footsteps audio REMOVED for good (Keith 2026-11-06): his isolation
    tests pinned the chop on the steps audio itself — every no-steps build
    ran smooth, every steps build chopped. Music only. */
-function backToTitle() {   /* CHANGE RUNNER on the wipeout screen: back to the title and its character select without restarting the app (Keith v0.62) */
+function backToTitle() {   /* MAIN MENU on the wipeout screen: back to the title and its character select without restarting the app (Keith v0.62, named plainly v0.64) */
+  const s = pendingSave; pendingSave = null; if (s) s();   /* quitting to the menu saves a qualifying score too */
   mode = 'title';
   G = null; GR = null; RACE = null;   /* the next startRun preps a fresh race */
   plats = []; worldEnd = 0; puffs = []; trail = []; motes = [];
@@ -1414,7 +1416,7 @@ function gameOver() {
   renderBoard();   /* global board swaps in when it has loaded */
   fetchBoard();      /* and a fresh pull re-renders it when it lands */
   kickRanks();       /* world ranks for the local scores (Keith v0.43) */
-  $('again').onclick = () => {
+  pendingSave = () => {   /* both exits save a qualifying score first (Keith v0.64) — TRY AGAIN and MAIN MENU alike */
     if (qualifies) {
       const n = ($('ini').value || 'ACE').toUpperCase().slice(0, 3).padEnd(3, '·');
       if (qualifiesLocal) {
@@ -1423,8 +1425,8 @@ function gameOver() {
       }
       if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, myFt, jumps, lastReplay);
     }
-    startRun();
   };
+  $('again').onclick = () => { const s = pendingSave; pendingSave = null; if (s) s(); startRun(); };
 }
 
 /* ---------- input: ONE button ---------- */
