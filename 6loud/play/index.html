@@ -72,7 +72,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.49</div>
+  <div id="ver">v0.50</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -85,7 +85,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.49 ==============================
+/* ============================== 6LOUD demo v0.50 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -766,6 +766,7 @@ let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
+let doubleArmed = false, doubleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps) */
 let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0, hangTY = 0;
 /* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
    rapid jump taps inside the window climb up (SAVE); otherwise he slips
@@ -1207,7 +1208,7 @@ function startRun() {
      No local record yet = nothing to break. */
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = lb.length ? lb[0].s : 0;
-  crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0;
+  crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
   ghostReset(!G);   /* first run (or after a catch): he sprints in from the left; if he was never caught, he's still out there ahead */
   playTrack(); kickDecode();
 }
@@ -1324,6 +1325,19 @@ function release() {
   if (!held) return;
   held = false;
   if (mode !== 'run' || dead) return;
+  if (!grounded && airMove && !hangPlat && !slipPlat && doubleArmed && pressT < 0.25) {
+    /* THE DOUBLE JUMP (Emma, v0.50): charged up, in the air, tap again —
+       he jumps off the air like it's a cloud: a fresh tap-strength hop
+       that converts whatever he was doing into the plain jump. One per
+       charged jump; a held press is not a tap and never fires it. */
+    doubleArmed = false; doubleUsed = true;   /* spent — and never re-armed mid-jump: NO TRIPLE JUMPS (Keith v0.50) */
+    vy = -1500; airGrav = 1; airTotal = 2 * Math.abs(vy) / GRAV;
+    airMove = 'jump'; airT = 0;
+    flipArmed = false; rollArmed = false; flipped = false; flipMove = null; landMove = null; landT = 0;
+    jumps++; score += 1;
+    for (let k = 0; k < 9; k++) spawnPuff(px - 30 + k * 7, py + 12, 10 + Math.random() * 8);   /* the invisible cloud he pushes off */
+    return;
+  }
   /* grounded, or a hair past the edge (coyote): the charge was earned running */
   if (!grounded && (hangPlat || airMove || time - lastGroundT > 0.09)) return;
   const c = Math.min(1, pressT / CHARGE_FULL);
@@ -1333,7 +1347,7 @@ function release() {
   const full = pressT >= ROLL_ARM;
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
-  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0;
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode;   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
   if (full) { score += 4; chargeFx(1.2); }   /* the held charge, let go: he leaves the ground lit (Keith v0.28) */
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
@@ -1366,6 +1380,7 @@ function update(dt) {
   if (!champMode && targetFt > 0 && Math.floor(dist / 15.24) > targetFt) {
     champMode = true; heatOn = true; mScene = 'battle'; xfade(true);   /* the crown takes the 2nd bg music directly (Keith v0.34) */
     crownFlash = 1; bannerT = 2.4; shake = Math.max(shake, 15);   /* flash + shake + banner (Keith v0.15) */
+    if (airMove && !doubleUsed) doubleArmed = true;   /* the crown breaking mid-jump charges THAT jump too (Keith v0.50) — unless its double is already spent */
   }
   /* AUDIO SCENE SWITCHES (Keith v0.37): the footsteps carry the chase until
      LaShmoove CHARGES — bg 1 starts the instant he lights up (Keith v0.40;
@@ -1470,7 +1485,7 @@ function update(dt) {
       }
     }
   } else {
-    py = grounded.y + (grounded.sink || 0); lastGroundT = time;
+    py = grounded.y + (grounded.sink || 0); lastGroundT = time; doubleArmed = false;   /* feet on a cloud: the double is spent or gone (v0.50) */
     if (px - 30 > grounded.x + grounded.len) {
       /* SEAM TRANSFER (v0.47): segments butt-join flush, and a runner who
          reaches the joint on foot simply keeps his ground on the next
