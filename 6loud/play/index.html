@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.23</div>
+  <div id="ver">v0.24</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.23 ==============================
+/* ============================== 6LOUD demo v0.24 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -783,6 +783,27 @@ let dressLow = [];
    6lade falls, LaShmoove just continues — he is ahead; only being
    CAUGHT (the player passing his record distance) makes him fall. */
 const GPAR = 0.16;
+const GSCALE = 0.55;   /* the ghost's world renders at 55% — far away, same geometry */
+/* ---------- the run recorder (Keith's design, v0.24) ----------------
+   Every run is distilled to small data: at 15 Hz, [distance delta,
+   feet height, move code], plus the course itself (each platform once:
+   x, y, length, cloud). A few KB — not video. The replay rides to the
+   global board WITH the score, transferred when the player enters
+   their initials, and LaShmoove re-runs that exact run — on the real
+   clouds, with the real jumps — on every device. */
+const REPLAY_HZ = 15;
+let REC = null, lastReplay = null;
+function recStart() { REC = { acc: 0, lastDist: 0, frames: [], plats: [] }; }
+function recSample() {
+  const mv = playerAnim().move;
+  const code = mv === 'run' ? 0 : mv === 'runjump' || mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
+  REC.frames.push([Math.round(dist - REC.lastDist), Math.round(py), code]);
+  REC.lastDist = dist;
+}
+function recFinish() {
+  lastReplay = (REC && REC.frames.length > 10)
+    ? JSON.stringify({ v: 1, total: Math.floor(dist / 15.24), plats: REC.plats, frames: REC.frames }) : null;
+}
 let GMAN = null, GANIM = {}, gReady = false;
 let gLane = [], gLastLx = 0, G = null, gTarget = 0;
 if (window.fetch) fetch('assets/ghost/manifest.json').then(r => r.json()).then(m => {
@@ -792,91 +813,78 @@ if (window.fetch) fetch('assets/ghost/manifest.json').then(r => r.json()).then(m
   for (let i = 0; i < m.run.n; i++) { const im = new Image(); im.onload = () => { if (++loaded >= m.run.n) gReady = true; }; im.src = 'assets/ghost/run/f' + String(i).padStart(3, '0') + '.webp'; GANIM.run.push(im); }
   for (const mv of ['runjump', 'diveroll', 'armsopen']) { GANIM[mv] = []; for (let i = 0; i < m[mv].n; i++) { const im = new Image(); im.src = 'assets/ghost/' + mv + '/f' + String(i).padStart(3, '0') + '.webp'; GANIM[mv].push(im); } }
 }).catch(() => {});
-function ghostTargetFt() {
+let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
+function ghostSource() {
+  if (typeof gBoard !== 'undefined' && gBoard && gBoard.length) return { total: gBoard[0].dist_ft, replay: gBoard[0].replay || null };
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  return (typeof gBoard !== 'undefined' && gBoard && gBoard.length) ? gBoard[0].dist_ft : (lb.length ? lb[0].s : 0);
-}
-function ghostGen() {
-  const horizon = camX * GPAR + viewW + 900;
-  while (gLastLx < horizon) {
-    const len = 300 + Math.random() * 280;
-    const prev = gLane[gLane.length - 1];
-    let f = prev ? prev.f + (Math.random() * 0.20 - 0.10) : 0.34;
-    f = Math.max(0.14, Math.min(0.56, f));
-    gLane.push({ lx: gLastLx, top: camY * GPAR - viewH * (0.55 - f), len, f, img: BGFAR[Math.floor(Math.random() * BGFAR.length)] });
-    gLastLx += len + 70 + Math.random() * 110;
-  }
-  while (gLane.length && gLane[0].lx + gLane[0].len < camX * GPAR - 600) gLane.shift();
+  return lb.length ? { total: lb[0].s, replay: lb[0].r || null } : null;
 }
 function ghostReset(entering) {
-  gTarget = ghostTargetFt();
+  const src = ghostSource();
+  gTarget = src ? src.total : 0;
+  GR = null;
   if (!gReady || !gTarget) { G = null; return; }
-  gLane = []; gLastLx = camX * GPAR - 300; ghostGen();
-  const p0 = gLane[0];
-  G = { gx: entering ? camX * GPAR - 260 : camX * GPAR + viewW * 0.64, feetY: p0 ? p0.top : 0, vy: 0,
-        grounded: p0 || null, state: entering ? 'enter' : 'run', rollT: -1, rollCd: 3, animT: Math.random() * 10,
-        airT: 0, fade: 1, puffs: [], puffT: 0 };
+  if (src.replay) {
+    try {
+      const rp = JSON.parse(src.replay);
+      if (rp && rp.frames && rp.frames.length > 10) GR = { plats: rp.plats || [], frames: rp.frames, t: 0, i: 0, distAcc: 0, py: rp.frames[0][1], pyS: rp.frames[0][1], st: 0, stT: 0, done: false };
+    } catch (e) { /* a bad replay never breaks the race */ }
+  }
+  G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', animT: Math.random() * 10,
+        fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, catchT: 0 };
+}
+function ghostFeetY() {
+  const base = viewH / zoom * 0.36 - camY * GPAR;
+  if (GR) return base + GR.pyS * GSCALE;
+  return viewH / zoom * 0.84 - camY * GPAR + Math.sin(dist * 0.008) * 5;   /* no replay yet: he runs the cloud sea itself */
 }
 function ghostPuff(big) {
   if (!G || G.puffs.length > 10) return;
-  G.puffs.push({ x: G.gx + 10, y: G.feetY + 4, r: big ? 16 : 9, life: 0.5, max: 0.5 });
+  G.puffs.push({ sx: G.sx + 8, sy: ghostFeetY() + 3, r: big ? 15 : 8, life: 0.5, max: 0.5 });
+}
+function ghostFall() {
+  if (!G || G.state === 'fall') return;
+  G.state = 'fall'; G.fallY = ghostFeetY(); G.fallVy = -170;
+  ghostPuff(true);
 }
 function ghostUpdate(dt) {
   if (!G) { if (gReady && mode === 'run' && runTime < 2.5) ghostReset(true); return; }
   G.animT += dt;
-  for (let i = G.puffs.length - 1; i >= 0; i--) { const q = G.puffs[i]; q.life -= dt; if (q.life <= 0) G.puffs.splice(i, 1); }
+  for (let i = G.puffs.length - 1; i >= 0; i--) { const q = G.puffs[i]; q.life -= dt; q.sx -= speed * GPAR * dt * 0.4; if (q.life <= 0) G.puffs.splice(i, 1); }
   if (G.state === 'fall') {   /* a caught ghost finishes his fall even if 6lade wipes out mid-fall */
-    G.vy += 2900 * dt; G.feetY += G.vy * dt; G.fade = Math.max(0, G.fade - dt * 0.45);
+    G.fallVy += 1500 * dt; G.fallY += G.fallVy * dt; G.fade = Math.max(0, G.fade - dt * 0.45);
     if (G.fade <= 0) G = null;
     return;
   }
   if (mode !== 'run') return;   /* title/over: 6lade is down — LaShmoove just continues, running in the distance (Keith) */
-  ghostGen();
-  let pace = speed * GPAR;
-  if (G.state === 'enter') { pace += 360; if (G.gx - camX * GPAR > viewW * 0.64) G.state = 'run'; }
-  else {
-    /* station-keeping with the catch drift (Keith): 6lade is locked
-       mid-screen, so as his distance closes on the record the ghost
-       can't be passed on screen — instead LaShmoove's station slides
-       from ahead (0.64) back behind the middle (0.42) over the last
-       500 ft, and the moment the distance is passed, he falls. */
-    const gapFt = gTarget - Math.floor(dist / 15.24);
-    const catchT = Math.max(0, Math.min(1, 1 - gapFt / 500));
-    G.catchT = catchT;
-    const sxStar = viewW * (0.64 + (0.42 - 0.64) * catchT) + Math.sin(G.animT * 0.45) * viewW * 0.02;
-    pace += (sxStar - (G.gx - camX * GPAR)) * 0.9;
-  }
-  G.gx += pace * dt;
-  const sup = gLane.find(p => G.gx + 30 >= p.lx && G.gx + 30 <= p.lx + p.len);
-  if (G.grounded && sup !== G.grounded) {
-    const nxt = gLane.find(p => p.lx > G.gx);
-    G.grounded = null;
-    if (nxt && nxt.lx - (G.gx) < 200 && sup !== null) { /* hop the gap */ G.vy = -1180; G.airT = 0; }
-    else if (sup) { G.grounded = sup; G.feetY = sup.top; }
-    else { G.vy = Math.max(G.vy, 0); G.airT = 0; }
-  }
-  if (!G.grounded) {
-    G.airT += dt; G.vy += 2900 * dt; G.feetY += G.vy * dt;
-    if (G.vy > 0) {
-      const land = gLane.find(p => G.gx + 30 >= p.lx && G.gx + 30 <= p.lx + p.len && G.feetY >= p.top && G.feetY - G.vy * dt <= p.top + 40);
-      if (land) { G.feetY = land.top; G.grounded = land; G.vy = 0; ghostPuff(true); }
+  if (GR) {
+    GR.t += dt; GR.stT += dt;
+    while (GR.i < GR.frames.length && GR.t >= (GR.i + 1) / REPLAY_HZ) {
+      const f = GR.frames[GR.i];
+      GR.distAcc += f[0]; GR.py = f[1];
+      if (f[2] !== GR.st) { GR.st = f[2]; GR.stT = 0; }
+      GR.i++;
     }
-    if (G.feetY - camY * GPAR + viewH * 0.55 > viewH + 320) {   /* missed the lane entirely: quietly rejoin ahead */
-      const p0 = gLane.find(p => p.lx > G.gx + 100) || gLane[gLane.length - 1];
-      if (p0) { G.feetY = p0.top; G.grounded = p0; G.vy = 0; }
-    }
+    GR.pyS += (GR.py - GR.pyS) * Math.min(1, dt * 16);
+    if (GR.i >= GR.frames.length && !GR.done) { GR.done = true; ghostFall(); }   /* his recorded run ends here — the champion's own fall */
+  }
+  const gapFt = gTarget - Math.floor(dist / 15.24);
+  G.catchT = GR ? Math.max(0, Math.min(1, 1 - gapFt / 500)) : 0;
+  if (G.state === 'enter') {
+    G.sx += (viewW * 0.64 - G.sx) * Math.min(1, dt * 0.8);
+    if (viewW * 0.64 - G.sx < 30) G.state = 'run';
   } else {
-    G.feetY = G.grounded.top;
-    G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.34; ghostPuff(false); }
-    if (G.rollT < 0 && G.rollCd <= 0 && !G.catchT && G.grounded.len > 470 && (G.grounded.lx + G.grounded.len) - G.gx > 430) G.rollT = 0;   /* no showing off while he's being caught */
-    G.rollCd -= dt;
+    /* station-keeping with the catch drift (Keith): 6lade is locked
+       mid-screen, so as his distance closes on the record the ghost's
+       station slides from ahead (0.64) back behind the middle (0.42)
+       over the last 500 ft — then the replay's own fall takes him. */
+    const sxStar = viewW * (0.64 + (0.42 - 0.64) * G.catchT) + Math.sin(G.animT * 0.45) * viewW * 0.02;
+    G.sx += (sxStar - G.sx) * Math.min(1, dt * 2.2);
   }
-  if (G.rollT >= 0) { G.rollT += dt; if (G.rollT > GMAN.diveroll.n / 30) G.rollT = -1; }
-  if (Math.floor(dist / 15.24) > gTarget) { G.state = 'fall'; G.vy = -320; G.grounded = null; ghostPuff(true); }
+  if (!GR || GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.34; ghostPuff(false); } }
+  if (!GR && Math.floor(dist / 15.24) > gTarget) ghostFall();   /* plain runner: passed — he bows out */
 }
-for (let i = 0; i < 4; i++) dressLow.push({ img: BGFAR[(i * 3 + 1) % BGFAR.length], x: Math.random() * 3000, fy: 0.66 + (i % 3) * 0.12 + Math.random() * 0.04, w: 540 + Math.random() * 220 });
 
-/* ---------- helpers ---------- */
 let puffAcc = 0, rollPuffT = 0, flipPuffT = 0;
 const puffImg = (() => { const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
@@ -895,6 +903,7 @@ function addPlat(x, band, lenClass) {
   const len = isIsle ? 330 : LEN[lenClass];
   const img = isIsle ? rnd(ISLAND) : rnd(LONGC);
   plats.push({ x, y: BAND_Y[band], len, img });
+  if (REC) REC.plats.push([x, BAND_Y[band], len, img]);   /* the recorder keeps the course (v0.24) */
   return x + len;
 }
 function buildSegment(seg) {
@@ -937,7 +946,9 @@ const ROLL_ARM = 0.55;      // s of hold that arms the roll landing
 const FEET = 16;            // his feet sit this deep in the cloud tops
 
 /* ---------- game flow ---------- */
+
 function startRun() {
+  recStart();   /* record from the very first platform (v0.24) */
   resetWorld();
   px = 60; py = BAND_Y[2]; vy = 0; grounded = plats[0];
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
@@ -962,16 +973,26 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let gBoard = null;   /* null = not loaded / unreachable; the local board renders meanwhile */
 async function fetchBoard() {
   try {
-    const r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=10',
+    let r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=10',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
+    if (!r.ok) r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=10',
+      { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });   /* replay column not there yet — board still works */
     if (r.ok) { gBoard = await r.json(); if (mode === 'over') renderBoard(); }
   } catch (e) { /* offline — local board stands */ }
 }
-async function postScore(n, sc, d, j) {
+async function postScore(n, sc, d, j, replay) {
   try {
-    await fetch(SB_URL + '/rest/v1/scores', { method: 'POST',
+    const body = { initials: n, score: sc, dist_ft: d, jumps: j };
+    if (replay) body.replay = replay;   /* the run itself travels with the score (Keith, v0.24) */
+    let r = await fetch(SB_URL + '/rest/v1/scores', { method: 'POST',
       headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ initials: n, score: sc, dist_ft: d, jumps: j }) });
+      body: JSON.stringify(body) });
+    if (!r.ok && replay) {   /* column missing — never let the replay cost the score */
+      delete body.replay;
+      await fetch(SB_URL + '/rest/v1/scores', { method: 'POST',
+        headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify(body) });
+    }
     fetchBoard();
   } catch (e) { /* offline — the local save already kept it */ }
 }
@@ -986,6 +1007,7 @@ function renderBoard() {
    ran smooth, every steps build chopped. Music only. */
 function gameOver() {
   mode = 'over'; dead = true;
+  recFinish();   /* this run's replay is ready to travel with its score (v0.24) */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
   const myFt = Math.floor(dist / 15.24);   /* the record is FEET (Keith) */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
@@ -1002,10 +1024,10 @@ function gameOver() {
     if (qualifies) {
       const n = ($('ini').value || 'ACE').toUpperCase().slice(0, 3).padEnd(3, '·');
       if (qualifiesLocal) {
-        best.push({ n, s: myFt }); best.sort((a, b) => b.s - a.s);
+        best.push({ n, s: myFt, r: lastReplay || undefined }); best.sort((a, b) => b.s - a.s);
         localStorage.setItem('sixloud_scores_ft', JSON.stringify(best.slice(0, 5)));
       }
-      if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, myFt, jumps);
+      if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, myFt, jumps, lastReplay);
     }
     startRun();
   };
@@ -1072,6 +1094,7 @@ function update(dt) {
     }
   }
   for (let i = motes.length - 1; i >= 0; i--) { const m = motes[i]; m.y -= 150 * dt; m.life -= dt; if (m.life <= 0) motes.splice(i, 1); }
+  if (REC) { REC.acc += dt; while (REC.acc >= 1 / REPLAY_HZ) { REC.acc -= 1 / REPLAY_HZ; recSample(); } }
   /* ghostUpdate ticks from loop() instead — it must run on the title and wipeout screens too */
   const prevFeet = py;
   if (held) pressT += dt;
@@ -1307,35 +1330,37 @@ function draw() {
      sea. They sink and fade as he climbs — by the top bands he's above
      them. Three depths, slowest parallax in the game. */
   if (G && GMAN) {
-    const nightDimG = 1 - 0.55 * sky.star;
-    for (const p of gLane) {
-      const sx = p.lx - camX * GPAR;
-      if (sx + p.len < -260 || sx > viewW + 260) continue;
-      const img = BGIMG['f' + p.img];
-      if (!img || !img.naturalWidth) continue;
-      const w = p.len * 1.5, h = w * img.naturalHeight / img.naturalWidth;
-      const sy = p.top - camY * GPAR + viewH / zoom * 0.55;
-      ctx.save(); ctx.globalAlpha = 0.55 * G.fade * nightDimG;
-      ctx.drawImage(img, sx - p.len * 0.25, sy - h * 0.30, w, h); ctx.restore();
+    const base = viewH / zoom * 0.36 - camY * GPAR;
+    if (GR) for (const p of GR.plats) {
+      const sx = G.sx + (p[0] - G.distAcc) * GSCALE;
+      if (sx + p[2] * GSCALE < -200 || sx > viewW / zoom + 200) continue;
+      const img = IMG['cloud' + p[3]], cd = CLOUDS[p[3]];
+      if (!img || !img.naturalWidth || !cd) continue;
+      const sy = base + p[1] * GSCALE, dh = p[2] * GSCALE * cd.asp;
+      ctx.save(); ctx.globalAlpha = 0.92 * G.fade;
+      ctx.drawImage(img, sx, sy - cd.surf * dh + 3, p[2] * GSCALE, dh); ctx.restore();
     }
     for (const q of G.puffs) {
       const a = 0.30 * (q.life / q.max); if (a <= 0) continue;
       const r = q.r * (1 + (1 - q.life / q.max) * 1.6);
       ctx.save(); ctx.globalAlpha = a;
-      ctx.drawImage(puffImg, q.x - camX * GPAR - r, q.y - camY * GPAR + viewH / zoom * 0.55 - r, r * 2, r * 2); ctx.restore();
+      ctx.drawImage(puffImg, q.sx - r, q.sy - r, r * 2, r * 2); ctx.restore();
     }
     let mv = 'run', idx = Math.floor(G.animT * 30) % GMAN.run.n;
-    if (G.state === 'fall') { mv = 'armsopen'; idx = Math.floor(G.animT * 10) % (GMAN.armsopen.n * 2); if (idx >= GMAN.armsopen.n) idx = GMAN.armsopen.n * 2 - 1 - idx; }
-    else if (G.rollT >= 0) { mv = 'diveroll'; idx = Math.min(GMAN.diveroll.n - 1, Math.floor(G.rollT * 30)); }
-    else if (!G.grounded) { mv = 'runjump'; idx = Math.max(0, Math.min(GMAN.runjump.n - 1, Math.floor(G.airT * 30))); }
+    if (G.state === 'fall') { mv = 'armsopen'; idx = pingpong(Math.floor(G.animT * 10), GMAN.armsopen.n); }
+    else if (GR) {
+      if (GR.st === 1) { mv = 'runjump'; idx = Math.min(GMAN.runjump.n - 1, Math.floor(GR.stT * 30)); }
+      else if (GR.st === 2 || GR.st === 3) { mv = 'diveroll'; idx = Math.min(GMAN.diveroll.n - 1, Math.floor(GR.stT * 30)); }
+      else if (GR.st === 4) { mv = 'armsopen'; idx = pingpong(Math.floor(GR.stT * 10), GMAN.armsopen.n); }
+    }
     const m = GMAN[mv], frames = GANIM[mv], gimg = frames && frames[idx];
     if (gimg && gimg.naturalWidth) {
       const gap = (m.gaps && m.gaps[idx]) || 0;
       const feetLine = m.h - m.offset + Math.max(0, m.offset - gap);
       const wU = m.w * PX2U, hU = m.h * PX2U;
-      const cxS = G.gx - camX * GPAR, feetS = G.feetY - camY * GPAR + viewH / zoom * 0.55;
+      const feetS = G.state === 'fall' ? G.fallY : ghostFeetY();
       ctx.save(); ctx.globalAlpha = 0.95 * G.fade;
-      ctx.drawImage(gimg, cxS - wU / 2, feetS - feetLine * PX2U, wU, hU); ctx.restore();
+      ctx.drawImage(gimg, G.sx - wU / 2, feetS - feetLine * PX2U, wU, hU); ctx.restore();
     }
   }
   {
