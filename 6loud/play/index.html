@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.32</div>
+  <div id="ver">v0.33</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.32 ==============================
+/* ============================== 6LOUD demo v0.33 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -111,6 +111,17 @@ function chargeFx(dur) { flareT = Math.max(flareT, dur); }
 let altSm = 0, vhNow = 1150;
 let camSmY = 0;   /* slow camera (v0.21): terrain + deep layers follow THIS, so hops don't pump them */   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
 let rawD = null, rawB = null;
+const MUSIC_VOL = 0.5;   /* the bg music sits lower, all the way through both tracks (Keith v0.33) */
+let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
+function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
+  boomT++;   /* the trigger fired (the harness counts these even with no audio stack) */
+  if (!actx || !bufBoom || actx.state !== 'running') return;   /* same proven route as the music: WebAudio only when it's alive */
+  const now = actx.currentTime;
+  if (now - lastBoomT < 0.4) return;   /* never machine-gun it */
+  lastBoomT = now;
+  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 0.9; gainBoom.connect(actx.destination); }
+  const src = actx.createBufferSource(); src.buffer = bufBoom; src.connect(gainBoom); src.start();
+}
 /* v0.13.4 — the silent-first-run fix (Keith: "music doesn't start when
    the game starts; it comes after I die and start over"). Cause: the
    AudioContext was created at page load, before any tap — iOS keeps a
@@ -122,6 +133,7 @@ let rawD = null, rawB = null;
 if (window.fetch) {
   fetch('assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
   fetch('assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
+  fetch('assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
 }
 /* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
    still doesn't play until I die"). v0.13.4's flaw: it trusted the
@@ -142,6 +154,7 @@ function kickDecode() {
   if (actx.state === 'suspended') { const p = actx.resume(); if (p && p.catch) p.catch(() => {}); }
   if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => {});
   if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => {});
+  if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => {});
 }
 function playTrack() {
   const want = champMode ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
@@ -155,11 +168,12 @@ function playTrack() {
       }
     }
     const t = actx.currentTime;
-    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(champMode ? 0 : 1, t, 0.18);
-    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(champMode ? 1 : 0, t, 0.18); }
+    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(champMode ? 0 : MUSIC_VOL, t, 0.18);
+    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(champMode ? MUSIC_VOL : 0, t, 0.18); }
     music.pause();
   } else {
     if (gainD) { try { gainD.gain.value = 0; if (gainB) gainB.gain.value = 0; } catch (e) {} }
+    music.volume = MUSIC_VOL;
     if (!(music.src || '').includes(want)) music.src = want;
     music.currentTime = 0; const p = music.play(); if (p && p.catch) p.catch(() => {});
   }
@@ -992,6 +1006,7 @@ function ghostUpdate(dt) {
     GR.pyS = sm.py;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
+      if (GR.chgSm > 0.3 || GR.fireT > 0) playBoom();   /* HIS charged landings boom too (Keith v0.33) */
       for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6);
     }
     if (GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
@@ -1293,6 +1308,7 @@ function update(dt) {
           else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
           landDur = (landTo - landFrom + 1) / landRate; landT = 0;
           for (let k = 0; k < 11; k++) spawnPuff(px - 32 + k * 7, py + 12, 11 + Math.random() * 9);   // landing burst (a little more puff, Keith v0.32)
+          if (champMode || flareT > 0) playBoom();   /* charged form touches down: the cinematic boom (Keith v0.33) */
         }
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         if (hard) { shake = Math.min(14, shake + 9); }
