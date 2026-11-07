@@ -80,6 +80,12 @@
     <button id="playOnce" class="tbtn" disabled aria-label="Play selected region once"><span class="sel">▶</span></button>
     <button id="playLoop" class="tbtn" disabled aria-label="Loop selected region"><span class="gld">↻</span></button>
   </div>
+  <div>
+    <label for="tuneRange">Tune / Tempo — tune &amp; pitch move together, like the MPC</label>
+    <input type="range" id="tuneRange" min="50" max="200" step="1" value="100">
+    <label class="chk"><input type="checkbox" id="pitchOnly"> Pitch only — move the pitch, keep the time</label>
+    <div class="stat" id="tuneStat"></div>
+  </div>
   <label class="chk" style="margin-top:8px"><input type="checkbox" id="snapGrid" checked> Snap the gold bars to the grid — In on the beat, Out on whole bars</label>
   <label class="chk"><input type="checkbox" id="fadeOn"> Fades — adds 2 white bars on the wave: slide them to set the fade in / fade out</label>
   <div class="stat" id="fadeStat"></div>
@@ -140,12 +146,6 @@
     <label>Sample rate — whole file, downsample only (the old machines)</label>
     <div class="btns" id="rateBtns"></div>
     <div class="stat" id="rateStat"></div>
-  </div>
-  <div>
-    <label for="tuneRange">Tune / Tempo — tune &amp; pitch move together, like the MPC</label>
-    <input type="range" id="tuneRange" min="50" max="200" step="1" value="100">
-    <label class="chk"><input type="checkbox" id="pitchOnly"> Pitch only — move the pitch, keep the time</label>
-    <div class="stat" id="tuneStat"></div>
   </div>
   <div class="stat" id="loopStat">Lock a loop to see its exact length.</div>
 
@@ -727,6 +727,7 @@ function refreshStats(){
     $("startBarOut").textContent = state.startBar;
   }
   syncLenUI();
+  syncTuneUI();
   drawWave();
 }
 
@@ -1420,8 +1421,11 @@ function syncTuneUI(){
   var rng = $("tuneRange"); if (rng) rng.value = state.tunePct;
   var po = $("pitchOnly"); if (po) po.checked = !!state.pitchOnly;
   var f = tuneFactor(), st = 12 * Math.log2(f);
+  var b0 = bpm();
+  var cur = b0 ? (state.pitchOnly ? b0 : b0 * f) : 0;
+  var head = "Current tempo: <b>" + (cur ? cur.toFixed(1) + " BPM" : "—") + "</b>";
   if (Math.abs(f - 1) < 1e-9){
-    el.textContent = state.buf ? "No tune — the selection plays and exports at the locked tempo." : "";
+    el.innerHTML = state.buf ? head + " — the locked tempo, no tune on it." : head;
     return;
   }
   var keyTxt = "";
@@ -1431,12 +1435,11 @@ function syncTuneUI(){
   }
   var stTxt = (st >= 0 ? "+" : "") + st.toFixed(1) + " st";
   if (state.pitchOnly){
-    el.innerHTML = "Pitch only: <b>" + stTxt + "</b>" + keyTxt +
-      " — the time and the BPM stay exactly where they are. Selection and exports carry it.";
+    el.innerHTML = head + " · Pitch only: <b>" + stTxt + "</b>" + keyTxt +
+      " — the time stays exactly where it is. Selection and exports carry it.";
   } else {
-    var b = bpm();
-    el.innerHTML = "Tuned <b>" + stTxt + "</b> (" + state.tunePct + "%)" +
-      (b ? " — the locked " + b.toFixed(1) + " BPM plays as <b>" + (b * f).toFixed(1) + " BPM</b>" : "") +
+    el.innerHTML = head + " · Tuned <b>" + stTxt + "</b> (" + state.tunePct + "%)" +
+      (b0 ? " from the locked " + b0.toFixed(1) + " BPM" : "") +
       keyTxt + " · the selection gets " + (f > 1 ? "shorter" : "longer") +
       ". Selection, slices and exports carry it.";
   }
