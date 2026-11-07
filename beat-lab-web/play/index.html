@@ -4,8 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
-<link rel="icon" href="data:," />
-<title>Beat Lab Web Beta</title>
+<script>/* Theme boot (Keith, 2026-11-07): apply the saved app theme before first paint — no flash of Default. App-level preference only (localStorage), never part of a project file. */ try{var _blThemeBoot=localStorage.getItem("beatlab.theme.v1");if(_blThemeBoot&&_blThemeBoot!=="default")document.documentElement.setAttribute("data-theme",_blThemeBoot);}catch(e){}</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
+<title>Beat Lab Web Beta v1.0</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. */ var BL_VERSION="v1.0"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -44,6 +47,7 @@ h1,h2,h3{margin:0}
 .brand .name{font-weight:900;font-size:19px;letter-spacing:.4px}
 .brand .name em{font-style:normal;color:var(--gold)}
 .brand .beta{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--bg);background:var(--gold);border-radius:3px;padding:2px 5px}
+.brand .version{font-size:12px;font-weight:700;letter-spacing:.4px;color:var(--dim);white-space:nowrap}
 .tgroup{display:flex;align-items:center;gap:6px}
 .tlabel{font-size:10px;letter-spacing:1.2px;color:var(--faint);font-weight:700;text-transform:uppercase}
 .playbtn{width:46px;height:38px;border-radius:8px;border:1px solid var(--gold2);background:var(--gold);color:#1c1503;font-size:17px;font-weight:900}
@@ -348,7 +352,7 @@ a{color:var(--teal)}
 
   <!-- ================= TRANSPORT ================= -->
   <div class="transport">
-    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span></div>
+    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v1.0</span></div>
     <div class="tgroup">
       <button class="playbtn" id="btnPlay" title="Play / Stop (Space)">▶</button>
       <button class="stopbtn" id="btnStop" title="Stop and rewind">■</button>
@@ -5219,7 +5223,15 @@ const BL_SUITE={
   boom: {label:"Boom Bap Warm",    eq:[2.5,-0.5,-1], thr:-14, ratio:2.5, width:0.95, max:3.5},
   trap: {label:"Trap Punch",       eq:[3,0.5,2],     thr:-18, ratio:3.5, width:1.05, max:6},
   dance:{label:"Dancehall Bright", eq:[1.5,0,3],     thr:-16, ratio:3,   width:1.2,  max:5},
-  stream:{label:"Streaming −14",   eq:[0.5,0,0.5],   thr:-14, ratio:2,   width:1.0,  max:1.5}
+  stream:{label:"Streaming −14",   eq:[0.5,0,0.5],   thr:-14, ratio:2,   width:1.0,  max:1.5},
+  soca:  {label:"Soca Fete",        eq:[1.5,1,4],     thr:-18, ratio:3.5, width:1.25, max:7},
+  dembow:{label:"Reggaeton Dembow", eq:[4,0,1],       thr:-19, ratio:4,   width:0.9,  max:6.5},
+  house: {label:"House Floor",      eq:[2,-0.5,2.5],  thr:-17, ratio:3,   width:1.3,  max:6},
+  rnb:   {label:"R&B Silk",         eq:[1,0.5,-2],    thr:-13, ratio:2,   width:1.25, max:2.5},
+  afro:  {label:"Afrobeats Glow",   eq:[0.5,1.5,3.5], thr:-15, ratio:2.5, width:1.15, max:4.5},
+  vinyl: {label:"Vinyl Dust",       eq:[2,-1,-3.5],   thr:-13, ratio:2,   width:0.75, max:2},
+  clubpa:{label:"Club PA",          eq:[2.5,0,2],     thr:-22, ratio:4.5, width:1.1,  max:10},
+  cartest:{label:"Car Test",        eq:[0,0,0],       thr:-14, ratio:1.5, width:1.0,  max:1}
 };
 const BL_GOO={ A:{sat:0.5, gain:4}, B:{sat:0.8, gain:7}, C:{sat:1.1, gain:10}, D:{sat:1.45, gain:13} };
 function blHeatAmount(ch){
@@ -6664,10 +6676,10 @@ function blxModal(build){
 const _blxDoNew=$("btnNewProj").onclick;
 $("btnNewProj").onclick=()=>{
   blxModal((card, close)=>{
-    card.innerHTML='<div class="blModalMsg"><b>Start a new track</b><br/>Start blank gives you one wave track — Track 1 — in the Edit window and on the mixer, with an empty SEQ 1 and nothing loaded in the Piano Roll; build up from there with ＋ Add channel / ＋ Add track. Or start from a template with its kit, BPM and starter patterns in place.</div>';
+    card.innerHTML='<div class="blModalMsg"><b>Start a new track</b><br/>Start blank loads the default template: a wave track “audio 1”, and a first sequence “drums 1” holding three empty sequencer channels — kick, snare, hihat — plus an instrument track “omnisphere” mapped to an Omnisphere module. Five tracks in the Edit window, five mixer channels; assign your own sounds to kick / snare / hihat and you are ready to make a beat. Nothing is loaded in the Piano Roll. Or start from a template with its kit, BPM and starter patterns in place.</div>';
     const wrap=document.createElement("div"); wrap.className="newchoices";
     const b1=document.createElement("button"); b1.className="btn gold newchoice"; b1.type="button";
-    b1.innerHTML='Start Blank<span>One wave track (Track 1), an empty SEQ 1, MASTER + Track 1 in the mixer</span>';
+    b1.innerHTML='Start Blank<span>Default template — audio 1 + drums 1 (kick · snare · hihat · omnisphere): 5 tracks, 5 mixer channels</span>';
     b1.onclick=()=>{ close();
       const go=()=>{ if(_blxDoNew) _blxDoNew(); if(typeof blTrulyBlank==="function") blTrulyBlank(); S._blDirty=false; };
       if(S._blDirty) showConfirm("Start blank? Your current project's edits will be cleared.", "Start blank", go); else go(); };
@@ -10489,7 +10501,7 @@ blSyncChannelUI();
        FREQ knob), so strips come out visibly shorter while every
        control stays put and labelled.
    5 · SUITE PRESETS = DROPDOWN — a single select on the MASTER
-       strip listing all seven presets; choosing one runs the exact
+       strip listing all fifteen presets; choosing one runs the exact
        apply path the old buttons used, and blSyncMasterUI keeps
        the select showing the saved/active preset.
    6 · MIDI TRACKS SPAWN MIXER CHANNELS — see 1: a MIDI track IS
@@ -16087,6 +16099,16 @@ if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>{ try{
 .synthblock .engrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 .synthblock .presetsel{max-width:min(420px,100%)}
 .synthblock .blockstat{min-height:16px}
+/* Shared audition keyboard control row — selector + Engine + Preset,
+   one compact row above the keys (phone: three dropdowns side by side) */
+.kbctlrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kbctlrow #blKbPresetSel{max-width:min(300px,100%)}
+@media (max-width:640px){
+  .kbctlrow{flex-wrap:nowrap;gap:5px;margin-bottom:6px}
+  .kbctlrow .kbctl-title{display:none}
+  .kbctlrow .hlabel{flex:1 1 0;min-width:0;flex-direction:column;align-items:stretch;gap:2px;font-size:9px;letter-spacing:.4px}
+  .kbctlrow .hlabel select{width:100%;min-width:0;max-width:none;font-size:11px;padding:5px 3px}
+}
 </style>
 <script>
 "use strict";
@@ -16536,7 +16558,7 @@ function blBlockSyncHead(block){
     else block.boundEl.textContent="Draft — dial a sound, then Map to Track (no track picked = one is created, named after the engine).";
   }
   /* every module carries its ✕ Remove at all times, bound or draft */
-  if(block.engSel) block.engSel.disabled= !!block.boundId;
+  if(block.engSel){ block.engSel.disabled= !!block.boundId; block.engSel.value=block.engine; }
   if(block.unmapBtn) block.unmapBtn.disabled= !block.boundId;
   if(block.editEl) block.editEl.textContent= ch? "Editing the mapped patch on “"+ch.name+"”." : "Working patch ("+BL_ENGINE_NAMES[block.engine]+") — not mapped yet.";
 }
@@ -16745,8 +16767,10 @@ if(typeof renameChannel==="function"){
     '<div id="blStackEmpty" class="small" style="display:none;margin:4px 0 10px">No modules — <button type="button" class="btn gold sm" id="blStackEmptyAdd">＋ Add module</button></div>'+
     '<button type="button" class="btn gold" id="blAddSynthBtn">＋ Add module</button>'+
     '<div class="small" style="margin-top:6px">Adds another complete module below — dial a second sound and map it to another MIDI track. Modules never share patches, even on the same engine.</div>'+
-    '<div id="blSharedKbWrap" style="margin-top:14px"><div class="mkbar"><span class="small" style="font-weight:700;letter-spacing:.06em">AUDITION KEYBOARD</span>'+
-    '<label class="hlabel">Module: <select id="blKbModuleSel" title="Which module the shared audition keyboard plays"></select></label></div>'+
+    '<div id="blSharedKbWrap" style="margin-top:14px"><div class="mkbar kbctlrow"><span class="small kbctl-title" style="font-weight:700;letter-spacing:.06em">AUDITION KEYBOARD</span>'+
+    '<label class="hlabel">Module: <select id="blKbModuleSel" title="Which module the shared audition keyboard plays"></select></label>'+
+    '<label class="hlabel">Engine: <select id="blKbEngSel" title="Engine of the module picked at left — same control as that module’s own Engine dropdown (unmap to change a bound module’s engine)"><option value="mk">microKORG</option><option value="omni">Omnisphere</option><option value="triton">Triton</option></select></label>'+
+    '<label class="hlabel">Preset: <select id="blKbPresetSel" title="Preset of the module picked at left — same control as that module’s own Preset dropdown; for Triton this is its Programs list"></select></label></div>'+
     '<div class="kbwrap"><div class="kb" id="blSharedKb"></div></div>'+
     '<div class="small" id="blKbNone" style="display:none;margin-top:6px">No modules — the keyboard has nothing to play. Add a module above and it plays that module.</div>'+
     '<div class="small" style="margin-top:6px">One keyboard for the whole stack — pick the module it plays. External MIDI routes itself: a module answers on the MIDI channel of its stack position (module 1 = CH 1, module 2 = CH 2…), whatever module is picked here.</div></div>';
@@ -17648,6 +17672,46 @@ function blKbMarkControlled(){
   const cur=blKbBlock();
   BL_STACK.forEach(b=>{ if(b.root) b.root.classList.toggle("blkbctrl", b===cur); });
 }
+/* Keyboard-row Engine + Preset pair (Keith, 2026-11-06 20:30): ONE
+   extra pair, directly over the audition keyboard to the right of
+   the module selector, addressing the SELECTOR's module only — so on
+   mobile module + engine + preset are all pickable at the keys with
+   no scroll back up to the blocks. Two views of the block's single
+   state: changes go through blBlockSetEngine / blBlockLoadPreset
+   exactly once (the value is copied into the block's own dropdown
+   first, the same trick the block pair uses), and the pair re-reads
+   the block whenever the selector, the block, or its preset table
+   changes. For Triton the pair clones the block's Programs dropdown,
+   so its load-on-call fetch path is the block's own. */
+function blKbPairSync(){
+  const es=$("blKbEngSel"), ps=$("blKbPresetSel"); if(!es && !ps) return;
+  const block=blKbBlock();
+  if(!block){
+    if(es){ es.disabled=true; }
+    if(ps){ ps.innerHTML=""; const o=document.createElement("option"); o.value="-1"; o.textContent="No modules"; ps.appendChild(o); ps.disabled=true; }
+    return;
+  }
+  if(es){ es.disabled= !!block.boundId; es.value=block.engine; }
+  if(ps){
+    if(block.presetSel){ ps.innerHTML=block.presetSel.innerHTML; ps.value=block.presetSel.value; }
+    ps.disabled=false;
+  }
+}
+function blKbPairWire(){
+  const es=$("blKbEngSel"), ps=$("blKbPresetSel");
+  if(es && !es.dataset.wired){ es.dataset.wired="1";
+    es.onchange=()=>{ const b=blKbBlock(); if(!b) return; blBlockSetEngine(b, es.value); blKbPairSync(); };
+  }
+  if(ps && !ps.dataset.wired){ ps.dataset.wired="1";
+    ps.onchange=()=>{ const b=blKbBlock(); if(!b) return; if(b.presetSel) b.presetSel.value=ps.value; blBlockLoadPreset(b); blKbPairSync(); };
+  }
+}
+const _blKbPairFillPrev=blBlockFillPresets;
+blBlockFillPresets=function(block){ _blKbPairFillPrev(block); try{ if(block && blKbBlock()===block) blKbPairSync(); }catch(e){} };
+const _blKbPairSyncPrev=blBlockSyncPreset;
+blBlockSyncPreset=function(block){ _blKbPairSyncPrev(block); try{ if(block && blKbBlock()===block) blKbPairSync(); }catch(e){} };
+const _blKbPairHeadPrev=blBlockSyncHead;
+blBlockSyncHead=function(block){ _blKbPairHeadPrev(block); try{ if(block && blKbBlock()===block) blKbPairSync(); }catch(e){} };
 function blKbSyncSelector(){
   const sel=$("blKbModuleSel"); if(!sel) return;
   const cur=blKbBlock(); BL_KB_SEL= cur? cur.id : null;
@@ -17662,8 +17726,9 @@ function blKbSyncSelector(){
     sel.appendChild(o);
   });
   if(cur) sel.value=cur.id;
-  sel.onchange=()=>{ blKbReleaseAll(); BL_KB_SEL=sel.value; blKbMarkControlled(); };
+  sel.onchange=()=>{ blKbReleaseAll(); BL_KB_SEL=sel.value; blKbMarkControlled(); blKbPairSync(); };
   blKbMarkControlled();
+  blKbPairWire(); blKbPairSync();
 }
 const _blKbSRPrev=blStackRefresh;
 blStackRefresh=function(){ _blKbSRPrev(); try{ blKbSyncSelector(); }catch(e){} };
@@ -17912,7 +17977,7 @@ if(typeof buildRack==="function"){
       if(hint){
         if(shown===0){
           hint.style.display="";
-          hint.textContent=(S.seqNames[S.pattern]||("SEQ "+(S.pattern+1)))+" has no channels in it yet — ＋ Add channel puts your first one here, and picking a channel (row name, mixer Select, multitrack lane) brings it in. Track 1 waits in the Edit window.";
+          hint.textContent=(S.seqNames[S.pattern]||("SEQ "+(S.pattern+1)))+" has no channels in it yet — ＋ Add channel puts your first one here, and picking a channel (row name, mixer Select, multitrack lane) brings it in. audio 1 waits in the Edit window.";
         } else hint.style.display="none";
       }
     });
@@ -18605,6 +18670,936 @@ if(typeof triggerChannel==="function"){
   }
 })();
 setStatus("Beat Lab ready — help text lives under Options → Help; on phones the BPM title card scrolls away with the page.");
+</script>
+<style>
+/* Sequencer-channel picker beside Strum (Keith, 2026-11-06) — sits in the
+   Piano Roll keyboard bar, wraps with the bar on phones. */
+#rollChannelSeqWrap{white-space:nowrap}
+#rollChannelSeq{max-width:230px}
+@media (max-width:640px){ #rollChannelSeq{max-width:170px} }
+</style>
+<script>
+"use strict";
+/* ================================================================
+   PIANO ROLL · SEQUENCER-CHANNEL PICKER BESIDE STRUM (Keith,
+   2026-11-06): "next to strum drop down on the piano roll, add a
+   drop down to select midi channel from sequencer."
+   This is a SECOND SURFACE for the roll's existing channel
+   selection — it holds no state of its own:
+   · Its list is cloned live from the header CHANNEL picker
+     (#rollChannel): the step sequencer's channels, with the same
+     labels (instrument tracks show "name · engine · preset" via the
+     buildRoll wrap that rewrites the header picker's options) and
+     the same "No channel" placeholder while nothing is loaded.
+   · Picking a channel here loads it through the EXISTING load
+     path — setRollChannel() — so the grid, velocity lane, header
+     name, Root Note, MIDI Templates target and sequence
+     membership all follow exactly as they do for the header
+     picker (whose change listener and wraps mark the load as
+     chosen, add the sequence member, and sync the root note).
+   · Picking in the header picker updates this dropdown (change
+     listener + wraps below), and channel add / delete / rename
+     updates both lists (the header list is rebuilt by
+     rollSyncChannelOptions / refreshChannelNames — a
+     MutationObserver on that one <select> mirrors every rebuild
+     here, on top of the function wraps).
+   · The header CHANNEL picker does not move and is untouched.
+   ================================================================ */
+(function blRollChannelSeqInit(){
+  var bar=document.getElementById("rollKbBar");
+  var strumSel=document.getElementById("chordStrumSel");
+  var src=document.getElementById("rollChannel");
+  if(!bar || !strumSel || !src) return;
+  if(document.getElementById("rollChannelSeq")) return;
+
+  var lab=document.createElement("label");
+  lab.className="hlabel"; lab.id="rollChannelSeqWrap";
+  lab.title="Channel shown in the Piano Roll — the step sequencer's channels, same list and same selection as the Channel picker in the Piano Roll header";
+  lab.appendChild(document.createTextNode("Channel: "));
+  var sel=document.createElement("select");
+  sel.id="rollChannelSeq";
+  sel.title="Load a step-sequencer channel into the Piano Roll — same selection as the Channel picker above";
+  lab.appendChild(sel);
+  var strumLab=strumSel.closest ? strumSel.closest("label") : null;
+  if(strumLab && strumLab.parentNode===bar) strumLab.after(lab); else bar.appendChild(lab);
+
+  var syncing=false;
+  function desiredOptions(){
+    var list=Array.prototype.map.call(src.options, function(o){ return { v:o.value, t:o.textContent }; });
+    if(!list.length && typeof S!=="undefined" && S && S.order){
+      list=S.order.filter(function(id){ return S.channels[id]; }).map(function(id){
+        var ch=S.channels[id];
+        var t=ch.name;
+        try{ if(typeof blIsInstrument==="function" && typeof blInstLabel==="function" && blIsInstrument(ch)) t=ch.name+" · "+blInstLabel(ch); }catch(e){}
+        return { v:id, t:t };
+      });
+    }
+    var loaded=false;
+    try{ loaded=!!(typeof S!=="undefined" && S && S.channels[S.rollChannel]); }catch(e){}
+    if(loaded){
+      list=list.filter(function(d){ return d.v!==""; });
+    } else if(!list.some(function(d){ return d.v===""; })){
+      list.unshift({ v:"", t:"No channel" });
+    }
+    return list;
+  }
+  function syncMirror(){
+    if(syncing) return; syncing=true;
+    try{
+      var wantList=desiredOptions();
+      var curSig=Array.prototype.map.call(sel.options, function(o){ return o.value+"\u0001"+o.textContent; }).join("\u0002");
+      var newSig=wantList.map(function(d){ return d.v+"\u0001"+d.t; }).join("\u0002");
+      if(curSig!==newSig){
+        sel.innerHTML="";
+        wantList.forEach(function(d){ var o=document.createElement("option"); o.value=d.v; o.textContent=d.t; sel.appendChild(o); });
+      }
+      var loaded=false, want="";
+      try{ loaded=!!(typeof S!=="undefined" && S && S.channels[S.rollChannel]); if(loaded) want=S.rollChannel; }catch(e){}
+      if(sel.value!==want) sel.value=want;
+    }catch(e){}
+    syncing=false;
+  }
+  window.blSyncRollChannelSeq=syncMirror;
+
+  sel.addEventListener("change", function(){
+    var v=sel.value;
+    if(!v){
+      /* the header picker's own empty handling: unload, never adopt */
+      try{
+        if(typeof blRollUnload==="function") blRollUnload();
+        else { S.rollChannel=null; if(src) src.value=""; if(typeof buildRoll==="function") buildRoll(); }
+      }catch(e){}
+      syncMirror();
+      return;
+    }
+    if(typeof S==="undefined" || !S.channels || !S.channels[v]){ syncMirror(); return; }
+    /* the existing load path — grid, velocity lane, header readouts,
+       Root Note and the MIDI Templates target all key off it */
+    try{
+      if(typeof setRollChannel==="function") setRollChannel(v, false);
+      else { S.rollChannel=v; if(src) src.value=v; if(typeof buildRoll==="function") buildRoll(); }
+    }catch(e){}
+    if(src && src.value!==v) src.value=v;
+    syncMirror();
+  });
+
+  /* header picker → this dropdown */
+  src.addEventListener("change", function(){ setTimeout(syncMirror, 0); setTimeout(syncMirror, 60); });
+  /* header list rebuilds (add / delete / rename) → this dropdown */
+  if(window.MutationObserver){
+    try{ new MutationObserver(function(){ setTimeout(syncMirror, 0); }).observe(src, { childList:true }); }catch(e){}
+  }
+  /* belt and braces: sync after every existing rebuild / load route */
+  function wrap(name){
+    try{
+      var prev=(typeof window!=="undefined")? window[name] : null;
+      if(typeof prev!=="function" || prev._blSeqWrapped) return;
+      var fn=function(){ var r=prev.apply(this, arguments); syncMirror(); return r; };
+      fn._blSeqWrapped=true;
+      window[name]=fn;
+    }catch(e){}
+  }
+  /* these names are plain function declarations — reassigning the
+     global binding is the same wrap pattern the rest of the app uses */
+  try{ if(typeof buildRoll==="function" && !buildRoll._blSeqWrapped){ var p1=buildRoll; var f1=function(){ var r=p1.apply(this, arguments); syncMirror(); return r; }; f1._blSeqWrapped=true; buildRoll=f1; } }catch(e){}
+  try{ if(typeof setRollChannel==="function" && !setRollChannel._blSeqWrapped){ var p2=setRollChannel; var f2=function(){ var r=p2.apply(this, arguments); syncMirror(); return r; }; f2._blSeqWrapped=true; setRollChannel=f2; } }catch(e){}
+  try{ if(typeof refreshChannelNames==="function" && !refreshChannelNames._blSeqWrapped){ var p3=refreshChannelNames; var f3=function(){ var r=p3.apply(this, arguments); syncMirror(); return r; }; f3._blSeqWrapped=true; refreshChannelNames=f3; } }catch(e){}
+  try{ if(typeof rollSyncChannelOptions==="function" && !rollSyncChannelOptions._blSeqWrapped){ var p4=rollSyncChannelOptions; var f4=function(){ var r=p4.apply(this, arguments); syncMirror(); return r; }; f4._blSeqWrapped=true; rollSyncChannelOptions=f4; } }catch(e){}
+  try{ if(typeof blRollPickerReconcile==="function" && !blRollPickerReconcile._blSeqWrapped){ var p5=blRollPickerReconcile; var f5=function(){ var r=p5.apply(this, arguments); syncMirror(); return r; }; f5._blSeqWrapped=true; blRollPickerReconcile=f5; } }catch(e){}
+  try{ if(typeof blRollUnload==="function" && !blRollUnload._blSeqWrapped){ var p6=blRollUnload; var f6=function(){ var r=p6.apply(this, arguments); syncMirror(); return r; }; f6._blSeqWrapped=true; blRollUnload=f6; } }catch(e){}
+  try{ if(typeof deleteChannel==="function" && !deleteChannel._blSeqWrapped){ var p7=deleteChannel; var f7=function(){ var r=p7.apply(this, arguments); syncMirror(); return r; }; f7._blSeqWrapped=true; deleteChannel=f7; } }catch(e){}
+
+  syncMirror();
+  setTimeout(syncMirror, 0);
+  setTimeout(syncMirror, 650);
+  setTimeout(syncMirror, 1600);
+})();
+</script>
+<script>
+"use strict";
+/* ================================================================
+   BLANK = DEFAULT TEMPLATE + NEW NAMING CONVENTIONS
+   (Keith, 2026-11-07 — this SUPERSEDES the 2026-11-06 blank-start
+   law of one "Track 1" wave track, an empty SEQ 1 and no channels.
+   Kit templates (New → Template) are untouched, and saved projects
+   keep their own state: this pass changes what a BLANK is, and the
+   names new tracks are born with, nothing else.)
+
+   BIRTH STATE — New → Blank and the app's first load both build:
+   · ONE wave track named "audio 1" (Edit wave lane + connected
+     mixer strip), the starter wave track as before, renamed.
+   · The first sequence is named "drums 1" and is current; every
+     other pre-created sequence is "SEQ2", "SEQ3", … (no space).
+   · "drums 1" holds THREE sequencer channels named "kick",
+     "snare", "hihat" — born EMPTY: no sound assigned, no steps,
+     no autofill (Keith assigns his favourite kick / snare / hat
+     himself). Each has its sequencer row, Edit lane, mixer strip.
+   · ONE instrument track named "omnisphere", built through the
+     synth-mapping path: a fresh Omnisphere module in the Modules
+     stack is mapped to it (ch.synthMap), so it carries the
+     instrument-track label/behaviour, and it is a member of
+     "drums 1" — playable and recordable in that pattern at once.
+     No preset was specified: the engine's default patch stands.
+   · TOTALS: 5 editor tracks (audio 1 wave lane + kick / snare /
+     hihat / omnisphere SEQ lanes) and 5 mixer channels.
+
+   NAMING CONVENTIONS — replace "Wave N" / "Midi N" everywhere a
+   name is minted (the add funnels, duplicates, Sampler sends all
+   funnel through the wrappers below):
+   · New wave tracks: "audio 1", "audio 2", "audio 3", …
+   · New sequencer channels beyond the template's named starters:
+     "midi channel 1", "midi channel 2", …
+   · Counting scans channel names AND lane names and skips names
+     already taken; a channel keeps its automatic name until
+     Keith renames it (the uniqueness law stands).
+   · The Map auto-create exception is unchanged: a track created
+     by mapping a module still takes the engine's name.
+   ================================================================ */
+function blTplSafe(fn){ try{ return fn(); }catch(e){} }
+
+/* ---------- next free counting name in a series ---------- */
+function blTplNextName(kind, exceptId){
+  const taken={};
+  S.order.forEach(id=>{ if(id===exceptId) return;
+    const ch=S.channels[id]; if(ch) taken[String(ch.name||"").toLowerCase()]=1; });
+  if(typeof blLaneKeys==="function"){
+    blTplSafe(()=>{ blLaneKeys().forEach(k=>{ if(exceptId && k.slice(2)===exceptId) return;
+      taken[String(blLaneName(k)||"").toLowerCase()]=1; }); });
+  }
+  const esc=kind.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re=new RegExp("^"+esc+"\\s+(\\d+)$", "i");
+  let max=0;
+  Object.keys(taken).forEach(nm=>{ const mm=re.exec(nm);
+    if(mm) max=Math.max(max, parseInt(mm[1],10)||0); });
+  let n=Math.max(1, max+1);
+  while(taken[(kind+" "+n).toLowerCase()]) n++;
+  return kind+" "+n;
+}
+/* ---------- rename in place: channel + any lane entry that
+   carried the old name follow, then every label rebuilds ---------- */
+function blTplRename(id, nm){
+  const ch=S.channels[id]; if(!ch || !nm) return;
+  const old=ch.name;
+  ch.name=nm;
+  if(S.laneNames && old && old!==nm){
+    ["m:","w:"].forEach(p=>{ const k=p+id, v=S.laneNames[k];
+      if(v===old) S.laneNames[k]=nm;
+      else if(v===old+" WAV") S.laneNames[k]=nm+" WAV";
+      else if(v===old+" SEQ") S.laneNames[k]=nm+" SEQ"; });
+  }
+  blTplSafe(()=>{ if(typeof blEnforceLaneNames==="function") blEnforceLaneNames(); });
+  blTplSafe(()=>refreshChannelNames());
+}
+
+/* ---------- the funnels mint the new counting names ---------- */
+if(typeof blAddChannelOfType==="function"){
+  const _blTplAddPrev=blAddChannelOfType;
+  blAddChannelOfType=function(type){
+    const ch=_blTplAddPrev(type);
+    if(ch && S.channels[ch.id])
+      blTplRename(ch.id, blTplNextName("midi channel", ch.id));
+    return ch;
+  };
+}
+if(typeof blAddWavTrack==="function"){
+  const _blTplWavPrev=blAddWavTrack;
+  blAddWavTrack=function(){
+    const before={}; S.order.forEach(id=>{ before[id]=1; });
+    _blTplWavPrev();
+    const nid=S.order.find(id=>!before[id] && S.channels[id]);
+    if(nid) blTplRename(nid, blTplNextName("audio", nid));
+  };
+}
+if(typeof blAddMidiTrack==="function"){
+  const _blTplMidiPrev=blAddMidiTrack;
+  blAddMidiTrack=function(){
+    const before={}; S.order.forEach(id=>{ before[id]=1; });
+    _blTplMidiPrev();
+    const nid=S.order.find(id=>!before[id] && S.channels[id]);
+    if(nid) blTplRename(nid, blTplNextName("midi channel", nid));
+  };
+}
+if(typeof blDuplicateChannel==="function"){
+  const _blTplDupPrev=blDuplicateChannel;
+  blDuplicateChannel=function(cid){
+    const src=S.channels[cid];
+    const ch=_blTplDupPrev(cid);
+    if(ch && src && /^(audio|midi channel|Midi|Wave) \d+$/i.test(src.name||"")){
+      const waveKind=!!(src.blWaveKind || src.blTrack1 || src.blWaveOnly);
+      blTplRename(ch.id, blTplNextName(waveKind? "audio" : "midi channel", ch.id));
+    }
+    return ch;
+  };
+}
+/* ---------- reload guard: the old "Audio N" factory heal must not
+   eat the new convention — a saved "audio N" name IS the truth ---------- */
+if(typeof loadClipsFromProject==="function"){
+  const _blTplLcpPrev=loadClipsFromProject;
+  loadClipsFromProject=function(p){
+    _blTplLcpPrev(p);
+    if(p && p.channels){
+      let fixed=false;
+      Object.keys(p.channels).forEach(id=>{
+        const ch=S.channels[id], src=p.channels[id];
+        if(!ch || !src || !src.name) return;
+        if(/^audio \d+$/.test(src.name) && ch.name!==src.name){
+          blTplRename(id, src.name); fixed=true;
+        }
+      });
+      if(fixed){
+        blTplSafe(()=>buildRack()); blTplSafe(()=>buildMixer()); blTplSafe(()=>ptRender());
+      }
+    }
+  };
+}
+
+/* ---------- the default template, built on the blank chain ---------- */
+function blTplBuild(){
+  /* the starter wave track takes the first audio name */
+  const starter=S.order.map(id=>S.channels[id]).find(c=>c && c.blTrack1);
+  let audioId=null;
+  if(starter){ audioId=starter.id; blTplRename(audioId, blTplNextName("audio", audioId)); }
+
+  /* drums 1's three sequencer channels — empty, through the same
+     ＋ Add channel funnel Keith uses (membership in the current
+     sequence, drums 1, is recorded by that funnel's own wraps) */
+  const drumIds=[];
+  ["kick","snare","hihat"].forEach(nm=>{
+    const ch=blTplSafe(()=>blAddChannelOfType("drum"));
+    if(ch && S.channels[ch.id]){ blTplRename(ch.id, nm); drumIds.push(ch.id); }
+  });
+
+  /* the omnisphere instrument track — a MIDI track, renamed, then
+     bound to a fresh Omnisphere module through Map itself */
+  let omniId=null;
+  { const before={}; S.order.forEach(id=>{ before[id]=1; });
+    blTplSafe(()=>blAddMidiTrack());
+    const nid=S.order.find(id=>!before[id] && S.channels[id]);
+    if(nid){ omniId=nid; blTplRename(omniId, "omnisphere"); } }
+  if(omniId && typeof BL_STACK!=="undefined"){
+    /* a previous blank's module bound to a since-deleted channel
+       never stacks up — repeats of New → Blank stay at one */
+    for(let i=BL_STACK.length-1;i>=0;i--){ const b=BL_STACK[i];
+      if(b.boundId && !S.channels[b.boundId]){ blTplSafe(()=>b.root.remove()); BL_STACK.splice(i,1); } }
+    if(typeof blNewBlock==="function" && typeof blBlockMap==="function"){
+      const blk=blTplSafe(()=>blNewBlock("omni", null, null));
+      if(blk){
+        blk.targetId=omniId; if(blk.picker) blk.picker.value=omniId;
+        blTplSafe(()=>blBlockMap(blk));
+        const oc=S.channels[omniId];
+        if(oc && !oc.synthMap){ /* Map is the path; this only fires if it ever refuses */
+          oc.synthMap={ engine:"omni", patch:blDeep(blk.inst.work) };
+          blk.boundId=omniId; blk.targetId=omniId; blSeqAddMember(S.pattern, omniId);
+        }
+        blTplSafe(()=>blStackRefresh()); blTplSafe(()=>blStackSyncEmpty());
+      }
+    }
+  }
+
+  /* sequences: drums 1 first and current, the rest SEQ2, SEQ3, … */
+  const n=(typeof seqCount==="function")? seqCount() : 4;
+  S.seqNames=[]; for(let i=0;i<n;i++) S.seqNames.push(i===0? "drums 1" : "SEQ"+(i+1));
+  S.seqBars=[]; for(let i=0;i<n;i++) S.seqBars.push(1);
+  if(Array.isArray(S.seqTranspose)){ S.seqTranspose=[]; for(let i=0;i<n;i++) S.seqTranspose.push(0); }
+  S.pattern=0;
+  /* membership is explicit: drums 1 = kick, snare, hihat, omnisphere;
+     every other sequence is born empty (the standing law) */
+  const members0=drumIds.slice(); if(omniId) members0.push(omniId);
+  S.seqMembers=[]; for(let i=0;i<n;i++) S.seqMembers.push(i===0? members0 : []);
+
+  if(audioId) S.selected=audioId;
+  /* the Piano Roll loads no track by default — the standing law */
+  blTplSafe(()=>{ BL_ROLL_CHOSEN=false; });
+  blTplSafe(()=>blRollUnload());
+
+  blTplSafe(()=>refreshChannelNames());
+  blTplSafe(()=>buildRack()); blTplSafe(()=>buildMixer()); blTplSafe(()=>ptRender());
+  blTplSafe(()=>buildPatBtns());
+  blTplSafe(()=>{ if(typeof blSqSync==="function") blSqSync(); });
+  markDirty();
+  setStatus("Default template — “drums 1” holds kick, snare and hihat (empty: assign your favourite sounds and they are ready to play) plus the omnisphere instrument track, mapped to its Omnisphere module in the Modules stack; audio 1 is the wave track. Five tracks in the Edit window, five mixer channels. Sequences after drums 1 are SEQ2, SEQ3…; new wave tracks count audio 2, audio 3… and new sequencer channels count midi channel 1, midi channel 2…");
+}
+if(typeof blTrulyBlank==="function"){
+  const _blTplBlankPrev=blTrulyBlank;
+  blTrulyBlank=function(){
+    _blTplBlankPrev();
+    blTplBuild();
+  };
+}
+
+/* ---------- fresh first run opens on the template ---------- */
+try{ blTrulyBlank(); }catch(e){}
+try{ ptRender(); }catch(e){}
+</script>
+<style>
+/* ================================================================
+   THEMES (Keith, 2026-11-07) — Options → Theme. COLOURS ONLY.
+   Default = no [data-theme] attribute = the app exactly as built
+   (the :root palette at the top of the page, untouched).
+   Every other theme re-skins through variables: base surfaces
+   (--bg/--panel/--ink/--dim/--line/--gold accent…) PLUS view
+   variables — editor lanes/clips (--lane/--clip/--clip2), mixer
+   strips (--stripbg), piano roll (--rollbg/--note/--noteline).
+   Per-channel colours (--chcol / --clipc) keep their hues in
+   every theme. Module faceplates are images: never tinted.
+   ================================================================ */
+:root[data-theme] .playbtn,:root[data-theme] .pill.on,:root[data-theme] .btn.gold,:root[data-theme] .btn.on,
+:root[data-theme] .patbtn.on,:root[data-theme] .msbtns button.s-on,:root[data-theme] .trkBtns button.s-on,
+:root[data-theme] .ptBtns button.s-on,:root[data-theme] .histbar .histlabel,:root[data-theme] .brand .beta,
+:root[data-theme] #blViewTabs .vtab.on,:root[data-theme] #blBarTabs .vtab.on,:root[data-theme] .synthbadge,
+:root[data-theme] .pttp button.on,:root[data-theme] .blTpBtn.on,:root[data-theme] .pad.hit{color:var(--on-accent)}
+:root[data-theme] .playbtn.playing,:root[data-theme] .pill.warn-on,:root[data-theme] .btn.red-on,
+:root[data-theme] .msbtns button.m-on,:root[data-theme] .trkBtns button.m-on,:root[data-theme] .ptBtns button.m-on,
+:root[data-theme] .wclip .wstale{color:var(--on-red)}
+:root[data-theme] .rollnote.sel{outline-color:var(--sel)}
+:root[data-theme] .velbar.sel{box-shadow:0 0 0 1px var(--sel)}
+/* view surfaces (all themes) */
+:root[data-theme] .ptBody{background:var(--lane)}
+:root[data-theme] .ptseqblock{background:color-mix(in srgb,var(--clip) 30%, var(--panel))}
+:root[data-theme] .ptmidiblock{background:color-mix(in srgb,var(--clip2) 26%, var(--panel));border-color:color-mix(in srgb,var(--clip2) 60%, var(--line))}
+:root[data-theme] .aclip{background:color-mix(in srgb,var(--clip2) 24%, var(--panel))}
+:root[data-theme] .seqblock{background:color-mix(in srgb,var(--clip) 26%, var(--panel))}
+:root[data-theme] .wclip{background:color-mix(in srgb,var(--clip2) 22%, var(--panel))}
+:root[data-theme] .strip,:root[data-theme] .bstrip{background:var(--stripbg)}
+:root[data-theme] .rollwrap,:root[data-theme] .velwrap{background:var(--rollbg)}
+:root[data-theme] .rollnote{background:var(--note);border-color:var(--noteline)}
+:root[data-theme] .rollnote.virt{background:color-mix(in srgb,var(--note) 55%, var(--step))}
+:root[data-theme] .rollcell.on{background:var(--note)}
+:root[data-theme] .velbar{background:var(--notevel)}
+/* track-colour clip themes: --clipc is set per lane from chColor() */
+:root[data-theme="protools"] .ptmidiblock,:root[data-theme="ableton"] .ptmidiblock,:root[data-theme="logic"] .ptmidiblock,
+:root[data-theme="cubase"] .ptmidiblock,:root[data-theme="fl"] .ptmidiblock,:root[data-theme="reason"] .ptmidiblock{background:color-mix(in srgb,var(--clipc, var(--clip2)) 42%, var(--panel))}
+:root[data-theme="protools"] .aclip,:root[data-theme="ableton"] .aclip,:root[data-theme="logic"] .aclip,
+:root[data-theme="cubase"] .aclip,:root[data-theme="fl"] .aclip,:root[data-theme="reason"] .aclip{background:color-mix(in srgb,var(--clipc, var(--clip2)) 30%, var(--panel))}
+/* velocity-shaded notes (Pro Tools / Cubase ramp / Logic warm top) */
+:root[data-theme="protools"] .rollnote[data-velb="1"]{background:#8fc3ee;border-color:#5b9bd5}
+:root[data-theme="protools"] .rollnote[data-velb="2"]{background:#4d9de0;border-color:#2f6db3}
+:root[data-theme="protools"] .rollnote[data-velb="3"]{background:#2565a8;border-color:#17497c}
+:root[data-theme="cubase"] .rollnote[data-velb="1"]{background:#2f7fd0;border-color:#1f5fa8}
+:root[data-theme="cubase"] .rollnote[data-velb="2"]{background:#e8c33c;border-color:#b99724}
+:root[data-theme="cubase"] .rollnote[data-velb="3"]{background:#e4572e;border-color:#b23a1c}
+:root[data-theme="logic"] .rollnote[data-velb="1"]{background:#2dd4bf;border-color:#1aa893}
+:root[data-theme="logic"] .rollnote[data-velb="2"]{background:#0a84ff;border-color:#0060cc}
+:root[data-theme="logic"] .rollnote[data-velb="3"]{background:#ff9f0a;border-color:#cc7a00}
+/* mixer signatures */
+:root[data-theme="protools"] .strip .sname{background:var(--chcol, var(--gold));color:#0d1117;border-radius:3px}
+:root[data-theme="reason"] .strip .sname{background:color-mix(in srgb,var(--chcol, var(--gold)) 32%, transparent);border-radius:3px}
+:root[data-theme="logic"] .kval,:root[data-theme="logic"] .strip .val{color:#9db8d9}
+:root[data-theme="cubase"] .strip.sel{box-shadow:inset 0 3px 0 var(--gold)}
+:root[data-theme="fl"] .strip .sname{color:var(--chcol, var(--ink))}
+/* light-theme legibility: accent-coloured TEXT deepened, channel names darkened toward ink */
+:root[data-theme="day"] .ptName,:root[data-theme="day"] .trkName,:root[data-theme="day"] .previewbar .pvname,
+:root[data-theme="day"] #rollSelInfo,:root[data-theme="day"] .wepos,:root[data-theme="day"] .blockpatch,
+:root[data-theme="day"] .rackbarhead .barlab,:root[data-theme="day"] .rollbarhead,
+:root[data-theme="ableton"] .ptName,:root[data-theme="ableton"] .trkName,:root[data-theme="ableton"] .previewbar .pvname,
+:root[data-theme="ableton"] #rollSelInfo,:root[data-theme="ableton"] .wepos,:root[data-theme="ableton"] .blockpatch,
+:root[data-theme="ableton"] .rackbarhead .barlab,:root[data-theme="ableton"] .rollbarhead{color:var(--goldink)}
+:root[data-theme="day"] #ptSelInfo,:root[data-theme="ableton"] #ptSelInfo{color:var(--goldink)!important}
+:root[data-theme="day"] .strip .sname,:root[data-theme="ableton"] .strip .sname{color:color-mix(in srgb,var(--chcol, var(--ink)) 55%, var(--ink))}
+/* ---- Day (Beat Lab light) ---- */
+:root[data-theme="day"]{color-scheme:light;
+  --bg:#ece7db; --bg2:#e6dfcd; --panel:#f5f1e8; --panel2:#e2dccc; --line:#cfc7b0;
+  --ink:#262219; --dim:#6f6a5c; --faint:#8a8471;
+  --gold:#a87b14; --gold2:#8a650e; --goldink:#7d5c0e; --red:#c23a1b; --green:#4c8a1f; --teal:#0e7569;
+  --step:#ddd5bf; --step-alt:#d3c9ac; --step-on:#a87b14; --btn:#e9e2cf;
+  --shadow:0 10px 30px rgba(60,50,20,.18); --on-accent:#ffffff; --on-red:#ffffff; --sel:#262219;
+  --lane:#e9e3d0; --clip:#a87b14; --clip2:#0e7569; --stripbg:#e2dccc; --rollbg:#e6dfcd;
+  --note:#a87b14; --noteline:#8a650e; --notevel:#0e7569}
+/* ---- Night (deeper than Default) ---- */
+:root[data-theme="night"]{color-scheme:dark;
+  --bg:#0b0b0d; --bg2:#0e0e10; --panel:#131316; --panel2:#1a1a1e; --line:#26262b;
+  --ink:#d8d8dc; --dim:#83838c; --faint:#5d5d64;
+  --gold:#e8b33c; --gold2:#c98f1b; --red:#e4572e; --green:#7bc950; --teal:#3fb8a6;
+  --step:#1c1c20; --step-alt:#212126; --step-on:#e8b33c; --btn:#1a1a1e;
+  --shadow:0 10px 30px rgba(0,0,0,.6); --on-accent:#1c1503; --on-red:#ffffff; --sel:#ffffff;
+  --lane:#0e0e10; --clip:#e8b33c; --clip2:#3fb8a6; --stripbg:#1a1a1e; --rollbg:#0e0e10;
+  --note:#e8b33c; --noteline:#c98f1b; --notevel:#3fb8a6}
+/* ---- Pro Tools (dark theme: blue-charcoal, steel blue) ---- */
+:root[data-theme="protools"]{color-scheme:dark;
+  --bg:#26282e; --bg2:#1f2126; --panel:#2f323a; --panel2:#383c45; --line:#484d58;
+  --ink:#d6d9df; --dim:#969ca7; --faint:#767d89;
+  --gold:#4d9de0; --gold2:#2f6db3; --red:#e05d4d; --green:#63b06a; --teal:#7cc0f0;
+  --step:#22242a; --step-alt:#282a31; --step-on:#4d9de0; --btn:#383c45;
+  --shadow:0 10px 30px rgba(0,0,0,.5); --on-accent:#0a1a29; --on-red:#ffffff; --sel:#ffffff;
+  --lane:#24262c; --clip:#4d9de0; --clip2:#4d9de0; --stripbg:#3a3e47; --rollbg:#23252b;
+  --note:#4d9de0; --noteline:#2f6db3; --notevel:#7cc0f0}
+/* ---- FL Studio (grey-green dark, signature orange + green notes) ---- */
+:root[data-theme="fl"]{color-scheme:dark;
+  --bg:#2c302d; --bg2:#232624; --panel:#363b37; --panel2:#40463f; --line:#4c534b;
+  --ink:#e9ebe4; --dim:#a3a89e; --faint:#7f857a;
+  --gold:#f26522; --gold2:#c24e15; --red:#e4572e; --green:#69b03c; --teal:#8fd45e;
+  --step:#272b28; --step-alt:#2d312e; --step-on:#f26522; --btn:#40463f;
+  --shadow:0 10px 30px rgba(0,0,0,.5); --on-accent:#2b1503; --on-red:#ffffff; --sel:#ffffff;
+  --lane:#262926; --clip:#f26522; --clip2:#69b03c; --stripbg:#31352f; --rollbg:#22251f;
+  --note:#69b03c; --noteline:#4c8a1f; --notevel:#69b03c}
+/* ---- Ableton Live (signature light designer grey, selection blue) ---- */
+:root[data-theme="ableton"]{color-scheme:light;
+  --bg:#c9c9c9; --bg2:#bcbcbc; --panel:#d8d8d8; --panel2:#bcbcbc; --line:#a8a8a8;
+  --ink:#191919; --dim:#5c5c5c; --faint:#767676;
+  --gold:#3d7bd9; --gold2:#2f63b8; --goldink:#2a5ca8; --red:#cf3527; --green:#4c8a1f; --teal:#2a5ca8;
+  --step:#b2b2b2; --step-alt:#a6a6a6; --step-on:#3d7bd9; --btn:#c4c4c4;
+  --shadow:0 10px 30px rgba(0,0,0,.22); --on-accent:#ffffff; --on-red:#ffffff; --sel:#191919;
+  --lane:#c2c2c2; --clip:#3d7bd9; --clip2:#3d7bd9; --stripbg:#d0d0d0; --rollbg:#c4c4c4;
+  --note:#3d7bd9; --noteline:#2f63b8; --notevel:#2a5ca8}
+/* ---- Logic Pro (graphite, Apple blue) ---- */
+:root[data-theme="logic"]{color-scheme:dark;
+  --bg:#1d1d1f; --bg2:#161618; --panel:#2a2a2d; --panel2:#333336; --line:#3d3d42;
+  --ink:#e9e9ec; --dim:#9d9da5; --faint:#74747c;
+  --gold:#0a84ff; --gold2:#0060cc; --red:#ff453a; --green:#30d158; --teal:#64d2ff;
+  --step:#17171a; --step-alt:#1e1e21; --step-on:#0a84ff; --btn:#333336;
+  --shadow:0 10px 30px rgba(0,0,0,.55); --on-accent:#ffffff; --on-red:#ffffff; --sel:#ffffff;
+  --lane:#1a1a1c; --clip:#0a84ff; --clip2:#0a84ff; --stripbg:#1e1e20; --rollbg:#17171a;
+  --note:#0a84ff; --noteline:#0060cc; --notevel:#64d2ff}
+/* ---- Reason Studio (hardware rack warmth, device orange, red key-editor notes) ---- */
+:root[data-theme="reason"]{color-scheme:dark;
+  --bg:#37312a; --bg2:#292420; --panel:#453d33; --panel2:#52483c; --line:#5f5545;
+  --ink:#ede6d6; --dim:#b3a893; --faint:#8f8271;
+  --gold:#e8762d; --gold2:#c25e1e; --red:#e4572e; --green:#8fae4c; --teal:#6db3a5;
+  --step:#2e2822; --step-alt:#352e26; --step-on:#e8762d; --btn:#52483c;
+  --shadow:0 10px 30px rgba(0,0,0,.5); --on-accent:#2e1605; --on-red:#ffffff; --sel:#ffffff;
+  --lane:#332c24; --clip:#e8762d; --clip2:#e8762d; --stripbg:#3a332a; --rollbg:#2b251f;
+  --note:#d93a2b; --noteline:#a8231a; --notevel:#d93a2b}
+/* ---- Cubase (dark, characteristic teal) ---- */
+:root[data-theme="cubase"]{color-scheme:dark;
+  --bg:#24262a; --bg2:#1b1d20; --panel:#2f3237; --panel2:#3a3e44; --line:#43474f;
+  --ink:#dde1e6; --dim:#9aa1ab; --faint:#767d87;
+  --gold:#0ea5b7; --gold2:#0b8291; --red:#e05a4e; --green:#4caf7d; --teal:#2dd4ee;
+  --step:#1d1f23; --step-alt:#22242a; --step-on:#0ea5b7; --btn:#3a3e44;
+  --shadow:0 10px 30px rgba(0,0,0,.5); --on-accent:#03252b; --on-red:#ffffff; --sel:#ffffff;
+  --lane:#22242a; --clip:#0ea5b7; --clip2:#0ea5b7; --stripbg:#2b2e33; --rollbg:#20242a;
+  --note:#0ea5b7; --noteline:#0b8291; --notevel:#2dd4ee}
+/* track-colour notes for Ableton (track colour) and FL (channel colour family) */
+:root[data-theme="ableton"] .rollnote,:root[data-theme="fl"] .rollnote{background:var(--bl-note, var(--note));border-color:var(--bl-note, var(--noteline))}
+:root[data-theme="ableton"] .rollcell.on,:root[data-theme="fl"] .rollcell.on{background:var(--bl-note, var(--note))}
+/* ---- Options → Theme + MIDI diagnostics ---- */
+#blThemeSel{width:100%;max-width:340px;min-height:44px;font-size:13px}
+.blmididot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--line);flex:none;vertical-align:middle;transition:background .13s ease,box-shadow .13s ease}
+.blmididot.lit{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+#blMidiDot{width:11px;height:11px;margin:0 2px}
+.blmidirow{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px;flex-wrap:wrap}
+.blmidirow:last-child{border-bottom:none}
+.blmidirow .blmidiname{font-weight:900;color:var(--ink)}
+.blmidirow .blmidilast{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--gold);flex:1 1 180px}
+.blmidimon{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);line-height:1.7;white-space:pre-wrap}
+.blmidisub{font-size:11px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;font-weight:900;margin:12px 0 4px}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   THEME SWITCHER + MIDI ACTIVITY LIGHT + MIDI DIAGNOSTICS
+   (Keith, 2026-11-07)
+   · Theme: Options → Appearance → Theme dropdown, nine entries.
+     The choice is an app-level preference in localStorage
+     ("beatlab.theme.v1") — never written into project files, so
+     a project opened elsewhere keeps the opener's theme. Applied
+     pre-paint by the boot snippet in <head>; switching re-skins
+     every view live through the CSS variables above. Detached
+     pop-outs copy the page styles at open, so the theme attribute
+     is mirrored into any open pop-out window (and re-applied
+     after each new detach).
+   · View colours: per-lane --clipc is stamped from chColor() so
+     track-colour themes (PT / FL / Ableton / Logic / Reason /
+     Cubase) fill editor blocks in the lane's own colour; the
+     Piano Roll gets --bl-note (Ableton: the loaded track's
+     colour; FL: that colour blended toward its house green) and
+     velocity buckets (data-velb) for the PT / Cubase / Logic
+     note-shading rules.
+   · MIDI light: a bare dot in the master transport cluster. The
+     tap wraps onMidiMessage — the RAW input handler every
+     device message passes through before any routing — so ANY
+     external message lights it (notes, CC, bend, clock…), each
+     message re-lights it, and it fades ~130 ms after the last
+     one. Internal / computer-keyboard playing never reaches
+     onMidiMessage, so it never lights the dot.
+   · Diagnostics: Options → MIDI diagnostics — access state +
+     (re)request, live input list with per-device dots and last
+     messages, a small overall monitor, outputs, and a read-only
+     routing summary (Module N = MIDI channel N by stack
+     position; synth-mapped tracks → engine · preset).
+   ================================================================ */
+(function blThemeAndMidi(){
+  var THEME_KEY="beatlab.theme.v1";
+  var THEMES=["default","day","night","protools","fl","ableton","logic","reason","cubase"];
+  var LABELS={default:"Default",day:"Day",night:"Night",protools:"Pro Tools",fl:"FL Studio",ableton:"Ableton Live",logic:"Logic Pro",reason:"Reason Studio",cubase:"Cubase"};
+  var cur="default";
+  try{ var saved=localStorage.getItem(THEME_KEY); if(saved && THEMES.indexOf(saved)>=0) cur=saved; }catch(e){}
+
+  /* ---------- theme apply ---------- */
+  var sel=null;
+  function syncPopouts(){
+    try{
+      if(typeof blDock==="undefined") return;
+      Object.keys(blDock).forEach(function(k){
+        var d=blDock[k];
+        if(d && d.mode==="pop" && d.win && !d.win.closed && d.win.document){
+          var de=d.win.document.documentElement;
+          if(cur==="default") de.removeAttribute("data-theme"); else de.setAttribute("data-theme", cur);
+        }
+      });
+    }catch(e){}
+  }
+  function applyTheme(name, silent){
+    if(THEMES.indexOf(name)<0) name="default";
+    cur=name;
+    if(name==="default") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", name);
+    try{ localStorage.setItem(THEME_KEY, name); }catch(e){}
+    if(sel) sel.value=name;
+    syncPopouts(); syncNoteColour();
+    if(!silent && typeof setStatus==="function") setStatus("Theme: "+LABELS[name]+" — colours only, every view re-skinned; the choice is saved on this device and never inside a project file.");
+  }
+  /* detached pop-outs open after a theme is chosen: re-mirror once the detach lands */
+  try{
+    if(typeof blDetach==="function" && !blDetach._blThemeWrapped){
+      var _bdPrev=blDetach;
+      var _bdWrap=function(){ var r=_bdPrev.apply(this, arguments); setTimeout(syncPopouts, 60); setTimeout(syncPopouts, 400); return r; };
+      _bdWrap._blThemeWrapped=true; blDetach=_bdWrap;
+    }
+  }catch(e){}
+
+  /* ---------- Options → Appearance group ---------- */
+  try{
+    var panel=document.getElementById("blOptionsPanel");
+    if(panel && !document.getElementById("blThemeSel")){
+      var g=document.createElement("div"); g.className="bloptgroup";
+      var h=document.createElement("h3"); h.textContent="Appearance"; g.appendChild(h);
+      var lab=document.createElement("label"); lab.className="hlabel"; lab.style.cssText="display:flex;gap:8px;align-items:center";
+      var lt=document.createElement("span"); lt.textContent="Theme:"; lab.appendChild(lt);
+      sel=document.createElement("select"); sel.id="blThemeSel";
+      sel.title="Colour theme for the whole app — surfaces, editor lanes and clips, mixer strips and Piano Roll notes. Colours only: no layout, wording or behaviour changes. Saved on this device, never in project files.";
+      THEMES.forEach(function(t){ var o=document.createElement("option"); o.value=t; o.textContent=LABELS[t]; sel.appendChild(o); });
+      sel.value=cur;
+      sel.onchange=function(){ applyTheme(sel.value, false); };
+      lab.appendChild(sel); g.appendChild(lab);
+      panel.appendChild(g);
+    } else { sel=document.getElementById("blThemeSel"); }
+  }catch(e){}
+  applyTheme(cur, true);
+
+  /* ---------- view colour sync: --clipc per lane, --bl-note, velocity buckets ---------- */
+  function hexMix(a, b, f){
+    try{
+      var pa=[1,3,5].map(function(i){ return parseInt(a.slice(i,i+2),16); });
+      var pb=[1,3,5].map(function(i){ return parseInt(b.slice(i,i+2),16); });
+      if(pa.some(isNaN)||pb.some(isNaN)) return a;
+      return "#"+pa.map(function(v,i){ return Math.round(v+(pb[i]-v)*f).toString(16).padStart(2,"0"); }).join("");
+    }catch(e){ return a; }
+  }
+  function syncLaneColours(){
+    try{
+      var lanes=document.querySelectorAll("#ptLanes .ptLane");
+      lanes.forEach(function(lane){
+        var cid=lane.getAttribute("data-ptmidi")||lane.getAttribute("data-pttrack");
+        if(!cid){ var body=lane.querySelector(".ptBody"); if(body) cid=body.getAttribute("data-ptlane"); }
+        if(!cid || typeof S==="undefined" || !S.channels || !S.channels[cid]) return;
+        if(typeof chColor==="function") lane.style.setProperty("--clipc", chColor(S.channels[cid]));
+      });
+    }catch(e){}
+  }
+  function syncNoteColour(){
+    try{
+      if(cur!=="ableton" && cur!=="fl") return;
+      if(typeof S==="undefined" || !S.channels || typeof chColor!=="function") return;
+      var ch=S.channels[S.rollChannel]; if(!ch) return;
+      var c=chColor(ch);
+      if(cur==="fl") c=hexMix(c, "#69b03c", 0.5);
+      document.documentElement.style.setProperty("--bl-note", c);
+    }catch(e){}
+  }
+  function syncVelBuckets(){
+    try{
+      document.querySelectorAll("#rollGrid .rollnote").forEach(function(el){
+        if(el.dataset.velb) return;
+        var v=100; try{ if(el._item && el._item.vel!=null) v=Math.round(el._item.vel*127); }catch(e){}
+        el.dataset.velb= v<43? "1" : (v>85? "3" : "2");
+      });
+    }catch(e){}
+  }
+  function syncViews(){ syncLaneColours(); syncNoteColour(); syncVelBuckets(); }
+  try{
+    var ptL=document.getElementById("ptLanes");
+    if(ptL && window.MutationObserver) new MutationObserver(function(){ setTimeout(syncViews, 30); }).observe(ptL, {childList:true, subtree:true});
+    var rg=document.getElementById("rollGrid");
+    if(rg && window.MutationObserver) new MutationObserver(function(){ setTimeout(syncViews, 30); }).observe(rg, {childList:true, subtree:true});
+    document.addEventListener("click", function(){ setTimeout(syncViews, 80); }, true);
+    setTimeout(syncViews, 500); setTimeout(syncViews, 1600);
+  }catch(e){}
+
+  /* ---------- transport MIDI activity light ---------- */
+  var dot=document.createElement("span");
+  dot.className="blmididot"; dot.id="blMidiDot";
+  dot.title="MIDI activity — flashes when a message arrives from a connected MIDI device";
+  try{
+    var cluster=document.getElementById("blBarTransport");
+    if(cluster) cluster.appendChild(dot);
+    else { var tg=document.querySelector(".transport .tgroup"); if(tg) tg.appendChild(dot); }
+  }catch(e){}
+  var dotTimer=null;
+  function lightDot(el){
+    if(!el) return;
+    el.classList.add("lit");
+    if(el._blT) clearTimeout(el._blT);
+    el._blT=setTimeout(function(){ el.classList.remove("lit"); }, 130);
+  }
+  function lightTransport(){ lightDot(dot); }
+
+  /* ---------- message formatting (plain terms) ---------- */
+  var NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  function nName(n){ try{ if(typeof noteName==="function") return noteName(n); }catch(e){} return NOTE_NAMES[((n%12)+12)%12]+(Math.floor(n/12)-1); }
+  function fmtMsg(d){
+    if(!d || !d.length) return "Message";
+    var st=d[0], cmd=st&0xf0, ch=(st&0x0f)+1;
+    if(st===0xf8) return "Clock";
+    if(st===0xfa) return "Start";
+    if(st===0xfb) return "Continue";
+    if(st===0xfc) return "Stop";
+    if(st===0xfe) return "Active Sensing";
+    if(st>=0xf0) return "System · "+st.toString(16).toUpperCase();
+    if(cmd===0x90) return d[2]>0? "Note On · ch "+ch+" · "+nName(d[1])+" · vel "+d[2] : "Note Off · ch "+ch+" · "+nName(d[1])+" · vel 0";
+    if(cmd===0x80) return "Note Off · ch "+ch+" · "+nName(d[1])+" · vel "+(d[2]||0);
+    if(cmd===0xb0) return "CC "+d[1]+" · ch "+ch+" · "+d[2];
+    if(cmd===0xe0) return "Pitch Bend · ch "+ch;
+    if(cmd===0xa0) return "Aftertouch · ch "+ch+" · "+nName(d[1])+" · "+d[2];
+    if(cmd===0xd0) return "Channel Pressure · ch "+ch+" · "+d[1];
+    if(cmd===0xc0) return "Program Change · ch "+ch+" · "+d[1];
+    return "Message · "+st.toString(16).toUpperCase();
+  }
+
+  /* ---------- diagnostics panel (Options) ---------- */
+  var devDots={}, devLast={}, monLines=[], lastClockMon=0;
+  var elAccess=null, elInputs=null, elOutputs=null, elMon=null, elRouting=null;
+  try{
+    var panel2=document.getElementById("blOptionsPanel");
+    if(panel2 && !document.getElementById("blMidiDiag")){
+      var g2=document.createElement("div"); g2.className="bloptgroup"; g2.id="blMidiDiag";
+      var h2=document.createElement("h3"); h2.textContent="MIDI diagnostics"; g2.appendChild(h2);
+      elAccess=document.createElement("div"); elAccess.className="small"; elAccess.id="blMidiAccessState"; g2.appendChild(elAccess);
+      var rb=document.createElement("button"); rb.type="button"; rb.className="btn bloptrow"; rb.id="blMidiRescan";
+      rb.textContent="Request MIDI access / rescan devices";
+      rb.onclick=function(){
+        var b=document.getElementById("btnMidi");
+        if(b) b.click();
+        setTimeout(renderDiag, 500); setTimeout(renderDiag, 1200);
+      };
+      g2.appendChild(rb);
+      var si=document.createElement("div"); si.className="blmidisub"; si.textContent="Inputs"; g2.appendChild(si);
+      elInputs=document.createElement("div"); elInputs.id="blMidiInputs"; g2.appendChild(elInputs);
+      var sm=document.createElement("div"); sm.className="blmidisub"; sm.textContent="Monitor — latest messages"; g2.appendChild(sm);
+      elMon=document.createElement("div"); elMon.className="blmidimon"; elMon.id="blMidiMonitor"; g2.appendChild(elMon);
+      var so=document.createElement("div"); so.className="blmidisub"; so.textContent="Outputs"; g2.appendChild(so);
+      elOutputs=document.createElement("div"); elOutputs.id="blMidiOutputs"; g2.appendChild(elOutputs);
+      var sr=document.createElement("div"); sr.className="blmidisub"; sr.textContent="Routing — who answers where (read-only)"; g2.appendChild(sr);
+      elRouting=document.createElement("div"); elRouting.id="blMidiRouting"; g2.appendChild(elRouting);
+      panel2.appendChild(g2);
+    }
+  }catch(e){}
+  function devKey(msg){
+    try{ var t=msg && (msg.target||msg.currentTarget); if(t && t.id) return t.id; if(t && t.name) return "n:"+t.name; }catch(e){}
+    return null;
+  }
+  function tapMessage(msg){
+    lightTransport();
+    var text="?"; try{ text=fmtMsg(msg && msg.data); }catch(e){}
+    var key=devKey(msg);
+    if(key){
+      devLast[key]=text;
+      var row=elInputs? elInputs.querySelector('[data-dev="'+CSS.escape(key)+'"]') : null;
+      if(row){ lightDot(row.querySelector(".blmididot")); var l=row.querySelector(".blmidilast"); if(l) l.textContent=text; }
+    }
+    var now=Date.now();
+    if(text==="Clock" || text==="Active Sensing"){ if(now-lastClockMon<1000) return; lastClockMon=now; }
+    monLines.unshift(text); if(monLines.length>6) monLines.length=6;
+    if(elMon) elMon.textContent=monLines.join("\n");
+  }
+  /* RAW tap: wrap the app's input handler itself — every device
+     message passes through here before any routing happens. */
+  try{
+    if(typeof onMidiMessage==="function" && !onMidiMessage._blTapWrapped){
+      var _rawPrev=onMidiMessage;
+      var _rawWrap=function(msg){ try{ tapMessage(msg); }catch(e){} return _rawPrev.apply(this, arguments); };
+      _rawWrap._blTapWrapped=true; onMidiMessage=_rawWrap;
+    }
+  }catch(e){}
+  function routingLines(){
+    var lines=[];
+    try{
+      var blocks=document.querySelectorAll(".synthblock");
+      if(blocks.length){
+        blocks.forEach(function(b, i){
+          var title=b.querySelector(".blocktitle");
+          var name=title? (title.textContent||"").replace(/\s+/g," ").trim() : "";
+          lines.push("MIDI ch "+(i+1)+" → Module "+(i+1)+(name? " — "+name : ""));
+        });
+      } else lines.push("No modules in the stack — module channels are silent.");
+    }catch(e){}
+    try{
+      if(typeof S!=="undefined" && S.order && S.channels){
+        var mapped=[];
+        S.order.forEach(function(id){
+          var ch=S.channels[id];
+          if(ch && ch.synthMap){
+            var eng=(typeof BL_ENGINE_NAMES!=="undefined" && BL_ENGINE_NAMES[ch.synthMap.engine]) || ch.synthMap.engine;
+            var preset=(ch.synthMap.patch && ch.synthMap.patch.name) || "Custom";
+            mapped.push("Track “"+ch.name+"” → "+eng+" · "+preset);
+          }
+        });
+        if(mapped.length) lines=lines.concat(mapped);
+        else lines.push("No tracks are synth-mapped right now.");
+        lines.push("Any other note plays the Piano Roll channel (“"+((S.channels[S.rollChannel]||{}).name||"—")+"”); GM-mapped drum notes go to their mapped channels.");
+      }
+    }catch(e){}
+    return lines;
+  }
+  function renderDiag(){
+    try{
+      if(!elAccess) return;
+      var supported=!!(navigator && navigator.requestMIDIAccess);
+      var acc=null; try{ acc=(typeof midiAccess!=="undefined")? midiAccess : null; }catch(e){}
+      if(!supported) elAccess.textContent="Access: Web MIDI is not supported in this browser — use Chrome or Edge on Mac/PC.";
+      else if(acc) elAccess.textContent="Access: granted — devices below update live as you plug and unplug.";
+      else elAccess.textContent="Access: not requested yet — press “Request MIDI access / rescan devices” (or Enable USB MIDI above).";
+      /* inputs */
+      elInputs.innerHTML="";
+      var nIn=0;
+      if(acc){
+        acc.inputs.forEach(function(inp){
+          nIn++;
+          var key=inp.id||("n:"+inp.name);
+          var row=document.createElement("div"); row.className="blmidirow"; row.setAttribute("data-dev", key);
+          var d=document.createElement("span"); d.className="blmididot"; row.appendChild(d);
+          var nm=document.createElement("span"); nm.className="blmidiname"; nm.textContent=inp.name||"MIDI device"; row.appendChild(nm);
+          var meta=document.createElement("span"); meta.className="small";
+          meta.textContent=(inp.manufacturer? inp.manufacturer+" · " : "")+((inp.state||"connected"))+((inp.connection && inp.connection!=="open")? " · "+inp.connection : "");
+          row.appendChild(meta);
+          var last=document.createElement("span"); last.className="blmidilast"; last.textContent=devLast[key]||"— no message yet —"; row.appendChild(last);
+          elInputs.appendChild(row);
+          devDots[key]=d;
+        });
+      }
+      if(!nIn){ var none=document.createElement("div"); none.className="small"; none.textContent=acc? "No MIDI inputs connected." : "No MIDI inputs — access has not been granted yet."; elInputs.appendChild(none); }
+      if(elMon && !monLines.length) elMon.textContent="— nothing received yet —";
+      /* outputs */
+      elOutputs.innerHTML="";
+      var nOut=0;
+      if(acc){
+        acc.outputs.forEach(function(out){
+          nOut++;
+          var row=document.createElement("div"); row.className="blmidirow";
+          var nm=document.createElement("span"); nm.className="blmidiname"; nm.textContent=out.name||"MIDI device"; row.appendChild(nm);
+          var meta=document.createElement("span"); meta.className="small"; meta.textContent=(out.manufacturer? out.manufacturer+" · " : "")+(out.state||"connected"); row.appendChild(meta);
+          elOutputs.appendChild(row);
+        });
+      }
+      if(!nOut){ var none2=document.createElement("div"); none2.className="small"; none2.textContent="No MIDI outputs connected."; elOutputs.appendChild(none2); }
+      /* routing */
+      elRouting.innerHTML="";
+      routingLines().forEach(function(t){
+        var row=document.createElement("div"); row.className="blmidirow";
+        var s=document.createElement("span"); s.textContent=t; row.appendChild(s);
+        elRouting.appendChild(row);
+      });
+    }catch(e){}
+  }
+  window.blMidiDiagRender=renderDiag;
+  window.blMidiTap=tapMessage;
+  renderDiag();
+  /* hot-plug + access changes: re-render when the device signature changes */
+  var lastSig="";
+  setInterval(function(){
+    try{
+      var acc=null; try{ acc=(typeof midiAccess!=="undefined")? midiAccess : null; }catch(e){}
+      var sig=acc? "g" : "-";
+      if(acc){ acc.inputs.forEach(function(i){ sig+="|i"+i.id+":"+(i.state||""); }); acc.outputs.forEach(function(o){ sig+="|o"+o.id+":"+(o.state||""); }); }
+      sig+="|mods"+document.querySelectorAll(".synthblock").length;
+      try{ sig+="|roll"+S.rollChannel; }catch(e){}
+      if(sig!==lastSig){ lastSig=sig; renderDiag(); syncNoteColour(); }
+    }catch(e){}
+  }, 900);
+})();
+</script>
+<script>
+"use strict";
+/* ================================================================
+   SOUND FETCH 400 — SPELLING CASCADE (Keith, 2026-11-07: "I did
+   the reset but still got this error").
+   ROOT CAUSE: Reset sounds was never going to fix this one. Reset
+   only drops this page's cached decodes; the failure happens one
+   step earlier, at the fetch itself. The built-in kit files live
+   under folders and names full of spaces — "SWUM MPC/hihat 1.wav"
+   is the one Keith kept hitting — and the serving layer between
+   this page and those files answers the canonical %20 spelling
+   with a deterministic HTTP 400. Every retry re-asks for the same
+   spelling, so every retry gets the same 400, reset or not. The
+   previous repair tried exactly two spellings (canonical, then
+   double-encoded) and surfaced the 400 when both were refused.
+   THE FIX: blDecode now walks a cascade of URL spellings for the
+   same file until one is served —
+     1 · the canonical %20 form (correct on a well-behaved host,
+         so the common case still costs exactly one request);
+     2 · the double-encoded %2520 form (survives a layer that
+         decodes %20 once and forwards a raw space, which strict
+         origins reject with exactly 400);
+     3 · a strict-escaped form that also percent-encodes the
+         characters encodeURIComponent leaves raw — ( ) ' ! * —
+         which several TYLER WOLF files carry in their names and
+         strict request parsers refuse unescaped;
+     4 · the "+"-for-space form some static stacks decode;
+     5 · the canonical form with a cache-busting query, in case an
+         intermediary has cached the 400 itself (a page-side reset
+         cannot clear that cache; a new URL walks around it).
+   The first spelling that returns audio is remembered per sound,
+   so the cascade is paid once, not on every pick. Only fetch
+   failures cascade — a file that arrives but won't decode throws
+   its decode error immediately, as before. Successes still cache
+   in the shared blBufCache (so Reset sounds still clears them),
+   failures still evict themselves, and if every spelling fails
+   the error that surfaces is the canonical attempt's real status.
+   ================================================================ */
+const blSpellWin={};
+function blSpellings(url){
+  const out=[];
+  const push=u=>{ if(u && out.indexOf(u)<0) out.push(u); };
+  push(url);
+  if(url.indexOf("%20")>=0) push(url.replace(/%20/g, "%2520"));
+  try{
+    const strict=url.split("/").map(seg=>{
+      let dec=seg; try{ dec=decodeURIComponent(seg); }catch(e){}
+      return encodeURIComponent(dec).replace(/[!'()*]/g, c=>"%"+c.charCodeAt(0).toString(16).toUpperCase());
+    }).join("/");
+    push(strict);
+  }catch(e){}
+  if(url.indexOf("%20")>=0) push(url.replace(/%20/g, "+"));
+  push(url+(url.indexOf("?")>=0? "&" : "?")+"blfetch=2");
+  return out;
+}
+function blFetchAudio(url){
+  ensureCtx();
+  if(!blBufCache[url]){
+    const fetchOnce=u=>fetch(u).then(r=>{ if(!r.ok) throw new Error("the sound file could not be fetched (HTTP "+r.status+")"); return r.arrayBuffer(); });
+    const tryFrom=(list, i, firstErr)=>fetchOnce(list[i])
+      .then(ab=>{ if(!ab || !ab.byteLength) throw new Error("the sound file came back empty"); blSpellWin[url]=list[i]; return AC.decodeAudioData(ab); })
+      .catch(err=>{
+        /* an arrived-but-undecodable body is not a spelling problem */
+        if(!/could not be fetched/.test(err && err.message || "")) throw err;
+        if(i+1>=list.length) throw (firstErr || err);
+        try{ console.warn("Beat Lab: sound fetch refused ("+(err && err.message)+") for "+list[i]+" — trying next spelling"); }catch(e){}
+        return tryFrom(list, i+1, firstErr || err);
+      });
+    const list=blSpellings(blSpellWin[url] && blSpellWin[url]!==url? blSpellWin[url] : url);
+    if(blSpellWin[url] && list[0]!==url){ /* winning spelling first, canonical kept as a later fallback */ list.splice(1, 0, url); }
+    let pr=tryFrom(list, 0, null).catch(err=>{ if(blBufCache[url]===pr) delete blBufCache[url]; throw err; });
+    blBufCache[url]=pr;
+  }
+  return blBufCache[url];
+}
+if(typeof blDecode==="function"){ blDecode=blFetchAudio; }
+if(typeof blResetSounds==="function"){
+  const _blSpellResetPrev=blResetSounds;
+  blResetSounds=function(){
+    Object.keys(blSpellWin).forEach(k=>{ delete blSpellWin[k]; });
+    return _blSpellResetPrev();
+  };
+}
 </script>
 </body>
 </html>
