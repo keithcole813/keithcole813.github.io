@@ -30,7 +30,14 @@
   .tbtn{ flex:1; padding:10px 0; text-align:center; font-size:23px; line-height:1.1; color:var(--ink);
          background:linear-gradient(180deg,#2b2b2b,#191919); border:none; border-right:1px solid #000; border-radius:0; }
   .tbtn:last-child{ border-right:none; }
-  .tbtn:active{ transform:none; background:linear-gradient(180deg,#141414,#232323); box-shadow:inset 0 2px 6px rgba(0,0,0,.65); }
+  .tbtn:active{ transform:none; background:linear-gradient(180deg,#141414,#232323); box-shadow:inset 0 2px 6px rgba(0,0,0,.65); color:#ffd968; }
+  /* Lit transport: the button for what's playing stays lit gold until
+     playback stops or ends, so the active mode is never a guess. */
+  .tbtn.lit{ background:linear-gradient(180deg,#8a6a1d,#5f4a12); color:#ffe9a8;
+             box-shadow:inset 0 0 0 1px var(--gold), inset 0 2px 12px rgba(217,166,46,.6);
+             text-shadow:0 0 9px rgba(255,210,90,.95); }
+  .tbtn.lit .gld{ color:#ffe9a8; }
+  .tbtn.lit .sel{ border-color:#ffe9a8; color:#ffe9a8; }
   .tbtn .sel{ border:2px dashed var(--gold); border-radius:5px; padding:0 7px; }
   .tbtn .gld{ color:var(--gold); }
   button{ background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:8px;
@@ -782,9 +789,15 @@ function enableTransport(on){
   ["toStart","playFull","stopBtn","playLoop","playOnce","expLoop","expSlices"].forEach(function(id){ $(id).disabled = !on; });
 }
 
+function litTransport(id){
+  ["toStart","playFull","stopBtn","playLoop","playOnce"].forEach(function(b){
+    var el = $(b); if (el) el.classList.toggle("lit", b === id);
+  });
+}
 function stopPlayback(){
   if (state.src){ try { state.src.onended = null; state.src.stop(); } catch (e){} state.src = null; }
   state.playing = false; state.playMode = null; cancelAnimationFrame(state.raf);
+  litTransport(null);
 }
 
 // The sample-rate feature: when a lower rate is picked, playback and
@@ -886,7 +899,8 @@ function playRegion(loop){
   state.playTimeScale = r.timeScale || 1;
   state.playStartCtx = actx.currentTime; state.playStartOff = 0; state.playDur = r.len / r.sr;
   var reg = regionSamples(); state.regionStartSec = reg.start / state.sr;
-  src.onended = function(){ if (!loop){ state.playing = false; } };
+  litTransport(loop ? "playLoop" : "playOnce");
+  src.onended = function(){ if (!loop){ state.playing = false; litTransport(null); } };
   tickPlayhead(loop);
 }
 function playFull(){
@@ -929,7 +943,8 @@ function playFull(){
   state.src = src; state.playing = true; state.playMode = "full";
   state.playStartCtx = actx.currentTime; state.playStartOff = startOff;
   state.regionStartSec = 0;
-  src.onended = function(){ state.playing = false; state.playMode = null; };
+  litTransport("playFull");
+  src.onended = function(){ state.playing = false; state.playMode = null; litTransport(null); };
   tickPlayhead(false, true);
 }
 function tickPlayhead(looping, full){
@@ -945,6 +960,7 @@ function tickPlayhead(looping, full){
       state.playhead = (state.regionStartSec || 0) + pos * ts;
       if (!looping && el >= state.playDur) state.playing = false;
     }
+    if (!state.playing) litTransport(null);
     // Repaint only when the playhead crosses into a new pixel (plus one
     // final frame when playback ends). At full view of a long song the
     // playhead moves a few pixels a second — the old code repainted the
