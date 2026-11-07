@@ -76,6 +76,7 @@
   #charL { left:8px; clip-path:polygon(0 50%, 100% 0, 100% 100%); }
   #charR { right:8px; clip-path:polygon(100% 50%, 0 0, 0 100%); }
   #charName { position:absolute; top:67.5%; left:0; right:0; z-index:9; text-align:center; font-family:'Luckiest Guy',cursive; font-size:34px; letter-spacing:1px; color:#ffd83d; -webkit-text-stroke:1.5px #1b1040; pointer-events:none; }
+  #startBtn { position:absolute; left:50%; bottom:23vh; transform:translateX(-50%); z-index:9; display:none; font-family:'Luckiest Guy',cursive; font-size:26px; letter-spacing:1px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:14px 42px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); cursor:pointer; animation:pulse 1.1s ease-in-out infinite; }
   /* the display face (Keith's leaderboard mock, 2026-11-07): Luckiest Guy, self-hosted —
      helper text, the board, and every headline share it now */
   @font-face { font-family:'Luckiest Guy'; font-style:normal; font-weight:400; font-display:swap; src:url(assets/fonts/luckiest-guy-latin-ext.woff2) format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
@@ -104,13 +105,14 @@
   </div>
   <div id="pullup">PULL UP!!</div>
   <div id="center">
-    <div id="tap">TAP TO START</div>
+    <div id="tap"></div>
   </div>
   <button id="muteBtn" aria-label="Toggle sound">🔊</button>
   <button id="charL" aria-label="Previous character"></button>
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
-  <div id="ver">v0.56</div>
+  <button id="startBtn">START GAME</button>
+  <div id="ver">v0.57</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -123,7 +125,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.56 ==============================
+/* ============================== 6LOUD demo v0.57 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -815,7 +817,7 @@ function titleFlow(dt) {
     }
   } else if (loadState === 'turn') {
     if (time - turnT0 >= 18 / 30) { loadState = 'done'; titleT0 = turnT0 + 18 / 30;
-      $('tap').textContent = 'TAP TO START'; }
+      $('tap').textContent = ''; }   /* the START GAME button is the call to action now (v0.57) */
   }
 }
 let plats = [];                // {x, y(top), len, img}
@@ -1412,7 +1414,7 @@ function gameOver() {
 
 /* ---------- input: ONE button ---------- */
 function press() { kickDecode();
-  if (mode === 'title') { if (loadState === 'done') startRun(); return; }
+  if (mode === 'title') return;   /* title taps are inert (Keith v0.57: picking a character started the game) — the START GAME button starts the run */
   if (mode !== 'run' || dead) return;
   if (hangPlat) { struggleTaps++; return; }   /* hanging: taps are the climb struggle (Keith) */
   /* no freeze, no launch: he keeps running while the button is down */
@@ -1462,6 +1464,8 @@ $('charL').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* 
 $('charL').addEventListener('click', e => { e.stopPropagation(); cycleChar(); });
 $('charR').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('charR').addEventListener('click', e => { e.stopPropagation(); cycleChar(); });
+$('startBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
+$('startBtn').addEventListener('click', e => { e.stopPropagation(); if (mode === 'title' && loadState === 'done') { kickDecode(); startRun(); } });
 addEventListener('pointerup', () => release());
 addEventListener('pointercancel', () => release());
 
@@ -2000,7 +2004,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false, mbShown = true, charUiShown = true, hudShown = true;
+let puShown = false, mbShown = true, charUiShown = true, hudShown = true, sbShown = false;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
@@ -2010,6 +2014,8 @@ function loop(ts) {
   const mb = mode === 'title';   /* the sound toggle lives on the loading/title screen only (Keith v0.53) */
   if (mb !== mbShown) { mbShown = mb; $('muteBtn').style.display = mb ? 'block' : 'none'; }
   if (mb !== charUiShown) { charUiShown = mb; $('charL').style.display = mb ? 'block' : 'none'; $('charR').style.display = mb ? 'block' : 'none'; $('charName').style.display = mb ? 'block' : 'none'; }   /* the carousel lives on the title screen only (v0.56) */
+  const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
+  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; }
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
   ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); draw();
