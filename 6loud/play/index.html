@@ -66,14 +66,13 @@
 <canvas id="c"></canvas>
 <div id="ui">
   <div id="hud">
-    <div class="hudbox" id="score"><small>SCORE</small>0</div>
     <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
   <div id="pullup">PULL UP!!</div>
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.47</div>
+  <div id="ver">v0.48</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -1272,8 +1271,10 @@ function renderBoard() {
   $('board').classList.add('global');
   let local = [];
   try { local = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]'); } catch (e) { }
+  const rows = gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT');
+  while (rows.length < 10) rows.push('— — 0 FT');   /* the board always shows 10 rows: real scores, then ZERO rows — never dummy scores (Keith v0.48) */
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
-    (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST') +
+    rows.join('<br>') +
     (local.length ? '<div class="boardTitle" style="margin-top:6px">YOUR BEST</div>' +
       (b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT' + (gRanks[b.s] !== undefined ? ' · #' + gRanks[b.s] + ' IN THE WORLD' : ''))(local[0]) : '');   /* one line only: the local high score + its world rank (Keith v0.46 — the YOUR SCORES list is gone) */
 }
@@ -1289,7 +1290,7 @@ function gameOver() {
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
   const qualifiesGlobal = gBoard ? (gBoard.length < 10 || myFt > gBoard[gBoard.length - 1].dist_ft) : false;
   const qualifies = qualifiesLocal || qualifiesGlobal;
-  $('overStats').textContent = 'SCORE ' + score + '  ·  ' + Math.floor(dist / 15.24) + 'ft  ·  ' + jumps + ' JUMPS';
+  $('overStats').textContent = Math.floor(dist / 15.24).toLocaleString('en-US') + ' FT';   /* feet only — no score shown anywhere (Keith v0.48) */
   $('board').innerHTML = best.map(b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT').join('<br>') || 'NO SCORES YET';
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('over').style.display = 'flex';
@@ -1520,7 +1521,6 @@ function update(dt) {
   const wantY = py - viewH / zoom * 0.58;
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
-  $('score').innerHTML = '<small>SCORE</small>' + score;
   $('dist').innerHTML = '<small>DISTANCE</small>' + Math.floor(dist / 15.24) + 'ft';
   if (py - camY > viewH / zoom + 260) gameOver();
 }
