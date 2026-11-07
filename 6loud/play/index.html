@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.26</div>
+  <div id="ver">v0.26.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.26 ==============================
+/* ============================== 6LOUD demo v0.26.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -789,6 +789,7 @@ let dressLow = [];
    CAUGHT (the player passing his record distance) makes him fall. */
 const GPAR = 0.16;
 const GSCALE = 0.55;   /* the ghost's world renders at 55% — far away, same geometry */
+const GSINK = 16;   /* LaShmoove sits IN the cloud like 6lade does (Keith, v0.26.1) — his whole performance rides FEET lower */
 /* ---------- the run recorder (Keith's design, v0.24) ----------------
    Every run is distilled to small data: at 15 Hz, [distance delta,
    feet height, move code], plus the course itself (each platform once:
@@ -887,7 +888,7 @@ function ghostPuff(big) {
 function ghostFall() {
   if (!G || G.state === 'fall') return;
   G.state = 'fall'; G.fallVy = -170;
-  if (G.plane === 'race') { G.fallX = px + G.o; G.fallY = GR ? GR.pyS : 0; spawnPuff(G.fallX, G.fallY + 6, 16); }
+  if (G.plane === 'race') { G.fallX = px + G.o; G.fallY = GR ? GR.pyS + GSINK : 0; spawnPuff(G.fallX, G.fallY + 6, 16); }
   else { G.fallY = ghostFeetY(); ghostPuff(true); }
 }
 const RACE_KEYS = [[0, -650], [0.18, -380], [0.38, 80], [0.58, 520], [0.78, 500], [0.9, 120], [1.0, -350], [1.12, -350]];
@@ -926,9 +927,9 @@ function ghostUpdate(dt) {
     GR.pyS += (sm.py - GR.pyS) * Math.min(1, dt * 18);
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
-      for (let k = 0; k < 3; k++) spawnPuff(px + G.o - 12 + Math.random() * 20, GR.pyS + 6, 8 + Math.random() * 5);
+      for (let k = 0; k < 3; k++) spawnPuff(px + G.o - 12 + Math.random() * 20, GR.pyS + GSINK + 4, 8 + Math.random() * 5);
     }
-    if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.17; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + 8, 8); } }
+    if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.17; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 8); } }
     GR.prevSt = GR.st;
     if (G.dG >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
@@ -1479,7 +1480,7 @@ function draw() {
       const gap = (m.gaps && m.gaps[idx]) || 0;
       const feetLine = m.h - m.offset + Math.max(0, m.offset - gap);
       const K = PX2U * 0.93;   /* the off-plane shade: slightly smaller, softly treated frames */
-      const fx = (G.state === 'fall' ? G.fallX : px + G.o) - camX, fy = (G.state === 'fall' ? G.fallY : GR.pyS) - camY;
+      const fx = (G.state === 'fall' ? G.fallX : px + G.o) - camX, fy = (G.state === 'fall' ? G.fallY : GR.pyS + GSINK) - camY;
       ctx.save(); ctx.globalAlpha = 0.96 * G.fade;
       ctx.drawImage(gimg, fx - m.w * K / 2, fy - feetLine * K, m.w * K, m.h * K); ctx.restore();
     }
