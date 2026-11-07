@@ -19869,5 +19869,76 @@ if(typeof buildRack==="function"){
   window.blExtMidiLights={ clear:clearAll, counts:function(){ return JSON.parse(JSON.stringify(toneCount)); } };
 })();
 </script>
+<script>
+"use strict";
+/* ================================================================
+   MIDI AUTO-ENABLE ON LOAD (Keith, 2026-11-07: "when beat lab
+   comes back after a refresh midi is locked up again. i have to
+   use the button in options to request").
+   ROOT CAUSE: Web MIDI access was only ever requested inside the
+   Options "Enable USB MIDI" button's click chain. The MIDIAccess
+   object and the inputs' onmidimessage handlers live in page
+   memory only, so every refresh threw them away and nothing ever
+   re-requested — devices enumerated nothing, the transport light
+   stayed dark and the controller was dead until the button in
+   Options was pressed by hand.
+   THE FIX: ask again automatically, through that very same button
+   chain, so the handlers attach exactly as a manual press does —
+   MPK auto-detect, the diagnostics tap and the key-light wrap all
+   ride along unchanged, and hot-plug keeps working via the chain's
+   own onstatechange:
+     1 · on load — while Chrome still holds this site's MIDI
+         permission from an earlier Allow, requestMIDIAccess()
+         resolves silently: no prompt, devices live immediately.
+     2 · first-gesture fallback — if the load-time request could
+         not get in (permission never granted here, so Chrome wants
+         a user gesture behind its prompt), the first pointer or
+         key press anywhere in the app re-fires the same chain, so
+         the prompt rides that click instead of a trip to Options.
+         Returning focus to the window retries the same way.
+   Retries retire the moment access is held and give up after a
+   few refused attempts, so a hard denial stays quiet — and the
+   Options button always remains as the manual route.
+   ================================================================ */
+(function(){
+  var btn=document.getElementById("btnMidi");
+  if(!btn || !navigator.requestMIDIAccess) return;
+  var done=false, inFlight=false, fails=0, MAXFAILS=3;
+  function haveAccess(){
+    try{ return (typeof midiAccess!=="undefined" && !!midiAccess); }catch(e){ return false; }
+  }
+  function cleanup(){
+    document.removeEventListener("pointerdown", onGesture, true);
+    document.removeEventListener("keydown", onGesture, true);
+    window.removeEventListener("focus", attempt);
+  }
+  function attempt(){
+    if(done || inFlight) return;
+    if(haveAccess()){ done=true; cleanup(); return; }
+    if(fails>=MAXFAILS){ cleanup(); return; }
+    inFlight=true;
+    try{ btn.click(); }
+    catch(e){ inFlight=false; fails++; return; }
+    setTimeout(function(){
+      inFlight=false;
+      if(haveAccess()){ done=true; cleanup(); }
+      else fails++;
+    }, 800);
+  }
+  function onGesture(){ attempt(); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", attempt);
+  else attempt();
+  document.addEventListener("pointerdown", onGesture, true);
+  document.addEventListener("keydown", onGesture, true);
+  window.addEventListener("focus", attempt);
+  /* settle poll: devices can enumerate a beat after the request
+     resolves; once access shows up, retire every fallback */
+  var settle=setInterval(function(){
+    if(haveAccess()){ done=true; cleanup(); clearInterval(settle); }
+    else if(fails>=MAXFAILS){ cleanup(); clearInterval(settle); }
+  }, 1000);
+  setTimeout(function(){ clearInterval(settle); }, 30000);
+})();
+</script>
 </body>
 </html>
