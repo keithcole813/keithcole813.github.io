@@ -110,7 +110,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.69</div>
+  <div id="ver">v0.69.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -124,7 +124,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.69 ==============================
+/* ============================== 6LOUD demo v0.69.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -924,7 +924,7 @@ let dressLow = [];
    runs past 6lade, then holds station AHEAD in the distance. When
    6lade falls, LaShmoove just continues — he is ahead; only being
    CAUGHT (the player passing his record distance) makes him fall. */
-const GSINK = 16;   /* LaShmoove sits IN the cloud like 6lade does (Keith, v0.26.1) — his whole performance rides FEET lower */
+const GSINK = 0;   /* SAME PLANE (Keith, 2026-11-07): the ghost runs on the same clouds at the same depth as the player — no sink offset. The old 16-unit ride-lower is gone with the off-plane treatment. */
 /* ---------- the run recorder (Keith's design, v0.24) ----------------
    Every run is distilled to small data: at 15 Hz, [distance delta,
    feet height, move code], plus the course itself (each platform once:
@@ -973,6 +973,36 @@ function loadGSkin(sk) {
 }
 loadGSkin(GSKINS.lash); loadGSkin(GSKINS.blade);
 let RACE = null;   /* the parsed replay this run is raced on */
+/* REPLAY ALIGNMENT (v0.69.1): the race invariant is perfD 0 == recorded-x 580
+   (the start plat's end). Current recordings are gated that way natively.
+   Older ones (recorded before the v0.52 course origin) start counting at
+   their run's first step — 520 units earlier — so performed as-is the ghost
+   runs ~34 ft out of phase with his own clouds: a parallel course in the
+   sky (Keith's videos, 2026-11-07 — small, floating, vanishing). Detect the
+   old zero by CONTACT: whichever shift puts his grounded frames' feet on
+   his own plats wins. Also cut the death-plunge tail (old recorders coded
+   it as plain air, py diving thousands of units): his fall belongs to the
+   ghostFall trigger at his total, not to recorded samples. */
+function alignReplay(rp) {
+  const contact = sh => { let cum = 0, ok = 0, n = 0;
+    for (const f of rp.frames) { cum += f[0]; const p = cum - sh; if (p < 0) continue;
+      if (f[2] !== 0 && f[2] !== 3) continue;
+      const x = p + 580, pl = rp.plats.find(q => x >= q[0] - 20 && x <= q[0] + q[2] + 20);
+      if (!pl) continue; n++; if (Math.abs(f[1] - pl[1]) <= 30) ok++; }
+    return n >= 8 ? ok / n : 0; };
+  let frames = rp.frames, total = rp.total;
+  if (contact(520) > contact(0) + 0.15) {
+    const out = []; let cum = 0;
+    for (const f of frames) { const prev = cum; cum += f[0]; if (cum <= 520) continue;
+      if (prev < 520) { const g = f.slice(); g[0] = cum - 520; out.push(g); } else out.push(f); }
+    if (out.length > 10) { frames = out; total = Math.max(0, Math.round(total - 520 / 15.24)); }
+  }
+  const maxTop = Math.max.apply(null, rp.plats.map(q => q[1]));
+  let cum = 0, cut = -1;
+  for (let i = 0; i < frames.length; i++) { cum += frames[i][0]; if (frames[i][1] > maxTop + 800 && frames[i][2] !== 0) { cut = i; break; } }
+  if (cut > 10) { frames = frames.slice(0, cut); let c2 = 0; for (const f of frames) c2 += f[0]; total = Math.round(c2 / 15.24); }
+  return { v: 1, total, plats: rp.plats, frames };
+}
 function prepRace() {
   RACE = null;
   GSKIN = GSKINS[ghostChar()];   /* the runner you didn't pick performs the record (v0.56) */
@@ -983,7 +1013,7 @@ function prepRace() {
   if (!src || !src.replay) return;
   try {
     const rp = JSON.parse(src.replay);
-    if (rp && rp.frames && rp.frames.length > 10 && rp.plats && rp.plats.length) { RACE = rp; gTarget = rp.total || src.total; }
+    if (rp && rp.frames && rp.frames.length > 10 && rp.plats && rp.plats.length) { RACE = alignReplay(rp); gTarget = RACE.total || src.total; }
   } catch (e) { /* a bad replay never breaks the race */ }
 }
 function grSpeedAt(d) {   /* the pace HE was traveling at distance d of his run (units/sec, from the recording's own deltas) */
@@ -1887,7 +1917,7 @@ function draw() {
       const gap = (m.gaps && m.gaps[idx]) || 0;
       const feetLine = (mv === 'diveroll' || mv === 'flip' || mv === 'diveflip' || mv === 'roll3' || mv === 'roll4')
         ? m.h - gap : m.h - m.offset + Math.max(0, m.offset - gap);   /* rolls anchor to the surface (Keith v0.31) */
-      const K = PX2U * 0.93;   /* the off-plane shade: slightly smaller, softly treated frames */
+      const K = PX2U / 0.82;   /* SAME SIZE (Keith, 2026-11-07): his frames are baked at 0.82 — dividing it back out puts him at true size on the same plane; the haze in the bake is what marks him as the ghost now, not a shrink */
       const fx = (G.state === 'fall' ? G.fallX : px + G.o) - camX, fy = (G.state === 'fall' ? G.fallY : GR.pyS + GSINK) - camY;
       if (GR.chgSm > 0.03) {   /* he was CHARGED here in his original run — his charge burns FIRE, not 6lade's blue (Keith v0.30) */
         ctx.save(); ctx.globalAlpha = 0.96 * G.fade * GR.chgSm;
