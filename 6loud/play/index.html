@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.59</div>
+  <div id="ver">v0.60</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -125,7 +125,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.59 ==============================
+/* ============================== 6LOUD demo v0.60 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -2011,7 +2011,7 @@ function loop(ts) {
   update(dt);
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
-  const mb = mode === 'title';   /* the sound toggle lives on the loading/title screen only (Keith v0.53) */
+  const mb = true;   /* the sound toggle lives EVERYWHERE now (Keith v0.60: title-only meant restarting the whole app to unmute mid-game). It was title-only in v0.53; the button is fenced from the canvas, so a mid-run tap never jumps or drops a charge. */
   if (mb !== mbShown) { mbShown = mb; $('muteBtn').style.display = mb ? 'block' : 'none'; }
   if (mb !== charUiShown) { charUiShown = mb; $('charL').style.display = mb ? 'block' : 'none'; $('charR').style.display = mb ? 'block' : 'none'; $('charName').style.display = mb ? 'block' : 'none'; }   /* the carousel lives on the title screen only (v0.56) */
   const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
