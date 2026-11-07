@@ -72,7 +72,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.51</div>
+  <div id="ver">v0.52</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -85,7 +85,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.51 ==============================
+/* ============================== 6LOUD demo v0.52 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -792,7 +792,8 @@ let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
 let puffs = []; let pTrailAcc = 0, gTrailAcc = 0, fTrailAcc = 0;
 let camX = 0, camY = 0, zoom = 1, shake = 0, time = 0, runTime = 0, lastSeg = -1, lastTier = 1, worldEnd = 0, exitBand = 0;
 let openerEnd = 0;   /* the opening staircase's end: inside it, running off an edge still LANDS (Keith v0.43 — the one scoped exception to no-jump-no-landing) */
-let courseBase = 0;   /* where the performed course begins, in run-distance units: past the staircase (and past the Low Road seam on race runs). Recordings and the ghost's clock live in course space — distance minus courseBase (v0.47) */
+let courseBase = 0;   /* where the performed course begins, in WORLD-X units: plats are recorded and placed against this origin (v0.47) */
+let courseDist = 0;   /* the same line in DISTANCE units — the recorder's gate, the totals, and the ghost's clock live here. It is courseBase + 520: the start plat ends at world x 580 while his feet ride at dist + 60, so the course starts 520 later in distance than in world x. v0.47 shipped with the two confused — the first ~520 units of every new recording carried the staircase's tail (feet at stair height over course clouds: LaShmoove "running off a cloud" at the start of every race, Keith 2026-11-07 14:15). Fixed v0.52. */
 let walkT = 0, dead = false;
 const PLAYER_XF = 0.30;        // player screen position (fraction of view width)
 
@@ -857,16 +858,16 @@ const REPLAY_HZ = 15;
 let REC = null, lastReplay = null;
 function recStart() { REC = { acc: 0, lastDist: 0, frames: [], plats: [] }; }
 function recSample() {
-  if (dist <= courseBase) { REC.lastDist = dist; return; }   /* the staircase (and a race's seam) is never recorded (v0.47): samples start at the course */
+  if (dist <= courseDist) { REC.lastDist = dist; return; }   /* the staircase (and a race's seam) is never recorded: samples start AT the course — in distance units (v0.52) */
   const mv = playerAnim().move;
   let code = mv === 'run' ? 0 : mv === 'runjump' ? 7 : mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
-  if (slipPlat) code = 5; else if (!grounded && !airMove && !hangPlat && vy > 260) code = 6;   /* 5 = ledge slip, 6 = Fall 2 plunge */
-  REC.frames.push([Math.round(dist - Math.max(REC.lastDist, courseBase)), Math.round(py), code, (champMode || flareT > 0) ? 1 : 0]);   /* course-space delta + the charge flag (Keith v0.30) */
+  if (slipPlat) code = 5; else if (!grounded && !airMove && !hangPlat && vy > 40) code = 6;   /* 5 = ledge slip, 6 = Fall 2 plunge — from the FIRST sample off the lip (v0.52): at vy > 260 up to two samples still coded as RUN, so LaShmoove visibly RAN off cloud edges into the air before his fall pose started (Keith, 2026-11-07 14:15) */
+  REC.frames.push([Math.round(dist - Math.max(REC.lastDist, courseDist)), Math.round(py), code, (champMode || flareT > 0) ? 1 : 0]);   /* course-space delta + the charge flag (Keith v0.30) */
   REC.lastDist = dist;
 }
 function recFinish() {
   lastReplay = (REC && REC.frames.length > 10)
-    ? JSON.stringify({ v: 1, total: Math.max(0, Math.floor((dist - courseBase) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47) */
+    ? JSON.stringify({ v: 1, total: Math.max(0, Math.floor((dist - courseDist) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47; distance origin corrected v0.52) */
 }
 let G = null, gTarget = 0;   /* the bokeh sea-runner set is GONE (Keith v0.34): no record to beat = no LaShmoove at all */
 let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
@@ -966,7 +967,7 @@ function ghostUpdate(dt) {
        His offset from 6lade follows the race arc; his feet follow the
        recording read at his own distance, on the very same clouds. */
     const totalU = gTarget * 15.24;
-    const distC = dist - courseBase;   /* the race clock runs in course space (v0.47): the staircase and seam in front change nothing about his run */
+    const distC = dist - courseDist;   /* the race clock runs in course space (v0.47; distance origin v0.52): the staircase and seam in front change nothing about his run */
     const p = Math.max(0, Math.min(1.12, distC / totalU));
     const oS = Math.max(0.25, Math.min(1, totalU / 12000));   /* short records run a tighter race — the lead can't swallow the course */
     if (GR.perfD === null || GR.perfD === undefined) GR.perfD = distC + G.oArc;
@@ -1040,7 +1041,7 @@ function ghostUpdate(dt) {
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(distC / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
       const gCharged = GR.chgSm > 0.3 || GR.fireT > 0;
-      if (gCharged) { playBoom(); const gp2 = plats.find(q => GR.perfD + courseBase >= q.x - 20 && GR.perfD + courseBase <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp2) { gp2.boost = 7; gp2.sinkV = (gp2.sinkV || 0) + 380; } }   /* HIS charged landings boom + sink his cloud too (Keith v0.33/0.33.2) */
+      if (gCharged) { playBoom(); const gp2 = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp2) { gp2.boost = 7; gp2.sinkV = (gp2.sinkV || 0) + 380; } }   /* HIS charged landings boom + sink his cloud too (Keith v0.33/0.33.2) — his feet in world x are perfD + courseBase + 580 (v0.52) */
       for (let k = 0; k < (gCharged ? 14 : 8); k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, (gCharged ? 12 : 10) + Math.random() * 6);
     }
     if (GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
@@ -1049,7 +1050,7 @@ function ghostUpdate(dt) {
     if (GR.st === 0 && GR.perfD >= 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.125; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 10); } }   /* no fog before his run starts (v0.47) */
     else { gTrailAcc -= dt; if (gTrailAcc <= 0) { gTrailAcc = 0.024; pushTrail(px + G.o, GR.pyS + GSINK - 92, 'plain'); } }   /* his jumps trail light too */
     if (GR.st === 0 && (GR.fireT > 0 || GR.chgSm > 0.3)) { fTrailAcc -= dt; if (fTrailAcc <= 0) { fTrailAcc = 0.016; pushTrail(px + G.o - 46, GR.pyS + GSINK - 92 + (Math.random() * 44 - 22), 'fire'); } }   /* charged and running by: golden fire streaks stream behind him, like the icon (Keith v0.35) */
-    if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase >= q.x - 20 && GR.perfD + courseBase <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; world coords, v0.47) */
+    if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; his feet in world x, v0.52) */
     GR.prevSt = GR.st;
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
@@ -1145,7 +1146,7 @@ function resetWorld() {
     }
     worldEnd = sx; openerEnd = sx;
   }
-  courseBase = STAIR_SPAN;
+  courseBase = STAIR_SPAN; courseDist = courseBase + 520;   /* distance-space twin (v0.52; the race branch re-sets both) */
   if (RACE) {   /* the champion's course, bridged in by Low Road (v0.47) */
     /* every recording opens with Flat Cruise at the start band, so the
        seam in is always the same shape: Low Road walks the player from
@@ -1163,6 +1164,7 @@ function resetWorld() {
       plats.push({ x: p[0] + champShift, y: p[1], len: p[2], img: p[3] });
       if (REC) REC.plats.push(p);   /* course space: the recording keeps the original coordinates */
     }
+    courseDist = courseBase + 520;   /* the distance-space twin, set once the world-x origin is final (v0.52) */
     const last = RACE.plats[RACE.plats.length - 1];
     worldEnd = last[0] + champShift + last[2];
     let bd = 1e9; BAND_Y.forEach((y, i) => { const d = Math.abs(y - last[1]); if (d < bd) { bd = d; exitBand = i; } });
