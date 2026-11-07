@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.36</div>
+  <div id="ver">v0.37</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.36 ==============================
+/* ============================== 6LOUD demo v0.37 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -918,7 +918,7 @@ function ghostReset(entering) {
   {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
     for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
-    GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0 };
+    GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0, leadMusic: false };
   }
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: 'race',
         animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
@@ -1013,7 +1013,7 @@ function ghostUpdate(dt) {
     if (G.o > 150) GR.wasAhead = true;
     if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; passFired = true; }   /* THE PASS (Keith v0.28) — and the 2nd bg music (Keith v0.34) */
     if (G.o < -150) GR.passArm = true;
-    if (GR.passArm && G.prevO <= 0 && G.o > 0 && G.state !== 'fall') { GR.fireT = 1.4; GR.passArm = false; }   /* HIS pass: the mirror moment — his fire burst (Keith v0.30.1) */
+    if (GR.passArm && G.prevO <= 0 && G.o > 0 && G.state !== 'fall') { GR.fireT = 1.4; GR.passArm = false; GR.leadMusic = true; }   /* HIS pass: the fire burst (Keith v0.30.1) — and bg music 1 comes in here (Keith v0.37) */
     G.prevO = G.o;
     const sm = grSample(GR.perfD);
     if (sm.st !== GR.st) { GR.st = sm.st; GR.stT = 0; GR.pick = ((GR.pick || 0) + 1) % 2; }
@@ -1276,14 +1276,17 @@ function update(dt) {
     champMode = true; heatOn = true; mScene = 'battle'; xfade(true);   /* the crown takes the 2nd bg music directly (Keith v0.34) */
     crownFlash = 1; bannerT = 2.4; shake = Math.max(shake, 15);   /* flash + shake + banner (Keith v0.15) */
   }
-  /* AUDIO SCENE SWITCHES (Keith v0.34): steps -> bg at 1000 ft or when 6lade
-     starts gaining on LaShmoove (his late drift back); bg -> 2nd bg on the pass */
+  /* AUDIO SCENE SWITCHES (Keith v0.37): the footsteps carry the chase until
+     LaShmoove CHARGES AND PASSES — bg 1 comes in there and holds while he is
+     in front; when 6lade charges to pass him, bg 2 takes over. (The v0.34
+     1000-ft / gaining triggers are retired.) No race = no LaShmoove moment:
+     the steps run until the crown (bg 2) or the wipeout screen (bg 1). */
   { const pf = passFired; passFired = false;
     if (mode === 'run' && mScene === 'intro' && Math.floor(dist / 15.24) >= 100) { mScene = 'steps'; playTrack(); }   /* the intro bg fades out to the footsteps at 100 ft (Keith v0.35) */
-    if (mode === 'run' && mScene === 'steps' && (Math.floor(dist / 15.24) >= 1000 || (GR && GR.phase === 'late'))) { mScene = 'day'; playTrack(); }
+    if (mode === 'run' && mScene === 'steps' && GR && GR.leadMusic) { mScene = 'day'; playTrack(); }
     if (mode === 'run' && mScene !== 'battle' && pf) { mScene = 'battle'; playTrack(); } }
   if (crownFlash > 0) crownFlash = Math.max(0, crownFlash - dt / 0.5);
-  if (surgeFlash > 0) surgeFlash = Math.max(0, surgeFlash - dt / 0.45);
+  if (surgeFlash > 0) surgeFlash = Math.max(0, surgeFlash - dt / 0.85);   /* the flash lasts a little longer (Keith v0.37 — at 0.45 s he could barely tell) */
   { const altT = Math.max(0, Math.min(1, (-camY - vhNow * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 1.4); }
   camSmY += (camY - camSmY) * Math.min(1, dt * 0.9);
   if (bannerT > 0) bannerT -= dt;
@@ -1743,7 +1746,7 @@ function draw() {
     ctx.fillRect(0, 0, W, H); ctx.restore();
   }
   if (surgeFlash > 0) {   /* LaShmoove's surge ignition: a flash of light across the whole screen (Keith v0.32) */
-    ctx.save(); ctx.globalAlpha = surgeFlash * 0.55; ctx.fillStyle = '#fff3c4';
+    ctx.save(); ctx.globalAlpha = surgeFlash * 0.6; ctx.fillStyle = '#fff3c4';
     ctx.fillRect(0, 0, W, H); ctx.restore();
   }
   if (bannerT > 0) {
