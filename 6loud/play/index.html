@@ -2000,7 +2000,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false, mbShown = true, charUiShown = true;
+let puShown = false, mbShown = true, charUiShown = true, hudShown = true;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
@@ -2010,6 +2010,8 @@ function loop(ts) {
   const mb = mode === 'title';   /* the sound toggle lives on the loading/title screen only (Keith v0.53) */
   if (mb !== mbShown) { mbShown = mb; $('muteBtn').style.display = mb ? 'block' : 'none'; }
   if (mb !== charUiShown) { charUiShown = mb; $('charL').style.display = mb ? 'block' : 'none'; $('charR').style.display = mb ? 'block' : 'none'; $('charName').style.display = mb ? 'block' : 'none'; }   /* the carousel lives on the title screen only (v0.56) */
+  const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
+  if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
   ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); draw();
   requestAnimationFrame(loop);
 }
