@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.35</div>
+  <div id="ver">v0.36</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.35 ==============================
+/* ============================== 6LOUD demo v0.36 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1382,11 +1382,15 @@ function update(dt) {
     if (grounded === p) w = 1;
     if (hangPlat === p || slipPlat === p) w = Math.max(w, 0.55);
     if (p.ghostOn) { w = Math.max(w, 1); p.ghostOn = false; }
-    p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 104 - (p.sinkV || 0) * 9.2) * dt;   /* livelier spring: it bounces back past level now (Keith v0.32) */
+    p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 118 - (p.sinkV || 0) * 8.4) * dt;   /* a little more bounce again (Keith v0.36; was 104/9.2 in v0.32, 90/11 in v0.29) */
     p.sink = (p.sink || 0) + (p.sinkV || 0) * dt;
-    if (p.sink < -4.2) { p.sink = -4.2; p.sinkV = 0; }
+    if (p.sink < -5.4) { p.sink = -5.4; p.sinkV = 0; }   /* the rebound overshoot grows with the livelier spring */
     if (p.sink > SINK_MAX + 4.5 + (p.boost || 0)) { p.sink = SINK_MAX + 4.5 + (p.boost || 0); p.sinkV = 0; }
     if (p.boost) p.boost = Math.max(0, p.boost - dt * 9);   /* the charged dip allowance rings out in under a second */
+    /* the hanging cloud TILTS a touch under his weight (Keith v0.36): it tips
+       while he dangles (hang or slip), and untilts when he pulls up or falls off */
+    const wantT = (hangPlat === p || slipPlat === p) ? 0.05 : 0;
+    p.tilt = (p.tilt || 0) + (wantT - (p.tilt || 0)) * Math.min(1, dt * 5);
   }
   if (grounded) walkT += dt;
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
@@ -1718,7 +1722,11 @@ function draw() {
     const dh = p.len * cd.asp;
     ctx.save();
     ctx.shadowColor = `rgba(255,255,255,${0.85 - 0.35 * sky.star})`; ctx.shadowBlur = 24 - 10 * sky.star;   /* bloom tamed at night so the clouds keep their texture (v0.19) */
-    ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
+    if (Math.abs(p.tilt || 0) > 0.002) {   /* tipped under the hanging man's weight — pivoting ON the grip, so his hands never move (Keith v0.36) */
+      const gp = gripOf(p), gx = gp.x - camX, gy = gp.y - camY;
+      ctx.translate(gx, gy); ctx.rotate(p.tilt);
+      ctx.drawImage(img, sx - gx, sy - cd.surf * dh + 6 - gy, p.len, dh);
+    } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
     ctx.restore();
   }
   /* a low fog band softens everything the clouds sit in */
