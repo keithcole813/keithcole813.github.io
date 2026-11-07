@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.37</div>
+  <div id="ver">v0.38</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.37 ==============================
+/* ============================== 6LOUD demo v0.38 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -776,6 +776,11 @@ const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.55, GRIP_DX = 0.04;
 const HANDS_DANGLE = { 3: 269, 4: 292, 5: 315, 6: 324, 7: 323 };   /* hand height per dangle frame, measured off the shipped art */
 const SINK_MAX = 8;   /* a cloud gives just a tiny bit under a landing, then springs back (Keith v0.29) */
 function gripOf(p) { const cd = CLOUDS[p.img]; return { x: p.x + p.len * GRIP_DX, y: p.y + (p.sink || 0) + p.len * cd.asp * GRIP_FRAC }; }
+/* the grip as DRAWN while the cloud is tilted: the tip swings around the
+   cloud's center, and the hang anchor rides it so his hands stay glued */
+function gripDrawn(p) { const g = gripOf(p), t = p.tilt || 0; if (!t) return g;
+  const cx = p.x + p.len / 2, cy = p.y + (p.sink || 0), dx = g.x - cx, dy = g.y - cy, c = Math.cos(t), sn = Math.sin(t);
+  return { x: cx + dx * c - dy * sn, y: cy + dx * sn + dy * c }; }
 let airGrav = 1, airTotal = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
 let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
@@ -1309,7 +1314,8 @@ function update(dt) {
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
-    hangTY = gripOf(hangPlat).y + HANG_HANDS - FEET;
+    { const gx = gripDrawn(hangPlat).x - HANG_DX, gy = gripDrawn(hangPlat).y + HANG_HANDS - FEET;
+      px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* ride the bending tip RIGIDLY: his hands move exactly with the drawn grip (v0.38) */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (struggleTaps >= HANG_TAPS) {   /* SAVE: he hauls himself up */
@@ -1319,7 +1325,8 @@ function update(dt) {
     } else if (hangT <= 0) { slipPlat = hangPlat; hangPlat = null; slipT = 0; }   /* no save: the slip begins */
   } else if (slipPlat) {
     slipT += dt;
-    hangTY = gripOf(slipPlat).y + HANG_HANDS - FEET;
+    { const gx = gripDrawn(slipPlat).x - HANG_DX, gy = gripDrawn(slipPlat).y + HANG_HANDS - FEET;
+      px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* same rigid ride through the slip */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; }   /* fingers go — the Fall 2 plunge (no landing, no grab: airMove stays null) */
@@ -1364,7 +1371,7 @@ function update(dt) {
       const top = p.y;
       if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
         hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
-        { const g = gripOf(p); hangTX = g.x - HANG_DX; hangTY = g.y + HANG_HANDS - FEET; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
+        { const g = gripDrawn(p); hangTX = g.x - HANG_DX; hangTY = g.y + HANG_HANDS - FEET; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         break;
       }
@@ -1392,8 +1399,8 @@ function update(dt) {
     if (p.boost) p.boost = Math.max(0, p.boost - dt * 9);   /* the charged dip allowance rings out in under a second */
     /* the hanging cloud TILTS a touch under his weight (Keith v0.36): it tips
        while he dangles (hang or slip), and untilts when he pulls up or falls off */
-    const wantT = (hangPlat === p || slipPlat === p) ? 0.05 : 0;
-    p.tilt = (p.tilt || 0) + (wantT - (p.tilt || 0)) * Math.min(1, dt * 5);
+    const wantT = (hangPlat === p || slipPlat === p) ? -0.16 : 0;   /* FLIPPED + a lot more (Keith v0.38, from his video: the v0.36 tilt read the wrong way): his end bends DOWN ~9 degrees, the far end rises */
+    p.tilt = (p.tilt || 0) + (wantT - (p.tilt || 0)) * Math.min(1, dt * 2.6);   /* the bend settles in across the hang — and his glued hands can track it (v0.38) */
   }
   if (grounded) walkT += dt;
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
@@ -1440,7 +1447,8 @@ function drawAnim(move, idx, cx, feetY) {
 const pingpong = (x, n) => { const p = x % (2 * n); return p < n ? p : 2 * n - 1 - p; };
 function playerAnim() {
   if (hangPlat) { const idx = 5 + pingpong(Math.floor(time * 10), 2); return { move: 'armsopen', idx, feetAdj: (HANDS_DANGLE[idx] || HANG_HANDS) - HANG_HANDS }; }   // ONLY frames 5-6: 3-4 are the open-hand REACH and 7 starts PEELING one hand off the grip — Keith caught it mid-hang in v0.33.2 play: 'he lets go and grabs back' (v0.33.3). feetAdj keeps the hands glued while the body sways.
-  if (slipPlat) { const m = MANIFEST.climbfall ? 'climbfall' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(slipT * 14), MANIFEST[m].n) }; }   // the ledge slip (Climb Attempt and Fall)
+  if (slipPlat) { if (MANIFEST.climbfall) return { move: 'climbfall', idx: Math.min(MANIFEST.climbfall.n - 1, Math.floor(slipT * 30)) };   // the real Climb Attempt and Fall plays ONE WAY, once
+    return { move: 'armsopen', idx: 5 + Math.min(3, Math.floor(slipT / SLIP_DUR * 4)) }; }   /* fallback: ONE WAY from the grip into the peel (5,6 grip -> 7 peeling -> 8 folding). NEVER a restart at frame 0 and never a pingpong — the old slip restarted the whole arms-open motion and swept back UP through the grip frames: a visible let-go-and-grab before the fall (Keith's video, v0.38) */
   if (!grounded && !airMove && vy > 260) { const m = MANIFEST.fall2 ? 'fall2' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(time * 14), MANIFEST[m].n) }; }   // the fatal plunge (Fall 2)
   if (!grounded) {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
@@ -1725,8 +1733,8 @@ function draw() {
     const dh = p.len * cd.asp;
     ctx.save();
     ctx.shadowColor = `rgba(255,255,255,${0.85 - 0.35 * sky.star})`; ctx.shadowBlur = 24 - 10 * sky.star;   /* bloom tamed at night so the clouds keep their texture (v0.19) */
-    if (Math.abs(p.tilt || 0) > 0.002) {   /* tipped under the hanging man's weight — pivoting ON the grip, so his hands never move (Keith v0.36) */
-      const gp = gripOf(p), gx = gp.x - camX, gy = gp.y - camY;
+    if (Math.abs(p.tilt || 0) > 0.002) {   /* bent under the hanging man's weight — pivoting on the cloud's CENTER so his end dips (Keith v0.38) */
+      const gx = p.x + p.len / 2 - camX, gy = p.y + (p.sink || 0) - camY;
       ctx.translate(gx, gy); ctx.rotate(p.tilt);
       ctx.drawImage(img, sx - gx, sy - cd.surf * dh + 6 - gy, p.len, dh);
     } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
