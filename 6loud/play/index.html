@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.42</div>
+  <div id="ver">v0.43</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.42 ==============================
+/* ============================== 6LOUD demo v0.43 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -787,6 +787,7 @@ let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
 let puffs = []; let pTrailAcc = 0, gTrailAcc = 0, fTrailAcc = 0;
 let camX = 0, camY = 0, zoom = 1, shake = 0, time = 0, runTime = 0, lastSeg = -1, lastTier = 1, worldEnd = 0, exitBand = 0;
+let openerEnd = 0;   /* the opening staircase's end: inside it, running off an edge still LANDS (Keith v0.43 — the one scoped exception to no-jump-no-landing) */
 let walkT = 0, dead = false;
 const PLAYER_XF = 0.30;        // player screen position (fraction of view width)
 
@@ -1114,13 +1115,34 @@ function resetWorld() {
       plats.push({ x: p[0], y: p[1], len: p[2], img: p[3] });
       if (REC) REC.plats.push(p);
     }
+    openerEnd = 0;   /* no training wheels on the champion's course */
     const last = RACE.plats[RACE.plats.length - 1];
     worldEnd = last[0] + last[2];
     let bd = 1e9; BAND_Y.forEach((y, i) => { const d = Math.abs(y - last[1]); if (d < bd) { bd = d; exitBand = i; } });
     return;
   }
   addPlat(-300, 2, 'LONG'); worldEnd = -300 + LEN.LONG;
-  buildSegment(SEGMENTS[0]); nextSegment(); nextSegment();
+  /* THE OPENING STAIRCASE (Keith v0.43 — the game is about to go out to
+     6lade and the kids): long clouds stepping DOWN ahead of the course,
+     close together, so a brand-new player who never touches the button
+     still lands on the next cloud and learns the run first. Geometry is
+     no-jump proof at starting speed: 90-unit gaps (a fall of ~55) against
+     85-unit steps down. It ends at the lowest band, then Low Road — the
+     gentlest designed segment — walks him back up with easy jumps before
+     the chained course takes over. Race runs keep the champion's own
+     course untouched (above). */
+  {
+    let sx = worldEnd;
+    for (let i = 1; i <= 4; i++) {
+      sx += 90;
+      const len = 700, img = rnd(LONGC), y = i * 85;
+      plats.push({ x: sx, y, len, img });
+      if (REC) REC.plats.push([sx, y, len, img]);
+      sx += len;
+    }
+    worldEnd = sx; exitBand = 0; openerEnd = sx;
+  }
+  buildSegment(SEGMENTS.find(sg => sg.n === 'Low Road')); nextSegment(); nextSegment();
 }
 
 /* ---------- jump control (Keith's model, v0.4 rulings 2026-11-06) ----------
@@ -1163,14 +1185,16 @@ function startRun() {
 }
 const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
-let gBoard = null;   /* null = not loaded / unreachable; the local board renders meanwhile */
+let gBoard = null;
+let gRanks = {};   /* dist_ft -> world rank, for the local board (Keith v0.43) */
+let rankSig = '';   /* null = not loaded / unreachable; the local board renders meanwhile */
 async function fetchBoard() {
   try {
     let r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=10',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
     if (!r.ok) r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=10',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });   /* replay column not there yet — board still works */
-    if (r.ok) { gBoard = await r.json(); if (mode === 'over') renderBoard(); }
+    if (r.ok) { gBoard = await r.json(); kickRanks(); if (mode === 'over') renderBoard(); }
   } catch (e) { /* offline — local board stands */ }
 }
 async function postScore(n, sc, d, j, replay) {
@@ -1189,11 +1213,40 @@ async function postScore(n, sc, d, j, replay) {
     fetchBoard();
   } catch (e) { /* offline — the local save already kept it */ }
 }
+async function fetchRanks(list) {   /* world rank for each local score: 1 + how many global scores beat it */
+  if (!gBoard) return;
+  for (const b of list) {
+    const d = b.s;
+    if (gRanks[d] !== undefined) continue;
+    const greater = gBoard.filter(g => g.dist_ft > d).length;
+    if (gBoard.length < 10 || greater < 10) { gRanks[d] = greater + 1; continue; }   /* the fetched window settles it */
+    try {
+      const r = await fetch(SB_URL + '/rest/v1/scores?select=dist_ft&dist_ft=gt.' + d + '&limit=1',
+        { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'count=exact' } });
+      const cr = r.headers.get('content-range') || '';
+      const tot = parseInt((cr.split('/')[1] || ''), 10);
+      if (r.ok && isFinite(tot)) gRanks[d] = tot + 1;
+    } catch (e) { /* rank unknown — the row just shows without one */ }
+  }
+  if (mode === 'over') renderBoard();
+}
+function kickRanks() {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]'); } catch (e) { }
+  const sig = list.map(b => b.s).join(',') + '|' + (gBoard ? gBoard.length + ':' + (gBoard.length ? gBoard[gBoard.length - 1].dist_ft : 0) : 'x');
+  if (sig === rankSig) return;
+  rankSig = sig;
+  fetchRanks(list);
+}
 function renderBoard() {
   if (!gBoard) return;
   $('board').classList.add('global');
+  let local = [];
+  try { local = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]'); } catch (e) { }
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
-    (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST');
+    (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST') +
+    (local.length ? '<div class="boardTitle" style="margin-top:6px">YOUR SCORES</div>' +
+      local.map(b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT' + (gRanks[b.s] !== undefined ? ' · #' + gRanks[b.s] + ' IN THE WORLD' : '')).join('<br>') : '');
 }
 /* Footsteps audio REMOVED for good (Keith 2026-11-06): his isolation
    tests pinned the chop on the steps audio itself — every no-steps build
@@ -1214,6 +1267,7 @@ function gameOver() {
   if (qualifies) { $('ini').value = ''; setTimeout(() => $('ini').focus(), 60); }
   renderBoard();   /* global board swaps in when it has loaded */
   fetchBoard();      /* and a fresh pull re-renders it when it lands */
+  kickRanks();       /* world ranks for the local scores (Keith v0.43) */
   $('again').onclick = () => {
     if (qualifies) {
       const n = ($('ini').value || 'ACE').toUpperCase().slice(0, 3).padEnd(3, '·');
@@ -1342,7 +1396,7 @@ function update(dt) {
     }
     if (flipped) flipT += dt;
     /* landing exists ONLY off a jump — no jump, no landing (Keith) */
-    if (airMove) for (const p of plats) {
+    if (airMove || px < openerEnd) for (const p of plats) {   /* opener exception: the staircase lands a no-jump runner (Keith v0.43) */
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
