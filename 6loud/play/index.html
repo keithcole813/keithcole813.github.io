@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.33</div>
+  <div id="ver">v0.33.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.33 ==============================
+/* ============================== 6LOUD demo v0.33.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -965,6 +965,10 @@ function ghostUpdate(dt) {
          run never covered and dropping him out of his own sky. */
       GR.perfD += grSpeedAt(GR.perfD) * dt;
       G.oArc = GR.perfD - dist;
+      /* ground he gains while 6lade hangs is HIS (Keith v0.33.1): the
+         staging target never pulls him back behind the furthest point he
+         reached during the beat — he caught up fair, he stays caught up */
+      GR.oHold = Math.max(GR.oHold === undefined ? -Infinity : GR.oHold, Math.min(G.oArc, RACE_LEAD_O * oS));
     } else {
       if (!GR.phase) { GR.phase = 'shadow'; GR.surgeT = 0; }
       let oT = RACE_SHADOW_O * oS, oRate = 200 + 300 * oS;
@@ -987,6 +991,7 @@ function ghostUpdate(dt) {
       } else {   /* late: his record is running out — slow and drift back */
         oT = RACE_END_O * oS;
       }
+      if (GR.phase !== 'late' && GR.oHold !== undefined) oT = Math.max(oT, GR.oHold);   /* no fall-back after a hang (Keith v0.33.1) */
       G.oArc += Math.max(-oRate * dt, Math.min(oRate * dt, oT - G.oArc));
       GR.perfD = dist + G.oArc;
       if (GR.phase === 'burst' && G.oArc >= RACE_LEAD_O * oS - 6) GR.phase = 'lead';
@@ -1360,11 +1365,9 @@ function update(dt) {
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
   /* camera: follows, eases out as speed climbs, shake decays */
   const ledgeBeat = hangPlat || slipPlat;
-  const surgeBeat = !!(GR && G && G.plane === 'race' && (GR.phase === 'charge' || GR.phase === 'burst'));
-  const targetZoom = ledgeBeat ? 1.62 + Math.sin(time * 1.3) * 0.02 : surgeBeat ? 1.36 + Math.sin(time * 7.5) * 0.018 : 1 - Math.min(0.12, (speed - 620) / 4400);   /* hang zoom in a little more (Keith v0.32); the surge push-in is tighter than cruise but looser than the ledge close-up */
-  zoom += (targetZoom - zoom) * Math.min(1, dt * (ledgeBeat ? 5 : surgeBeat ? 4.2 : 2.2));
+  const targetZoom = ledgeBeat ? 1.62 + Math.sin(time * 1.3) * 0.02 : 1 - Math.min(0.12, (speed - 620) / 4400);   /* hang zoom in a little more (Keith v0.32). NO zoom on LaShmoove's pass (Keith v0.33.1: the surge push-in made the whole screen do something weird — regular camera through the pass) */
+  zoom += (targetZoom - zoom) * Math.min(1, dt * (ledgeBeat ? 5 : 2.2));
   if (ledgeBeat) shake = Math.max(shake, 1.8);   /* handy-cam tremble: the close-up is alive, never a locked frame */
-  else if (surgeBeat) shake = Math.max(shake, 1.1);
   camX = px - (viewW / zoom) * PLAYER_XF;
   const wantY = py - viewH / zoom * 0.58;
   camY += (wantY - camY) * Math.min(1, dt * 5);
