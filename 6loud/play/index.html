@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.30.2</div>
+  <div id="ver">v0.31</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.30.2 ==============================
+/* ============================== 6LOUD demo v0.31 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -968,7 +968,10 @@ function ghostUpdate(dt) {
     GR.pyS = sm.py;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
-      for (let k = 0; k < 4; k++) spawnPuff(px + G.o - 12 + Math.random() * 20, GR.pyS + GSINK + 4, 8 + Math.random() * 5);
+      for (let k = 0; k < 6; k++) spawnPuff(px + G.o - 14 + Math.random() * 24, GR.pyS + GSINK + 4, 9 + Math.random() * 6);
+    }
+    if (GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
+      for (let k = 0; k < 6; k++) spawnPuff(px + G.o - 14 + Math.random() * 24, GR.pyS + GSINK + 4, 9 + Math.random() * 6);
     }
     if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.145; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 9); } }
     if (GR.st === 0) { const gp = plats.find(q => GR.perfD >= q.x - 20 && GR.perfD <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29) */
@@ -1334,10 +1337,13 @@ function drawAnim(move, idx, cx, feetY) {
   const img = ANIM[move] && ANIM[move][idx];
   if (!img || !img.complete || !img.naturalWidth) return;
   const gap = m.gaps[idx];
-  /* the cell row that sits on the feet line: the baked ground line, lifted
-     whenever this frame's body reaches below it (rolls) so he rests ON the
-     surface; airborne frames keep the ground line and float naturally. */
-  const refRow = m.h - m.offset + Math.max(0, m.offset - gap);
+  /* the cell row that sits on the feet line. Roll-family frames anchor by
+     their FULL content gap (Keith v0.31: the roll rode ~130 units high —
+     the old cap stopped at the bake offset while a tucked roll floats up
+     to 277px above its cel bottom): the body's lowest point rests ON the
+     surface line. Other moves keep the capped ground-line rule. */
+  const refRow = (move === 'diveroll' || move === 'flip' || move === 'diveflip' || move === 'roll3' || move === 'roll4')
+    ? m.h - gap : m.h - m.offset + Math.max(0, m.offset - gap);
   ctx.drawImage(img, cx - m.w * PX2U / 2, feetY - refRow * PX2U, m.w * PX2U, m.h * PX2U);
 }
 const pingpong = (x, n) => { const p = x % (2 * n); return p < n ? p : 2 * n - 1 - p; };
@@ -1386,7 +1392,7 @@ function ghostPick() {
   if (st === 7) return { mv: 'runjump', idx: Math.min(GMAN2.runjump.n - 1, Math.floor(t * 30)) };
   if (st === 2) { const mv = GR.pick ? 'diveflip' : 'flip'; return { mv, idx: Math.min(GMAN2[mv].n - 1, Math.floor(t * 30)) }; }
   if (st === 3) { const mv = GR.pick ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GMAN2[mv].n - 1, Math.floor(t * 45)) }; }
-  if (st === 4) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10), GMAN2.armsopen.n) };
+  if (st === 4) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 30), GMAN2.armsopen.n) };   /* his plain airtime at its TRUE rate — at a third rate he read as paused mid-air (Keith v0.31) */
   if (st === 5) return { mv: 'armsopen', idx: Math.min(GMAN2.armsopen.n - 1, Math.floor(t * 30)) };
   if (st === 6) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10), GMAN2.armsopen.n) };
   return { mv: 'run', idx: Math.floor(G.animT * 30) % GMAN2.run.n };
@@ -1563,7 +1569,8 @@ function draw() {
     const m = GMAN2[mv], frames = GANIM2[mv], gimg = frames && frames[idx];
     if (gimg && gimg.naturalWidth) {
       const gap = (m.gaps && m.gaps[idx]) || 0;
-      const feetLine = m.h - m.offset + Math.max(0, m.offset - gap);
+      const feetLine = (mv === 'diveroll' || mv === 'flip' || mv === 'diveflip' || mv === 'roll3' || mv === 'roll4')
+        ? m.h - gap : m.h - m.offset + Math.max(0, m.offset - gap);   /* rolls anchor to the surface (Keith v0.31) */
       const K = PX2U * 0.93;   /* the off-plane shade: slightly smaller, softly treated frames */
       const fx = (G.state === 'fall' ? G.fallX : px + G.o) - camX, fy = (G.state === 'fall' ? G.fallY : GR.pyS + GSINK) - camY;
       if (GR.chgSm > 0.03) {   /* he was CHARGED here in his original run — his charge burns FIRE, not 6lade's blue (Keith v0.30) */
