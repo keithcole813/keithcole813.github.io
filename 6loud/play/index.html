@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.45</div>
+  <div id="ver">v0.46</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.45 ==============================
+/* ============================== 6LOUD demo v0.46 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1238,6 +1238,7 @@ async function fetchRanks(list) {   /* world rank for each local score: 1 + how 
 function kickRanks() {
   let list = [];
   try { list = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]'); } catch (e) { }
+  list = list.slice(0, 1);   /* only the local HIGH score gets a world rank (Keith v0.46) */
   const sig = list.map(b => b.s).join(',') + '|' + (gBoard ? gBoard.length + ':' + (gBoard.length ? gBoard[gBoard.length - 1].dist_ft : 0) : 'x');
   if (sig === rankSig) return;
   rankSig = sig;
@@ -1250,8 +1251,8 @@ function renderBoard() {
   try { local = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]'); } catch (e) { }
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
     (gBoard.length ? gBoard.map(b => b.initials + ' — ' + Number(b.dist_ft).toLocaleString('en-US') + ' FT').join('<br>') : 'NO SCORES YET — SET THE FIRST') +
-    (local.length ? '<div class="boardTitle" style="margin-top:6px">YOUR SCORES</div>' +
-      local.map(b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT' + (gRanks[b.s] !== undefined ? ' · #' + gRanks[b.s] + ' IN THE WORLD' : '')).join('<br>') : '');
+    (local.length ? '<div class="boardTitle" style="margin-top:6px">YOUR BEST</div>' +
+      (b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT' + (gRanks[b.s] !== undefined ? ' · #' + gRanks[b.s] + ' IN THE WORLD' : ''))(local[0]) : '');   /* one line only: the local high score + its world rank (Keith v0.46 — the YOUR SCORES list is gone) */
 }
 /* Footsteps audio REMOVED for good (Keith 2026-11-06): his isolation
    tests pinned the chop on the steps audio itself — every no-steps build
