@@ -66,7 +66,7 @@
   <div class="stat" id="ytStat"></div>
 
   <canvas id="wave" width="608" height="150"></canvas>
-  <div class="stat" id="gridStat">The thick <b>gold bars on the wave are the loop In/Out — drag them</b>. Drag the ruler strip to slide the 1 · drag the wave to pan · tap for the playhead · pinch to zoom.</div>
+  <div class="stat" id="gridStat">The thick <b>gold bars on the wave are the loop In/Out — drag them</b>. Drag the ruler strip to slide the 1 · drag the wave to pan · tap for the playhead · pinch to zoom. Tick <b>Fades</b> under the transport and two <b>white bars</b> join them — those set the fade in / fade out.</div>
   <div class="btns">
     <button id="zoomOut">− Zoom out</button>
     <button id="zoomIn">+ Zoom in</button>
@@ -81,6 +81,8 @@
     <button id="playLoop" class="tbtn" disabled aria-label="Loop selected region"><span class="gld">↻</span></button>
   </div>
   <label class="chk" style="margin-top:8px"><input type="checkbox" id="snapGrid" checked> Snap the gold bars to the grid — In on the beat, Out on whole bars</label>
+  <label class="chk"><input type="checkbox" id="fadeOn"> Fades — adds 2 white bars on the wave: slide them to set the fade in / fade out</label>
+  <div class="stat" id="fadeStat"></div>
 
   <h2>Tempo &amp; the 1</h2>
   <div class="row">
@@ -138,6 +140,12 @@
     <label>Sample rate — whole file, downsample only (the old machines)</label>
     <div class="btns" id="rateBtns"></div>
     <div class="stat" id="rateStat"></div>
+  </div>
+  <div>
+    <label for="tuneRange">Tune / Tempo — tune &amp; pitch move together, like the MPC</label>
+    <input type="range" id="tuneRange" min="50" max="200" step="1" value="100">
+    <label class="chk"><input type="checkbox" id="pitchOnly"> Pitch only — move the pitch, keep the time</label>
+    <div class="stat" id="tuneStat"></div>
   </div>
   <div class="stat" id="loopStat">Lock a loop to see its exact length.</div>
 
@@ -381,6 +389,104 @@ function detectKey(ch, sr, startSamp, endSamp){
   return { best: results[0], second: results[1], chroma: chroma };
 }
 function keyName(k){ return NOTE_NAMES[k.root] + " " + k.mode; }
+
+// ---- Tune / pitch DSP (Keith, 2026-11-07) ----
+// Repitch — the MPC Tune move: resample so pitch AND time move together.
+// factor 2 = twice as fast, an octave up, half as long.
+function repitchChan(data, factor){
+  if (!(factor > 0) || Math.abs(factor - 1) < 1e-9) return data;
+  var outLen = Math.max(1, Math.round(data.length / factor));
+  var out = new Float32Array(outLen);
+  for (var i = 0; i < outLen; i++){
+    var pos = i * factor, j = Math.floor(pos), f = pos - j;
+    var a = data[j] || 0, b = (j + 1 < data.length) ? data[j + 1] : a;
+    out[i] = a + (b - a) * f;
+  }
+  return out;
+}
+
+// Inverse FFT via the conjugate trick on the forward fft() above.
+function ifft(re, im){
+  var n = re.length, i;
+  for (i = 0; i < n; i++) im[i] = -im[i];
+  fft(re, im);
+  for (i = 0; i < n; i++){ re[i] = re[i] / n; im[i] = -im[i] / n; }
+}
+
+// Phase-vocoder time stretch: length scales by ratio, pitch preserved.
+// (Classic Dolson/Laroche: STFT, true-phase propagation, overlap-add.)
+function timeStretchChan(data, sr, ratio){
+  if (!(ratio > 0) || Math.abs(ratio - 1) < 1e-9) return data;
+  var N = 2048, Ha = 512;
+  if (data.length < N * 2) return data;  // too short to vocode honestly; leave the time alone
+  var Hs = Math.max(1, Math.round(Ha * ratio));
+  var win = new Float32Array(N), w;
+  for (w = 0; w < N; w++) win[w] = 0.5 - 0.5 * Math.cos(2 * Math.PI * w / N);
+  var frames = Math.max(1, Math.floor((data.length - N) / Ha) + 1);
+  var outLen = (frames - 1) * Hs + N;
+  var out = new Float32Array(outLen), norm = new Float32Array(outLen);
+  var nb = N / 2 + 1;
+  var prevIn = new Float64Array(nb), outPh = new Float64Array(nb);
+  var re = new Float64Array(N), im = new Float64Array(N);
+  for (var fr = 0; fr < frames; fr++){
+    var off = fr * Ha, i, k;
+    for (i = 0; i < N; i++){ re[i] = (data[off + i] || 0) * win[i]; im[i] = 0; }
+    fft(re, im);
+    var yr = new Float64Array(N), yi = new Float64Array(N);
+    for (k = 0; k < nb; k++){
+      var mg = Math.sqrt(re[k] * re[k] + im[k] * im[k]);
+      var ph = Math.atan2(im[k], re[k]);
+      if (fr === 0) outPh[k] = ph;
+      else {
+        var expect = 2 * Math.PI * Ha * k / N;
+        var d = ph - prevIn[k] - expect;
+        d = d - 2 * Math.PI * Math.round(d / (2 * Math.PI));
+        outPh[k] += (expect + d) * ratio;
+      }
+      prevIn[k] = ph;
+      yr[k] = mg * Math.cos(outPh[k]); yi[k] = mg * Math.sin(outPh[k]);
+      if (k > 0 && k < N / 2){ yr[N - k] = yr[k]; yi[N - k] = -yi[k]; }
+    }
+    ifft(yr, yi);
+    var oOff = fr * Hs;
+    for (i = 0; i < N; i++){ out[oOff + i] += yr[i] * win[i]; norm[oOff + i] += win[i] * win[i]; }
+  }
+  for (var s2 = 0; s2 < outLen; s2++) if (norm[s2] > 1e-8) out[s2] /= norm[s2];
+  var target = Math.round(data.length * ratio);
+  if (out.length === target) return out;
+  var res = new Float32Array(target);
+  for (var q = 0; q < target; q++) res[q] = out[q] || 0;
+  return res;
+}
+
+// Pitch shift with the duration untouched: stretch by the factor, then
+// repitch by the same factor — the length cancels, the pitch moves.
+function pitchShiftChan(data, sr, factor){
+  if (!(factor > 0) || Math.abs(factor - 1) < 1e-9) return data;
+  var out = repitchChan(timeStretchChan(data, sr, factor), factor);
+  if (out.length === data.length) return out;
+  var r = new Float32Array(data.length);
+  for (var i = 0; i < data.length; i++) r[i] = out[i] || 0;
+  return r;
+}
+
+function tuneChan(data, sr, factor, pitchOnly){
+  if (!(factor > 0) || Math.abs(factor - 1) < 1e-9) return data;
+  return pitchOnly ? pitchShiftChan(data, sr, factor) : repitchChan(data, factor);
+}
+
+// Linear fade ramps: fadeIn samples ramp up from 0 at the start,
+// fadeOut samples ramp down to 0 at the end. Returns a new channel.
+function applyFadesChan(data, fadeIn, fadeOut){
+  var n = data.length;
+  fadeIn = Math.max(0, Math.min(Math.floor(fadeIn) || 0, n));
+  fadeOut = Math.max(0, Math.min(Math.floor(fadeOut) || 0, n - fadeIn));
+  if (!fadeIn && !fadeOut) return data;
+  var out = new Float32Array(data);
+  for (var i = 0; i < fadeIn; i++) out[i] *= i / fadeIn;
+  for (var j = 0; j < fadeOut; j++) out[n - fadeOut + j] *= 1 - j / fadeOut;
+  return out;
+}
 // ==/CORE==
 
 // ---------------- App wiring ----------------
@@ -411,7 +517,13 @@ var state = {
   viewStart: 0,     // zoom window: first visible second
   viewDur: 0,       // zoom window length in seconds (0 = whole file)
   inSec: null,      // slider-set region start (seconds); null = follow the grid
-  outSec: null      // slider-set region end (seconds); null = start + bars
+  outSec: null,     // slider-set region end (seconds); null = start + bars
+  tunePct: 100,     // Tune / Tempo slider (100 = off); pitch and time move together
+  pitchOnly: false, // true = move the pitch, keep the time
+  playTimeScale: 1, // source seconds per played second (repitch factor, else 1)
+  fadeOn: false,    // white fade bars visible/active
+  fadeInSec: null,  // white bar: fade-in ends here (absolute seconds)
+  fadeOutSec: null  // white bar: fade-out starts here (absolute seconds)
 };
 function $(id){ return document.getElementById(id); }
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
@@ -455,6 +567,8 @@ function shiftRegion(d){
   if (!state.buf || !d) return;
   if (state.inSec != null) state.inSec = clamp(state.inSec + d, 0, state.buf.duration);
   if (state.outSec != null) state.outSec = clamp(state.outSec + d, 0, state.buf.duration);
+  if (state.fadeInSec != null) state.fadeInSec = clamp(state.fadeInSec + d, 0, state.buf.duration);
+  if (state.fadeOutSec != null) state.fadeOutSec = clamp(state.fadeOutSec + d, 0, state.buf.duration);
 }
 
 function fmtT(s){ var m = Math.floor(s / 60), r = s - m * 60; return m + ":" + (r < 10 ? "0" : "") + r.toFixed(2); }
@@ -462,6 +576,34 @@ function fmtT(s){ var m = Math.floor(s / 60), r = s - m * 60; return m + ":" + (
 // Waveform peaks are computed once per buffer+view and cached: re-scanning
 // the raw samples on every animation frame pegged phone CPUs during
 // playback (worst on long, high-sample-rate files) and made audio skip.
+// White fade-bar positions, clamped to the current region. Unset bars
+// hug the region edges (zero-length fades).
+function fadeSecs(){
+  var reg = regionSamples();
+  if (!reg || !state.buf) return { inSec: 0, outSec: 0 };
+  var s0 = reg.start / state.sr, s1 = (reg.start + reg.len) / state.sr;
+  var i = (state.fadeInSec == null) ? s0 : clamp(state.fadeInSec, s0, s1);
+  var o = (state.fadeOutSec == null) ? s1 : clamp(state.fadeOutSec, s0, s1);
+  if (o < i) o = i;
+  return { inSec: i, outSec: o };
+}
+// First switch-on: park both bars inside the region where they're easy to grab.
+function enableFades(){
+  var reg = regionSamples(); if (!reg || !state.buf) return;
+  var s0 = reg.start / state.sr, lenS = reg.len / state.sr;
+  if (state.fadeInSec == null) state.fadeInSec = s0 + lenS * 0.10;
+  if (state.fadeOutSec == null) state.fadeOutSec = s0 + lenS * 0.65;
+}
+function setFadeSec(isIn, v){
+  if (!state.buf) return;
+  var reg = regionSamples(); if (!reg) return;
+  var s0 = reg.start / state.sr, s1 = (reg.start + reg.len) / state.sr;
+  var fs = fadeSecs();
+  v = clamp(v, s0, s1);
+  if (isIn) state.fadeInSec = Math.min(v, fs.outSec);
+  else state.fadeOutSec = Math.max(v, fs.inSec);
+}
+
 var peaksCache = { buf: null, vS: -1, vD: -1, W: -1, per: -1, mn: null, mx: null };
 function drawWave(){
   var cv = $("wave"), ctx = cv.getContext("2d");
@@ -541,6 +683,23 @@ function drawWave(){
     ctx.fillText("IN", x0 - 4, 21);
     ctx.fillText("OUT", x1 - 8, 21);
   }
+  // White fade bars — same size as the gold bars; the faded zones shade pale.
+  if (state.fadeOn && reg){
+    var fs2 = fadeSecs();
+    var fx0 = X(fs2.inSec), fx1 = X(fs2.outSec);
+    ctx.fillStyle = "rgba(242,234,216,.10)";
+    if (fx0 > x0) ctx.fillRect(x0, 0, fx0 - x0, H);
+    if (fx1 < x1) ctx.fillRect(fx1, 0, x1 - fx1, H);
+    ctx.fillStyle = "#f2ead8";
+    ctx.fillRect(fx0 - 3, 0, 6, H);
+    ctx.fillRect(fx1 - 3, 0, 6, H);
+    ctx.fillRect(fx0 - 8, 13, 20, 11);
+    ctx.fillRect(fx1 - 11, 13, 20, 11);
+    ctx.fillStyle = "#141414";
+    ctx.font = "bold 8px Verdana";
+    ctx.fillText("FI", fx0 - 4, 21);
+    ctx.fillText("FO", fx1 - 6, 21);
+  }
   // playhead
   var px = X(state.playhead) + offPx;
   ctx.strokeStyle = "#f2ead8"; ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
@@ -583,7 +742,7 @@ function runKey(){
       " Next closest: <b>" + keyName(k.second) + "</b>. " +
       (state.mode === "loop" ? "Read from the locked loop." : "Read from the one-shot region.");
   } catch (e){ $("keyStat").textContent = "Key read failed on this file."; }
-  refreshStatsLight();
+  refreshStatsLight(); syncTuneUI();
 }
 function refreshStatsLight(){
   var reg = regionSamples(), b = bpm();
@@ -648,6 +807,27 @@ function rateTag(){
   return "_" + (r === 26040 ? "26k" : r === 22050 ? "22k" : r === 11025 ? "11k" : Math.round(r / 1000) + "k");
 }
 
+function tuneFactor(){ return (state.tunePct || 100) / 100; }
+function tuneTag(){
+  var f = tuneFactor(); if (Math.abs(f - 1) < 1e-9) return "";
+  var st = 12 * Math.log2(f);
+  return (state.pitchOnly ? "_pitch" : "_tune") + (st >= 0 ? "+" : "") + st.toFixed(1) + "st";
+}
+// Fade lengths for a render, in the render's own samples. The white bars
+// sit on the source timeline, so their lengths scale by whatever the
+// render did to the region (rate conversion and/or repitch).
+function fadeLens(reg, outLen){
+  if (!state.fadeOn || !reg) return { i: 0, o: 0 };
+  var fs = fadeSecs();
+  var fi = fs.inSec * state.sr - reg.start;
+  var fo = (reg.start + reg.len) - fs.outSec * state.sr;
+  var k = outLen / reg.len;
+  return {
+    i: Math.round(clamp(fi, 0, reg.len) * k),
+    o: Math.round(clamp(fo, 0, reg.len) * k)
+  };
+}
+
 // Seamless loop audition: play a crossfaded render of the region, looped by the player.
 function renderRegionBuffer(forExport){
   var reg = regionSamples(); if (!reg || !state.buf) return null;
@@ -663,18 +843,32 @@ function renderRegionBuffer(forExport){
     for (var i = 0; i < len; i++) out[i] = src[start + i] || 0;
     chans.push(out);
   }
-  reg = { start: start, len: len };
-  if (state.mode === "loop" && $("expFade").checked){
-    var f = Math.round(sr * 0.005);
-    for (var c2 = 0; c2 < nCh; c2++) bakeLoopCrossfade(chans[c2], 0, reg.len, f);
+  // TUNE / TEMPO — tune & pitch together by default (the MPC way);
+  // Pitch only moves the pitch and keeps the time.
+  var f = tuneFactor();
+  if (Math.abs(f - 1) >= 1e-9){
+    chans = chans.map(function(ch){ return tuneChan(ch, sr, f, state.pitchOnly); });
+    len = chans[0].length; nCh = chans.length;
   }
-  if (state.mode === "shot"){
+  // FADES — when the white bars are set, the user's own ramps are baked
+  // in and win over the automatic micro-fades below.
+  var fl = fadeLens(reg, len), userFaded = false;
+  if (fl.i > 0 || fl.o > 0){
+    chans = chans.map(function(ch){ return applyFadesChan(ch, fl.i, fl.o); });
+    userFaded = true;
+  }
+  if (state.mode === "loop" && $("expFade").checked && !userFaded){
+    var wf = Math.round(sr * 0.005);
+    for (var c2 = 0; c2 < nCh; c2++) bakeLoopCrossfade(chans[c2], 0, len, wf);
+  }
+  if (state.mode === "shot" && !(state.fadeOn && fl.o > 0)){
     // one-shot: 3 ms fade-out tail so the stop never clicks
-    var f2 = Math.min(Math.round(sr * 0.003), Math.floor(reg.len / 2));
+    var f2 = Math.min(Math.round(sr * 0.003), Math.floor(len / 2));
     for (var c3 = 0; c3 < nCh; c3++)
-      for (var j = 0; j < f2; j++) chans[c3][reg.len - f2 + j] *= 1 - j / f2;
+      for (var j = 0; j < f2; j++) chans[c3][len - f2 + j] *= 1 - j / f2;
   }
-  return { chans: chans, len: reg.len, nCh: nCh, sr: sr };
+  return { chans: chans, len: len, nCh: nCh, sr: sr,
+           timeScale: state.pitchOnly ? 1 : f };
 }
 
 function playRegion(loop){
@@ -688,6 +882,7 @@ function playRegion(loop){
   g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
   src.connect(g); g.connect(actx.destination); src.start();
   state.src = src; state.playing = true; state.playMode = "region";
+  state.playTimeScale = r.timeScale || 1;
   state.playStartCtx = actx.currentTime; state.playStartOff = 0; state.playDur = r.len / r.sr;
   var reg = regionSamples(); state.regionStartSec = reg.start / state.sr;
   src.onended = function(){ if (!loop){ state.playing = false; } };
@@ -697,20 +892,41 @@ function playFull(){
   ensureCtx(); stopPlayback();
   var src = actx.createBufferSource();
   var r = effRate();
-  if (r){
+  var tf = tuneFactor(), tuned = Math.abs(tf - 1) >= 1e-9;
+  var startOff = state.playhead % state.buf.duration;
+  state.playTimeScale = 1;
+  if (tuned && state.pitchOnly){
+    // Pitch only on the whole file: render it through the vocoder from
+    // the top (time preserved, so the playhead still tracks 1:1).
+    var effP = effChans();
+    var tch = effP.chans.map(function(ch){ return tuneChan(ch, effP.sr, tf, true); });
+    var abP = actx.createBuffer(tch.length, tch[0].length, effP.sr);
+    for (var cp = 0; cp < tch.length; cp++) abP.getChannelData(cp).set(tch[cp]);
+    src.buffer = abP; startOff = 0;
+    state.playDur = abP.duration;
+  } else if (r){
     // Whole file, downsampled: play the converted channels at their true rate.
     var eff = effChans();
     var ab = actx.createBuffer(eff.chans.length, eff.chans[0].length, r);
     for (var c = 0; c < eff.chans.length; c++) ab.getChannelData(c).set(eff.chans[c]);
     src.buffer = ab;
-  } else src.buffer = state.buf;
+    state.playDur = state.buf.duration - startOff;
+  } else {
+    src.buffer = state.buf;
+    state.playDur = state.buf.duration - startOff;
+  }
+  if (tuned && !state.pitchOnly){
+    // Repitch on the whole file is just a playback rate — instant.
+    src.playbackRate.value = tf; state.playTimeScale = tf;
+    state.playDur = state.playDur / tf;
+  }
   var g = actx.createGain(), t0 = actx.currentTime;
   g.gain.setValueAtTime(0, t0);
   g.gain.linearRampToValueAtTime(1, t0 + 0.005); // 5ms fade-in: hitting play never clicks
   src.connect(g); g.connect(actx.destination);
-  src.start(0, state.playhead % state.buf.duration);
+  src.start(0, startOff);
   state.src = src; state.playing = true; state.playMode = "full";
-  state.playStartCtx = actx.currentTime; state.playStartOff = state.playhead; state.playDur = state.buf.duration - state.playhead;
+  state.playStartCtx = actx.currentTime; state.playStartOff = startOff;
   state.regionStartSec = 0;
   src.onended = function(){ state.playing = false; state.playMode = null; };
   tickPlayhead(false, true);
@@ -721,10 +937,11 @@ function tickPlayhead(looping, full){
   var step = function(){
     if (!state.playing || !actx) return;
     var el = actx.currentTime - state.playStartCtx;
-    if (full){ state.playhead = state.playStartOff + el; if (state.playhead >= state.buf.duration){ state.playing = false; } }
+    var ts = state.playTimeScale || 1;
+    if (full){ state.playhead = state.playStartOff + el * ts; if (state.playhead >= state.buf.duration){ state.playing = false; } }
     else if (state.playDur > 0){
       var pos = looping ? (el % state.playDur) : Math.min(el, state.playDur);
-      state.playhead = (state.regionStartSec || 0) + pos;
+      state.playhead = (state.regionStartSec || 0) + pos * ts;
       if (!looping && el >= state.playDur) state.playing = false;
     }
     // Repaint only when the playhead crosses into a new pixel (plus one
@@ -781,8 +998,8 @@ function exportLoop(){
   var r = renderRegionBuffer(true); if (!r) return;
   var chans = prepExportChans(r);
   var name;
-  if (state.mode === "loop") name = slug() + "_loop_" + bpm().toFixed(1) + "bpm_" + state.bars + "bars_" + keySlug() + rateTag() + ".wav";
-  else name = slug() + "_oneshot_" + keySlug() + rateTag() + ".wav";
+  if (state.mode === "loop") name = slug() + "_loop_" + bpm().toFixed(1) + "bpm_" + state.bars + "bars_" + keySlug() + rateTag() + tuneTag() + ".wav";
+  else name = slug() + "_oneshot_" + keySlug() + rateTag() + tuneTag() + ".wav";
   download(encodeWAV(chans, r.sr), name);
 }
 function exportSlices(){
@@ -793,7 +1010,7 @@ function exportSlices(){
       setTimeout(function(){
         var chans = r.chans.map(function(ch){ return ch.slice(s * per, s === n - 1 ? r.len : (s + 1) * per); });
         chans = prepExportChans({ chans: chans, len: chans[0].length });
-        download(encodeWAV(chans, r.sr), slug() + "_slice" + (s + 1) + "of" + n + "_" + keySlug() + rateTag() + ".wav");
+        download(encodeWAV(chans, r.sr), slug() + "_slice" + (s + 1) + "of" + n + "_" + keySlug() + rateTag() + tuneTag() + ".wav");
       }, s * 350);
     })(s);
   }
@@ -807,6 +1024,9 @@ function loadDecoded(buf, displayName){
   if (buf.numberOfChannels > 1){ var c1 = buf.getChannelData(1); for (var i = 0; i < n; i++) mono[i] = (c0[i] + c1[i]) / 2; }
   else mono.set(c0);
   state.mono = mono; state.rateHz = 0; state.ds = null; syncRateUI();
+  state.tunePct = 100; state.pitchOnly = false; state.playTimeScale = 1;
+  state.fadeOn = false; state.fadeInSec = null; state.fadeOutSec = null;
+  syncTuneUI(); $("fadeOn").checked = false; syncFadeStat();
   state.shotOut = 0; state.startBar = 1; state.playhead = 0;
   state.viewStart = 0; state.viewDur = 0; state.dragOffSec = 0;
   state.inSec = null; state.outSec = null;
@@ -983,7 +1203,14 @@ wave.addEventListener("pointerdown", function(e){
     var phX = (state.playhead - (state.viewStart || 0)) / vD * r2.width;
     var mode = null;
     var reg = regionSamples();
-    if (reg){
+    if (state.fadeOn && reg){
+      var fsx = fadeSecs();
+      var fiX = (fsx.inSec - (state.viewStart || 0)) / vD * r2.width;
+      var foX = (fsx.outSec - (state.viewStart || 0)) / vD * r2.width;
+      if (Math.abs(x - fiX) <= 14) mode = "fadein";        // grabbed the white fade-in bar
+      else if (Math.abs(x - foX) <= 14) mode = "fadeout";  // grabbed the white fade-out bar
+    }
+    if (!mode && reg){
       var inX = (reg.start / state.sr - (state.viewStart || 0)) / vD * r2.width;
       var outX = ((reg.start + reg.len) / state.sr - (state.viewStart || 0)) / vD * r2.width;
       if (Math.abs(x - inX) <= 14) mode = "in";          // grabbed the gold In bar
@@ -1018,7 +1245,11 @@ wave.addEventListener("pointermove", function(e){
   if (Math.abs(dx) > 4) dragInfo.moved = true;
   if (!dragInfo.moved) return;
   var vD2 = viewDurNow();
-  if (dragInfo.mode === "in" || dragInfo.mode === "out"){
+  if (dragInfo.mode === "fadein" || dragInfo.mode === "fadeout"){
+    var tF = (state.viewStart || 0) + (e.clientX - r.left) / r.width * vD2;
+    setFadeSec(dragInfo.mode === "fadein", tF);
+    drawWave(); syncFadeStat();
+  } else if (dragInfo.mode === "in" || dragInfo.mode === "out"){
     var tPos = (state.viewStart || 0) + (e.clientX - r.left) / r.width * vD2;
     if (dragInfo.mode === "in") setInSec(tPos); else setOutSec(tPos);
     refreshStats(); scheduleKey();
@@ -1182,6 +1413,58 @@ RATE_OPTS.forEach(function(o){
   if (o[0] === 0) btn.classList.add("on");
   btn.addEventListener("click", function(){ setRate(o[0]); });
   rateWrap.appendChild(btn);
+});
+// ---- Tune / Tempo + Fades wiring (2026-11-07) ----
+function syncTuneUI(){
+  var el = $("tuneStat"); if (!el) return;
+  var rng = $("tuneRange"); if (rng) rng.value = state.tunePct;
+  var po = $("pitchOnly"); if (po) po.checked = !!state.pitchOnly;
+  var f = tuneFactor(), st = 12 * Math.log2(f);
+  if (Math.abs(f - 1) < 1e-9){
+    el.textContent = state.buf ? "No tune — the selection plays and exports at the locked tempo." : "";
+    return;
+  }
+  var keyTxt = "";
+  if (state.key){
+    var root = ((state.key.best.root + Math.round(st)) % 12 + 12) % 12;
+    keyTxt = " · key " + keyName(state.key.best) + " \u2192 <b>" + NOTE_NAMES[root] + " " + state.key.best.mode + "</b>";
+  }
+  var stTxt = (st >= 0 ? "+" : "") + st.toFixed(1) + " st";
+  if (state.pitchOnly){
+    el.innerHTML = "Pitch only: <b>" + stTxt + "</b>" + keyTxt +
+      " — the time and the BPM stay exactly where they are. Selection and exports carry it.";
+  } else {
+    var b = bpm();
+    el.innerHTML = "Tuned <b>" + stTxt + "</b> (" + state.tunePct + "%)" +
+      (b ? " — the locked " + b.toFixed(1) + " BPM plays as <b>" + (b * f).toFixed(1) + " BPM</b>" : "") +
+      keyTxt + " · the selection gets " + (f > 1 ? "shorter" : "longer") +
+      ". Selection, slices and exports carry it.";
+  }
+}
+function syncFadeStat(){
+  var el = $("fadeStat"); if (!el) return;
+  if (!state.fadeOn || !state.buf){ el.textContent = ""; return; }
+  var reg = regionSamples(); if (!reg){ el.textContent = ""; return; }
+  var fs = fadeSecs();
+  var fi = fs.inSec - reg.start / state.sr;
+  var fo = (reg.start + reg.len) / state.sr - fs.outSec;
+  el.innerHTML = "Fade in <b>" + fi.toFixed(2) + " s</b> from the start · fade out <b>" +
+    fo.toFixed(2) + " s</b> into the end — baked into the selection's playback and exports. Slide a white bar to the edge to zero its fade.";
+}
+$("tuneRange").addEventListener("input", function(){
+  state.tunePct = parseInt($("tuneRange").value, 10) || 100;
+  if (state.playing) stopPlayback();
+  syncTuneUI();
+});
+$("pitchOnly").addEventListener("change", function(){
+  state.pitchOnly = $("pitchOnly").checked;
+  if (state.playing) stopPlayback();
+  syncTuneUI();
+});
+$("fadeOn").addEventListener("change", function(){
+  state.fadeOn = $("fadeOn").checked;
+  if (state.fadeOn) enableFades();
+  drawWave(); syncFadeStat();
 });
 $("lenMinus").addEventListener("click", function(){ setBars(state.bars - 1); });
 $("lenPlus").addEventListener("click", function(){ setBars(state.bars + 1); });
