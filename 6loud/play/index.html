@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.29.1</div>
+  <div id="ver">v0.29.2</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.29.1 ==============================
+/* ============================== 6LOUD demo v0.29.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -835,12 +835,14 @@ let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
 /* the NEAR set (v0.25): LaShmoove at nearly full size with a breath of
    softness — same clouds as 6lade, slightly off his plane (Keith). */
 let GMAN2 = null, GANIM2 = {}, gLiveReady = false;
-if (window.fetch) fetch('assets/ghostlive/manifest.json').then(r => r.json()).then(m => {
+if (window.fetch) fetch('assets/ghostlive/manifest.json?v=2').then(r => r.json()).then(m => {
   if (!m || !m.run) return; GMAN2 = m;
   let loaded = 0;
   GANIM2.run = [];
   for (let i = 0; i < m.run.n; i++) { const im = new Image(); im.onload = () => { if (++loaded >= m.run.n) gLiveReady = true; }; im.src = 'assets/ghostlive/run/f' + String(i).padStart(3, '0') + '.webp'; GANIM2.run.push(im); }
-  for (const mv of ['runjump', 'diveroll', 'armsopen']) { GANIM2[mv] = []; for (let i = 0; i < m[mv].n; i++) { const im = new Image(); im.src = 'assets/ghostlive/' + mv + '/f' + String(i).padStart(3, '0') + '.webp'; GANIM2[mv].push(im); } }
+  /* EVERY move in the manifest loads — the v0.29.1 grammar reached for
+     basic/flip/rolls this loader never fetched, and he vanished mid-move */
+  for (const mv of Object.keys(m)) { if (mv === 'run') continue; GANIM2[mv] = []; for (let i = 0; i < m[mv].n; i++) { const im = new Image(); im.src = 'assets/ghostlive/' + mv + '/f' + String(i).padStart(3, '0') + '.webp'; GANIM2[mv].push(im); } }
 }).catch(() => {});
 let RACE = null;   /* the parsed replay this run is raced on */
 function prepRace() {
@@ -1360,6 +1362,11 @@ function playerAnim() {
    run-up and the slip/plunge fell through to the run cycle — he read as
    floating and running on air; Keith caught it) */
 function ghostMove() {
+  const pick = ghostPick();
+  if (pick.mv !== 'run' && !GANIM2[pick.mv]) return { mv: 'run', idx: Math.floor(G.animT * 30) % GMAN2.run.n };   /* set not loaded yet: run the beat, never vanish */
+  return pick;
+}
+function ghostPick() {
   if (G.state === 'fall') return { mv: 'armsopen', idx: pingpong(Math.floor(G.animT * 10), GMAN2.armsopen.n) };
   const st = GR.st, t = GR.stT;   /* every pick below is guarded where it's used: GANIM2 loads per-move, a missing set simply doesn't draw that beat */
   if (st === 1) return { mv: 'basic', idx: Math.min(GMAN2.basic.n - 1, Math.floor(t * 30)) };
