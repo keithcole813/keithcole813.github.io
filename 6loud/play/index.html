@@ -49,6 +49,7 @@
          background:linear-gradient(#ffd94d,#ff9d3c); border:0; border-radius:999px; padding:12px 30px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #b3541e; }
   #ver { position:absolute; left:0; bottom:2.2%; width:100%; text-align:center; font-size:13px; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.55); text-shadow:0 1px 6px rgba(0,0,0,.45); pointer-events:none; }
+  #muteBtn { position:absolute; top:14px; right:14px; z-index:9; width:46px; height:46px; border-radius:50%; border:2px solid #ffdd67; background:rgba(22,11,41,.72); font-size:20px; line-height:1; cursor:pointer; }
   #loadbar { position:absolute; left:50%; bottom:11%; transform:translateX(-50%); width:min(78vw,520px);
              text-align:center; pointer-events:none; transition:opacity .45s ease; z-index:5; }
   #loadpct { font-weight:900; letter-spacing:2px; color:#ffe9a8; font-size:19px; margin-bottom:8px;
@@ -72,7 +73,8 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.52</div>
+  <button id="muteBtn" aria-label="Toggle sound">🔊</button>
+  <div id="ver">v0.53</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -85,7 +87,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.52 ==============================
+/* ============================== 6LOUD demo v0.53 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -123,9 +125,18 @@ let rawD = null, rawB = null, rawS = null, bufS = null, srcS = null, gainS = nul
    cloud or silence — like real footsteps. */
 const STEPS_VOL = 0.65;
 let mScene = 'steps', passFired = false, stepsGateOn = null;
-const MUSIC_VOL = 0.5;   /* the bg music sits lower, all the way through both tracks (Keith v0.33) */
+const MUSIC_VOL = 0.35;   /* bg music level, both tracks — pulled down from 0.5 (Keith v0.53); the steps (0.65) and the boom (1.08) stay where they are, per his word */
+let muted = false;   /* the loading-screen sound toggle (Keith v0.53): default ON; muting silences music, steps, and boom together */
+const musV = () => muted ? 0 : MUSIC_VOL;
+const stpV = () => muted ? 0 : STEPS_VOL;
+function toggleMute() {
+  muted = !muted;
+  $('muteBtn').textContent = muted ? '🔇' : '🔊';
+  if (mode !== 'title') playTrack();   /* re-apply at once when audio is live (mid-run or the wipeout screen); at title nothing is playing yet */
+}
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
+  if (muted) return;   /* the sound toggle silences the boom too (v0.53) */
   boomT++;   /* the trigger fired (the harness counts these even with no audio stack) */
   if (!actx || !bufBoom || actx.state !== 'running') return;   /* same proven route as the music: WebAudio only when it's alive */
   const now = actx.currentTime;
@@ -183,13 +194,13 @@ function playTrack() {
     }
     if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
     const t = actx.currentTime;
-    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(mScene === 'day' ? MUSIC_VOL : 0, t, 0.18);
-    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(mScene === 'battle' ? MUSIC_VOL : 0, t, 0.18); }
-    if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? STEPS_VOL : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
+    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(mScene === 'day' ? musV() : 0, t, 0.18);
+    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(mScene === 'battle' ? musV() : 0, t, 0.18); }
+    if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     music.pause();
   } else {
     if (gainD) { try { gainD.gain.value = 0; if (gainB) gainB.gain.value = 0; if (gainS) gainS.gain.value = 0; } catch (e) {} }
-    music.volume = mScene === 'steps' ? STEPS_VOL : MUSIC_VOL;
+    music.volume = mScene === 'steps' ? stpV() : musV();
     if (!(music.src || '').includes(want)) { music.src = want; music.currentTime = 0; }
     if (mScene === 'steps' && stepsGateOn === false) music.pause();
     else { const p = music.play(); if (p && p.catch) p.catch(() => {}); }
@@ -198,7 +209,7 @@ function playTrack() {
 function gateSteps() {   /* footsteps sound only while his feet are on a cloud — checked every frame, acts on change */
   const on = mScene === 'steps' && mode === 'run' && !!grounded && !hangPlat && !slipPlat;
   if (on === stepsGateOn) return; stepsGateOn = on;
-  if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? STEPS_VOL : 0, actx.currentTime, 0.045);
+  if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
   else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
 }
 function xfade(toHeat) { playTrack(); }
@@ -1361,6 +1372,8 @@ function release() {
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
 addEventListener('keyup', e => { if (e.code === 'Space') release(); });
 cv.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
+$('muteBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* tapping the toggle never starts the run (v0.53) */
+$('muteBtn').addEventListener('click', e => { e.stopPropagation(); toggleMute(); });
 addEventListener('pointerup', () => release());
 addEventListener('pointercancel', () => release());
 
@@ -1898,13 +1911,15 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false;
+let puShown = false, mbShown = true;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
   update(dt);
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
+  const mb = mode === 'title';   /* the sound toggle lives on the loading/title screen only (Keith v0.53) */
+  if (mb !== mbShown) { mbShown = mb; $('muteBtn').style.display = mb ? 'block' : 'none'; }
   ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); draw();
   requestAnimationFrame(loop);
 }
