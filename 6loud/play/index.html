@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.65</div>
+  <div id="ver">v0.66</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -126,7 +126,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.65 ==============================
+/* ============================== 6LOUD demo v0.66 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -221,10 +221,10 @@ function kickDecode() {
   if (!AC) return;
   if (!actx) { try { actx = new AC(); } catch (e) { return; } }
   if (actx.state === 'suspended') { const p = actx.resume(); if (p && p.catch) p.catch(() => {}); }
-  if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => {});
-  if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => {});
-  if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => {});
-  if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => {});
+  if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => { decD = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
+  if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => { decB = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
+  if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => { decBoom = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
+  if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack() {
   const want = mScene === 'steps' ? 'assets/steps.mp3' : mScene === 'battle' ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
@@ -242,7 +242,10 @@ function playTrack() {
     gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(mScene === 'day' ? musV() : 0, t, 0.18);
     if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(mScene === 'battle' ? musV() : 0, t, 0.18); }
     if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
-    music.pause();
+    if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
+      if (!(music.src || '').includes('assets/steps.mp3')) { music.src = 'assets/steps.mp3'; music.currentTime = 0; }
+      if (!muted && stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
+    } else music.pause();
   } else {
     /* do NOT zero the WebAudio gains here (the v0.62 stuck-silence fix): if the context is merely suspended, those gains are inaudible anyway — and wiping them left the game silent-but-unmuted after the context resumed, because nothing re-applies gains until a scene boundary. The gains keep their last scene/mute values and the routes hand off cleanly. */
     music.volume = mScene === 'steps' ? stpV() : musV();
