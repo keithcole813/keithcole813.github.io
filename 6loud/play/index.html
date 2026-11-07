@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.28.4</div>
+  <div id="ver">v0.29</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.28.4 ==============================
+/* ============================== 6LOUD demo v0.29 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -739,7 +739,8 @@ const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
    above his soles in the dangle cycle (bobbing ±25). */
 const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.55, GRIP_DX = 0.04;
 const HANDS_DANGLE = { 3: 269, 4: 292, 5: 315, 6: 324, 7: 323 };   /* hand height per dangle frame, measured off the shipped art */
-function gripOf(p) { const cd = CLOUDS[p.img]; return { x: p.x + p.len * GRIP_DX, y: p.y + p.len * cd.asp * GRIP_FRAC }; }
+const SINK_MAX = 8;   /* a cloud gives just a tiny bit under a landing, then springs back (Keith v0.29) */
+function gripOf(p) { const cd = CLOUDS[p.img]; return { x: p.x + p.len * GRIP_DX, y: p.y + (p.sink || 0) + p.len * cd.asp * GRIP_FRAC }; }
 let airGrav = 1, airTotal = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
 let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
@@ -955,6 +956,7 @@ function ghostUpdate(dt) {
       for (let k = 0; k < 4; k++) spawnPuff(px + G.o - 12 + Math.random() * 20, GR.pyS + GSINK + 4, 8 + Math.random() * 5);
     }
     if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.145; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 9); } }
+    if (GR.st === 0) { const gp = plats.find(q => GR.perfD >= q.x - 20 && GR.perfD <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29) */
     GR.prevSt = GR.st;
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
@@ -1208,6 +1210,7 @@ function update(dt) {
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
+    hangTY = gripOf(hangPlat).y + HANG_HANDS - FEET;
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (struggleTaps >= HANG_TAPS) {   /* SAVE: he hauls himself up */
@@ -1217,6 +1220,7 @@ function update(dt) {
     } else if (hangT <= 0) { slipPlat = hangPlat; hangPlat = null; slipT = 0; }   /* no save: the slip begins */
   } else if (slipPlat) {
     slipT += dt;
+    hangTY = gripOf(slipPlat).y + HANG_HANDS - FEET;
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; }   /* fingers go — the Fall 2 plunge (no landing, no grab: airMove stays null) */
@@ -1232,9 +1236,10 @@ function update(dt) {
     /* landing exists ONLY off a jump — no jump, no landing (Keith) */
     if (airMove) for (const p of plats) {
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
-      const top = p.y;
+      const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
         py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
+        p.sinkV = (p.sinkV || 0) + Math.min(430, fallV * 0.17);   /* the landing thump dips it */
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed) {
@@ -1269,8 +1274,19 @@ function update(dt) {
       }
     }
   } else {
-    py = grounded.y; lastGroundT = time;
+    py = grounded.y + (grounded.sink || 0); lastGroundT = time;
     if (px - 30 > grounded.x + grounded.len) { grounded = null; vy = 60; airMove = null; airT = 0; landMove = null; airGrav = 1; }
+  }
+  /* cloud springs: weight dips them a tiny bit, leaving lets them rise (Keith v0.29) */
+  for (const p of plats) {
+    let w = 0;
+    if (grounded === p) w = 1;
+    if (hangPlat === p || slipPlat === p) w = Math.max(w, 0.55);
+    if (p.ghostOn) { w = Math.max(w, 1); p.ghostOn = false; }
+    p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 90 - (p.sinkV || 0) * 11) * dt;
+    p.sink = (p.sink || 0) + (p.sinkV || 0) * dt;
+    if (p.sink < -2.5) { p.sink = -2.5; p.sinkV = 0; }
+    if (p.sink > SINK_MAX + 3.5) { p.sink = SINK_MAX + 3.5; p.sinkV = 0; }
   }
   if (grounded) walkT += dt;
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
@@ -1579,7 +1595,7 @@ function draw() {
   for (const p of plats) {
     const img = IMG['cloud' + p.img], cd = CLOUDS[p.img];
     if (!img || !img.naturalWidth) continue;
-    const sx = p.x - camX, sy = p.y - camY;
+    const sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;
     if (sx + p.len < -200 || sx > viewW / zoom + 200) continue;
     const dh = p.len * cd.asp;
     ctx.save();
