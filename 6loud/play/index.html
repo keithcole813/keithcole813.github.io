@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.33.1</div>
+  <div id="ver">v0.33.2</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.33.1 ==============================
+/* ============================== 6LOUD demo v0.33.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -983,7 +983,7 @@ function ghostUpdate(dt) {
         GR.fireT = Math.max(GR.fireT, 0.45);
         if (GR.surgeT >= SURGE_CHARGE_DUR) { GR.phase = 'burst'; GR.fireT = Math.max(GR.fireT, 1.8); }
       } else if (GR.phase === 'burst') {
-        oT = RACE_LEAD_O * oS; oRate = 1750 + 450 * oS;   /* the burst of speed */
+        oT = RACE_LEAD_O * oS; oRate = 1500 + 350 * oS;   /* the burst of speed (softened a touch — the scrub carries the read now) */
         GR.fireT = Math.max(GR.fireT, 0.8);
       } else if (GR.phase === 'lead') {
         oT = RACE_LEAD_O * oS;   /* a good amount ahead, still on screen: same pace as 6lade */
@@ -998,6 +998,15 @@ function ghostUpdate(dt) {
     }
     G.o = GR.perfD - dist;
     G.dG = GR.perfD;
+    /* his animation clock is locked to his GROUND speed (Keith v0.33.2:
+       the burst scrubbed him through his own recording at ~3x while his
+       stride played at 1x — he lurched forward in steps, "teleported 10
+       feet"). scrub = how fast his performance distance is advancing vs
+       the pace he recorded it at; his stride and moves play at that rate,
+       so a burst reads as sprinting, not skipping. */
+    const dPerf = GR.prevPerfD === undefined ? 0 : GR.perfD - GR.prevPerfD;
+    GR.prevPerfD = GR.perfD;
+    GR.scrub = Math.max(0.6, Math.min(3.2, dt > 0 ? (dPerf / dt) / Math.max(120, grSpeedAt(GR.perfD)) : 1));
     if (G.o > 150) GR.wasAhead = true;
     if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; }   /* THE PASS (Keith v0.28) */
     if (G.o < -150) GR.passArm = true;
@@ -1007,12 +1016,13 @@ function ghostUpdate(dt) {
     if (sm.st !== GR.st) { GR.st = sm.st; GR.stT = 0; GR.pick = ((GR.pick || 0) + 1) % 2; }
     if (GR.fireT > 0) GR.fireT -= dt;
     GR.chgSm = Math.min(1, Math.max(0, (GR.chgSm || 0) + (((GR.fireT > 0 || GR.st === 7) ? 1 : 0) - (GR.chgSm || 0)) * Math.min(1, dt * 10)));   /* burns on the pass burst and through his held jumps (code 7) */
-    GR.stT += dt;
+    GR.stT += dt * GR.scrub; GR.runT = (GR.runT || 0) + dt * GR.scrub;
     GR.pyS = sm.py;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
-      if (GR.chgSm > 0.3 || GR.fireT > 0) playBoom();   /* HIS charged landings boom too (Keith v0.33) */
-      for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6);
+      const gCharged = GR.chgSm > 0.3 || GR.fireT > 0;
+      if (gCharged) { playBoom(); const gp2 = plats.find(q => GR.perfD >= q.x - 20 && GR.perfD <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp2) { gp2.boost = 7; gp2.sinkV = (gp2.sinkV || 0) + 380; } }   /* HIS charged landings boom + sink his cloud too (Keith v0.33/0.33.2) */
+      for (let k = 0; k < (gCharged ? 14 : 8); k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, (gCharged ? 12 : 10) + Math.random() * 6);
     }
     if (GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
       for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6);
@@ -1302,7 +1312,9 @@ function update(dt) {
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
         py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
-        p.sinkV = (p.sinkV || 0) + Math.min(500, fallV * 0.20);   /* the landing thump dips it (a little more bounce, Keith v0.32) */
+        const chargedLand = champMode || flareT > 0;   /* a charged touchdown hits the cloud harder (Keith v0.33.2) */
+        p.sinkV = (p.sinkV || 0) + Math.min(chargedLand ? 760 : 500, fallV * (chargedLand ? 0.32 : 0.20));   /* the landing thump dips it (a little more bounce, Keith v0.32) */
+        if (chargedLand) p.boost = 7;   /* the dip is allowed deeper while the charge rings out */
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed) {
@@ -1312,8 +1324,8 @@ function update(dt) {
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
           else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
           landDur = (landTo - landFrom + 1) / landRate; landT = 0;
-          for (let k = 0; k < 11; k++) spawnPuff(px - 32 + k * 7, py + 12, 11 + Math.random() * 9);   // landing burst (a little more puff, Keith v0.32)
-          if (champMode || flareT > 0) playBoom();   /* charged form touches down: the cinematic boom (Keith v0.33) */
+          if (chargedLand) { for (let k = 0; k < 18; k++) spawnPuff(px - 40 + k * 5, py + 12, 13 + Math.random() * 10); playBoom(); }   /* charged landing: a bigger burst + the cinematic boom (Keith v0.33/0.33.2) */
+          else for (let k = 0; k < 11; k++) spawnPuff(px - 32 + k * 7, py + 12, 11 + Math.random() * 9);   // landing burst (a little more puff, Keith v0.32)
         }
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         if (hard) { shake = Math.min(14, shake + 9); }
@@ -1350,7 +1362,8 @@ function update(dt) {
     p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 104 - (p.sinkV || 0) * 9.2) * dt;   /* livelier spring: it bounces back past level now (Keith v0.32) */
     p.sink = (p.sink || 0) + (p.sinkV || 0) * dt;
     if (p.sink < -4.2) { p.sink = -4.2; p.sinkV = 0; }
-    if (p.sink > SINK_MAX + 4.5) { p.sink = SINK_MAX + 4.5; p.sinkV = 0; }
+    if (p.sink > SINK_MAX + 4.5 + (p.boost || 0)) { p.sink = SINK_MAX + 4.5 + (p.boost || 0); p.sinkV = 0; }
+    if (p.boost) p.boost = Math.max(0, p.boost - dt * 9);   /* the charged dip allowance rings out in under a second */
   }
   if (grounded) walkT += dt;
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
@@ -1441,7 +1454,7 @@ function ghostPick() {
   if (st === 4) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 30), GMAN2.armsopen.n) };   /* his plain airtime at its TRUE rate — at a third rate he read as paused mid-air (Keith v0.31) */
   if (st === 5) return { mv: 'armsopen', idx: Math.min(GMAN2.armsopen.n - 1, Math.floor(t * 30)) };
   if (st === 6) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10), GMAN2.armsopen.n) };
-  return { mv: 'run', idx: Math.floor(G.animT * 30) % GMAN2.run.n };
+  return { mv: 'run', idx: Math.floor((GR.runT || 0) * 30) % GMAN2.run.n };   /* the race run cycle rides the scrub clock (v0.33.2) */
 }
 function draw() {
   const ph = (time % SKY_PERIOD) / SKY_PERIOD;
