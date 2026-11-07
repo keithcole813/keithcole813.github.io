@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.25.1</div>
+  <div id="ver">v0.26</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.25.1 ==============================
+/* ============================== 6LOUD demo v0.26 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -725,6 +725,11 @@ let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
+let slipPlat = null, slipT = 0, struggleTaps = 0;
+/* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
+   rapid jump taps inside the window climb up (SAVE); otherwise he slips
+   (climbfall) and the plunge is Fall 2. His eyes lock the final rule. */
+const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
 let airGrav = 1, airTotal = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
 let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
@@ -796,7 +801,8 @@ let REC = null, lastReplay = null;
 function recStart() { REC = { acc: 0, lastDist: 0, frames: [], plats: [] }; }
 function recSample() {
   const mv = playerAnim().move;
-  const code = mv === 'run' ? 0 : mv === 'runjump' || mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
+  let code = mv === 'run' ? 0 : mv === 'runjump' || mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
+  if (slipPlat) code = 5; else if (!grounded && !airMove && !hangPlat && vy > 260) code = 6;   /* 5 = ledge slip, 6 = Fall 2 plunge */
   REC.frames.push([Math.round(dist - REC.lastDist), Math.round(py), code]);
   REC.lastDist = dist;
 }
@@ -876,7 +882,7 @@ function ghostFeetY() {
 }
 function ghostPuff(big) {
   if (!G || G.puffs.length > 10) return;
-  G.puffs.push({ sx: G.sx + 8, sy: ghostFeetY() + 3, r: big ? 15 : 8, life: 0.5, max: 0.5 });
+  G.puffs.push({ sx: G.sx - 14, sy: ghostFeetY() + 3, r: big ? 15 : 9, life: 0.5, max: 0.5 });
 }
 function ghostFall() {
   if (!G || G.state === 'fall') return;
@@ -919,7 +925,11 @@ function ghostUpdate(dt) {
     GR.stT += dt;
     GR.pyS += (sm.py - GR.pyS) * Math.min(1, dt * 18);
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
-    if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.30; spawnPuff(px + G.o - 14, GR.pyS + 12, 7); } }
+    if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
+      for (let k = 0; k < 3; k++) spawnPuff(px + G.o - 12 + Math.random() * 20, GR.pyS + 6, 8 + Math.random() * 5);
+    }
+    if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.17; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + 8, 8); } }
+    GR.prevSt = GR.st;
     if (G.dG >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
   }
@@ -931,7 +941,7 @@ function ghostUpdate(dt) {
     const sxStar = viewW * 0.64 + Math.sin(G.animT * 0.45) * viewW * 0.02;
     G.sx += (sxStar - G.sx) * Math.min(1, dt * 2.2);
   }
-  G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.34; ghostPuff(false); }
+  G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.24; ghostPuff(false); }
   if (Math.floor(dist / 15.24) > gTarget) ghostFall();   /* passed — he bows out */
 }
 
@@ -1013,7 +1023,7 @@ function startRun() {
   resetWorld();
   px = 60; py = BAND_Y[2]; vy = 0; grounded = plats[0];
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
-  airMove = null; dead = false; hangPlat = null; held = false; pressT = 0; lastHold = 0;
+  airMove = null; dead = false; hangPlat = null; slipPlat = null; slipT = 0; struggleTaps = 0; held = false; pressT = 0; lastHold = 0;
   flipped = false; flipMove = null; landMove = null; landT = 0; puffs = [];
   airGrav = 1; flipArmed = false; rollArmed = false;
   camX = px - viewW * PLAYER_XF; camY = -560; camSmY = -560; zoom = 1; shake = 0;
@@ -1098,6 +1108,7 @@ function gameOver() {
 function press() { kickDecode();
   if (mode === 'title') { if (loadState === 'done') startRun(); return; }
   if (mode !== 'run' || dead) return;
+  if (hangPlat) { struggleTaps++; return; }   /* hanging: taps are the climb struggle (Keith) */
   /* no freeze, no launch: he keeps running while the button is down */
   held = true; pressT = 0;
 }
@@ -1165,8 +1176,15 @@ function update(dt) {
   if (hangPlat) {
     hangT -= dt;
     py = hangPlat.y + 88; vy = 0;
-    if (hangT <= 0) { py = hangPlat.y; grounded = hangPlat; hangPlat = null;
-      landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; landDur = (landTo - landFrom + 1) / landRate; landT = 0; }
+    if (struggleTaps >= HANG_TAPS) {   /* SAVE: he hauls himself up */
+      py = hangPlat.y; grounded = hangPlat; hangPlat = null; score += 2;
+      held = false; pressT = 0;
+      landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; landDur = (landTo - landFrom + 1) / landRate; landT = 0;
+    } else if (hangT <= 0) { slipPlat = hangPlat; hangPlat = null; slipT = 0; }   /* no save: the slip begins */
+  } else if (slipPlat) {
+    slipT += dt;
+    py = slipPlat.y + 88; vy = 0;
+    if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; }   /* fingers go — the Fall 2 plunge (no landing, no grab: airMove stays null) */
   } else if (!grounded) {
     vy += GRAV * airGrav * dt; py += vy * dt; airT += dt;
     /* the flip cue: an armed jump converts at the top of the arc */
@@ -1203,7 +1221,7 @@ function update(dt) {
       if (px + 70 < p.x || px - 40 > p.x + p.len) continue;
       const top = p.y;
       if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
-        hangPlat = p; hangT = 0.30; score += 2; shake = Math.min(10, shake + 4);
+        hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         break;
       }
@@ -1256,6 +1274,8 @@ function drawAnim(move, idx, cx, feetY) {
 const pingpong = (x, n) => { const p = x % (2 * n); return p < n ? p : 2 * n - 1 - p; };
 function playerAnim() {
   if (hangPlat) return { move: 'armsopen', idx: 3 + pingpong(Math.floor(time * 10), 5) };   // dangling swing, never frozen
+  if (slipPlat) { const m = MANIFEST.climbfall ? 'climbfall' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(slipT * 14), MANIFEST[m].n) }; }   // the ledge slip (Climb Attempt and Fall)
+  if (!grounded && !airMove && vy > 260) { const m = MANIFEST.fall2 ? 'fall2' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(time * 14), MANIFEST[m].n) }; }   // the fatal plunge (Fall 2)
   if (!grounded) {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
     if (flipped && flipMove && flipT < MANIFEST[flipMove].n / 30)
@@ -1392,7 +1412,7 @@ function draw() {
      them. Three depths, slowest parallax in the game. */
   if (G && !GR && GMAN) {   /* sea-runner only — the race ghost draws in the world pass, on the real clouds */
     for (const q of G.puffs) {
-      const a = 0.30 * (q.life / q.max); if (a <= 0) continue;
+      const a = 0.38 * (q.life / q.max); if (a <= 0) continue;
       const r = q.r * (1 + (1 - q.life / q.max) * 1.6);
       ctx.save(); ctx.globalAlpha = a;
       ctx.drawImage(puffImg, q.sx - r, q.sy - r, r * 2, r * 2); ctx.restore();
