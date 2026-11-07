@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.25</div>
+  <div id="ver">v0.25.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.25 ==============================
+/* ============================== 6LOUD demo v0.25.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -845,14 +845,18 @@ function grSample(d) {   /* the recorded run, read by DISTANCE: {py, st} at d un
   return { py: F[lo][1] + (F[hi][1] - F[lo][1]) * f, st: F[lo][2] };
 }
 function ghostSource() {
-  /* a replay PERFORMANCE beats a bare distance: global #1 with a replay,
-     else the local best with a replay, else the bare #1 (sea-runner) */
-  const g = (typeof gBoard !== 'undefined' && gBoard && gBoard.length) ? { total: gBoard[0].dist_ft, replay: gBoard[0].replay || null } : null;
+  /* a race that can be PERFORMED beats a bigger bare number: the best
+     entry WITH a replay (global board first, then the local board),
+     else the bare #1 as a sea-runner (widened v0.25.1) */
+  const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
+  const gp = gb.find(e => e.replay);
+  if (gp) return { total: gp.dist_ft, replay: gp.replay };
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  const l = lb.length ? { total: lb[0].s, replay: lb[0].r || null } : null;
-  if (g && g.replay) return g;
-  if (l && l.replay) return l;
-  return g || l;
+  const lp = lb.find(e => e.r);
+  if (lp) return { total: lp.s, replay: lp.r };
+  if (gb.length) return { total: gb[0].dist_ft, replay: null };
+  if (lb.length) return { total: lb[0].s, replay: null };
+  return null;
 }
 function ghostReset(entering) {
   GR = null;
