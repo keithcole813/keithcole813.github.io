@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.28</div>
+  <div id="ver">v0.28.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.28 ==============================
+/* ============================== 6LOUD demo v0.28.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -727,11 +727,16 @@ let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
-let slipPlat = null, slipT = 0, struggleTaps = 0;
+let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0;
 /* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
    rapid jump taps inside the window climb up (SAVE); otherwise he slips
    (climbfall) and the plunge is Fall 2. His eyes lock the final rule. */
 const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
+/* the dangle, measured off the real frames (Keith's yellow outline,
+   v0.28.1): his HANDS belong at the lip, body below the cloud's edge.
+   Hands sit ~300 above his soles in the dangle cycle (bobbing ±25),
+   ~at his center horizontally — so the anchor is the lip itself. */
+const HANG_HANDS = 300, HANG_DX = 8;
 let airGrav = 1, airTotal = 1, flipArmed = false, rollArmed = false, flipped = false, flipMove = null, flipT = 0;
 let lastGroundT = -9;   // coyote clock: when he last had ground under him
 let landMove = null, landFrom = 0, landTo = 0, landRate = 30, landDur = 0;
@@ -1200,7 +1205,8 @@ function update(dt) {
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
-    py = hangPlat.y + 88; vy = 0;
+    px += (hangTX - px) * Math.min(1, dt * 14);
+    py = hangPlat.y + HANG_HANDS - FEET; vy = 0;
     if (struggleTaps >= HANG_TAPS) {   /* SAVE: he hauls himself up */
       py = hangPlat.y; grounded = hangPlat; hangPlat = null; score += 2;
       held = false; pressT = 0;
@@ -1208,7 +1214,8 @@ function update(dt) {
     } else if (hangT <= 0) { slipPlat = hangPlat; hangPlat = null; slipT = 0; }   /* no save: the slip begins */
   } else if (slipPlat) {
     slipT += dt;
-    py = slipPlat.y + 88; vy = 0;
+    px += (hangTX - px) * Math.min(1, dt * 14);
+    py = slipPlat.y + HANG_HANDS - FEET; vy = 0;
     if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; }   /* fingers go — the Fall 2 plunge (no landing, no grab: airMove stays null) */
   } else if (!grounded) {
     vy += GRAV * airGrav * dt; py += vy * dt; airT += dt;
@@ -1247,6 +1254,7 @@ function update(dt) {
       const top = p.y;
       if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
         hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
+        hangTX = p.x - HANG_DX;   /* he eases to the lip: hands on the edge, body outside it */
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         break;
       }
