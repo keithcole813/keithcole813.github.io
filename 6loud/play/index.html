@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.33.5</div>
+  <div id="ver">v0.34</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.33.5 ==============================
+/* ============================== 6LOUD demo v0.34 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -110,7 +110,16 @@ let surgeFlash = 0;   /* LaShmoove's surge: the whole-screen flash of light (Kei
 function chargeFx(dur) { flareT = Math.max(flareT, dur); }
 let altSm = 0, vhNow = 1150;
 let camSmY = 0;   /* slow camera (v0.21): terrain + deep layers follow THIS, so hops don't pump them */   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
-let rawD = null, rawB = null;
+let rawD = null, rawB = null, rawS = null, bufS = null, srcS = null, gainS = null, decS = null;
+/* AUDIO SCENES (Keith v0.34): every run OPENS on the footsteps — his snow-run
+   loop — with NO bg music under them. At 1000 ft, or the moment 6lade starts
+   GAINING on LaShmoove (the late drift, when he closes on the lead), the bg
+   music comes in. When 6lade PASSES him (or breaks the crown), the 2nd bg
+   music takes over. Steps and bg music NEVER play at the same time: one
+   scene, one gain up. The steps themselves are ground-gated — feet on a
+   cloud or silence — like real footsteps. */
+const STEPS_VOL = 0.65;
+let mScene = 'steps', passFired = false, stepsGateOn = null;
 const MUSIC_VOL = 0.5;   /* the bg music sits lower, all the way through both tracks (Keith v0.33) */
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
@@ -119,7 +128,7 @@ function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud 
   const now = actx.currentTime;
   if (now - lastBoomT < 0.4) return;   /* never machine-gun it */
   lastBoomT = now;
-  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 0.9; gainBoom.connect(actx.destination); }
+  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 1.35; gainBoom.connect(actx.destination); }   /* louder (Keith v0.34) */
   const src = actx.createBufferSource(); src.buffer = bufBoom; src.connect(gainBoom); src.start();
 }
 /* v0.13.4 — the silent-first-run fix (Keith: "music doesn't start when
@@ -134,6 +143,7 @@ if (window.fetch) {
   fetch('assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
   fetch('assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
   fetch('assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
+  fetch('assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
 }
 /* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
    still doesn't play until I die"). v0.13.4's flaw: it trusted the
@@ -155,9 +165,10 @@ function kickDecode() {
   if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => {});
   if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => {});
   if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => {});
+  if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => {});
 }
 function playTrack() {
-  const want = champMode ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
+  const want = mScene === 'steps' ? 'assets/steps.mp3' : mScene === 'battle' ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
       gainD = actx.createGain(); gainD.connect(actx.destination);
@@ -167,16 +178,25 @@ function playTrack() {
         srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
       }
     }
+    if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
     const t = actx.currentTime;
-    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(champMode ? 0 : MUSIC_VOL, t, 0.18);
-    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(champMode ? MUSIC_VOL : 0, t, 0.18); }
+    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(mScene === 'day' ? MUSIC_VOL : 0, t, 0.18);
+    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(mScene === 'battle' ? MUSIC_VOL : 0, t, 0.18); }
+    if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? STEPS_VOL : 0, t, 0.05); }
     music.pause();
   } else {
-    if (gainD) { try { gainD.gain.value = 0; if (gainB) gainB.gain.value = 0; } catch (e) {} }
-    music.volume = MUSIC_VOL;
-    if (!(music.src || '').includes(want)) music.src = want;
-    music.currentTime = 0; const p = music.play(); if (p && p.catch) p.catch(() => {});
+    if (gainD) { try { gainD.gain.value = 0; if (gainB) gainB.gain.value = 0; if (gainS) gainS.gain.value = 0; } catch (e) {} }
+    music.volume = mScene === 'steps' ? STEPS_VOL : MUSIC_VOL;
+    if (!(music.src || '').includes(want)) { music.src = want; music.currentTime = 0; }
+    if (mScene === 'steps' && stepsGateOn === false) music.pause();
+    else { const p = music.play(); if (p && p.catch) p.catch(() => {}); }
   }
+}
+function gateSteps() {   /* footsteps sound only while his feet are on a cloud — checked every frame, acts on change */
+  const on = mScene === 'steps' && mode === 'run' && !!grounded && !hangPlat && !slipPlat;
+  if (on === stepsGateOn) return; stepsGateOn = on;
+  if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? STEPS_VOL : 0, actx.currentTime, 0.045);
+  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
 }
 function xfade(toHeat) { playTrack(); }
 
@@ -813,8 +833,6 @@ let dressLow = [];
    runs past 6lade, then holds station AHEAD in the distance. When
    6lade falls, LaShmoove just continues — he is ahead; only being
    CAUGHT (the player passing his record distance) makes him fall. */
-const GPAR = 0.16;
-const GSCALE = 0.55;   /* the ghost's world renders at 55% — far away, same geometry */
 const GSINK = 16;   /* LaShmoove sits IN the cloud like 6lade does (Keith, v0.26.1) — his whole performance rides FEET lower */
 /* ---------- the run recorder (Keith's design, v0.24) ----------------
    Every run is distilled to small data: at 15 Hz, [distance delta,
@@ -837,15 +855,7 @@ function recFinish() {
   lastReplay = (REC && REC.frames.length > 10)
     ? JSON.stringify({ v: 1, total: Math.floor(dist / 15.24), plats: REC.plats, frames: REC.frames }) : null;
 }
-let GMAN = null, GANIM = {}, gReady = false;
-let gLane = [], gLastLx = 0, G = null, gTarget = 0;
-if (window.fetch) fetch('assets/ghost/manifest.json').then(r => r.json()).then(m => {
-  if (!m || !m.run) return; GMAN = m;
-  let loaded = 0;
-  GANIM.run = [];
-  for (let i = 0; i < m.run.n; i++) { const im = new Image(); im.onload = () => { if (++loaded >= m.run.n) gReady = true; }; im.src = 'assets/ghost/run/f' + String(i).padStart(3, '0') + '.webp'; GANIM.run.push(im); }
-  for (const mv of ['runjump', 'diveroll', 'armsopen']) { GANIM[mv] = []; for (let i = 0; i < m[mv].n; i++) { const im = new Image(); im.src = 'assets/ghost/' + mv + '/f' + String(i).padStart(3, '0') + '.webp'; GANIM[mv].push(im); } }
-}).catch(() => {});
+let G = null, gTarget = 0;   /* the bokeh sea-runner set is GONE (Keith v0.34): no record to beat = no LaShmoove at all */
 let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
 /* the NEAR set (v0.25): LaShmoove at nearly full size with a breath of
    softness — same clouds as 6lade, slightly off his plane (Keith). */
@@ -863,7 +873,9 @@ let RACE = null;   /* the parsed replay this run is raced on */
 function prepRace() {
   RACE = null;
   const src = ghostSource();
-  gTarget = src ? src.total : 0;
+  const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
+  const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
+  gTarget = Math.max(gb.length ? gb[0].dist_ft : 0, lb.length ? lb[0].s : 0, src ? src.total : 0);
   if (!src || !src.replay) return;
   try {
     const rp = JSON.parse(src.replay);
@@ -889,44 +901,32 @@ function grSample(d) {   /* the recorded run, read by DISTANCE: {py, st} at d un
 }
 function ghostSource() {
   /* a race that can be PERFORMED beats a bigger bare number: the best
-     entry WITH a replay (global board first, then the local board),
-     else the bare #1 as a sea-runner (widened v0.25.1) */
+     entry WITH a replay (global board first, then the local board).
+     NO replay anywhere = NO LaShmoove (Keith v0.34 — the sea-runner
+     fallback is deleted; a bare score is a number to beat, not a ghost) */
   const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
   const gp = gb.find(e => e.replay);
   if (gp) return { total: gp.dist_ft, replay: gp.replay };
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   const lp = lb.find(e => e.r);
   if (lp) return { total: lp.s, replay: lp.r };
-  if (gb.length) return { total: gb[0].dist_ft, replay: null };
-  if (lb.length) return { total: lb[0].s, replay: null };
   return null;
 }
 function ghostReset(entering) {
   GR = null;
-  if (!gTarget) { G = null; return; }
-  if (RACE) {   /* perform the recording, read by distance */
+  if (!RACE) { G = null; return; }   /* no record to beat: no LaShmoove (Keith v0.34) */
+  {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
     for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
     GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0 };
   }
-  G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: GR ? 'race' : 'sea',
+  G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: 'race',
         animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
-}
-function ghostFeetY() {
-  const base = viewH / zoom * 0.36 - camY * GPAR;
-  if (GR) return base + GR.pyS * GSCALE;
-  return viewH / zoom * 0.84 - camY * GPAR + Math.sin(dist * 0.008) * 5;   /* no replay yet: he runs the cloud sea itself */
-}
-function ghostPuff(big) {
-  if (!G || G.puffs.length > 10) return;
-  if (G.sx < -80 || G.sx > W + 80) return;   /* the sea-runner's trail too: no puffs while he's offstage (v0.33.4) */
-  G.puffs.push({ sx: G.sx - 14, sy: ghostFeetY() + 3, r: big ? 15 : 10, life: 0.5, max: 0.5 });
 }
 function ghostFall() {
   if (!G || G.state === 'fall') return;
   G.state = 'fall'; G.fallVy = -170;
-  if (G.plane === 'race') { G.fallX = px + G.o; G.fallY = GR ? GR.pyS + GSINK : 0; spawnPuff(G.fallX, G.fallY + 6, 16); }
-  else { G.fallY = ghostFeetY(); ghostPuff(true); }
+  G.fallX = px + G.o; G.fallY = GR ? GR.pyS + GSINK : 0; spawnPuff(G.fallX, G.fallY + 6, 16);
 }
 /* Keith's race staging (v0.32): LaShmoove SHADOWS 6lade — behind him,
    pacing at the same speed — for most of the race. Then the surge: a flash
@@ -937,12 +937,10 @@ function ghostFall() {
 const RACE_SHADOW_O = -540, RACE_LEAD_O = 520, RACE_END_O = -350;
 const SURGE_P = 0.52, SURGE_CHARGE_DUR = 0.85;
 function ghostUpdate(dt) {
-  if (!G) { if ((gReady || gLiveReady) && mode === 'run' && runTime < 2.5) ghostReset(true); return; }
+  if (!G) { if (gLiveReady && mode === 'run' && runTime < 2.5) ghostReset(true); return; }
   G.animT += dt;
-  for (let i = G.puffs.length - 1; i >= 0; i--) { const q = G.puffs[i]; q.life -= dt; q.sx -= speed * GPAR * dt * 0.4; if (q.life <= 0) G.puffs.splice(i, 1); }
   if (G.state === 'fall') {   /* his fall finishes even if 6lade wipes out during it */
-    if (G.plane === 'race') { G.fallVy += 3400 * dt; G.fallY += G.fallVy * dt; }
-    else { G.fallVy += 1500 * dt; G.fallY += G.fallVy * dt; }
+    G.fallVy += 3400 * dt; G.fallY += G.fallVy * dt;
     G.fade = Math.max(0, G.fade - dt * 0.45);
     if (G.fade <= 0) G = null;
     return;
@@ -1009,7 +1007,7 @@ function ghostUpdate(dt) {
     GR.prevPerfD = GR.perfD;
     GR.scrub = Math.max(0.6, Math.min(2.7, dt > 0 ? (dPerf / dt) / Math.max(120, grSpeedAt(GR.perfD)) : 1));   /* cap eased with the slower burst (v0.33.4) */
     if (G.o > 150) GR.wasAhead = true;
-    if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; }   /* THE PASS (Keith v0.28) */
+    if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; passFired = true; }   /* THE PASS (Keith v0.28) — and the 2nd bg music (Keith v0.34) */
     if (G.o < -150) GR.passArm = true;
     if (GR.passArm && G.prevO <= 0 && G.o > 0 && G.state !== 'fall') { GR.fireT = 1.4; GR.passArm = false; }   /* HIS pass: the mirror moment — his fire burst (Keith v0.30.1) */
     G.prevO = G.o;
@@ -1035,16 +1033,6 @@ function ghostUpdate(dt) {
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
   }
-  /* no replay: the sea-runner theater (v0.23) */
-  if (G.state === 'enter') {
-    G.sx += (viewW * 0.64 - G.sx) * Math.min(1, dt * 0.8);
-    if (viewW * 0.64 - G.sx < 30) G.state = 'run';
-  } else {
-    const sxStar = viewW * 0.64 + Math.sin(G.animT * 0.45) * viewW * 0.02;
-    G.sx += (sxStar - G.sx) * Math.min(1, dt * 2.2);
-  }
-  G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.20; ghostPuff(false); }
-  if (Math.floor(dist / 15.24) > gTarget) { chargeFx(1.6); ghostFall(); }   /* passed — he bows out, and the pass lights 6lade (Keith v0.28) */
 }
 
 let puffAcc = 0, rollPuffT = 0, flipPuffT = 0;
@@ -1148,6 +1136,7 @@ function startRun() {
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none'; $('ver').style.display = 'none';
   champMode = false; heatOn = false;   /* every run starts on the original beat (Keith's correction): the battle track is per-run, crown moment to wipeout */
+  mScene = 'steps'; passFired = false; stepsGateOn = null;   /* and every run OPENS on the footsteps (Keith v0.34) */
   /* the record this run is chasing: the LOCAL best (Keith v0.15 — the
      celebration is for beating your own mark, not the global board).
      No local record yet = nothing to break. */
@@ -1274,9 +1263,14 @@ function update(dt) {
      the reigning high score, the battle loop crossfades in — and keeps
      going: through the wipeout, into every later run this session. */
   if (!champMode && targetFt > 0 && Math.floor(dist / 15.24) > targetFt) {
-    champMode = true; heatOn = true; xfade(true);
+    champMode = true; heatOn = true; mScene = 'battle'; xfade(true);   /* the crown takes the 2nd bg music directly (Keith v0.34) */
     crownFlash = 1; bannerT = 2.4; shake = Math.max(shake, 15);   /* flash + shake + banner (Keith v0.15) */
   }
+  /* AUDIO SCENE SWITCHES (Keith v0.34): steps -> bg at 1000 ft or when 6lade
+     starts gaining on LaShmoove (his late drift back); bg -> 2nd bg on the pass */
+  { const pf = passFired; passFired = false;
+    if (mode === 'run' && mScene === 'steps' && (Math.floor(dist / 15.24) >= 1000 || (GR && GR.phase === 'late'))) { mScene = 'day'; playTrack(); }
+    if (mode === 'run' && mScene !== 'battle' && pf) { mScene = 'battle'; playTrack(); } }
   if (crownFlash > 0) crownFlash = Math.max(0, crownFlash - dt / 0.5);
   if (surgeFlash > 0) surgeFlash = Math.max(0, surgeFlash - dt / 0.45);
   { const altT = Math.max(0, Math.min(1, (-camY - vhNow * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 1.4); }
@@ -1585,25 +1579,6 @@ function draw() {
      night -> sunrise, sitting on the world's floor behind the cloud
      sea. They sink and fade as he climbs — by the top bands he's above
      them. Three depths, slowest parallax in the game. */
-  if (G && !GR && GMAN) {   /* sea-runner only — the race ghost draws in the world pass, on the real clouds */
-    for (const q of G.puffs) {
-      const a = 0.38 * (q.life / q.max); if (a <= 0) continue;
-      const r = q.r * (1 + (1 - q.life / q.max) * 1.6);
-      ctx.save(); ctx.globalAlpha = a;
-      ctx.drawImage(puffImg, q.sx - r, q.sy - r, r * 2, r * 2); ctx.restore();
-    }
-    let mv = 'run', idx = Math.floor(G.animT * 30) % GMAN.run.n;
-    if (G.state === 'fall') { mv = 'armsopen'; idx = pingpong(Math.floor(G.animT * 10), GMAN.armsopen.n); }
-    const m = GMAN[mv], frames = GANIM[mv], gimg = frames && frames[idx];
-    if (gimg && gimg.naturalWidth) {
-      const gap = (m.gaps && m.gaps[idx]) || 0;
-      const feetLine = m.h - m.offset + Math.max(0, m.offset - gap);
-      const wU = m.w * PX2U, hU = m.h * PX2U;
-      const feetS = G.state === 'fall' ? G.fallY : ghostFeetY();
-      ctx.save(); ctx.globalAlpha = 0.95 * G.fade;
-      ctx.drawImage(gimg, G.sx - wU / 2, feetS - feetLine * PX2U, wU, hU); ctx.restore();
-    }
-  }
   {
     const climb = Math.max(0, -camSmY - viewH / zoom * 0.42);   /* slow camera (v0.21): the fade can't pump with hops either */
     const mFade = Math.max(0, Math.min(1, 1.15 - climb / 650));
@@ -1781,7 +1756,7 @@ function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
   update(dt);
-  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ draw();
+  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); draw();
   requestAnimationFrame(loop);
 }
 resize();
