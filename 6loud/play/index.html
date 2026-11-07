@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.23</div>
+  <div id="ver">v0.20</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.23 ==============================
+/* ============================== 6LOUD demo v0.20 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -105,8 +105,7 @@ const music = $('music');
 let actx = null, bufD = null, bufB = null, srcD = null, srcB = null, gainD = null, gainB = null, heatOn = false;
 let champMode = false, targetFt = 0;
 let crownFlash = 0, bannerT = 0, moteT = 0, motes = [];
-let altSm = 0, vhNow = 1150;
-let camSmY = 0;   /* slow camera (v0.21): terrain + deep layers follow THIS, so hops don't pump them */   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
+let altSm = 0, vhNow = 1150;   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
 let rawD = null, rawB = null;
 /* v0.13.4 — the silent-first-run fix (Keith: "music doesn't start when
    the game starts; it comes after I die and start over"). Cause: the
@@ -776,104 +775,6 @@ for (let i = 0; i < 8; i++) dressMid.push({ img: BGMID[(i * 2) % BGMID.length], 
    lower view shouldn't empty out — a far-below cloud layer fades in
    with altitude and fills the bottom of the frame */
 let dressLow = [];
-/* ---------- the ghost racer: LaShmoove (Keith's design, v0.22) -------
-   An NPC in the distant field, running a choreographed lane of the far
-   clouds. Entrance (Keith): at the start he sprints in from the LEFT,
-   runs past 6lade, then holds station AHEAD in the distance. When
-   6lade falls, LaShmoove just continues — he is ahead; only being
-   CAUGHT (the player passing his record distance) makes him fall. */
-const GPAR = 0.16;
-let GMAN = null, GANIM = {}, gReady = false;
-let gLane = [], gLastLx = 0, G = null, gTarget = 0;
-if (window.fetch) fetch('assets/ghost/manifest.json').then(r => r.json()).then(m => {
-  if (!m || !m.run) return; GMAN = m;
-  let loaded = 0;
-  GANIM.run = [];
-  for (let i = 0; i < m.run.n; i++) { const im = new Image(); im.onload = () => { if (++loaded >= m.run.n) gReady = true; }; im.src = 'assets/ghost/run/f' + String(i).padStart(3, '0') + '.webp'; GANIM.run.push(im); }
-  for (const mv of ['runjump', 'diveroll', 'armsopen']) { GANIM[mv] = []; for (let i = 0; i < m[mv].n; i++) { const im = new Image(); im.src = 'assets/ghost/' + mv + '/f' + String(i).padStart(3, '0') + '.webp'; GANIM[mv].push(im); } }
-}).catch(() => {});
-function ghostTargetFt() {
-  const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  return (typeof gBoard !== 'undefined' && gBoard && gBoard.length) ? gBoard[0].dist_ft : (lb.length ? lb[0].s : 0);
-}
-function ghostGen() {
-  const horizon = camX * GPAR + viewW + 900;
-  while (gLastLx < horizon) {
-    const len = 300 + Math.random() * 280;
-    const prev = gLane[gLane.length - 1];
-    let f = prev ? prev.f + (Math.random() * 0.20 - 0.10) : 0.34;
-    f = Math.max(0.14, Math.min(0.56, f));
-    gLane.push({ lx: gLastLx, top: camY * GPAR - viewH * (0.55 - f), len, f, img: BGFAR[Math.floor(Math.random() * BGFAR.length)] });
-    gLastLx += len + 70 + Math.random() * 110;
-  }
-  while (gLane.length && gLane[0].lx + gLane[0].len < camX * GPAR - 600) gLane.shift();
-}
-function ghostReset(entering) {
-  gTarget = ghostTargetFt();
-  if (!gReady || !gTarget) { G = null; return; }
-  gLane = []; gLastLx = camX * GPAR - 300; ghostGen();
-  const p0 = gLane[0];
-  G = { gx: entering ? camX * GPAR - 260 : camX * GPAR + viewW * 0.64, feetY: p0 ? p0.top : 0, vy: 0,
-        grounded: p0 || null, state: entering ? 'enter' : 'run', rollT: -1, rollCd: 3, animT: Math.random() * 10,
-        airT: 0, fade: 1, puffs: [], puffT: 0 };
-}
-function ghostPuff(big) {
-  if (!G || G.puffs.length > 10) return;
-  G.puffs.push({ x: G.gx + 10, y: G.feetY + 4, r: big ? 16 : 9, life: 0.5, max: 0.5 });
-}
-function ghostUpdate(dt) {
-  if (!G) { if (gReady && mode === 'run' && runTime < 2.5) ghostReset(true); return; }
-  G.animT += dt;
-  for (let i = G.puffs.length - 1; i >= 0; i--) { const q = G.puffs[i]; q.life -= dt; if (q.life <= 0) G.puffs.splice(i, 1); }
-  if (G.state === 'fall') {   /* a caught ghost finishes his fall even if 6lade wipes out mid-fall */
-    G.vy += 2900 * dt; G.feetY += G.vy * dt; G.fade = Math.max(0, G.fade - dt * 0.45);
-    if (G.fade <= 0) G = null;
-    return;
-  }
-  if (mode !== 'run') return;   /* title/over: 6lade is down — LaShmoove just continues, running in the distance (Keith) */
-  ghostGen();
-  let pace = speed * GPAR;
-  if (G.state === 'enter') { pace += 360; if (G.gx - camX * GPAR > viewW * 0.64) G.state = 'run'; }
-  else {
-    /* station-keeping with the catch drift (Keith): 6lade is locked
-       mid-screen, so as his distance closes on the record the ghost
-       can't be passed on screen — instead LaShmoove's station slides
-       from ahead (0.64) back behind the middle (0.42) over the last
-       500 ft, and the moment the distance is passed, he falls. */
-    const gapFt = gTarget - Math.floor(dist / 15.24);
-    const catchT = Math.max(0, Math.min(1, 1 - gapFt / 500));
-    G.catchT = catchT;
-    const sxStar = viewW * (0.64 + (0.42 - 0.64) * catchT) + Math.sin(G.animT * 0.45) * viewW * 0.02;
-    pace += (sxStar - (G.gx - camX * GPAR)) * 0.9;
-  }
-  G.gx += pace * dt;
-  const sup = gLane.find(p => G.gx + 30 >= p.lx && G.gx + 30 <= p.lx + p.len);
-  if (G.grounded && sup !== G.grounded) {
-    const nxt = gLane.find(p => p.lx > G.gx);
-    G.grounded = null;
-    if (nxt && nxt.lx - (G.gx) < 200 && sup !== null) { /* hop the gap */ G.vy = -1180; G.airT = 0; }
-    else if (sup) { G.grounded = sup; G.feetY = sup.top; }
-    else { G.vy = Math.max(G.vy, 0); G.airT = 0; }
-  }
-  if (!G.grounded) {
-    G.airT += dt; G.vy += 2900 * dt; G.feetY += G.vy * dt;
-    if (G.vy > 0) {
-      const land = gLane.find(p => G.gx + 30 >= p.lx && G.gx + 30 <= p.lx + p.len && G.feetY >= p.top && G.feetY - G.vy * dt <= p.top + 40);
-      if (land) { G.feetY = land.top; G.grounded = land; G.vy = 0; ghostPuff(true); }
-    }
-    if (G.feetY - camY * GPAR + viewH * 0.55 > viewH + 320) {   /* missed the lane entirely: quietly rejoin ahead */
-      const p0 = gLane.find(p => p.lx > G.gx + 100) || gLane[gLane.length - 1];
-      if (p0) { G.feetY = p0.top; G.grounded = p0; G.vy = 0; }
-    }
-  } else {
-    G.feetY = G.grounded.top;
-    G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.34; ghostPuff(false); }
-    if (G.rollT < 0 && G.rollCd <= 0 && !G.catchT && G.grounded.len > 470 && (G.grounded.lx + G.grounded.len) - G.gx > 430) G.rollT = 0;   /* no showing off while he's being caught */
-    G.rollCd -= dt;
-  }
-  if (G.rollT >= 0) { G.rollT += dt; if (G.rollT > GMAN.diveroll.n / 30) G.rollT = -1; }
-  if (Math.floor(dist / 15.24) > gTarget) { G.state = 'fall'; G.vy = -320; G.grounded = null; ghostPuff(true); }
-}
 for (let i = 0; i < 4; i++) dressLow.push({ img: BGFAR[(i * 3 + 1) % BGFAR.length], x: Math.random() * 3000, fy: 0.66 + (i % 3) * 0.12 + Math.random() * 0.04, w: 540 + Math.random() * 220 });
 
 /* ---------- helpers ---------- */
@@ -944,7 +845,7 @@ function startRun() {
   airMove = null; dead = false; hangPlat = null; held = false; pressT = 0; lastHold = 0;
   flipped = false; flipMove = null; landMove = null; landT = 0; puffs = [];
   airGrav = 1; flipArmed = false; rollArmed = false;
-  camX = px - viewW * PLAYER_XF; camY = -560; camSmY = -560; zoom = 1; shake = 0;
+  camX = px - viewW * PLAYER_XF; camY = -560; zoom = 1; shake = 0;
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none'; $('ver').style.display = 'none';
   champMode = false; heatOn = false;   /* every run starts on the original beat (Keith's correction): the battle track is per-run, crown moment to wipeout */
@@ -954,7 +855,6 @@ function startRun() {
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = [];
-  ghostReset(!G);   /* first run (or after a catch): he sprints in from the left; if he was never caught, he's still out there ahead */
   playTrack(); kickDecode();
 }
 const SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
@@ -1061,7 +961,6 @@ function update(dt) {
   }
   if (crownFlash > 0) crownFlash = Math.max(0, crownFlash - dt / 0.5);
   { const altT = Math.max(0, Math.min(1, (-camY - vhNow * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 1.4); }
-  camSmY += (camY - camSmY) * Math.min(1, dt * 0.9);
   if (bannerT > 0) bannerT -= dt;
   /* while crowned he CHARGES: blue sparks rise off him (Keith v0.15) */
   if (champMode && mode === 'run') {
@@ -1072,7 +971,6 @@ function update(dt) {
     }
   }
   for (let i = motes.length - 1; i >= 0; i--) { const m = motes[i]; m.y -= 150 * dt; m.life -= dt; if (m.life <= 0) motes.splice(i, 1); }
-  /* ghostUpdate ticks from loop() instead — it must run on the title and wipeout screens too */
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
@@ -1242,46 +1140,6 @@ function draw() {
       if (meteor.x > W + 120) meteor = null;
     }
   }
-  /* SCREEN-SPACE DEEP LAYERS (v0.21) — Keith's second video: the bottom
-     clouds STILL moved with the jump, because inside the world pass they
-     inherit the handy-cam ZOOM (which breathes on floats and grabs) and
-     any residual camera coupling. Out here they answer only to the
-     run's scroll and the smoothed altitude: a hop cannot move them. */
-  {
-    const lowA = Math.max(0, Math.min(1, (altSm - 0.086) / 0.714));
-    if (lowA > 0.01) for (const d of dressLow) {
-      const img = BGIMG['f' + d.img];
-      if (!img || !img.naturalWidth) continue;
-      const wPx = d.w * S;
-      let dx = (d.x * S - camX * 0.30 * S) % (W + wPx + 120); if (dx < -wPx - 120) dx += W + wPx + 120;
-      ctx.save(); ctx.globalAlpha = 0.34 * lowA * (1 - 0.55 * sky.star);
-      ctx.drawImage(img, dx - wPx * 0.5, H * d.fy, wPx, wPx * img.naturalHeight / img.naturalWidth); ctx.restore();
-    }
-  }
-  {
-    const seaSet = ['17', '27', '26', '28', '18'];
-    const base = H * (0.90 - 0.07 * altSm);
-    const billow = wx => base + (18 * Math.sin(wx * 0.006 + 1.3) + 12 * Math.sin(wx * 0.0137 + 4.1) + 7 * Math.sin(wx * 0.031 + 0.7)) * S;
-    const mixc2 = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
-    ctx.save(); ctx.globalAlpha = 0.98 * (1 - 0.35 * sky.star);
-    const dg = ctx.createLinearGradient(0, base - 30 * S, 0, H);
-    dg.addColorStop(0, `rgb(${mixc2(sky.c[3], [255, 255, 255], 0.22)})`);
-    dg.addColorStop(0.5, `rgb(${mixc2(sky.c[2], sky.c[3], 0.4)})`);
-    dg.addColorStop(1, `rgb(${mixc2(sky.c[1], sky.c[2], 0.5)})`);
-    ctx.fillStyle = dg;
-    ctx.beginPath(); ctx.moveTo(-60, H + 80);
-    for (let sx = -60; sx <= W + 60; sx += 30) ctx.lineTo(sx, billow(sx + camX * 0.5 * S));
-    ctx.lineTo(W + 60, H + 80); ctx.closePath(); ctx.fill(); ctx.restore();
-    const sw = W * 0.52, span = sw * 0.66 * seaSet.length;
-    for (let i = 0; i < seaSet.length; i++) {
-      const img = BGIMG['m' + seaSet[i]];
-      if (!img || !img.naturalWidth) continue;
-      const sh = sw * img.naturalHeight / img.naturalWidth;
-      let sx = (i * sw * 0.66 - camX * 0.5 * S) % span; if (sx < -sw) sx += span;
-      ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star);
-      ctx.drawImage(img, sx - sw * 0.1, billow(sx + camX * 0.5 * S + sw * 0.4) - sh * 0.52, sw, sh); ctx.restore();
-    }
-  }
   ctx.save();
   const shx = shake ? (Math.random() - 0.5) * shake : 0, shy = shake ? (Math.random() - 0.5) * shake : 0;
   ctx.translate(shx, shy);
@@ -1306,40 +1164,8 @@ function draw() {
      night -> sunrise, sitting on the world's floor behind the cloud
      sea. They sink and fade as he climbs — by the top bands he's above
      them. Three depths, slowest parallax in the game. */
-  if (G && GMAN) {
-    const nightDimG = 1 - 0.55 * sky.star;
-    for (const p of gLane) {
-      const sx = p.lx - camX * GPAR;
-      if (sx + p.len < -260 || sx > viewW + 260) continue;
-      const img = BGIMG['f' + p.img];
-      if (!img || !img.naturalWidth) continue;
-      const w = p.len * 1.5, h = w * img.naturalHeight / img.naturalWidth;
-      const sy = p.top - camY * GPAR + viewH / zoom * 0.55;
-      ctx.save(); ctx.globalAlpha = 0.55 * G.fade * nightDimG;
-      ctx.drawImage(img, sx - p.len * 0.25, sy - h * 0.30, w, h); ctx.restore();
-    }
-    for (const q of G.puffs) {
-      const a = 0.30 * (q.life / q.max); if (a <= 0) continue;
-      const r = q.r * (1 + (1 - q.life / q.max) * 1.6);
-      ctx.save(); ctx.globalAlpha = a;
-      ctx.drawImage(puffImg, q.x - camX * GPAR - r, q.y - camY * GPAR + viewH / zoom * 0.55 - r, r * 2, r * 2); ctx.restore();
-    }
-    let mv = 'run', idx = Math.floor(G.animT * 30) % GMAN.run.n;
-    if (G.state === 'fall') { mv = 'armsopen'; idx = Math.floor(G.animT * 10) % (GMAN.armsopen.n * 2); if (idx >= GMAN.armsopen.n) idx = GMAN.armsopen.n * 2 - 1 - idx; }
-    else if (G.rollT >= 0) { mv = 'diveroll'; idx = Math.min(GMAN.diveroll.n - 1, Math.floor(G.rollT * 30)); }
-    else if (!G.grounded) { mv = 'runjump'; idx = Math.max(0, Math.min(GMAN.runjump.n - 1, Math.floor(G.airT * 30))); }
-    const m = GMAN[mv], frames = GANIM[mv], gimg = frames && frames[idx];
-    if (gimg && gimg.naturalWidth) {
-      const gap = (m.gaps && m.gaps[idx]) || 0;
-      const feetLine = m.h - m.offset + Math.max(0, m.offset - gap);
-      const wU = m.w * PX2U, hU = m.h * PX2U;
-      const cxS = G.gx - camX * GPAR, feetS = G.feetY - camY * GPAR + viewH / zoom * 0.55;
-      ctx.save(); ctx.globalAlpha = 0.95 * G.fade;
-      ctx.drawImage(gimg, cxS - wU / 2, feetS - feetLine * PX2U, wU, hU); ctx.restore();
-    }
-  }
   {
-    const climb = Math.max(0, -camSmY - viewH / zoom * 0.42);   /* slow camera (v0.21): the fade can't pump with hops either */
+    const climb = Math.max(0, -camY - viewH / zoom * 0.42);
     const mFade = Math.max(0, Math.min(1, 1.15 - climb / 650));
     if (mFade > 0.01) {
       const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
@@ -1350,7 +1176,7 @@ function draw() {
       ];
       const vw2 = viewW / zoom, vh2 = viewH / zoom;
       for (const r of RIDGES) {
-        const baseY = r.base - camSmY * r.pv + vh2 * 0.55;   /* slow camera: no hop-pump (v0.21) */
+        const baseY = r.base - camY * r.pv + vh2 * 0.55;
         if (baseY - r.amp > vh2 + 60) continue;
         ctx.save(); ctx.globalAlpha = r.a * mFade * (1 - 0.35 * sky.star);
         ctx.fillStyle = `rgb(${r.col})`;
@@ -1376,6 +1202,51 @@ function draw() {
     const dy = d.y - camY * 0.38 + viewH / zoom * 0.55;
     ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim;
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+  }
+  /* the depths below: fade in with climb, out at ground level */
+  {
+    const lowA = Math.max(0, Math.min(1, (altSm - 0.086) / 0.714));   /* smoothed — no hop-pump (v0.19.3) */
+    if (lowA > 0.01) for (const d of dressLow) {
+      const img = BGIMG['f' + d.img];
+      if (!img || !img.naturalWidth) continue;
+      let dx = (d.x - camX * 0.30) % (viewW / zoom + 760); if (dx < -760) dx += viewW / zoom + 760;
+      const dy = viewH / zoom * d.fy;
+      ctx.save(); ctx.globalAlpha = 0.34 * lowA * nightDim;
+      ctx.drawImage(img, dx - 380, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
+    }
+  }
+  /* the cloud DECK — v0.18 (Keith, pointing at the mockup's bottom):
+     the effect is a CONTINUOUS banked floor of cloud, not scattered
+     sprites — "it didn't happen by just throwing more clouds at it."
+     So: a filled deck whose billowed top edge is drawn from the live
+     sky palette (gap-free by construction), with the puffy photo
+     clouds riding along its top, overlapped tight so their tops form
+     the billow line. The deck rides a little higher as he climbs. */
+  {
+    const seaSet = ['17', '27', '26', '28', '18'];
+    const vw = viewW / zoom, vh = viewH / zoom;
+    const alt = altSm;
+    const base = vh * (0.90 - 0.07 * alt);   /* was also -camY*0.06: that coupling made the deck bob with every hop (Keith v0.19.3) */
+    const billow = wx => base + 18 * Math.sin(wx * 0.006 + 1.3) + 12 * Math.sin(wx * 0.0137 + 4.1) + 7 * Math.sin(wx * 0.031 + 0.7);
+    const mixc2 = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+    ctx.save(); ctx.globalAlpha = 0.98 * (1 - 0.35 * sky.star);
+    const dg = ctx.createLinearGradient(0, base - 30, 0, vh);
+    dg.addColorStop(0, `rgb(${mixc2(sky.c[3], [255, 255, 255], 0.22)})`);
+    dg.addColorStop(0.5, `rgb(${mixc2(sky.c[2], sky.c[3], 0.4)})`);
+    dg.addColorStop(1, `rgb(${mixc2(sky.c[1], sky.c[2], 0.5)})`);
+    ctx.fillStyle = dg;
+    ctx.beginPath(); ctx.moveTo(-60, vh + 80);
+    for (let sx = -60; sx <= vw + 60; sx += 30) ctx.lineTo(sx, billow(sx + camX * 0.5));
+    ctx.lineTo(vw + 60, vh + 80); ctx.closePath(); ctx.fill(); ctx.restore();
+    const sw = vw * 0.52, span = sw * 0.66 * seaSet.length;
+    for (let i = 0; i < seaSet.length; i++) {
+      const img = BGIMG['m' + seaSet[i]];
+      if (!img || !img.naturalWidth) continue;
+      const sh = sw * img.naturalHeight / img.naturalWidth;
+      let sx = (i * sw * 0.66 - camX * 0.5) % span; if (sx < -sw) sx += span;
+      ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star);
+      ctx.drawImage(img, sx - sw * 0.1, billow(sx + camX * 0.5 + sw * 0.4) - sh * 0.52, sw, sh); ctx.restore();
+    }
   }
   /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
@@ -1484,8 +1355,7 @@ let lastTs = 0;
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
-  update(dt);
-  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ draw();
+  update(dt); draw();
   requestAnimationFrame(loop);
 }
 resize();
