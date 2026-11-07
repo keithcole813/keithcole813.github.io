@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.62</div>
+  <div id="ver">v0.63</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -126,7 +126,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.62 ==============================
+/* ============================== 6LOUD demo v0.63 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -171,7 +171,12 @@ const stpV = () => muted ? 0 : STEPS_VOL;
 function toggleMute() {
   muted = !muted;
   $('muteBtn').textContent = muted ? '🔇' : '🔊';
-  if (mode !== 'title') playTrack();   /* re-apply at once when audio is live (mid-run or the wipeout screen); at title nothing is playing yet */
+  if (mode !== 'title' || titleMusicOn) playTrack();   /* re-apply at once when audio is live — at title too, once the select music is playing (v0.63) */
+}
+let titleMusicOn = false;
+function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "Put bg1 at character selection screen since we have one now"). Browsers gate sound behind a gesture, so this is poked from the title's taps; the load-complete attempt is harmless where autoplay is blocked. */
+  if (mode !== 'title') return;
+  mScene = 'day'; titleMusicOn = true; playTrack();
 }
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
@@ -818,7 +823,7 @@ function titleFlow(dt) {
       setTimeout(() => { $('loadbar').style.display = 'none'; }, 500);
     }
   } else if (loadState === 'turn') {
-    if (time - turnT0 >= 18 / 30) { loadState = 'done'; titleT0 = turnT0 + 18 / 30;
+    if (time - turnT0 >= 18 / 30) { loadState = 'done'; titleMusic(); titleT0 = turnT0 + 18 / 30;
       $('tap').textContent = ''; }   /* the START GAME button is the call to action now (v0.57) */
   }
 }
@@ -856,7 +861,7 @@ const SKINS = {
 let PSKIN = SKINS[selChar];
 const ghostChar = () => selChar === 'lash' ? 'blade' : 'lash';
 function applyChar() { PSKIN = SKINS[selChar]; const cn = $('charName'); if (cn) cn.textContent = PSKIN.name; }
-function cycleChar() { selChar = ghostChar(); try { localStorage.setItem('sixloud_char', selChar); } catch (e) {} applyChar(); }
+function cycleChar() { selChar = ghostChar(); try { localStorage.setItem('sixloud_char', selChar); } catch (e) {} applyChar(); kickDecode(); titleMusic(); }
 applyChar();
 const SINK_MAX = 8;   /* a cloud gives just a tiny bit under a landing, then springs back (Keith v0.29) */
 function gripOf(p) { const cd = CLOUDS[p.img]; return { x: p.x + p.len * GRIP_DX, y: p.y + (p.sink || 0) + p.len * cd.asp * GRIP_FRAC }; }
@@ -1389,7 +1394,7 @@ function backToTitle() {   /* CHANGE RUNNER on the wipeout screen: back to the t
   G = null; GR = null; RACE = null;   /* the next startRun preps a fresh race */
   plats = []; worldEnd = 0; puffs = []; trail = []; motes = [];
   champMode = false; flareT = 0; bannerT = 0; crownFlash = 0; surgeFlash = 0; dead = false; hangPlat = null; slipPlat = null;
-  mScene = 'steps'; stepsGateOn = false; playTrack();   /* silence on both routes: steps scene + gate off */
+  mScene = 'day'; titleMusicOn = true; stepsGateOn = false; playTrack();   /* the select screen plays bg 1 (Keith v0.63) — and the CHANGE RUNNER tap is the gesture that lets it start */
   $('over').style.display = 'none'; $('center').style.display = ''; $('ver').style.display = '';
 }
 function gameOver() {
@@ -1424,7 +1429,7 @@ function gameOver() {
 
 /* ---------- input: ONE button ---------- */
 function press() { kickDecode();
-  if (mode === 'title') return;   /* title taps are inert (Keith v0.57: picking a character started the game) — the START GAME button starts the run */
+  if (mode === 'title') { titleMusic(); return; }   /* title taps are inert (Keith v0.57: picking a character started the game) — the START GAME button starts the run */
   if (mode !== 'run' || dead) return;
   if (hangPlat) { struggleTaps++; return; }   /* hanging: taps are the climb struggle (Keith) */
   /* no freeze, no launch: he keeps running while the button is down */
