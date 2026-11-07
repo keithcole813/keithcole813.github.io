@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.67</div>
+  <div id="ver">v0.68</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -126,7 +126,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.67 ==============================
+/* ============================== 6LOUD demo v0.68 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1483,6 +1483,7 @@ $('muteBtn').addEventListener('click', e => { e.stopPropagation(); toggleMute();
 $('titleBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('titleBtn').addEventListener('click', e => { e.stopPropagation(); backToTitle(); });
 addEventListener('visibilitychange', () => { if (!document.hidden) { kickDecode(); if (mode !== 'title' || titleMusicOn) playTrack(); } });   /* coming back to the tab/app re-kicks the audio at once (v0.67) — the heartbeat covers the rest */
+addEventListener('pointerdown', () => { if (mode === 'title') { kickDecode(); titleMusic(); } }, true);   /* the select music starts on the FIRST tap ANYWHERE (v0.68, Keith: "I should be hearing something on this screen but I don't") — no browser will sound a note before a gesture, and the first tap may land on a dead patch of sky rather than a wired control; capture phase, so it fires ahead of every button's own handler */
 $('charL').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* swapping runners never starts the run (v0.56) */
 $('charL').addEventListener('click', e => { e.stopPropagation(); cycleChar(); });
 $('charR').addEventListener('pointerdown', e => { e.stopPropagation(); });
