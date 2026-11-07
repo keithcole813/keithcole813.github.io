@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.24</div>
+  <div id="ver">v0.24.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.24 ==============================
+/* ============================== 6LOUD demo v0.24.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -815,9 +815,14 @@ if (window.fetch) fetch('assets/ghost/manifest.json').then(r => r.json()).then(m
 }).catch(() => {});
 let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
 function ghostSource() {
-  if (typeof gBoard !== 'undefined' && gBoard && gBoard.length) return { total: gBoard[0].dist_ft, replay: gBoard[0].replay || null };
+  /* a replay PERFORMANCE beats a bare distance: global #1 with a replay,
+     else the local best with a replay, else the bare #1 (sea-runner) */
+  const g = (typeof gBoard !== 'undefined' && gBoard && gBoard.length) ? { total: gBoard[0].dist_ft, replay: gBoard[0].replay || null } : null;
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  return lb.length ? { total: lb[0].s, replay: lb[0].r || null } : null;
+  const l = lb.length ? { total: lb[0].s, replay: lb[0].r || null } : null;
+  if (g && g.replay) return g;
+  if (l && l.replay) return l;
+  return g || l;
 }
 function ghostReset(entering) {
   const src = ghostSource();
