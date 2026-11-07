@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.41</div>
+  <div id="ver">v0.42</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.41 ==============================
+/* ============================== 6LOUD demo v0.42 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -129,7 +129,7 @@ function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud 
   const now = actx.currentTime;
   if (now - lastBoomT < 0.4) return;   /* never machine-gun it */
   lastBoomT = now;
-  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 1.35; gainBoom.connect(actx.destination); }   /* louder (Keith v0.34) */
+  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 1.08; gainBoom.connect(actx.destination); }   /* 1.35 x 0.8 — down 20% (Keith v0.42) */
   const src = actx.createBufferSource(); src.buffer = bufBoom; src.connect(gainBoom); src.start();
 }
 /* v0.13.4 — the silent-first-run fix (Keith: "music doesn't start when
@@ -987,7 +987,7 @@ function ghostUpdate(dt) {
         GR.fireT = Math.max(GR.fireT, 0.45);
         if (GR.surgeT >= SURGE_CHARGE_DUR) { GR.phase = 'burst'; GR.fireT = Math.max(GR.fireT, 1.8); }
       } else if (GR.phase === 'burst') {
-        oT = RACE_LEAD_O * oS; oRate = 900 + 200 * oS;   /* the burst of speed (Keith v0.35: eased again — the run-by was still a little too fast) */
+        oT = RACE_LEAD_O * oS; oRate = 680 + 160 * oS;   /* the burst of speed (Keith v0.42: the run-by was STILL too fast — eased ~25% again; history 1750+450 -> 1500+350 -> 1150+260 -> 900+200 -> here) */
         GR.fireT = Math.max(GR.fireT, 0.8);
       } else if (GR.phase === 'lead') {
         oT = RACE_LEAD_O * oS;   /* a good amount ahead, still on screen: same pace as 6lade */
@@ -1015,7 +1015,7 @@ function ghostUpdate(dt) {
        so a burst reads as sprinting, not skipping. */
     const dPerf = GR.prevPerfD === undefined ? 0 : GR.perfD - GR.prevPerfD;
     GR.prevPerfD = GR.perfD;
-    GR.scrub = Math.max(0.6, Math.min(2.4, dt > 0 ? (dPerf / dt) / Math.max(120, grSpeedAt(GR.perfD)) : 1));   /* cap eased with the slower burst (v0.35) */
+    GR.scrub = Math.max(0.6, Math.min(2.1, dt > 0 ? (dPerf / dt) / Math.max(120, grSpeedAt(GR.perfD)) : 1));   /* cap eased with the slower burst (v0.42) */
     if (G.o > 150) GR.wasAhead = true;
     if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; passFired = true; }   /* THE PASS (Keith v0.28) — and the 2nd bg music (Keith v0.34) */
     if (G.o < -150) GR.passArm = true;
