@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.66</div>
+  <div id="ver">v0.67</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -126,7 +126,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.66 ==============================
+/* ============================== 6LOUD demo v0.67 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1482,6 +1482,7 @@ $('muteBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });   /
 $('muteBtn').addEventListener('click', e => { e.stopPropagation(); toggleMute(); });
 $('titleBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('titleBtn').addEventListener('click', e => { e.stopPropagation(); backToTitle(); });
+addEventListener('visibilitychange', () => { if (!document.hidden) { kickDecode(); if (mode !== 'title' || titleMusicOn) playTrack(); } });   /* coming back to the tab/app re-kicks the audio at once (v0.67) — the heartbeat covers the rest */
 $('charL').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* swapping runners never starts the run (v0.56) */
 $('charL').addEventListener('click', e => { e.stopPropagation(); cycleChar(); });
 $('charR').addEventListener('pointerdown', e => { e.stopPropagation(); });
@@ -2027,6 +2028,7 @@ function resize() {
 addEventListener('resize', resize);
 let lastTs = 0;
 let puShown = false, mbShown = true, charUiShown = true, hudShown = true, sbShown = false;
+let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   if (mode === 'title') titleFlow(dt);
@@ -2041,7 +2043,10 @@ function loop(ts) {
   if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; }
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
-  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); draw();
+  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps();
+  audioBeat += dt;   /* THE AUDIO HEARTBEAT (v0.67, Keith: "after you die and come back the audio is muted even with it set to play"): every half second the live scene re-asserts its routing. Death, the initials keyboard, an app switch, a suspended context resuming a beat late — every one of those could strand the gains or the element on the wrong side of a boundary, and a boundary-only design stays stranded until the NEXT boundary. playTrack is idempotent, so re-asserting it twice a second costs nothing and no stuck state survives longer than half a second. */
+  if (audioBeat > 0.5) { audioBeat = 0; if (mode !== 'title' || titleMusicOn) playTrack(); }
+  draw();
   requestAnimationFrame(loop);
 }
 resize();
