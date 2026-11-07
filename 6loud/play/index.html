@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.31</div>
+  <div id="ver">v0.32</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.31 ==============================
+/* ============================== 6LOUD demo v0.32 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -106,6 +106,7 @@ let actx = null, bufD = null, bufB = null, srcD = null, srcB = null, gainD = nul
 let champMode = false, targetFt = 0;
 let crownFlash = 0, bannerT = 0, moteT = 0, motes = [];
 let flareT = 0;   /* the blue charge, borrowed: passing the ghost + full-charge releases (Keith v0.28) */
+let surgeFlash = 0;   /* LaShmoove's surge: the whole-screen flash of light (Keith v0.32) */
 function chargeFx(dur) { flareT = Math.max(flareT, dur); }
 let altSm = 0, vhNow = 1150;
 let camSmY = 0;   /* slow camera (v0.21): terrain + deep layers follow THIS, so hops don't pump them */   /* smoothed altitude: sustained climbs move the deep layers; single hops average out (Keith v0.19.3) */   /* the crown celebration (Keith v0.15) */   /* the battle track is the CROWN track (Keith, v0.13): it starts the moment the high score breaks and keeps going for the rest of that run; the next run starts back on the original beat */
@@ -892,7 +893,7 @@ function ghostReset(entering) {
   if (RACE) {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
     for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
-    GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false };
+    GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0 };
   }
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: GR ? 'race' : 'sea',
         animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
@@ -912,7 +913,14 @@ function ghostFall() {
   if (G.plane === 'race') { G.fallX = px + G.o; G.fallY = GR ? GR.pyS + GSINK : 0; spawnPuff(G.fallX, G.fallY + 6, 16); }
   else { G.fallY = ghostFeetY(); ghostPuff(true); }
 }
-const RACE_KEYS = [[0, -650], [0.18, -380], [0.38, 80], [0.58, 520], [0.78, 500], [0.9, 120], [1.0, -350], [1.12, -350]];
+/* Keith's race staging (v0.32): LaShmoove SHADOWS 6lade — behind him,
+   pacing at the same speed — for most of the race. Then the surge: a flash
+   of light, the handycam pushes in tight, he CHARGES in fire and bursts
+   past. Once he holds a good lead, still on screen, he settles back to
+   6lade's pace and the camera breathes back out to normal. Only as his
+   record runs out does he drift back the old way. */
+const RACE_SHADOW_O = -540, RACE_LEAD_O = 520, RACE_END_O = -350;
+const SURGE_P = 0.52, SURGE_CHARGE_DUR = 0.85;
 function ghostUpdate(dt) {
   if (!G) { if ((gReady || gLiveReady) && mode === 'run' && runTime < 2.5) ghostReset(true); return; }
   G.animT += dt;
@@ -944,14 +952,30 @@ function ghostUpdate(dt) {
       GR.perfD += grSpeedAt(GR.perfD) * dt;
       G.oArc = GR.perfD - dist;
     } else {
-      let oT = -350 * oS;
-      for (let k = 0; k < RACE_KEYS.length - 1; k++) {
-        const a = RACE_KEYS[k], b = RACE_KEYS[k + 1];
-        if (p >= a[0] && p <= b[0]) { const f = (p - a[0]) / ((b[0] - a[0]) || 1); oT = (a[1] + (b[1] - a[1]) * (f * f * (3 - 2 * f))) * oS; break; }
+      if (!GR.phase) { GR.phase = 'shadow'; GR.surgeT = 0; }
+      let oT = RACE_SHADOW_O * oS, oRate = 200 + 300 * oS;
+      if (GR.phase === 'shadow') {
+        if (p >= SURGE_P) {   /* the surge begins: flash, charge, ignition puffs */
+          GR.phase = 'charge'; GR.surgeT = 0; surgeFlash = 1; shake = Math.max(shake, 9);
+          GR.fireT = Math.max(GR.fireT, SURGE_CHARGE_DUR + 1.8);
+          for (let k = 0; k < 12; k++) spawnPuff(px + G.o - 22 + Math.random() * 44, GR.pyS + GSINK + 6, 10 + Math.random() * 7);
+        }
+      } else if (GR.phase === 'charge') {
+        GR.surgeT += dt;   /* still pacing behind 6lade while the fire builds */
+        GR.fireT = Math.max(GR.fireT, 0.45);
+        if (GR.surgeT >= SURGE_CHARGE_DUR) { GR.phase = 'burst'; GR.fireT = Math.max(GR.fireT, 1.8); }
+      } else if (GR.phase === 'burst') {
+        oT = RACE_LEAD_O * oS; oRate = 1750 + 450 * oS;   /* the burst of speed */
+        GR.fireT = Math.max(GR.fireT, 0.8);
+      } else if (GR.phase === 'lead') {
+        oT = RACE_LEAD_O * oS;   /* a good amount ahead, still on screen: same pace as 6lade */
+        if (p >= 0.9) GR.phase = 'late';
+      } else {   /* late: his record is running out — slow and drift back */
+        oT = RACE_END_O * oS;
       }
-      const oRate = 200 + 300 * oS;
       G.oArc += Math.max(-oRate * dt, Math.min(oRate * dt, oT - G.oArc));
       GR.perfD = dist + G.oArc;
+      if (GR.phase === 'burst' && G.oArc >= RACE_LEAD_O * oS - 6) GR.phase = 'lead';
     }
     G.o = GR.perfD - dist;
     G.dG = GR.perfD;
@@ -968,12 +992,12 @@ function ghostUpdate(dt) {
     GR.pyS = sm.py;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(dist / 15.24)) / 500));
     if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
-      for (let k = 0; k < 6; k++) spawnPuff(px + G.o - 14 + Math.random() * 24, GR.pyS + GSINK + 4, 9 + Math.random() * 6);
+      for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6);
     }
     if (GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
-      for (let k = 0; k < 6; k++) spawnPuff(px + G.o - 14 + Math.random() * 24, GR.pyS + GSINK + 4, 9 + Math.random() * 6);
+      for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6);
     }
-    if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.145; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 9); } }
+    if (GR.st === 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.125; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 10); } }
     if (GR.st === 0) { const gp = plats.find(q => GR.perfD >= q.x - 20 && GR.perfD <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29) */
     GR.prevSt = GR.st;
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
@@ -1000,7 +1024,7 @@ const puffImgB = (() => { const c = document.createElement('canvas'); c.width = 
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(170,215,255,0.95)'); gr.addColorStop(0.6, 'rgba(80,160,255,0.45)'); gr.addColorStop(1, 'rgba(60,140,255,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();
-function spawnPuff(x, y, r) { if (puffs.length < 56)   /* some puffs back (Keith 2026-11-06) — still under the choking levels */ puffs.push({ x, y, r, life: 0.5, max: 0.5 }); }
+function spawnPuff(x, y, r) { if (puffs.length < 68)   /* a little more puff (Keith v0.32) — still under the choking levels */ puffs.push({ x, y, r, life: 0.58, max: 0.58 }); }
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 
 /* ---------- world building ---------- */
@@ -1081,7 +1105,7 @@ function startRun() {
      No local record yet = nothing to break. */
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = lb.length ? lb[0].s : 0;
-  crownFlash = 0; bannerT = 0; motes = []; flareT = 0;
+  crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0;
   ghostReset(!G);   /* first run (or after a catch): he sprints in from the left; if he was never caught, he's still out there ahead */
   playTrack(); kickDecode();
 }
@@ -1176,7 +1200,7 @@ function release() {
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
   /* white puffs kick off the cloud at takeoff */
-  for (let k = 0; k < 9; k++) spawnPuff(px - 28 + k * 8, py + 12, 9 + Math.random() * 8);   // takeoff burst (Keith: a little more puff, v0.28)
+  for (let k = 0; k < 11; k++) spawnPuff(px - 30 + k * 7, py + 12, 10 + Math.random() * 8);   // takeoff burst (a little more puff, Keith v0.32)
   zoom = Math.min(1.05, zoom + 0.03);
 }
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
@@ -1206,6 +1230,7 @@ function update(dt) {
     crownFlash = 1; bannerT = 2.4; shake = Math.max(shake, 15);   /* flash + shake + banner (Keith v0.15) */
   }
   if (crownFlash > 0) crownFlash = Math.max(0, crownFlash - dt / 0.5);
+  if (surgeFlash > 0) surgeFlash = Math.max(0, surgeFlash - dt / 0.45);
   { const altT = Math.max(0, Math.min(1, (-camY - vhNow * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 1.4); }
   camSmY += (camY - camSmY) * Math.min(1, dt * 0.9);
   if (bannerT > 0) bannerT -= dt;
@@ -1257,7 +1282,7 @@ function update(dt) {
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
         py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
-        p.sinkV = (p.sinkV || 0) + Math.min(430, fallV * 0.17);   /* the landing thump dips it */
+        p.sinkV = (p.sinkV || 0) + Math.min(500, fallV * 0.20);   /* the landing thump dips it (a little more bounce, Keith v0.32) */
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed) {
@@ -1267,7 +1292,7 @@ function update(dt) {
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
           else { landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; }
           landDur = (landTo - landFrom + 1) / landRate; landT = 0;
-          for (let k = 0; k < 9; k++) spawnPuff(px - 30 + k * 8, py + 12, 10 + Math.random() * 9);   // landing burst (a little more, v0.28)
+          for (let k = 0; k < 11; k++) spawnPuff(px - 32 + k * 7, py + 12, 11 + Math.random() * 9);   // landing burst (a little more puff, Keith v0.32)
         }
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
         if (hard) { shake = Math.min(14, shake + 9); }
@@ -1301,17 +1326,17 @@ function update(dt) {
     if (grounded === p) w = 1;
     if (hangPlat === p || slipPlat === p) w = Math.max(w, 0.55);
     if (p.ghostOn) { w = Math.max(w, 1); p.ghostOn = false; }
-    p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 90 - (p.sinkV || 0) * 11) * dt;
+    p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 104 - (p.sinkV || 0) * 9.2) * dt;   /* livelier spring: it bounces back past level now (Keith v0.32) */
     p.sink = (p.sink || 0) + (p.sinkV || 0) * dt;
-    if (p.sink < -2.5) { p.sink = -2.5; p.sinkV = 0; }
-    if (p.sink > SINK_MAX + 3.5) { p.sink = SINK_MAX + 3.5; p.sinkV = 0; }
+    if (p.sink < -4.2) { p.sink = -4.2; p.sinkV = 0; }
+    if (p.sink > SINK_MAX + 4.5) { p.sink = SINK_MAX + 4.5; p.sinkV = 0; }
   }
   if (grounded) walkT += dt;
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
   if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
-  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 82) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 9 + Math.random() * 7); } }   // foot fog — a step denser than perfect, short of the choking stream
-  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.06; spawnPuff(px - 8, py + 12, 10 + Math.random() * 6); } }   // roll-landing trail
+  if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 74) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 10 + Math.random() * 7); } }   // foot fog — a little denser (Keith v0.32), short of the choking stream
+  if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.05; spawnPuff(px - 8, py + 12, 11 + Math.random() * 6); } }   // roll-landing trail
   /* sky trail REMOVED at Keith's order 2026-11-06 (v0.8.7): still chopping with it in. */
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= 13 * dt; q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   /* extend the world ahead, prune behind */
@@ -1319,9 +1344,11 @@ function update(dt) {
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
   /* camera: follows, eases out as speed climbs, shake decays */
   const ledgeBeat = hangPlat || slipPlat;
-  const targetZoom = ledgeBeat ? 1.5 + Math.sin(time * 1.3) * 0.02 : 1 - Math.min(0.12, (speed - 620) / 4400);
-  zoom += (targetZoom - zoom) * Math.min(1, dt * (ledgeBeat ? 5 : 2.2));
+  const surgeBeat = !!(GR && G && G.plane === 'race' && (GR.phase === 'charge' || GR.phase === 'burst'));
+  const targetZoom = ledgeBeat ? 1.62 + Math.sin(time * 1.3) * 0.02 : surgeBeat ? 1.36 + Math.sin(time * 7.5) * 0.018 : 1 - Math.min(0.12, (speed - 620) / 4400);   /* hang zoom in a little more (Keith v0.32); the surge push-in is tighter than cruise but looser than the ledge close-up */
+  zoom += (targetZoom - zoom) * Math.min(1, dt * (ledgeBeat ? 5 : surgeBeat ? 4.2 : 2.2));
   if (ledgeBeat) shake = Math.max(shake, 1.8);   /* handy-cam tremble: the close-up is alive, never a locked frame */
+  else if (surgeBeat) shake = Math.max(shake, 1.1);
   camX = px - (viewW / zoom) * PLAYER_XF;
   const wantY = py - viewH / zoom * 0.58;
   camY += (wantY - camY) * Math.min(1, dt * 5);
@@ -1664,6 +1691,10 @@ function draw() {
      an action callout */
   if (crownFlash > 0) {
     ctx.save(); ctx.globalAlpha = crownFlash * 0.5; ctx.fillStyle = '#fff6d8';
+    ctx.fillRect(0, 0, W, H); ctx.restore();
+  }
+  if (surgeFlash > 0) {   /* LaShmoove's surge ignition: a flash of light across the whole screen (Keith v0.32) */
+    ctx.save(); ctx.globalAlpha = surgeFlash * 0.55; ctx.fillStyle = '#fff3c4';
     ctx.fillRect(0, 0, W, H); ctx.restore();
   }
   if (bannerT > 0) {
