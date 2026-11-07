@@ -70,7 +70,7 @@
   <div id="center">
     <div id="tap">TAP TO START</div>
   </div>
-  <div id="ver">v0.39</div>
+  <div id="ver">v0.40</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -83,7 +83,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.39 ==============================
+/* ============================== 6LOUD demo v0.40 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -180,7 +180,7 @@ function playTrack() {
     }
     if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
     const t = actx.currentTime;
-    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime((mScene === 'day' || mScene === 'intro') ? MUSIC_VOL : 0, t, 0.18);
+    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(mScene === 'day' ? MUSIC_VOL : 0, t, 0.18);
     if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(mScene === 'battle' ? MUSIC_VOL : 0, t, 0.18); }
     if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? STEPS_VOL : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     music.pause();
@@ -999,7 +999,7 @@ function ghostUpdate(dt) {
       GR.perfD = dist + G.oArc;
       if (GR.phase === 'burst' && G.oArc >= RACE_LEAD_O * oS - 6) GR.phase = 'lead';
       if (GR.phase === 'closein' && G.oArc >= RACE_CLOSE_O * oS - 4) {   /* arrived, right behind him: NOW the flash, the fire, the ignition (Keith v0.35) */
-        GR.phase = 'charge'; GR.surgeT = 0; surgeFlash = 1; shake = Math.max(shake, 9);
+        GR.phase = 'charge'; GR.surgeT = 0; surgeFlash = 1; shake = Math.max(shake, 9); GR.leadMusic = true;   /* bg music 1 starts THIS instant — the charge itself, not the completed pass (Keith v0.40) */
         GR.fireT = Math.max(GR.fireT, SURGE_CHARGE_DUR + 1.8);
         for (let k = 0; k < 12; k++) spawnPuff(px + G.o - 22 + Math.random() * 44, GR.pyS + GSINK + 6, 10 + Math.random() * 7);
       }
@@ -1018,7 +1018,7 @@ function ghostUpdate(dt) {
     if (G.o > 150) GR.wasAhead = true;
     if (GR.wasAhead && G.prevO >= 0 && G.o < 0 && G.state !== 'fall') { chargeFx(1.6); GR.wasAhead = false; passFired = true; }   /* THE PASS (Keith v0.28) — and the 2nd bg music (Keith v0.34) */
     if (G.o < -150) GR.passArm = true;
-    if (GR.passArm && G.prevO <= 0 && G.o > 0 && G.state !== 'fall') { GR.fireT = 1.4; GR.passArm = false; GR.leadMusic = true; }   /* HIS pass: the fire burst (Keith v0.30.1) — and bg music 1 comes in here (Keith v0.37) */
+    if (GR.passArm && G.prevO <= 0 && G.o > 0 && G.state !== 'fall') { GR.fireT = 1.4; GR.passArm = false; }   /* HIS pass: the fire burst (Keith v0.30.1) */
     G.prevO = G.o;
     const sm = grSample(GR.perfD);
     if (sm.st !== GR.st) { GR.st = sm.st; GR.stT = 0; GR.pick = ((GR.pick || 0) + 1) % 2; }
@@ -1150,7 +1150,7 @@ function startRun() {
   mode = 'run';
   $('center').style.display = 'none'; $('over').style.display = 'none'; $('ver').style.display = 'none';
   champMode = false; heatOn = false;   /* every run starts on the original beat (Keith's correction): the battle track is per-run, crown moment to wipeout */
-  mScene = 'intro'; passFired = false; stepsGateOn = null;   /* every run opens on the bg music, which fades to the footsteps at 100 ft (Keith v0.35) */
+  mScene = 'steps'; passFired = false; stepsGateOn = null;   /* every run opens on the SNOW STEPS alone — bg music 1 does NOT play at the start (Keith v0.40, reversing the v0.35 intro) */
   /* the record this run is chasing: the LOCAL best (Keith v0.15 — the
      celebration is for beating your own mark, not the global board).
      No local record yet = nothing to break. */
@@ -1282,12 +1282,12 @@ function update(dt) {
     crownFlash = 1; bannerT = 2.4; shake = Math.max(shake, 15);   /* flash + shake + banner (Keith v0.15) */
   }
   /* AUDIO SCENE SWITCHES (Keith v0.37): the footsteps carry the chase until
-     LaShmoove CHARGES AND PASSES — bg 1 comes in there and holds while he is
+     LaShmoove CHARGES — bg 1 starts the instant he lights up (Keith v0.40;
+     v0.37 had it on the completed pass) and holds while he is
      in front; when 6lade charges to pass him, bg 2 takes over. (The v0.34
      1000-ft / gaining triggers are retired.) No race = no LaShmoove moment:
      the steps run until the crown (bg 2) or the wipeout screen (bg 1). */
   { const pf = passFired; passFired = false;
-    if (mode === 'run' && mScene === 'intro' && Math.floor(dist / 15.24) >= 100) { mScene = 'steps'; playTrack(); }   /* the intro bg fades out to the footsteps at 100 ft (Keith v0.35) */
     if (mode === 'run' && mScene === 'steps' && GR && GR.leadMusic) { mScene = 'day'; playTrack(); }
     if (mode === 'run' && mScene !== 'battle' && pf) { mScene = 'battle'; playTrack(); } }
   if (crownFlash > 0) crownFlash = Math.max(0, crownFlash - dt / 0.5);
@@ -1417,8 +1417,8 @@ function update(dt) {
   while (plats.length && plats[0].x + plats[0].len < camX - 500) plats.shift();
   /* camera: follows, eases out as speed climbs, shake decays */
   const ledgeBeat = hangPlat || slipPlat;
-  const targetZoom = ledgeBeat ? 1.62 + Math.sin(time * 1.3) * 0.02 : 1 - Math.min(0.12, (speed - 620) / 4400);   /* hang zoom in a little more (Keith v0.32). NO zoom on LaShmoove's pass (Keith v0.33.1: the surge push-in made the whole screen do something weird — regular camera through the pass) */
-  zoom += (targetZoom - zoom) * Math.min(1, dt * (ledgeBeat ? 5 : 2.2));
+  const targetZoom = 1 - Math.min(0.12, (speed - 620) / 4400);   /* NO zoom on the hang anymore (Keith v0.40: 'Dont zoom in when he hangs' — reverses his v0.27/v0.32 close-up; the screen still stops and the handy-cam tremble stays. Same no-zoom rule as LaShmoove's pass, v0.33.1) */
+  zoom += (targetZoom - zoom) * Math.min(1, dt * 2.2);
   if (ledgeBeat) shake = Math.max(shake, 1.8);   /* handy-cam tremble: the close-up is alive, never a locked frame */
   camX = px - (viewW / zoom) * PLAYER_XF;
   const wantY = py - viewH / zoom * 0.58;
