@@ -71,7 +71,6 @@
          background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:12px 30px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #b3541e; }
   #ver { position:absolute; left:0; bottom:2.2%; width:100%; text-align:center; font-size:13px; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.55); text-shadow:0 1px 6px rgba(0,0,0,.45); pointer-events:none; }
-  #muteBtn { position:absolute; top:calc(10px + env(safe-area-inset-top)); right:14px; z-index:9; width:46px; height:46px; border-radius:50%; border:2px solid #ffdd67; background:rgba(22,11,41,.72); font-size:20px; line-height:1; cursor:pointer; pointer-events:auto; }   /* pointer-events:auto is the house rule — #ui is pointer-events:none, so every tappable child must opt back in (.btn and #ini always did). The mute button was born without it in v0.53 and never took a tap; same for the v0.56 carousel and v0.57 start button until v0.59. */
   #charL, #charR { position:absolute; top:53.5%; z-index:9; width:52px; height:74px; border:0; padding:0; cursor:pointer; pointer-events:auto; background:linear-gradient(180deg,#ffd94d,#ff9d2e); filter:drop-shadow(0 3px 0 rgba(20,8,0,.55)) drop-shadow(0 0 14px rgba(255,170,40,.35)); }
   #charL { left:8px; clip-path:polygon(0 50%, 100% 0, 100% 100%); }
   #charR { right:8px; clip-path:polygon(100% 50%, 0 0, 0 100%); }
@@ -107,12 +106,11 @@
   <div id="center">
     <div id="tap"></div>
   </div>
-  <button id="muteBtn" aria-label="Toggle sound">🔊</button>
   <button id="charL" aria-label="Previous character"></button>
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.68</div>
+  <div id="ver">v0.69</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -126,7 +124,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.68 ==============================
+/* ============================== 6LOUD demo v0.69 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -165,14 +163,8 @@ let rawD = null, rawB = null, rawS = null, bufS = null, srcS = null, gainS = nul
 const STEPS_VOL = 0.65;
 let mScene = 'steps', passFired = false, stepsGateOn = null;
 const MUSIC_VOL = 0.35;   /* bg music level, both tracks — pulled down from 0.5 (Keith v0.53); the steps (0.65) and the boom (1.08) stay where they are, per his word */
-let muted = false;   /* the loading-screen sound toggle (Keith v0.53): default ON; muting silences music, steps, and boom together */
-const musV = () => muted ? 0 : MUSIC_VOL;
-const stpV = () => muted ? 0 : STEPS_VOL;
-function toggleMute() {
-  muted = !muted;
-  $('muteBtn').textContent = muted ? '🔇' : '🔊';
-  if (mode !== 'title' || titleMusicOn) playTrack();   /* re-apply at once when audio is live — at title too, once the select music is playing (v0.63) */
-}
+const musV = () => MUSIC_VOL;   /* audio is simply ON (Keith v0.69: the sound controls are REMOVED — "the user just uses their phone"). There is no mute state anywhere anymore: the v0.53 toggle and its whole bug family (dead button, stuck silence, silent-after-death) are deleted, and these levels are constants the heartbeat can only ever re-assert as audible. */
+const stpV = () => STEPS_VOL;
 let pendingSave = null;   /* set by gameOver: saves a qualifying score before EITHER exit from the board screen (v0.64) */
 let titleMusicOn = false;
 function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "Put bg1 at character selection screen since we have one now"). Browsers gate sound behind a gesture, so this is poked from the title's taps; the load-complete attempt is harmless where autoplay is blocked. */
@@ -181,7 +173,6 @@ function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "
 }
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
-  if (muted) return;   /* the sound toggle silences the boom too (v0.53) */
   boomT++;   /* the trigger fired (the harness counts these even with no audio stack) */
   if (!actx || !bufBoom || actx.state !== 'running') return;   /* same proven route as the music: WebAudio only when it's alive */
   const now = actx.currentTime;
@@ -244,14 +235,13 @@ function playTrack() {
     if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
       if (!(music.src || '').includes('assets/steps.mp3')) { music.src = 'assets/steps.mp3'; music.currentTime = 0; }
-      if (!muted && stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
+      if (stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
     } else music.pause();
   } else {
-    /* do NOT zero the WebAudio gains here (the v0.62 stuck-silence fix): if the context is merely suspended, those gains are inaudible anyway — and wiping them left the game silent-but-unmuted after the context resumed, because nothing re-applies gains until a scene boundary. The gains keep their last scene/mute values and the routes hand off cleanly. */
+    /* do NOT zero the WebAudio gains here (the v0.62 stuck-silence fix): if the context is merely suspended, those gains are inaudible anyway — and wiping them left the game silent-but-unmuted after the context resumed, because nothing re-applies gains until a scene boundary. The gains keep their last scene values and the routes hand off cleanly. */
     music.volume = mScene === 'steps' ? stpV() : musV();
     if (!(music.src || '').includes(want)) { music.src = want; music.currentTime = 0; }
-    if (muted) music.pause();   /* iOS ignores element.volume, so on this route mute has to be a real pause */
-    else if (mScene === 'steps' && stepsGateOn === false) music.pause();
+    if (mScene === 'steps' && stepsGateOn === false) music.pause();
     else { const p = music.play(); if (p && p.catch) p.catch(() => {}); }
   }
 }
@@ -259,7 +249,7 @@ function gateSteps() {   /* footsteps sound only while his feet are on a cloud �
   const on = mScene === 'steps' && mode === 'run' && !!grounded && !hangPlat && !slipPlat;
   if (on === stepsGateOn) return; stepsGateOn = on;
   if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
-  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on && !muted) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
+  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
 }
 function xfade(toHeat) { playTrack(); }
 
@@ -1478,8 +1468,6 @@ function release() {
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) press(); } });
 addEventListener('keyup', e => { if (e.code === 'Space') release(); });
 cv.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
-$('muteBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* tapping the toggle never starts the run (v0.53) */
-$('muteBtn').addEventListener('click', e => { e.stopPropagation(); toggleMute(); });
 $('titleBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('titleBtn').addEventListener('click', e => { e.stopPropagation(); backToTitle(); });
 addEventListener('visibilitychange', () => { if (!document.hidden) { kickDecode(); if (mode !== 'title' || titleMusicOn) playTrack(); } });   /* coming back to the tab/app re-kicks the audio at once (v0.67) — the heartbeat covers the rest */
@@ -2028,7 +2016,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false, mbShown = true, charUiShown = true, hudShown = true, sbShown = false;
+let puShown = false, charUiShown = true, hudShown = true, sbShown = false;
 let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
@@ -2036,8 +2024,6 @@ function loop(ts) {
   update(dt);
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
-  const mb = true;   /* the sound toggle lives EVERYWHERE now (Keith v0.60: title-only meant restarting the whole app to unmute mid-game). It was title-only in v0.53; the button is fenced from the canvas, so a mid-run tap never jumps or drops a charge. */
-  if (mb !== mbShown) { mbShown = mb; $('muteBtn').style.display = mb ? 'block' : 'none'; }
   const cu = mode === 'title';   /* the carousel lives on the title screen only (v0.56) — it gets its OWN flag: it used to borrow mb (the sound toggle's), which was title-only until v0.60 made the toggle always-visible and silently kept the arrows + name on every screen (Keith's screenshots, fixed v0.65) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('charName').style.display = cu ? 'block' : 'none'; }
   const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
