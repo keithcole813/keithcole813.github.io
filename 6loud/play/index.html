@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.61</div>
+  <div id="ver">v0.62</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -120,12 +120,13 @@
     <div id="board"></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
     <button class="btn" id="again">RUN AGAIN</button>
+    <button class="btn" id="titleBtn" style="margin-top:10px;">CHANGE RUNNER</button>
   </div>
 </div>
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.61 ==============================
+/* ============================== 6LOUD demo v0.62 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -237,10 +238,11 @@ function playTrack() {
     if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     music.pause();
   } else {
-    if (gainD) { try { gainD.gain.value = 0; if (gainB) gainB.gain.value = 0; if (gainS) gainS.gain.value = 0; } catch (e) {} }
+    /* do NOT zero the WebAudio gains here (the v0.62 stuck-silence fix): if the context is merely suspended, those gains are inaudible anyway — and wiping them left the game silent-but-unmuted after the context resumed, because nothing re-applies gains until a scene boundary. The gains keep their last scene/mute values and the routes hand off cleanly. */
     music.volume = mScene === 'steps' ? stpV() : musV();
     if (!(music.src || '').includes(want)) { music.src = want; music.currentTime = 0; }
-    if (mScene === 'steps' && stepsGateOn === false) music.pause();
+    if (muted) music.pause();   /* iOS ignores element.volume, so on this route mute has to be a real pause */
+    else if (mScene === 'steps' && stepsGateOn === false) music.pause();
     else { const p = music.play(); if (p && p.catch) p.catch(() => {}); }
   }
 }
@@ -248,7 +250,7 @@ function gateSteps() {   /* footsteps sound only while his feet are on a cloud �
   const on = mScene === 'steps' && mode === 'run' && !!grounded && !hangPlat && !slipPlat;
   if (on === stepsGateOn) return; stepsGateOn = on;
   if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
-  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
+  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on && !muted) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
 }
 function xfade(toHeat) { playTrack(); }
 
@@ -1382,6 +1384,14 @@ function renderBoard() {
 /* Footsteps audio REMOVED for good (Keith 2026-11-06): his isolation
    tests pinned the chop on the steps audio itself — every no-steps build
    ran smooth, every steps build chopped. Music only. */
+function backToTitle() {   /* CHANGE RUNNER on the wipeout screen: back to the title and its character select without restarting the app (Keith v0.62) */
+  mode = 'title';
+  G = null; GR = null; RACE = null;   /* the next startRun preps a fresh race */
+  plats = []; worldEnd = 0; puffs = []; trail = []; motes = [];
+  champMode = false; flareT = 0; bannerT = 0; crownFlash = 0; surgeFlash = 0; dead = false; hangPlat = null; slipPlat = null;
+  mScene = 'steps'; stepsGateOn = false; playTrack();   /* silence on both routes: steps scene + gate off */
+  $('over').style.display = 'none'; $('center').style.display = ''; $('ver').style.display = '';
+}
 function gameOver() {
   mode = 'over'; dead = true;
   mScene = 'day'; playTrack();   /* the initials screen plays the 1st bg music (Keith v0.35) */
@@ -1460,6 +1470,8 @@ addEventListener('keyup', e => { if (e.code === 'Space') release(); });
 cv.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
 $('muteBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* tapping the toggle never starts the run (v0.53) */
 $('muteBtn').addEventListener('click', e => { e.stopPropagation(); toggleMute(); });
+$('titleBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
+$('titleBtn').addEventListener('click', e => { e.stopPropagation(); backToTitle(); });
 $('charL').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* swapping runners never starts the run (v0.56) */
 $('charL').addEventListener('click', e => { e.stopPropagation(); cycleChar(); });
 $('charR').addEventListener('pointerdown', e => { e.stopPropagation(); });
