@@ -15,7 +15,7 @@
   html, body { margin:0; padding:0; height:100%; background:#17102e; overflow:hidden; }
   #c { display:block; width:100vw; height:100vh; touch-action:none; -webkit-user-select:none; user-select:none; }
   #ui { position:fixed; inset:0; pointer-events:none; font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif; color:#fff; }
-  #hud { position:absolute; top:calc(10px + env(safe-area-inset-top)); left:14px; right:14px; display:flex; justify-content:space-between; align-items:flex-start; }
+  #hud { position:absolute; top:calc(10px + env(safe-area-inset-top)); left:14px; right:14px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; }
   .hudbox { background:rgba(20,10,40,.38); border:2px solid rgba(255,255,255,.35); border-radius:12px; padding:6px 12px; }
   /* v0.16 — distance is the hero (Keith: "I don't even care about the
      score, to me distance is more important"): the mockup's plaque —
@@ -71,7 +71,7 @@
          background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:12px 30px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #b3541e; }
   #ver { position:absolute; left:0; bottom:2.2%; width:100%; text-align:center; font-size:13px; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.55); text-shadow:0 1px 6px rgba(0,0,0,.45); pointer-events:none; }
-  #muteBtn { position:absolute; top:14px; right:14px; z-index:9; width:46px; height:46px; border-radius:50%; border:2px solid #ffdd67; background:rgba(22,11,41,.72); font-size:20px; line-height:1; cursor:pointer; pointer-events:auto; }   /* pointer-events:auto is the house rule — #ui is pointer-events:none, so every tappable child must opt back in (.btn and #ini always did). The mute button was born without it in v0.53 and never took a tap; same for the v0.56 carousel and v0.57 start button until v0.59. */
+  #muteBtn { position:absolute; top:calc(10px + env(safe-area-inset-top)); right:14px; z-index:9; width:46px; height:46px; border-radius:50%; border:2px solid #ffdd67; background:rgba(22,11,41,.72); font-size:20px; line-height:1; cursor:pointer; pointer-events:auto; }   /* pointer-events:auto is the house rule — #ui is pointer-events:none, so every tappable child must opt back in (.btn and #ini always did). The mute button was born without it in v0.53 and never took a tap; same for the v0.56 carousel and v0.57 start button until v0.59. */
   #charL, #charR { position:absolute; top:53.5%; z-index:9; width:52px; height:74px; border:0; padding:0; cursor:pointer; pointer-events:auto; background:linear-gradient(180deg,#ffd94d,#ff9d2e); filter:drop-shadow(0 3px 0 rgba(20,8,0,.55)) drop-shadow(0 0 14px rgba(255,170,40,.35)); }
   #charL { left:8px; clip-path:polygon(0 50%, 100% 0, 100% 100%); }
   #charR { right:8px; clip-path:polygon(100% 50%, 0 0, 0 100%); }
@@ -112,7 +112,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="charName">6LADE</div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.60</div>
+  <div id="ver">v0.61</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -125,7 +125,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.60 ==============================
+/* ============================== 6LOUD demo v0.61 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
