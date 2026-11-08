@@ -116,7 +116,7 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.69.2</div>
+  <div id="ver">v0.70</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -130,7 +130,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.69.2 ==============================
+/* ============================== 6LOUD demo v0.70 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -702,6 +702,7 @@ const MANIFEST = {
  }
 };
 const LASH_MANIFEST = {"run": {"n": 19, "w": 312, "h": 405, "offset": 13, "gaps": [16, 22, 34, 19, 11, 7, 5, 6, 9, 17, 28, 34, 25, 13, 14, 9, 4, 7, 13]}, "armsopen": {"n": 31, "w": 328, "h": 525, "offset": 10, "gaps": [8, 9, 10, 10, 18, 32, 48, 70, 100, 131, 158, 174, 185, 191, 193, 191, 182, 168, 149, 129, 106, 83, 60, 37, 18, 7, 8, 11, 13, 15, 16]}, "basic": {"n": 31, "w": 328, "h": 525, "offset": 10, "gaps": [6, 6, 7, 8, 10, 16, 16, 17, 19, 22, 26, 30, 32, 31, 27, 23, 18, 14, 13, 15, 15, 15, 13, 12, 10, 9, 8, 9, 10, 10, 18]}, "runjump": {"n": 49, "w": 505, "h": 571, "offset": 82, "gaps": [63, 73, 88, 104, 122, 142, 164, 189, 218, 252, 275, 255, 235, 213, 190, 165, 140, 115, 90, 67, 59, 49, 49, 53, 61, 59, 79, 81, 85, 39, 23, 10, 4, 10, 23, 38, 54, 72, 80, 80, 81, 82, 83, 82, 82, 82, 82, 83, 82]}, "flip": {"n": 16, "w": 505, "h": 571, "offset": 82, "gaps": [189, 218, 252, 275, 255, 235, 213, 190, 165, 140, 115, 90, 67, 59, 49, 49]}, "diveroll": {"n": 65, "w": 460, "h": 517, "offset": 71, "gaps": [82, 83, 79, 77, 91, 107, 135, 157, 157, 155, 152, 154, 177, 225, 260, 253, 248, 238, 213, 208, 226, 258, 289, 258, 215, 174, 128, 90, 74, 75, 76, 78, 82, 85, 88, 74, 65, 59, 58, 58, 54, 29, 12, 4, 7, 16, 31, 50, 40, 27, 18, 12, 13, 17, 30, 47, 65, 79, 78, 77, 77, 76, 75, 74, 74]}, "diveflip": {"n": 18, "w": 460, "h": 517, "offset": 71, "gaps": [157, 155, 152, 154, 177, 225, 260, 253, 248, 238, 213, 208, 226, 258, 289, 258, 215, 174]}, "roll3": {"n": 40, "w": 465, "h": 421, "offset": 14, "gaps": [18, 19, 20, 30, 57, 44, 26, 14, 7, 15, 6, 5, 12, 25, 38, 45, 49, 54, 46, 29, 21, 13, 4, 5, 7, 8, 9, 9, 9, 8, 9, 10, 11, 12, 14, 16, 14, 12, 12, 14]}, "roll4": {"n": 79, "w": 350, "h": 361, "offset": 9, "gaps": [8, 7, 5, 4, 6, 11, 19, 23, 21, 18, 14, 12, 12, 12, 12, 13, 16, 7, 8, 20, 33, 36, 36, 38, 36, 35, 40, 37, 34, 24, 18, 10, 6, 6, 10, 13, 15, 16, 19, 20, 22, 24, 24, 24, 25, 24, 22, 22, 24, 29, 35, 36, 34, 28, 18, 13, 11, 8, 7, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9]}, "front": {"n": 19, "w": 312, "h": 405, "offset": 13, "gaps": [16, 22, 34, 19, 11, 7, 5, 6, 9, 17, 28, 34, 25, 13, 14, 9, 4, 7, 13]}, "turn": {"n": 18, "w": 312, "h": 405, "offset": 13, "gaps": [16, 22, 34, 19, 11, 7, 6, 6, 9, 17, 28, 34, 25, 13, 14, 9, 4, 7]}};
+const YORO_MANIFEST = {"run": {"n": 19, "w": 300, "h": 413, "offset": 10, "gaps": [4, 10, 25, 25, 22, 15, 9, 8, 9, 10, 14, 34, 22, 23, 23, 9, 7, 6, 5]}, "armsopen": {"n": 31, "w": 291, "h": 482, "offset": 15, "gaps": [4, 5, 6, 9, 19, 36, 52, 74, 102, 131, 155, 169, 178, 182, 183, 181, 172, 160, 144, 124, 104, 82, 60, 38, 18, 6, 5, 7, 10, 11, 12]}, "basic": {"n": 31, "w": 291, "h": 482, "offset": 15, "gaps": [10, 9, 10, 10, 12, 14, 16, 17, 20, 23, 26, 31, 37, 40, 38, 34, 29, 23, 19, 16, 13, 11, 8, 6, 4, 4, 4, 5, 6, 9, 19]}, "runjump": {"n": 49, "w": 447, "h": 514, "offset": 15, "gaps": [24, 32, 43, 57, 74, 91, 112, 134, 159, 190, 220, 199, 179, 159, 141, 123, 107, 92, 78, 66, 54, 42, 42, 30, 26, 19, 18, 26, 29, 33, 39, 33, 30, 19, 16, 10, 7, 5, 4, 4, 4, 4, 4, 5, 7, 9, 12, 15, 16]}, "flip": {"n": 16, "w": 447, "h": 514, "offset": 15, "gaps": [134, 159, 190, 220, 199, 179, 159, 141, 123, 107, 92, 78, 66, 54, 42, 42]}, "diveroll": {"n": 65, "w": 446, "h": 460, "offset": 7, "gaps": [13, 16, 23, 33, 49, 65, 91, 107, 108, 110, 112, 117, 137, 184, 212, 206, 198, 199, 209, 227, 243, 245, 224, 202, 153, 112, 66, 30, 7, 7, 9, 10, 13, 19, 26, 34, 40, 43, 42, 34, 27, 23, 23, 23, 25, 29, 33, 34, 39, 39, 34, 20, 15, 9, 7, 5, 4, 5, 6, 7, 8, 9, 10, 10, 10]}, "diveflip": {"n": 18, "w": 446, "h": 460, "offset": 7, "gaps": [108, 110, 112, 117, 137, 184, 212, 206, 198, 199, 209, 227, 243, 245, 224, 202, 153, 112]}, "roll3": {"n": 40, "w": 427, "h": 421, "offset": 14, "gaps": [17, 17, 18, 30, 54, 53, 42, 27, 21, 27, 39, 54, 68, 79, 83, 72, 56, 46, 42, 26, 17, 15, 14, 14, 11, 9, 8, 6, 4, 4, 7, 8, 9, 11, 14, 16, 16, 16, 17, 20]}, "roll4": {"n": 79, "w": 319, "h": 362, "offset": 7, "gaps": [4, 4, 4, 5, 15, 13, 11, 9, 8, 8, 8, 10, 14, 18, 21, 23, 27, 41, 67, 92, 89, 88, 88, 88, 89, 84, 79, 68, 58, 50, 42, 34, 31, 30, 28, 27, 25, 24, 22, 21, 21, 22, 21, 21, 21, 21, 21, 21, 22, 23, 23, 23, 21, 14, 9, 7, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]}, "front": {"n": 19, "w": 300, "h": 413, "offset": 10, "gaps": [4, 10, 25, 25, 22, 15, 9, 8, 9, 10, 14, 34, 22, 23, 23, 9, 7, 6, 5]}, "turn": {"n": 18, "w": 300, "h": 413, "offset": 10, "gaps": [4, 10, 25, 25, 22, 15, 9, 8, 9, 10, 14, 34, 22, 23, 23, 9, 7, 6]}};
 /* ---------- asset loader: small batches, timeouts, retries ----------
    Firing 360 requests at once at a home server over a tunnel leaves most
    of them hanging forever — that was Keith's stuck-at-15% screen with no
@@ -740,6 +741,15 @@ for (const mv of Object.keys(LASH_MANIFEST)) {
   LASH_ANIM[mv] = new Array(LASH_MANIFEST[mv].n);
   for (let i = 0; i < LASH_MANIFEST[mv].n; i++)
     queueImg(im => { LASH_ANIM[mv][i] = im; }, 'assets/lash/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
+}
+/* Yorokobi's player set (v0.70) — same queue, same core gate. She never
+   ghosts (Keith: when she runs, LaShmoove is the ghost), so she needs
+   no ghost-treated set. */
+const YORO_ANIM = {};
+for (const mv of Object.keys(YORO_MANIFEST)) {
+  YORO_ANIM[mv] = new Array(YORO_MANIFEST[mv].n);
+  for (let i = 0; i < YORO_MANIFEST[mv].n; i++)
+    queueImg(im => { YORO_ANIM[mv][i] = im; }, 'assets/yoro/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* cloud platform art: measured surface line (fraction of drawn height) + aspect */
 const CLOUDS = {
@@ -846,6 +856,7 @@ const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
 const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.19, GRIP_DX = 0.04;   /* 0.55 -> 0.19 in v0.69.2: the floor dropped +0.36, so the grip fraction drops the same amount and his hands stay on the SAME point of the cloud image */
 const HANDS_DANGLE = { 3: 269, 4: 292, 5: 315, 6: 324, 7: 323 };   /* hand height per dangle frame, measured off the shipped art */
 const LASH_DANGLE = { 3: 268, 4: 299, 5: 323, 6: 332, 7: 329 };   /* LaShmoove's dangle: 6lade's table scaled per-frame by his measured figure extent (v0.56) */
+const YORO_DANGLE = { 3: 252, 4: 263, 5: 273, 6: 281, 7: 292 };   /* Yorokobi's dangle, MEASURED from her shipped frames (v0.70): the table-to-pixel-extent factor is per-frame and agrees between 6lade's and LaShmoove's sets to ~0.001 (idx3 .646, idx4 .657, idx5 .677, idx6 .702, idx7 .746); her extents (390/400/403/401/391) x those factors give this table */
 /* character select (Keith v0.56): two runners, identical physics and
    moves — the pick is looks only, and it is remembered. The runner you
    don't pick performs the ghost on race runs. Title phases included:
@@ -856,7 +867,15 @@ let selChar = 'blade';
 try { const c0 = localStorage.getItem('sixloud_char'); if (c0 === 'lash' || c0 === 'yoro') selChar = c0; } catch (e) {}
 const SKINS = {
   blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE' },
-  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE' }
+  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE' },
+  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI' }
+};
+/* each runner burns in their OWN color (Keith: 6lade blue + LaShmoove fire, v0.56; Yorokobi PURPLE, v0.70).
+   pstreak = the ground streaks a runner stamps AS THE PLAYER while lit — LaShmoove and Yorokobi carry theirs; 6lade has none. */
+const CHAR_FX = {
+  blade: { halo: 'rgba(70,160,255,0.95)', trail: 'blue', streak: 'streakB', pstreak: null, ember: rise => 'rgba(' + Math.round(110 + 120 * (1 - rise)) + ',175,255,1)' },
+  lash: { halo: 'rgba(255,110,25,0.95)', trail: 'ember', streak: 'fire', pstreak: 'fire', ember: rise => 'rgba(255,' + Math.round(120 + 110 * (1 - rise)) + ',40,1)' },
+  yoro: { halo: 'rgba(178,102,255,0.95)', trail: 'purple', streak: 'streakP', pstreak: 'streakP', ember: rise => 'rgba(' + Math.round(150 + 82 * (1 - rise)) + ',' + Math.round(70 + 120 * (1 - rise)) + ',255,1)' }
 };
 let PSKIN = SKINS[selChar];
 const ghostChar = () => selChar === 'lash' ? 'blade' : 'lash';
@@ -1181,8 +1200,8 @@ function ghostUpdate(dt) {
       for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6, 140);
     }
     if (GR.st === 0 && GR.perfD >= 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.125; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 13 + Math.random() * 6, 150); } }   /* no fog before his run starts (v0.47) */
-    else { gTrailAcc -= dt; if (gTrailAcc <= 0) { gTrailAcc = 0.024; pushTrail(px + G.o, GR.pyS + GSINK - 92, (GR.fireT > 0 || GR.chgSm > 0.3) ? (ghostChar() === 'lash' ? 'ember' : 'blue') : 'plain');   /* his air trail tints with HIS color while he burns (v0.56) */ } }   /* his jumps trail light too */
-    if (GR.st === 0 && (GR.fireT > 0 || GR.chgSm > 0.3)) { fTrailAcc -= dt; if (fTrailAcc <= 0) { fTrailAcc = 0.016; pushTrail(px + G.o - 46, GR.pyS + GSINK - 92 + (Math.random() * 44 - 22), ghostChar() === 'lash' ? 'fire' : 'streakB');   /* ground streaks in the ghost's own color (v0.56) */ } }   /* charged and running by: golden fire streaks stream behind him, like the icon (Keith v0.35) */
+    else { gTrailAcc -= dt; if (gTrailAcc <= 0) { gTrailAcc = 0.024; pushTrail(px + G.o, GR.pyS + GSINK - 92, (GR.fireT > 0 || GR.chgSm > 0.3) ? CHAR_FX[ghostChar()].trail : 'plain');   /* his air trail tints with HIS color while he burns (v0.56) */ } }   /* his jumps trail light too */
+    if (GR.st === 0 && (GR.fireT > 0 || GR.chgSm > 0.3)) { fTrailAcc -= dt; if (fTrailAcc <= 0) { fTrailAcc = 0.016; pushTrail(px + G.o - 46, GR.pyS + GSINK - 92 + (Math.random() * 44 - 22), CHAR_FX[ghostChar()].streak);   /* ground streaks in the ghost's own color (v0.56) */ } }   /* charged and running by: golden fire streaks stream behind him, like the icon (Keith v0.35) */
     if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; his feet in world x, v0.52) */
     GR.prevSt = GR.st;
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
@@ -1203,6 +1222,11 @@ const puffImgF = (() => { const c = document.createElement('canvas'); c.width = 
   const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
   gr.addColorStop(0, 'rgba(255,214,110,0.95)'); gr.addColorStop(0.55, 'rgba(255,132,38,0.5)'); gr.addColorStop(1, 'rgba(255,90,20,0)');
   x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();   /* gold, for the fire streaks */
+const puffImgP = (() => { const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'); const gr = x.createRadialGradient(32, 32, 2, 32, 32, 31);
+  gr.addColorStop(0, 'rgba(226,190,255,0.95)'); gr.addColorStop(0.55, 'rgba(168,110,255,0.5)'); gr.addColorStop(1, 'rgba(130,60,255,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c; })();   /* purple, for Yorokobi's streaks (Keith v0.70) */
+function puffFor(c) { return c === 'lash' ? puffImgF : c === 'yoro' ? puffImgP : puffImgB; }
 function onCam(x, y) { const hw = W / 2 / (S * zoom) + 240, hh = H / 2 / (S * zoom) + 240; return Math.abs(x - px) <= hw && Math.abs(y - camY) <= hh; }
 /* THE JUMP LIGHT-TRAIL (Keith v0.33.5): the takeoff puff stays, then a short chem trail of soft
    light hangs along the arc — about 3 ft of it — and dissolves. Dots are world-fixed (the arc
@@ -1211,7 +1235,7 @@ function onCam(x, y) { const hw = W / 2 / (S * zoom) + 240, hh = H / 2 / (S * zo
    heavy; this one is built cheap from the start). Blue while 6lade is lit. */
 const TRAIL_LIFE = 0.17;
 let trail = [];
-function pushTrail(x, y, kind) { if (trail.length >= 220 || !onCam(x, y)) return; const L = (kind === 'fire' || kind === 'streakB') ? 0.3 : TRAIL_LIFE; trail.push({ x, y, life: L, max: L, kind }); }
+function pushTrail(x, y, kind) { if (trail.length >= 220 || !onCam(x, y)) return; const L = (kind === 'fire' || kind === 'streakB' || kind === 'streakP') ? 0.3 : TRAIL_LIFE; trail.push({ x, y, life: L, max: L, kind }); }
 function spawnPuff(x, y, r, rise) {
   if (puffs.length >= 68) return;   /* a little more puff (Keith v0.32) — still under the choking levels */
   /* OFFSCREEN CULL (Keith v0.33.4: "is lashmoove drawing puffs offscreen?" — he WAS: his stride fog and
@@ -1687,8 +1711,8 @@ function update(dt) {
   /* foot fog: a puff every 90 units of running, a wisp while rolling out */
   if (grounded && !landMove) { puffAcc += speed * dt; if (puffAcc > 56) { puffAcc = 0; spawnPuff(px - 16 + Math.random() * 10, py + 12, 12 + Math.random() * 8, 150); }   /* more puffs per step, rising clear of the deep floor (Keith v0.69.2) */ }   // foot fog — a little denser (Keith v0.32), short of the choking stream
   if (grounded && landMove && landMove !== 'basic' && landMove !== 'armsopen') { rollPuffT -= dt; if (rollPuffT <= 0) { rollPuffT = 0.05; spawnPuff(px - 8, py + 12, 11 + Math.random() * 6, 120); } }   // roll-landing trail
-  if (selChar === 'lash' && grounded && !landMove && (champMode || flareT > 0) && mode === 'run') { pStreakAcc -= dt; if (pStreakAcc <= 0) { pStreakAcc = 0.016; pushTrail(px - 46, py + FEET - 92 + (Math.random() * 44 - 22), 'fire'); } }   /* LaShmoove lit on the ground streaks fire behind him — the signature he carries as the ghost, now his as the player too (v0.56) */
-  if (!grounded && !hangPlat && !slipPlat && mode === 'run') { pTrailAcc -= dt; if (pTrailAcc <= 0) { pTrailAcc = 0.024; pushTrail(px - 6, py - 100, (champMode || flareT > 0) ? (selChar === 'lash' ? 'ember' : 'blue') : 'plain');   /* the trail wears the PLAYER's color (v0.56) */ } }   /* airborne: the light trail lays along his arc */
+  if (CHAR_FX[selChar].pstreak && grounded && !landMove && (champMode || flareT > 0) && mode === 'run') { pStreakAcc -= dt; if (pStreakAcc <= 0) { pStreakAcc = 0.016; pushTrail(px - 46, py + FEET - 92 + (Math.random() * 44 - 22), CHAR_FX[selChar].pstreak); } }   /* a lit runner who carries ground streaks stamps them in her/his own color — LaShmoove's fire (v0.56), Yorokobi's purple (v0.70); 6lade has none */   /* LaShmoove lit on the ground streaks fire behind him — the signature he carries as the ghost, now his as the player too (v0.56) */
+  if (!grounded && !hangPlat && !slipPlat && mode === 'run') { pTrailAcc -= dt; if (pTrailAcc <= 0) { pTrailAcc = 0.024; pushTrail(px - 6, py - 100, (champMode || flareT > 0) ? CHAR_FX[selChar].trail : 'plain');   /* the trail wears the PLAYER's color (v0.56) */ } }   /* airborne: the light trail lays along his arc */
   /* sky trail REMOVED at Keith's order 2026-11-06 (v0.8.7): still chopping with it in. */
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt; q.r += 26 * dt; q.y -= (13 + (q.vy || 0)) * dt;   /* ground puffs RISE now (v0.69.2, Keith): with the floor deep, a puff that stays at his feet is buried in the cloud — it has to billow up high enough to be seen above the step */ q.x -= 26 * dt; if (q.life <= 0) puffs.splice(i, 1); }
   for (let i = trail.length - 1; i >= 0; i--) { const q = trail[i]; q.life -= dt; if (q.life <= 0) trail.splice(i, 1); }   /* trail dots hang in the world and dissolve */
@@ -1924,8 +1948,8 @@ function draw() {
     ctx.drawImage(img, dx - 410, dy, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
   for (const q of trail) { const la = Math.max(0, q.life / q.max);
-    if (q.kind === 'fire' || q.kind === 'streakB') { const r = 15 + 22 * (1 - la); ctx.save(); ctx.globalAlpha = 0.55 * la; ctx.drawImage(q.kind === 'fire' ? puffImgF : puffImgB, q.x - camX - r * 2.6, q.y - camY - r * 0.55, r * 5.2, r * 1.1); ctx.restore(); }   /* a streak, stretched long — gold for LaShmoove, blue for 6lade */   /* a golden streak, stretched long */
-    else { const r = 12 + 30 * (1 - la); ctx.save(); ctx.globalAlpha = 0.5 * la; ctx.drawImage(q.kind === 'blue' ? puffImgB : q.kind === 'ember' ? puffImgF : puffImg, q.x - camX - r, q.y - camY - r, r * 2, r * 2); ctx.restore(); } }   /* the light trail, behind the runners */
+    if (q.kind === 'fire' || q.kind === 'streakB' || q.kind === 'streakP') { const r = 15 + 22 * (1 - la); ctx.save(); ctx.globalAlpha = 0.55 * la; ctx.drawImage(q.kind === 'fire' ? puffImgF : q.kind === 'streakP' ? puffImgP : puffImgB, q.x - camX - r * 2.6, q.y - camY - r * 0.55, r * 5.2, r * 1.1); ctx.restore(); }   /* a streak, stretched long — gold for LaShmoove, blue for 6lade */   /* a golden streak, stretched long */
+    else { const r = 12 + 30 * (1 - la); ctx.save(); ctx.globalAlpha = 0.5 * la; ctx.drawImage(q.kind === 'blue' ? puffImgB : q.kind === 'ember' ? puffImgF : q.kind === 'purple' ? puffImgP : puffImg, q.x - camX - r, q.y - camY - r, r * 2, r * 2); ctx.restore(); } }   /* the light trail, behind the runners */
   if (G && GR && GSKIN.man && (G.state === 'fall' || GR.perfD >= 0)) {   /* not drawn before his run starts — the player is still on the staircase (v0.47) */
     const gm = ghostMove(); const mv = gm.mv, idx = gm.idx;
     const m = GSKIN.man[mv], frames = GSKIN.anim[mv], gimg = frames && frames[idx];
@@ -1937,12 +1961,12 @@ function draw() {
       const fx = (G.state === 'fall' ? G.fallX : px + G.o) - camX, fy = (G.state === 'fall' ? G.fallY : GR.pyS + GSINK) - camY;
       if (GR.chgSm > 0.03) {   /* he was CHARGED here in his original run — his charge burns FIRE, not 6lade's blue (Keith v0.30) */
         ctx.save(); ctx.globalAlpha = 0.96 * G.fade * GR.chgSm;
-        ctx.shadowColor = ghostChar() === 'lash' ? 'rgba(255,110,25,0.95)' : 'rgba(70,160,255,0.95)'; ctx.shadowBlur = 26 + 10 * Math.sin(time * 9);   /* the ghost burns in HIS character's color (v0.56) */
+        ctx.shadowColor = CHAR_FX[ghostChar()].halo; ctx.shadowBlur = 26 + 10 * Math.sin(time * 9);   /* the ghost burns in HIS character's color (v0.56) */
         ctx.drawImage(gimg, fx - m.w * K / 2, fy - feetLine * K, m.w * K, m.h * K); ctx.restore();
         if (GR.chgSm > 0.3) for (let k = 0; k < 7; k++) {   /* embers off him while he burns */
           const seed = k * 1.71, rise = (time * 0.85 + seed) % 1;
           ctx.save(); ctx.globalAlpha = 0.8 * GR.chgSm * (1 - rise);
-          ctx.fillStyle = ghostChar() === 'lash' ? 'rgba(255,' + Math.round(120 + 110 * (1 - rise)) + ',40,1)' : 'rgba(' + Math.round(110 + 120 * (1 - rise)) + ',175,255,1)';
+          ctx.fillStyle = CHAR_FX[ghostChar()].ember(rise);
           ctx.beginPath(); ctx.arc(fx + Math.sin(seed * 7 + time * 2.6) * (16 + rise * 22), fy - 8 - rise * 165, 3.4 * (1 - rise) + 1, 0, 7); ctx.fill(); ctx.restore();
         }
       }
@@ -1982,13 +2006,13 @@ function draw() {
       /* the Shinobi Brawl blue charge (Keith v0.15): a pulsing electric
          halo pass under the clean sprite pass */
       ctx.save();
-      ctx.shadowColor = selChar === 'lash' ? 'rgba(255,110,25,0.95)' : 'rgba(70,160,255,0.95)';   /* the player's charge wears HIS color: fire for LaShmoove, blue for 6lade (v0.56) */
+      ctx.shadowColor = CHAR_FX[selChar].halo;   /* the player's charge wears HIS color: fire for LaShmoove, blue for 6lade (v0.56) */
       ctx.shadowBlur = 30 + 12 * Math.sin(time * 9);
       drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET + (pa.feetAdj || 0));
       ctx.restore();
       for (const m of motes) {
         ctx.save(); ctx.globalAlpha = 0.75 * Math.max(0, m.life / m.max);
-        ctx.drawImage(selChar === 'lash' ? puffImgF : puffImgB, m.x - camX - m.r, m.y - camY - m.r, m.r * 2, m.r * 2); ctx.restore();
+        ctx.drawImage(puffFor(selChar), m.x - camX - m.r, m.y - camY - m.r, m.r * 2, m.r * 2); ctx.restore();
       }
     }
     drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET + (pa.feetAdj || 0));
