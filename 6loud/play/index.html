@@ -120,12 +120,6 @@
              text-align:center; pointer-events:none; transition:opacity .45s ease; z-index:5; }
   #loadpct { font-weight:900; letter-spacing:2px; color:#ffe9a8; font-size:19px; margin-bottom:8px;
              text-shadow:0 2px 10px rgba(0,0,0,.55); }
-  #track { position:relative; height:26px; background:rgba(22,11,41,.6); border:2px solid #ffdd67; border-radius:13px; }
-  #fill { height:100%; width:0%; background:linear-gradient(90deg,#ffdd67,#f7b731); border-radius:11px;
-          position:relative; transition:width .15s ease-out; }
-  #cap { position:absolute; right:-18px; top:-17px; width:58px; pointer-events:none;
-         filter:drop-shadow(0 3px 3px rgba(0,0,0,.3)); animation:capbob 1.5s ease-in-out infinite alternate; }
-  @keyframes capbob { from { transform:translateX(0) scale(1); } to { transform:translateX(3px) scale(1.05); } }
   @keyframes pulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.07); opacity:.85; } }
 </style>
 </head>
@@ -146,8 +140,8 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.73.1</div>
-  <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
+  <div id="ver">v0.73.2</div>
+  <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
@@ -160,7 +154,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.73.1 ==============================
+/* ============================== 6LOUD demo v0.73.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -850,11 +844,10 @@ const smooth01 = t => t * t * (3 - 2 * t);
 function titleFlow(dt) {
   if (loadState === 'loading') {
     const pct = coreTotal ? Math.floor(coreLoaded / coreTotal * 100) : 0;
-    $('fill').style.width = pct + '%';
     $('loadpct').textContent = 'LOADING ' + pct + '%';
     $('tap').textContent = '';
     if (coreLoaded >= coreTotal) { loadState = 'ready'; readyT = 0;
-      $('fill').style.width = '100%'; $('loadpct').textContent = 'READY!'; }
+      $('loadpct').textContent = 'READY!'; }
   } else if (loadState === 'ready') {
     readyT += dt;
     if (readyT > 0.3 && Math.floor(time * 30) % PSKIN.man.front.n === 0) {
@@ -919,6 +912,7 @@ function applyChar() { PSKIN = SKINS[selChar]; const cn = $('charName'); if (cn)
 function setChar(c) { if (!SKINS[c]) return; selChar = c; try { localStorage.setItem('sixloud_char', selChar); } catch (e) {} applyChar(); kickDecode(); titleMusic(); }
 function cycleChar(dir) { const avail = ORDER.filter(c => SKINS[c]); let i = avail.indexOf(selChar); i = (i + (dir || 1) + avail.length) % avail.length; selChar = avail[i]; try { localStorage.setItem('sixloud_char', selChar); } catch (e) {} applyChar(); kickDecode(); titleMusic(); }
 applyChar();
+Object.values(PHOTOS).forEach(p => queueImg(() => {}, p, true));   /* the select photos are core load (v0.73.2): when the strip reveals at 'done' its cards are painted, never gray boxes (Keith's shot) */
 const SINK_MAX = 8;   /* a cloud gives just a tiny bit under a landing, then springs back (Keith v0.29) */
 function gripOf(p) { const cd = CLOUDS[p.img]; return { x: p.x + p.len * GRIP_DX, y: p.y + (p.sink || 0) + p.len * cd.asp * GRIP_FRAC }; }
 /* the grip as DRAWN while the cloud is tilted: the tip swings around the
@@ -2134,7 +2128,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false, dbShown = false, charUiShown = false, hudShown = true, sbShown = false;   /* charUiShown starts FALSE (v0.73.1): mode starts 'title', so an initial true made the first-frame guard skip itself forever — the photo strip kept its CSS display:none on a fresh load while the arrows/name/best (visible by default) made the title look complete. Keith's iPhone shot caught it. */
+let puShown = false, dbShown = false, charUiShown = null, hudShown = true, sbShown = false;   /* charUiShown starts NULL (v0.73.2): the sentinel makes the first frame APPLY the select cluster's state — hidden while loading (its elements are visible by CSS default), shown at 'done'. (v0.73.1's true->false fix cured the never-appearing strip; the null sentinel is what lets the cluster also start hidden.) */
 let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
@@ -2144,7 +2138,7 @@ function loop(ts) {
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
   const db = mode === 'run' && !grounded && !hangPlat && !slipPlat && doubleArmed && !doubleUsed;   /* DOUBLE JUMP!! helper: on screen exactly while a mid-air tap would fire the double (Keith v0.70.1) */
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
-  const cu = mode === 'title';   /* the carousel lives on the title screen only (v0.56) — it gets its OWN flag: it used to borrow mb (the sound toggle's), which was title-only until v0.60 made the toggle always-visible and silently kept the arrows + name on every screen (Keith's screenshots, fixed v0.65) */
+  const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('charName').style.display = cu ? 'block' : 'none'; $('charBest').style.display = cu ? 'block' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
   const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
   if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; }
