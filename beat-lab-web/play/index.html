@@ -8,8 +8,8 @@
 <script>/* Emulation boot (Keith, 2026-11-07): apply the saved emulation before first paint, beside the theme boot — layout preference only (localStorage), never part of a project file. The full Emulation pass at the end of the body reads the same key. */ try{var _blEmuBoot=localStorage.getItem("beatlab.emu.v1");if(_blEmuBoot&&_blEmuBoot!=="default")document.documentElement.setAttribute("data-emu",_blEmuBoot);}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
-<title>Beat Lab Web Beta v0.6</title>
-<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.6 (FL pitch parity: detection reports, roots stay at FL's C5), superseding the 0.5 stamp. */ var BL_VERSION="v0.6"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
+<title>Beat Lab Web Beta v0.7</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.7 (the called batch: Editor-silence repair, blank start with no sequences in the editor, green-label rename, project folder + stock sounds, C major default, pads/keys MIDI split, mixer Gain/Pan/Pitch, the MPK knob popup, Piano Roll Play = whole sequencer, global Stop, double-click sequence → Piano Roll), superseding the 0.6 stamp. */ var BL_VERSION="v0.7"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -387,7 +387,7 @@ a{color:var(--teal)}
 
   <!-- ================= TRANSPORT ================= -->
   <div class="transport">
-    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.6</span></div>
+    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.7</span></div>
     <div class="tgroup">
       <button class="playbtn" id="btnPlay" title="Play / Stop (Space)">▶</button>
       <button class="stopbtn" id="btnStop" title="Stop and rewind">■</button>
@@ -773,7 +773,7 @@ a{color:var(--teal)}
         <h2>Project key</h2>
         <div class="ctlgrid">
           <div class="ctl"><h3>Project key</h3>
-            <div class="mono" id="projKeyLabel" style="font-size:16px;color:var(--gold)">D minor · 7A</div>
+            <div class="mono" id="projKeyLabel" style="font-size:16px;color:var(--gold)">C major · 8B</div>
             <div style="display:flex;gap:6px;margin-top:6px">
               <select id="pkRoot" title="Project key root"></select>
               <select id="pkMode" title="Project key mode"><option value="major">Major</option><option value="minor">Minor</option></select>
@@ -894,7 +894,7 @@ const S = {
   bpm:95, swing:0.08, pattern:0, playing:false, recording:false,
   selected:"kick", rollChannel:"bass808", selSlice:0, chopCount:8,
   template:"boombap", customTemplates:{},
-  projectKey:{ root:2, mode:"minor" },           // D minor
+  projectKey:{ root:0, mode:"major" },           // C major — the Pro Tools session default (Keith, build 0.7); a chopped sample's detected key can still move it
   flipKey:null,                                   // last key-finder result
   starterHats:null,
   mode:"pattern", songLoop:true, songFollow:true, // MPC-style: "pattern" loops one sequence; "song" runs the playlist
@@ -1145,6 +1145,7 @@ function scheduleStep(step, t){
     const tMul=blTimeMul(ch, barCount, step); // Time FX mix: gated steps fade toward silence as the mix rises; at 100% they are cut outright, as always
     if(tMul<=0.001) return;
     const pat=ch.patterns[activePatIdx()];
+    if(!pat) return; /* v0.7 Editor-silence repair: a channel born after this sequence was created (or loaded with fewer slots) has NO pattern at this index. The old code read pat.steps unguarded, threw mid-step, and the throw aborted the whole scheduler tick — the transport and its time-based playhead kept running while every channel went silent and the mixer showed nothing. Play roll never hit it because it guards the same read (if(pat && …)). Skip the channel; its missing slot is also padded with an empty pattern when Play starts (blV7EnsurePatternSlots). */
     const as=step+seqBarPos*16; // absolute step inside the (possibly multi-bar) sequence
     const tch=(step%2===1)? t + blSwingOf(ch)*stepDurSec() : t; // per-channel swing: odd 16ths of THIS channel only
     if(pat.steps[as]) triggerChannel(AC, liveNodes[id], ch, tch, {vel:0.92*tMul, fromStep:true});
@@ -8572,6 +8573,7 @@ function ptBuildMidiLane(cid, idx, ts){
   blocks.forEach(b=>{
     const el=document.createElement("div");
     el.className="ptmidiblock"+(b.ghost?" ghost":"")+((ptFocus==="seq"&&S.selSeqEntry===b.entry)?" sel":"");
+    el.dataset.seq=b.seq; el.dataset.entry=b.entry; /* v0.7: double-click opens this sequence in the Piano Roll (delegated handler in the 0.7 pass) */
     el.style.left=(b.startBar/LB*100)+"%";
     el.style.width=Math.max(1.4, b.lenBars/LB*100)+"%";
     el.title=(S.seqNames[b.seq]||("SEQ "+(b.seq+1)))+" on "+ch.name+" — click to select the sequence, Roll for note editing";
@@ -15463,6 +15465,7 @@ ptRender=function(){
     blocks.forEach(b=>{
       const el=document.createElement("div");
       el.className="ptmidiblock";
+      el.dataset.seq=b.seq; el.dataset.entry=b.entry; /* v0.7: double-click opens this sequence in the Piano Roll */
       el.style.left=(b.startBar/LB*100)+"%";
       el.style.width=Math.max(1.4, b.lenBars/LB*100)+"%";
       el.title=blSqName(b.seq)+" on "+ch.name+" — placed from the Piano Roll; click to select the sequence";
@@ -21551,6 +21554,31 @@ if(typeof buildRack==="function"){
             }
           }
         }
+        /* v0.7 (Keith): the pads are the Drum Machine's on EVERY tab.
+           Off this tab, pad notes — MIDI channel 10 (index 9), where
+           the MPK's pads live; his keys stay on channel 1 and keep
+           passing through to whatever tab he's on — fire the same kit
+           with the same bank map. The view-only extras above
+           (aftertouch swallow, stick variation, key audition strip)
+           stay gated to this tab, exactly as before. */
+        if(!DM.viewActive && msg && msg.data && msg.data.length>=2 && (msg.data[0]&0x0f)===9){
+          const cmd=msg.data[0]&0xf0;
+          if(cmd===0x90 || cmd===0x80){
+            const note=msg.data[1], velRaw=msg.data[2]||0;
+            let bank=null, idx=-1;
+            if(note>=36 && note<=51){ bank=DM.bank; idx=note-36;
+              if(DM.padMode===8){ const needHalf= idx>=8? 1 : 0;
+                if(DM.half!==needHalf){ DM.half=needHalf; dmApplyMode(); } } }
+            else if(note>=52 && note<=67){ bank="B"; idx=note-52; }
+            else if(note>=68 && note<=83){ bank="C"; idx=note-68; }
+            else if(note>=84 && note<=99){ bank="D"; idx=note-84; }
+            if(idx>=0 && bank){
+              if(cmd===0x90 && velRaw>0){ DM_HELD[bank+idx]=true; dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); dmRepeatArm(bank, idx, DM.fullLevel? 1 : velRaw/127); }
+              else dmHold(bank, idx, false);
+              return;
+            }
+          }
+        }
       }catch(e){}
       return _dmMidiPrev(msg);
     };
@@ -22715,6 +22743,504 @@ if(typeof buildRack==="function"){
         syncDetectUI(); blGuideKbSync(); if(S.keyGuide) buildRoll();
       }catch(e){} };
   }catch(e){}
+})();
+</script>
+<style>
+/* ============================================================
+   BUILD 0.7 (Keith, 2026-11-08) — the called batch + the
+   Editor-silence repair. Styles for the MPK knob popup.
+   ============================================================ */
+#blKp{position:fixed;left:50%;top:110px;transform:translateX(-50%);z-index:640;width:min(680px,94vw);
+  background:linear-gradient(180deg,#1d1d1d,#121212);border:1px solid #3a3a3a;border-radius:14px;
+  box-shadow:0 24px 60px rgba(0,0,0,.65),0 0 0 1px rgba(0,0,0,.6);color:#eee;display:none;
+  font-family:Archivo,system-ui,sans-serif;user-select:none}
+#blKp.open{display:block}
+#blKp .kphead{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:grab;border-bottom:1px solid #2c2c2c;border-radius:14px 14px 0 0}
+#blKp .kphead:active{cursor:grabbing}
+#blKp .kptitle{font-weight:900;letter-spacing:2.5px;font-size:13px;color:#f5f5f5}
+#blKp .kptitle span{color:#e8b13c}
+#blKp .kprange{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:#9a9a9a;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#blKp .kpbtn{background:#262626;border:1px solid #3c3c3c;color:#eee;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+#blKp .kpbtn:hover{border-color:#e8b13c;color:#e8b13c}
+#blKp .kpgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding:12px}
+#blKp .kpcol{border:1px solid #2c2c2c;border-radius:10px;padding:8px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;background:#171717;transition:border-color .15s,box-shadow .15s,background .15s}
+#blKp .kpcol.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 9%,#171717);box-shadow:0 0 0 1px var(--gold),0 0 14px color-mix(in srgb,var(--gold) 35%,transparent)}
+#blKp .kpname{font-size:10px;font-weight:700;letter-spacing:.4px;color:#ddd;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+#blKp .kpcol.on .kpname{color:var(--gold)}
+#blKp .krowlab{font-size:8.5px;letter-spacing:1.6px;color:#8a8a8a;font-weight:700;margin-top:-2px}
+#blKp .kpempty{font-size:10px;color:#555;padding:26px 0}
+#blKp .kpfoot{display:flex;gap:8px;align-items:center;padding:0 14px 12px;font-size:10.5px;color:#8a8a8a}
+#blKp .kpfoot .kpbtn{margin-left:auto}
+#blFolderPanel .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.renameInp{z-index:5}
+</style>
+<script>
+"use strict";
+/* ============================================================
+   BUILD 0.7 (Keith, 2026-11-08) — the batch he called with
+   "ok push all updates", riding with the Editor-silence repair
+   (base scheduleStep guard at the engine + pattern-slot padding
+   on Play, below). Items:
+   (1) Blank project starts with NO sequences in the editor.
+   (2) Click the channel's green name label in the Step
+       Sequencer → rename that channel inline.
+   (3) A designated project folder on this computer feeds the
+       Sound Browser and re-links missing files by name; the
+       built-in stock sounds STAY (mobile has no local folder).
+   (4) Default project key = C major (Pro Tools session default);
+       a chop's detected key can still move it afterwards.
+   (5) MPK pads (MIDI channel 10) always fire the Drum Machine
+       kit, on any tab; keys keep following the current tab.
+   (6) Mixer strips lead with GAIN · PAN · PITCH above the fader;
+       the TIME knob is gone (its slot is PITCH now).
+   (7) MPK knob popup: CC70–77 on any tab opens a floating
+       MPK-style window — 2 rows × 8 (GAIN over PAN), 8 named
+       channels at a time, hardware drives one half (left =
+       1–4, right = 5–8), mouse-draggable knobs, keyboard arrows
+       move the selection and the MIDI mapping follows, pages
+       right without limit, X closes, drag it aside, and it
+       remembers the selected mapping while closed.
+   (8) Piano Roll Play starts the WHOLE step sequencer.
+   (9) Master transport Stop silences everything Beat Lab-wide.
+   (10) Double-click a sequence in the Editor → Piano Roll with
+        that sequence loaded.
+   ============================================================ */
+(function(){
+const $id=id=>document.getElementById(id);
+const has=fn=>{ try{ return typeof fn==="function"; }catch(e){ return false; } };
+
+/* ---------- Editor-silence repair, part 2: pad pattern slots on Play ----------
+   The base scheduler now skips a channel whose pattern slot is missing
+   (build 0.7 edit at scheduleStep). This wrapper also repairs the data
+   shape itself: when Play starts, every channel gets an (empty) pattern
+   object for every sequence the project knows, so a channel added after
+   a sequence was created can never be slot-less again mid-playback. */
+function blV7EnsurePatternSlots(){
+  try{
+    const n=(typeof seqCount==="function")? seqCount():0; if(!n) return;
+    S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+      if(!Array.isArray(ch.patterns)) ch.patterns=[];
+      while(ch.patterns.length<n) ch.patterns.push({ steps:Array(16).fill(0), notes:[], hits:[] });
+    });
+  }catch(e){}
+}
+window.blV7EnsurePatternSlots=blV7EnsurePatternSlots;
+if(has(setPlaying)){ const _v7PlayPrev=setPlaying;
+  setPlaying=function(on){ if(on) blV7EnsurePatternSlots(); return _v7PlayPrev(on); }; }
+
+/* ---------- (1) Blank project: no sequences in the editor ----------
+   The default template still builds its working sequence for the step
+   sequencer — Keith's ruling is about the EDITOR: a blank start shows
+   no sequence blocks on the editor's MIDI lanes. The flag suppresses
+   only the editor's block feed (ptChainBlocks in pattern mode); the
+   moment he places, slices, or switches to Song mode, the flag clears
+   and the editor behaves exactly as before. */
+let BL_V7_NOSEQ=false;
+if(has(ptChainBlocks)){ const _v7CbPrev=ptChainBlocks;
+  ptChainBlocks=function(){ if(BL_V7_NOSEQ && S.mode!=="song") return []; return _v7CbPrev(); }; }
+function blV7SeqsPlaced(){ BL_V7_NOSEQ=false; }
+if(has(blSqPlace)){ const _v7SqPrev=blSqPlace; blSqPlace=function(){ blV7SeqsPlaced(); return _v7SqPrev.apply(this, arguments); }; }
+if(has(ptEnsureSongChain)){ const _v7EscPrev=ptEnsureSongChain; ptEnsureSongChain=function(){ blV7SeqsPlaced(); return _v7EscPrev.apply(this, arguments); }; }
+if(has(setMode)){ const _v7SmPrev=setMode; setMode=function(m){ if(m==="song") blV7SeqsPlaced(); return _v7SmPrev.apply(this, arguments); }; }
+if(has(blTrulyBlank)){ const _v7BlankPrev=blTrulyBlank;
+  blTrulyBlank=function(){
+    const r=_v7BlankPrev.apply(this, arguments);
+    try{
+      S.playlist=[]; S.mode="pattern"; S.pattern=0;
+      if(has(updateSongUI)) updateSongUI();
+      if(has(renderPlaylist)) renderPlaylist();
+      /* (4) a blank session opens on C major, like Pro Tools */
+      S.projectKey={ root:0, mode:"major" };
+      const kl=(typeof keyLabel==="function")? keyLabel(0,"major") : "C major · 8B";
+      const p1=$id("projKeyLabel"); if(p1) p1.textContent=kl;
+      const p2=$id("progKeyLabel"); if(p2) p2.textContent=kl;
+      const pr=$id("pkRoot"); if(pr) pr.value="0";
+      const pm=$id("pkMode"); if(pm) pm.value="major";
+    }catch(e){}
+    BL_V7_NOSEQ=true;
+    try{ if(has(ptRender)) ptRender(); }catch(e){}
+    try{ setStatus("Blank project — the editor starts empty; build in the step sequencer and place sequences when you're ready. Project key: C major."); }catch(e){}
+    return r;
+  }; }
+/* A fresh boot reaches this script after the blank template was already
+   built (the wrapper above only fires on New → Blank). If the project on
+   screen has no content anywhere — no steps, notes, sounds, placements
+   or clips — it IS a blank start: apply the same editor rule. */
+try{
+  const anyContent=S.order.some(id=>{ const ch=S.channels[id]; return ch && (ch.buffer || (ch.patterns||[]).some(p=>p && (((p.steps||[]).some(s=>s)) || (p.notes||[]).length || (p.hits||[]).length))); })
+    || (S.playlist&&S.playlist.length) || (S.clips&&S.clips.length) || (S.aclips&&S.aclips.length);
+  if(!anyContent && S.mode!=="song"){ BL_V7_NOSEQ=true; if(has(ptRender)) ptRender(); }
+}catch(e){}
+
+/* ---------- (2) Green label rename in the Step Sequencer ----------
+   The older inline rename (blNtStepRename) asked for the click on the
+   label, but the rack's delegated select handler rebuilds the rack
+   first (setRollChannel → buildRack), detaching the very label the
+   rename tried to replace — the input landed in a dead tree. This
+   capture-phase handler runs BEFORE any of that: it selects the
+   channel without a rebuild, stops the event, and edits the live
+   label in place. Enter/blur commits through the same global
+   renameChannel every other rename uses; Esc cancels. */
+try{
+  const rsEl=$id("rackSteps");
+  if(rsEl && !rsEl._blV7Rename){ rsEl._blV7Rename=true;
+    rsEl.addEventListener("click", e=>{
+      const t=e.target; if(!t || !t.closest) return;
+      if(t.closest(".stepdel") || t.closest("select") || t.closest(".renameInp") || t.closest(".step") || t.closest("button")) return;
+      const nm=t.closest(".stepch"); if(!nm) return;
+      const row=nm.closest(".steprow"); if(!row) return;
+      const id=row.dataset.ch, ch=S.channels[id]; if(!ch) return;
+      e.preventDefault(); e.stopPropagation();
+      try{ selectChannel(id); }catch(err){}
+      const inp=document.createElement("input");
+      inp.type="text"; inp.className="renameInp"; inp.value=ch.name;
+      inp.setAttribute("aria-label","Rename channel "+ch.name);
+      nm.replaceWith(inp);
+      try{ inp.focus(); inp.select(); }catch(err){}
+      let done=false;
+      const commit=save=>{ if(done) return; done=true;
+        const v=(inp.value||"").trim();
+        if(save && v && v!==ch.name){ try{ renameChannel(id, v); }catch(err){ ch.name=v; } try{ markDirty(); }catch(err){} }
+        try{ refreshChannelNames(); }catch(err){}
+        try{ buildRack(); }catch(err){}
+      };
+      inp.addEventListener("blur", ()=>commit(true));
+      inp.addEventListener("keydown", ev=>{ ev.stopPropagation(); if(ev.key==="Enter") commit(true); else if(ev.key==="Escape") commit(false); });
+      inp.addEventListener("click", ev=>ev.stopPropagation());
+      inp.addEventListener("pointerdown", ev=>ev.stopPropagation());
+    }, true);
+  }
+}catch(e){}
+
+/* ---------- (3) Project folder on this computer ----------
+   Desktop workflow: link one folder and Beat Lab scans its audio into
+   the Sound Browser and re-links any channel/clip whose saved file
+   name matches a file in the folder (the "missing file" cure that
+   doesn't need Options → Reset). The folder link lives in memory for
+   this session only — browsers can't keep a folder handle across
+   restarts without asking again. The built-in stock sounds are NOT
+   touched: on a phone there is no local folder, and stock is the
+   fallback there, exactly as Keith ruled. */
+let BL_FOLDER=null; /* { handle, name } */
+function blFolderUI(msg){
+  const info=$id("blFolderInfo"); if(!info) return;
+  info.textContent = BL_FOLDER? ("Linked: "+BL_FOLDER.name+" — sounds from it are in the browser; matching project files re-link on scan.")
+                              : "No folder linked yet.";
+  const rs=$id("blFolderRescan"); if(rs) rs.disabled=!BL_FOLDER;
+  if(msg) info.textContent=msg;
+}
+async function blFolderCollect(){
+  const files=[]; if(!BL_FOLDER || !BL_FOLDER.handle) return files;
+  const walk=async(dir, depth)=>{
+    for await(const h of dir.values()){
+      if(h.kind==="file"){ if(/\.(wav|mp3|m4a|ogg|flac|aif|aiff)$/i.test(h.name)){ try{ files.push(await h.getFile()); }catch(e){} } }
+      else if(h.kind==="directory" && depth<2){ try{ await walk(h, depth+1); }catch(e){} }
+    }
+  };
+  try{ await walk(BL_FOLDER.handle, 0); }catch(e){}
+  return files;
+}
+async function blFolderRelink(files){
+  let n=0; if(!files || !files.length) return 0;
+  try{ ensureCtx(); }catch(e){}
+  const byName={}; files.forEach(f=>{ byName[f.name.toLowerCase()]=f; });
+  const grab=async holder=>{ const f=byName[String(holder.sampleName).toLowerCase()]; if(!f) return false;
+    try{ holder.buffer=await AC.decodeAudioData(await f.arrayBuffer()); holder.missing=false; return true; }catch(e){ return false; } };
+  for(const id of S.order){ const ch=S.channels[id]; if(ch && ch.sampleName && (!ch.buffer || ch.missing)){ if(await grab(ch)) n++; } }
+  for(const list of [S.clips||[], S.aclips||[]]) for(const c of list){ if(c && c.sampleName && (!c.buffer || c.missing)){ if(await grab(c)) n++; } }
+  if(n){ try{ buildRack(); }catch(e){} try{ buildMixer(); }catch(e){} try{ if(has(ptRender)) ptRender(); }catch(e){} try{ if(has(renderLayout)) renderLayout(); }catch(e){} }
+  return n;
+}
+async function blFolderScan(silent){
+  if(!BL_FOLDER) return;
+  const files=await blFolderCollect();
+  if(files.length && has(addToLibrary)) addToLibrary(files, false);
+  const n=await blFolderRelink(files);
+  blFolderUI("Linked: "+BL_FOLDER.name+" — "+files.length+" sound file(s) found"+(n? ", "+n+" project file(s) re-linked." : "."));
+  if(!silent) setStatus("Project folder “"+BL_FOLDER.name+"”: "+files.length+" sound(s) in the browser"+(n? " — "+n+" missing project file(s) re-linked by name." : "."));
+}
+async function blFolderChoose(){
+  if(window.showDirectoryPicker){
+    try{ const h=await window.showDirectoryPicker(); BL_FOLDER={ handle:h, name:h.name }; await blFolderScan(false); }
+    catch(e){ /* picker cancelled — nothing changes */ }
+  } else {
+    const inp=$id("fileFolder");
+    if(inp){ inp.click(); setStatus("This browser can't hold a live folder link — the folder you pick still loads its sounds into the browser for this session. On desktop Chrome/Edge the link stays live for rescans."); }
+  }
+}
+try{
+  const optView=$id("blViewOptions");
+  if(optView && !$id("blFolderPanel")){
+    const sec=document.createElement("section"); sec.className="panel"; sec.id="blFolderPanel";
+    sec.innerHTML='<h2>Project folder — this computer</h2>'
+      +'<div class="small">Link the folder on this computer that holds this project\u2019s sounds. Beat Lab scans it into the Sound Browser and re-links any channel or clip whose file name matches — the fix for sounds that come up missing, without resetting anything. The link lasts while Beat Lab stays open. The built-in sounds stay as they are: on your phone there\u2019s no local folder, so stock is what the phone reads.</div>'
+      +'<div class="btnrow"><button class="btn gold" id="blFolderPick" type="button">Choose project folder\u2026</button>'
+      +'<button class="btn" id="blFolderRescan" type="button" disabled>Rescan folder</button>'
+      +'<span class="small" id="blFolderInfo">No folder linked yet.</span></div>';
+    optView.insertBefore(sec, optView.firstChild);
+    $id("blFolderPick").addEventListener("click", blFolderChoose);
+    $id("blFolderRescan").addEventListener("click", ()=>blFolderScan(false));
+  }
+}catch(e){}
+if(has(loadClipsFromProject)){ const _v7LcpPrev=loadClipsFromProject;
+  loadClipsFromProject=function(){ const r=_v7LcpPrev.apply(this, arguments); if(BL_FOLDER) blFolderScan(true); return r; }; }
+
+/* ---------- (6) Mixer strips: GAIN · PAN · PITCH lead the strip ----------
+   Final buildMixer wrapper: on every channel strip (master keeps its
+   own layout), the strip's first knob group above the fader becomes
+   GAIN / PAN / PITCH; the SFX TIME knob comes out (PITCH takes its
+   slot — the same strip-pitch value the old PITCH knob drove), the
+   old separate PITCH group comes out, and PAN leaves the Pan·Width
+   group (WIDTH stays). Knob APIs register in window.BL_GP so the MPK
+   knob popup (7) and the mixer always show the same values. */
+window.BL_GP={};
+if(has(buildMixer)){ const _v7MixPrev=buildMixer;
+  buildMixer=function(){
+    _v7MixPrev.apply(this, arguments);
+    try{
+      window.BL_GP={};
+      document.querySelectorAll("#mixerStrips .bstrip:not(.masterstrip)").forEach(d=>{
+        const id=d.dataset.ch, ch=S.channels[id]; if(!ch) return;
+        const st=ensureStrip(ch);
+        /* TIME knob out */
+        d.querySelectorAll(".knobwrap").forEach(w=>{ const lab=w.querySelector(".klab"); if(lab && lab.textContent==="TIME") w.remove(); });
+        const sfx=d.querySelector('[data-g="sfx"]'); if(sfx){ const kl=sfx.querySelector(".klabel"); if(kl) kl.textContent="Delay · Reverb"; }
+        /* old PITCH group out — its value moves to the lead group */
+        const pg=d.querySelector('[data-g="pitch"]'); if(pg){ const grp=pg.closest(".kgroup"); if(grp) grp.remove(); }
+        /* PAN out of Pan·Width (WIDTH stays) */
+        const pw=d.querySelector('[data-g="pw"]');
+        if(pw){ pw.querySelectorAll(".knobwrap").forEach(w=>{ const lab=w.querySelector(".klab"); if(lab && lab.textContent==="PAN") w.remove(); });
+          const pgrp=pw.closest(".kgroup"); const kl=pgrp? pgrp.querySelector(".klabel") : null; if(kl) kl.textContent="Width"; }
+        if(d.querySelector('[data-g="gp"]')) return;
+        const grp=document.createElement("div"); grp.className="kgroup";
+        grp.innerHTML='<div class="klabel">Gain · Pan · Pitch</div>';
+        const row=document.createElement("div"); row.className="krow"; row.dataset.g="gp"; grp.appendChild(row);
+        const gKnob=blKnob({ size:44, min:-24, max:24, value:ch.gainDb||0, def:0, fmt:fmtDb,
+          oninput:v=>{ ch.gainDb=Math.round(v*2)/2; refreshChain(ch); markDirty(); } });
+        const pKnob=blKnob({ size:44, min:-1, max:1, value:ch.pan||0, def:0,
+          fmt:v=> v<=-0.99? "L" : v>=0.99? "R" : Math.abs(v)<0.02? "C" : (v<0? "L"+Math.round(-v*100) : "R"+Math.round(v*100)),
+          oninput:v=>{ ch.pan=Math.round(v*100)/100; refreshChain(ch); markDirty(); } });
+        const tKnob=blKnob({ size:44, min:-12, max:12, value:st.pitchSt||0, def:0, fmt:v=>(v>0?"+":"")+Math.round(v)+" st",
+          oninput:v=>{ st.pitchSt=Math.round(v); markDirty(); } });
+        [[gKnob,"GAIN"],[pKnob,"PAN"],[tKnob,"PITCH"]].forEach(pair=>{
+          const w=document.createElement("div"); w.className="knobwrap"; w.appendChild(pair[0].el);
+          const l=document.createElement("div"); l.className="klab"; l.textContent=pair[1]; w.appendChild(l); row.appendChild(w);
+        });
+        window.BL_GP[id]={ gain:gKnob, pan:pKnob, pitch:tKnob };
+        const firstGrp=d.querySelector(".kgroup"), fader=d.querySelector(".faderRow");
+        if(firstGrp) d.insertBefore(grp, firstGrp); else if(fader) d.insertBefore(grp, fader); else d.appendChild(grp);
+      });
+    }catch(e){}
+    try{ if(window.BL_KP && BL_KP.open) blKpRender(); }catch(e){}
+  }; }
+
+/* ---------- (7) MPK knob popup ----------
+   CC70–77, any tab. The window mirrors the MPK's knob bank: two rows
+   of eight — GAIN over PAN — for eight named mixer channels at a time.
+   The hardware drives one half (sel..sel+3): CC70–73 take that half's
+   GAIN row, CC74–77 its PAN row. The driven half wears the same gold
+   highlight language as a selected mixer strip (.strip.sel). Mouse
+   drag works on every knob; clicking a column selects its half; the
+   computer keyboard's arrows walk the selection in 4-channel halves
+   and the MIDI mapping follows instantly; paging continues right as
+   long as channels exist. X closes it; the header drags it aside; the
+   selection is remembered (localStorage, app-level like the theme)
+   and it reopens on the same mapping. */
+const BL_KP={ open:false, sel:0, knobs:[] };
+window.BL_KP=BL_KP;
+try{ const saved=JSON.parse(localStorage.getItem("beatlab.kp.v1")||"null"); if(saved && typeof saved.sel==="number" && saved.sel>=0) BL_KP.sel=Math.floor(saved.sel/4)*4; }catch(e){}
+function blKpSave(){ try{ localStorage.setItem("beatlab.kp.v1", JSON.stringify({ sel:BL_KP.sel })); }catch(e){} }
+function kpChannels(){ return S.order.filter(id=>S.channels[id]); }
+function blKpBuild(){
+  if($id("blKp")) return;
+  const panel=document.createElement("div"); panel.id="blKp"; panel.setAttribute("role","dialog"); panel.setAttribute("aria-label","MPK knob bank — gain and pan");
+  panel.innerHTML='<div class="kphead" id="blKpHead"><div class="kptitle">MPK <span>KNOB BANK</span></div>'
+    +'<div class="kprange" id="blKpRange"></div>'
+    +'<button class="kpbtn" id="blKpPrev" type="button" title="Previous four channels (←)">&#9664;</button>'
+    +'<button class="kpbtn" id="blKpNext" type="button" title="Next four channels (→)">&#9654;</button>'
+    +'<button class="kpbtn" id="blKpClose" type="button" title="Close — the selected mapping is remembered">&#10005;</button></div>'
+    +'<div class="kpgrid" id="blKpGrid"></div>'
+    +'<div class="kpfoot"><span>Top row GAIN · bottom row PAN. Hardware drives the highlighted four; &#8592;/&#8594; move the selection and the mapping follows.</span></div>';
+  document.body.appendChild(panel);
+  $id("blKpClose").addEventListener("click", ()=>blKpClose());
+  $id("blKpPrev").addEventListener("click", ()=>blKpStep(-4));
+  $id("blKpNext").addEventListener("click", ()=>blKpStep(4));
+  const head=$id("blKpHead");
+  head.addEventListener("pointerdown", e=>{
+    if(e.target.closest("button")) return;
+    const r=panel.getBoundingClientRect(); const ox=e.clientX-r.left, oy=e.clientY-r.top;
+    panel.style.transform="none"; panel.style.left=r.left+"px"; panel.style.top=r.top+"px";
+    const mv=ev=>{ panel.style.left=Math.max(0, Math.min(window.innerWidth-80, ev.clientX-ox))+"px"; panel.style.top=Math.max(0, Math.min(window.innerHeight-40, ev.clientY-oy))+"px"; };
+    const up=()=>{ document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); };
+    document.addEventListener("pointermove", mv); document.addEventListener("pointerup", up);
+  });
+}
+function blKpStep(d){ const n=kpChannels().length; if(!n) return;
+  const maxSel=Math.floor((n-1)/4)*4; const nx=Math.max(0, Math.min(maxSel, BL_KP.sel+d));
+  if(nx!==BL_KP.sel){ BL_KP.sel=nx; blKpSave(); blKpRender(); } }
+function blKpOpen(){ blKpBuild(); const p=$id("blKp"); if(!p) return;
+  if(!BL_KP.open){ BL_KP.open=true; p.classList.add("open"); } blKpRender(); }
+function blKpClose(){ BL_KP.open=false; const p=$id("blKp"); if(p) p.classList.remove("open"); blKpSave(); }
+window.blKpOpen=blKpOpen; window.blKpClose=blKpClose;
+function blKpRender(){
+  const grid=$id("blKpGrid"); if(!grid) return;
+  const ids=kpChannels(), n=ids.length;
+  const maxSel=n? Math.floor((n-1)/4)*4 : 0;
+  if(BL_KP.sel>maxSel) BL_KP.sel=maxSel; if(BL_KP.sel<0) BL_KP.sel=0;
+  const start=BL_KP.sel-(BL_KP.sel%8);
+  const range=$id("blKpRange");
+  if(range) range.textContent = n? ("Channels "+(start+1)+"\u2013"+Math.min(start+8,n)+" of "+n+" \u00b7 hardware on "+(BL_KP.sel+1)+"\u2013"+Math.min(BL_KP.sel+4,n)) : "No mixer channels";
+  grid.innerHTML=""; BL_KP.knobs=[];
+  const panFmt=v=> v<=-0.99? "L" : v>=0.99? "R" : Math.abs(v)<0.02? "C" : (v<0? "L"+Math.round(-v*100) : "R"+Math.round(v*100));
+  for(let i=0;i<8;i++){
+    const id=ids[start+i];
+    const col=document.createElement("div"); col.className="kpcol";
+    if(!id){ col.innerHTML='<div class="kpname">\u2014</div><div class="kpempty">empty</div>'; grid.appendChild(col); continue; }
+    if((start+i)>=BL_KP.sel && (start+i)<BL_KP.sel+4) col.classList.add("on");
+    const ch=S.channels[id];
+    const nm=document.createElement("div"); nm.className="kpname"; nm.textContent=ch.name; nm.title=ch.name; col.appendChild(nm);
+    const g=blKnob({ size:46, min:-24, max:24, value:ch.gainDb||0, def:0, fmt:fmtDb,
+      oninput:v=>{ ch.gainDb=Math.round(v*2)/2; refreshChain(ch); markDirty(); const r=window.BL_GP[id]; if(r&&r.gain) r.gain.set(ch.gainDb,false); } });
+    const gl=document.createElement("div"); gl.className="krowlab"; gl.textContent="GAIN";
+    const p=blKnob({ size:46, min:-1, max:1, value:ch.pan||0, def:0, fmt:panFmt,
+      oninput:v=>{ ch.pan=Math.round(v*100)/100; refreshChain(ch); markDirty(); const r=window.BL_GP[id]; if(r&&r.pan) r.pan.set(ch.pan,false); } });
+    const pl=document.createElement("div"); pl.className="krowlab"; pl.textContent="PAN";
+    col.appendChild(g.el); col.appendChild(gl); col.appendChild(p.el); col.appendChild(pl);
+    col.addEventListener("pointerdown", ()=>{ const hs=start+(i>=4?4:0); if(BL_KP.sel!==hs){ BL_KP.sel=hs; blKpSave(); blKpRender(); } });
+    grid.appendChild(col); BL_KP.knobs[i]={ id:id, gain:g, pan:p };
+  }
+}
+window.blKpRender=blKpRender;
+function blKpHandleCC(cc, val){
+  blKpOpen();
+  const ids=kpChannels(); if(!ids.length) return;
+  const k=cc-70, off=k%4, id=ids[BL_KP.sel+off]; if(!id) return;
+  const ch=S.channels[id]; if(!ch) return;
+  const start=BL_KP.sel-(BL_KP.sel%8), colIdx=(BL_KP.sel+off)-start;
+  const kb=BL_KP.knobs[colIdx];
+  if(k<4){ ch.gainDb=Math.round(((val/127)*48-24)*2)/2; if(kb&&kb.id===id) kb.gain.set(ch.gainDb,false); const r=window.BL_GP[id]; if(r&&r.gain) r.gain.set(ch.gainDb,false); }
+  else { ch.pan=Math.round(((val/127)*2-1)*100)/100; if(kb&&kb.id===id) kb.pan.set(ch.pan,false); const r=window.BL_GP[id]; if(r&&r.pan) r.pan.set(ch.pan,false); }
+  refreshChain(ch); markDirty();
+}
+window.blKpHandleCC=blKpHandleCC;
+document.addEventListener("keydown", e=>{
+  if(!BL_KP.open) return;
+  const tg=e.target; if(tg && (tg.tagName==="INPUT"||tg.tagName==="TEXTAREA"||tg.tagName==="SELECT"||tg.isContentEditable)) return;
+  if(e.key==="ArrowRight"||e.key==="ArrowUp"){ e.preventDefault(); blKpStep(4); }
+  else if(e.key==="ArrowLeft"||e.key==="ArrowDown"){ e.preventDefault(); blKpStep(-4); }
+});
+/* A manual opener beside the transport, for mouse-only sessions. */
+try{
+  const bs=$id("btnStop");
+  if(bs && bs.parentElement && !$id("blKpBtn")){
+    const b=document.createElement("button"); b.type="button"; b.id="blKpBtn"; b.className="btn sm"; b.textContent="Knob bank";
+    b.title="MPK knob bank (CC70\u201377) — gain and pan for eight mixer channels";
+    b.addEventListener("click", ()=>{ BL_KP.open? blKpClose() : blKpOpen(); });
+    bs.parentElement.insertBefore(b, bs.nextSibling);
+  }
+}catch(e){}
+
+/* ---------- (5) + (7) MIDI routing ----------
+   (5) Pads: claimed inside the Drum Machine's own onMidiMessage
+   wrapper (build 0.7 edit there), because the kit's trigger/hold/
+   repeat machinery lives inside that module's scope — pad notes on
+   MIDI channel 10 fire the kit on any tab now; keys (channel 1)
+   still pass through to whatever the current tab holds.
+   (7) Knobs: this outermost wrapper claims CC70–77 on EVERY tab for
+   the knob popup, before any other handler sees them — Keith's
+   ruling for those CCs supersedes the Drum Machine template's
+   pad-parameter knobs that shared the same numbers. Everything else
+   passes through untouched. */
+if(has(onMidiMessage)){ const _v7MidiPrev=onMidiMessage;
+  onMidiMessage=function(msg){
+    try{
+      const d=msg && msg.data;
+      if(d && d.length>=2 && (d[0]&0xf0)===0xb0 && d[1]>=70 && d[1]<=77){ blKpHandleCC(d[1], d[2]); return; }
+    }catch(e){}
+    return _v7MidiPrev(msg);
+  }; }
+
+/* ---------- (8) Piano Roll Play = the whole step sequencer ----------
+   Play roll used to audition only the roll's loaded channel through a
+   private preview scheduler. Keith's ruling: it starts the transport —
+   the current sequence, every channel, same as Play up top. The
+   transpose audition controls keep their job (Apply still writes the
+   shift into the notes); the private preview timer is stopped so the
+   two never overlap. */
+if(has(blStartRollPreview)){ const _v7RpStopPrev=blStopRollPreview;
+  blStopRollPreview=function(){ try{ _v7RpStopPrev(); }catch(e){} blV7SyncRollBtn(); };
+  blStartRollPreview=function(){
+    try{ _v7RpStopPrev(); }catch(e){}
+    if(S.playing) setPlaying(false); else setPlaying(true);
+    blV7SyncRollBtn();
+  };
+  window.blV7SyncRollBtn=function(){ const b=$id("rollTpPlay"); if(b) b.textContent=S.playing? "\u25a0 Stop" : "\u25b6 Play roll"; };
+  blV7SyncRollBtn();
+  setInterval(()=>{ try{ blV7SyncRollBtn(); }catch(e){} }, 400);
+  try{ const bar=$id("rollTpBar"); if(bar){ const sm=bar.querySelector(".small"); if(sm) sm.textContent="Play runs the whole step sequencer \u2014 every channel of this sequence. Apply writes the shift into the notes."; } }catch(e){}
+}
+function blV7SyncRollBtn(){ if(window.blV7SyncRollBtn) window.blV7SyncRollBtn(); }
+
+/* ---------- (9) Master Stop: everything, Beat Lab-wide ----------
+   The top transport's Stop becomes the global kill: sequencer and
+   song engine (setPlaying false), the roll preview timer, the Drum
+   Machine's own scope + note repeat, the sampler's playback, browser
+   previews, and every live voice (samples, synths, live-MPK holds) cut
+   at the source. Nothing keeps sounding. */
+function blGlobalStop(){
+  try{ if(has(blStopRollPreview)) blStopRollPreview(); }catch(e){}
+  try{ setPlaying(false); }catch(e){}
+  try{ S.paused=false; }catch(e){}
+  try{ if(typeof pauseState!=="undefined") pauseState=null; }catch(e){}
+  try{ uiStep=-1; }catch(e){}
+  try{ window._dmScopeAlone=false; }catch(e){}
+  try{ const B=window.blDM; if(B){ if(typeof B.repeatStop==="function") B.repeatStop();
+    if(B.voices && typeof AC!=="undefined" && AC){ const t=AC.currentTime;
+      for(let i=B.voices.length-1;i>=0;i--){ const v=B.voices[i];
+        try{ v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0.0001, t, 0.004); v.src.stop(t+0.03); }catch(e){} }
+      B.voices.length=0; } } }catch(e){}
+  try{ if(has(stopPlayback)) stopPlayback(); }catch(e){}
+  try{ if(has(stopPreview)) stopPreview(); }catch(e){}
+  try{ if(has(blKillAllLiveVoices)) blKillAllLiveVoices(); }catch(e){}
+  try{
+    if(typeof AC!=="undefined" && AC) S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+      try{ blCutVoices(ch, AC, AC.currentTime); }catch(e){}
+      if(ch._liveSrc){ try{ ch._liveSrc.stop(); }catch(e){} ch._liveSrc=null; }
+    });
+  }catch(e){}
+  try{ if(has(lpSyncLoopUI)) lpSyncLoopUI(); }catch(e){}
+  try{ setStatus("Stopped \u2014 all playback halted, Beat Lab-wide."); }catch(e){}
+}
+window.blGlobalStop=blGlobalStop;
+try{ const bs=$id("btnStop"); if(bs) bs.onclick=()=>blGlobalStop(); }catch(e){}
+
+/* ---------- (10) Double-click a sequence in the Editor → Piano Roll ----------
+   The editor's sequence blocks now carry their sequence index
+   (dataset.seq, set where the blocks are built). One capture-phase
+   delegated listener: load that sequence, point the roll at the
+   lane's channel when the block sits on a channel lane, and switch to
+   the Piano Roll. Capture phase so it wins over the chain lane's old
+   double-tap-to-slice gesture on the same blocks — Slice stays on its
+   toolbar button. */
+document.addEventListener("dblclick", e=>{
+  const t=e.target; if(!t || !t.closest) return;
+  const blk=t.closest("#ptLanes .ptmidiblock, #ptLanes .ptseqblock"); if(!blk) return;
+  const seq=parseInt(blk.dataset.seq, 10); if(isNaN(seq)) return;
+  e.preventDefault(); e.stopPropagation();
+  try{
+    if(has(selectSequence)) selectSequence(seq);
+    const lane=blk.closest(".ptLane"); const cid=lane && lane.dataset? lane.dataset.ptmidi : null;
+    if(cid && S.channels[cid] && has(setRollChannel)) setRollChannel(cid, false);
+    if(window.blSetView) window.blSetView("roll");
+    setStatus((S.seqNames[seq]||("SEQ "+(seq+1)))+" is loaded in the Piano Roll \u2014 double-clicked open from the Editor.");
+  }catch(err){}
+}, true);
+
+/* The board was first built by earlier boot scripts, before the (6)
+   wrapper above existed — rebuild it once through the full chain so
+   the strips lead with GAIN · PAN · PITCH from the first frame. */
+try{ if(has(buildMixer)) buildMixer(); }catch(e){}
+try{ setStatus("Beat Lab "+(window.BL_VERSION||"v0.7")+" ready \u2014 Editor playback repaired; blank starts open with an empty editor on C major."); }catch(e){}
 })();
 </script>
 </body>
