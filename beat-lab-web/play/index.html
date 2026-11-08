@@ -8,8 +8,8 @@
 <script>/* Emulation boot (Keith, 2026-11-07): apply the saved emulation before first paint, beside the theme boot — layout preference only (localStorage), never part of a project file. The full Emulation pass at the end of the body reads the same key. */ try{var _blEmuBoot=localStorage.getItem("beatlab.emu.v1");if(_blEmuBoot&&_blEmuBoot!=="default")document.documentElement.setAttribute("data-emu",_blEmuBoot);}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
-<title>Beat Lab Web Beta v0.5</title>
-<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.5, superseding the v1.0 stamp. */ var BL_VERSION="v0.5"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
+<title>Beat Lab Web Beta v0.6</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.6 (FL pitch parity: detection reports, roots stay at FL's C5), superseding the 0.5 stamp. */ var BL_VERSION="v0.6"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -387,7 +387,7 @@ a{color:var(--teal)}
 
   <!-- ================= TRANSPORT ================= -->
   <div class="transport">
-    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.5</span></div>
+    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.6</span></div>
     <div class="tgroup">
       <button class="playbtn" id="btnPlay" title="Play / Stop (Space)">▶</button>
       <button class="stopbtn" id="btnStop" title="Stop and rewind">■</button>
@@ -683,7 +683,7 @@ a{color:var(--teal)}
           </span>
         </h2>
         <div id="rollSelInfo">No note selected — click a note block to select it.</div>
-        <div class="small" style="margin-bottom:8px">FL-style editing: click an empty cell to add a note · drag a note to move it (up/down = pitch, auditioned as you drag on pitched channels) · drag its right edge to change its length · right-click or long-press a note to delete it. Drum channels get the same treatment — their step-grid hits show as dashed blocks and become full notes the moment you drag, resize or set their velocity. In-key rows are tinted, roots are gold, out-of-key notes flag red on the 808. Tools (top right of the Piano Roll): Draw is the editing above. Eraser — tap a note to delete it, or drag across a run of notes to clear them all; no long-press needed, which is the reliable way to delete on a phone browser. Splitter — tap a note to cut it in two at the tapped spot, or drag a vertical line across stacked notes to cut every note it crosses at that same column; the cut follows the Snap setting (Snap on = nearest grid line, Snap off = the exact sub-step position tapped), both halves keep the original pitch and velocity, notes too short to split are left alone, and each tap or drag is a single undo step. Select — drag across the grid to marquee-select some or all notes, click a note to select just it, drag any selected note to move the whole selection together (relative positions kept), Delete removes the selection; a group move or delete is one undo step. The grid's lines are the Snap setting — change Snap and the divisions redraw to match. The teal line sweeping the grid in playback is the playhead, and the keyboard under the roll lights each note as it sounds. Voices (top right, beside Root note) is the channel's polyphony: Poly lets notes ring over each other; Mono (the MPC 2000's word) cuts the ringing voice the moment a new note lands — the setting for 808s and sounds that must never overlap. Pitch detection: every sample you assign is analysed — the channel's root follows the detected pitch (Root Note overrides it until the sample changes; ⟳ Re-detect re-runs it), a chop/loop's detected key sets the project key, and a sound with no clear pitch says so instead of guessing. Key guide (top right) is off unless you call it: on, the project key's scale rows light with the root strongest, out-of-key rows dim, and the keyboard marks its in-key keys — guidance only, nothing is ever blocked.</div>
+        <div class="small" style="margin-bottom:8px">FL-style editing: click an empty cell to add a note · drag a note to move it (up/down = pitch, auditioned as you drag on pitched channels) · drag its right edge to change its length · right-click or long-press a note to delete it. Drum channels get the same treatment — their step-grid hits show as dashed blocks and become full notes the moment you drag, resize or set their velocity. In-key rows are tinted, roots are gold, out-of-key notes flag red on the 808. Tools (top right of the Piano Roll): Draw is the editing above. Eraser — tap a note to delete it, or drag across a run of notes to clear them all; no long-press needed, which is the reliable way to delete on a phone browser. Splitter — tap a note to cut it in two at the tapped spot, or drag a vertical line across stacked notes to cut every note it crosses at that same column; the cut follows the Snap setting (Snap on = nearest grid line, Snap off = the exact sub-step position tapped), both halves keep the original pitch and velocity, notes too short to split are left alone, and each tap or drag is a single undo step. Select — drag across the grid to marquee-select some or all notes, click a note to select just it, drag any selected note to move the whole selection together (relative positions kept), Delete removes the selection; a group move or delete is one undo step. The grid's lines are the Snap setting — change Snap and the divisions redraw to match. The teal line sweeping the grid in playback is the playhead, and the keyboard under the roll lights each note as it sounds. Voices (top right, beside Root note) is the channel's polyphony: Poly lets notes ring over each other; Mono (the MPC 2000's word) cuts the ringing voice the moment a new note lands — the setting for 808s and sounds that must never overlap. Pitch detection: every sample you assign is analysed and its pitch is reported in the header (⟳ Re-detect re-runs it) — for tuning and the key guide only. Like FL Studio, detection never moves a root: every channel's root is C5 unless you move it with the Root Note control, so the same key plays the same pitch in both apps. A chop/loop's detected key sets the project key, and a sound with no clear pitch says so instead of guessing. Key guide (top right) is off unless you call it: on, the project key's scale rows light with the root strongest, out-of-key rows dim, and the keyboard marks its in-key keys — guidance only, nothing is ever blocked.</div>
         <div class="rollwrap" id="rollWrap"><div class="rollgrid" id="rollGrid"></div></div>
         <div class="velwrap"><div class="vellane" id="velLane"></div></div>
         <div class="vellabel"><span>Velocity lane</span><span class="mono" id="velReadout">Drag a bar to set that note’s velocity (1–127).</span></div>
@@ -907,7 +907,7 @@ const S = {
  "ohat|Open Hat|drum|ohat","chop|Chop / Flip|chop|","sample|Sample (pitched)|sample|","bass808|808 Bass|808|","synth|Synth (multi-engine)|synth|"]
 .forEach(spec=>{ const [id,name,type,builtin]=spec.split("|"); S.channels[id]=makeChannel(id,name,type,builtin); });
 S.order = TEMPLATES.boombap.order.slice();
-S.channels.bass808.root = 36;
+S.channels.bass808.root = 60; /* FL parity (Keith, 2026-11-08): FL never analyses a root — a sampler channel's root is C5 by default, the 808 channel included. The old 36 exception is retired; the built-in synth 808's step hits keep their low voice in triggerChannel's fallback, which is a note choice, not a root. */
 S.channels.synth.root = 60;
 
 /* starter beat in Pattern 1 so Play makes sound immediately */
@@ -1093,7 +1093,7 @@ function triggerChannel(ctx, bundle, ch, t, opts){
   if(ch.type==="drum"){ if(ch.buffer){ if(opts.midi!=null){ /* a NOTE on a drum-typed channel (Keith's Midi 1 + Triangle.wav): the note's pitch is honoured, root-relative — only step-grid hits (no midi) stay one-shot at root */
         playBuffer(ctx,dest,ch,t,{semis:(opts.midi-ch.root)+(BL_T||0), vel, dur: opts.lenSteps? opts.lenSteps*stepDur*Math.pow(2,((opts.midi-ch.root))/12) : undefined});
       } else playBuffer(ctx,dest,ch,t,{vel}); } else triggerSynthDrum(ctx,dest,ch.builtin,t,vel,ch); }
-  else if(ch.type==="808"){ trigger808(ctx,dest,ch,t,opts.midi||36,vel, opts.lenSteps? opts.lenSteps*stepDur : stepDur*0.95); }
+  else if(ch.type==="808"){ trigger808(ctx,dest,ch,t, opts.midi!=null? opts.midi : (ch.buffer? (ch.root||60) : 36), vel, opts.lenSteps? opts.lenSteps*stepDur : stepDur*0.95); } /* no note given: a SAMPLED 808's step hits play at its root (native — FL channel-rack parity); the buffer-less synth 808 keeps its low step voice at 36 */
   else if(ch.type==="synth"){ if(ch.buffer) playBuffer(ctx,dest,ch,t,{semis:(opts.midi||ch.root)-ch.root+(BL_T||0), vel, dur: opts.lenSteps? opts.lenSteps*stepDur*Math.pow(2,((opts.midi||ch.root)-ch.root)/12) : undefined}); else triggerSynth(ctx,dest,ch,t,opts.midi||60,vel,stepDur*0.95); }
   else if(ch.type==="sample"){ if(ch.buffer) playBuffer(ctx,dest,ch,t,{semis:(opts.midi||ch.root)-ch.root+(BL_T||0), vel, dur: opts.lenSteps? opts.lenSteps*stepDur*Math.pow(2,((opts.midi||ch.root)-ch.root)/12) : undefined}); else triggerSynth(ctx,dest,ch,t,opts.midi||60,vel*0.6,stepDur); }
   else if(ch.type==="chop"){ const idx=opts.midi||0;
@@ -2557,25 +2557,88 @@ if($("btnSetKey")) $("btnSetKey").onclick=()=>{ const ch=sel(); if(!S.flipKey){ 
   S.projectKey={ root:flipRoot, mode:S.flipKey.mode };
   $("projKeyLabel").textContent=keyLabel(flipRoot,S.flipKey.mode); $("progKeyLabel").textContent=NOTE_NAMES[flipRoot]+" "+S.flipKey.mode;
   buildRoll(); updatePitchMatch(); setStatus("Project key is now the flip: "+keyLabel(flipRoot,S.flipKey.mode)+". Generators + 808 roll follow it."); };
+/* ---------------- shared pitch estimator (build 0.6) ----------------
+   Normalized autocorrelation with FIRST-STRONG-PEAK selection (the
+   smallest period, past the correlation's first valley, that really
+   repeats) over several windows spread across the sound; the lower
+   median window read wins, so settled tails outvote attack
+   transients. Returns {midi, freq} or null — null is an honest
+   answer for noise and unpitched material.
+   This replaces two faulty readers: the AMDF detectRoot below (a
+   clean C5 sine read as C4 — every period multiple scores ~0 — and
+   an 808 glide read as C5 off its attack) and 0.5's blAnalyseBuffer
+   autocorrelation, whose "prefer the fundamental" step doubled the
+   lag whenever the doubled lag correlated within 8% — true for
+   nearly every steady tone, so clean tones read an octave low while
+   pitch-drop attacks read wherever the transient pointed. Those
+   misreads became channel roots, which is why the same key played
+   a different pitch than FL Studio (Keith, 2026-11-08: "fl studio
+   c5 sounds like the black key between c6 and d6 in beat lab"). */
+function blEstimatePitch(buf){
+  if(!buf) return null;
+  try{
+    const sr=buf.sampleRate;
+    let d=buf.getChannelData(0);
+    if(buf.numberOfChannels>1){ const d1=buf.getChannelData(1), m=new Float32Array(d.length);
+      for(let i=0;i<d.length;i++) m[i]=(d[i]+d1[i])*0.5; d=m; }
+    const W=Math.min(Math.floor(sr*0.2), d.length);
+    if(W<Math.floor(sr*0.03)) return null;
+    const minLag=Math.max(2,Math.floor(sr/1200)), maxLag=Math.min(Math.floor(sr/28), W-2);
+    if(maxLag<=minLag) return null;
+    const span=Math.max(0, Math.min(d.length-W, Math.floor(sr*2)));
+    const nWin= span>0? 4 : 1, reads=[];
+    for(let k=0;k<nWin;k++){
+      const wStart=Math.floor(Math.min(span, sr*0.015 + span*(nWin===1?0:k/(nWin-1))));
+      let e=0; for(let i=wStart;i<wStart+W;i+=8) e+=d[i]*d[i];
+      if(e<1e-7) continue;
+      const ac=new Float32Array(maxLag+2);
+      let bestVal=0;
+      for(let lag=minLag;lag<=maxLag;lag++){ let s=0, r1=0, r2=0; const n=W-lag;
+        for(let i=0;i<n;i++){ const a=d[wStart+i], b=d[wStart+i+lag]; s+=a*b; r1+=a*a; r2+=b*b; }
+        const v=(r1>1e-12 && r2>1e-12)? s/Math.sqrt(r1*r2) : 0; ac[lag]=v; if(v>bestVal) bestVal=v; }
+      if(bestVal<0.6) continue;
+      let valley=minLag; while(valley<maxLag && ac[valley]>bestVal*0.5) valley++;
+      let pick=-1;
+      for(let lag=Math.max(minLag,valley);lag<=maxLag;lag++){
+        if(ac[lag]>=bestVal*0.85 && ac[lag]>=(ac[lag-1]||0) && ac[lag]>=(ac[lag+1]||0)){ pick=lag; break; } }
+      if(pick<0){ let bv=-1; for(let lag=minLag;lag<=maxLag;lag++){ if(ac[lag]>bv){ bv=ac[lag]; pick=lag; } } }
+      if(pick<=0) continue;
+      const a=ac[pick-1]||ac[pick], b=ac[pick], c=ac[pick+1]||ac[pick];
+      const shift=(a-c)/(2*(a-2*b+c)||1);
+      const freq=sr/(pick+(isFinite(shift)? clamp(shift,-0.5,0.5):0));
+      const mf=69+12*Math.log2(freq/440);
+      if(mf>=16 && mf<=96) reads.push(mf);
+    }
+    if(!reads.length) return null;
+    reads.sort((x,y)=>x-y);
+    const med=reads[Math.floor((reads.length-1)/2)];
+    return { midi:Math.round(med), freq:440*Math.pow(2,(med-69)/12) };
+  }catch(e){ return null; }
+}
 function detectRoot(buf){
-  if(!buf) return null; const data=buf.getChannelData(0), sr=buf.sampleRate;
-  let best=null;
-  for(let midi=24;midi<=60;midi++){ const freq=440*Math.pow(2,(midi-69)/12), period=Math.round(sr/freq);
-    let sum=0,count=0; const limit=Math.min(data.length-period, sr);
-    for(let i=0;i<limit;i+=7){ sum+=Math.abs(data[i]-data[i+period]); count++; }
-    const score=sum/count; if(!best||score<best.score) best={midi, score};
-  }
-  return best? best.midi : null;
+  /* kept signature + 24..60 contract (808 status, Triton root
+     suggestion): the shared estimator's read, octave-folded into
+     range so the pitch CLASS is always the measured one. It only
+     ever SUGGESTS/DISPLAYS now — it never re-roots a channel by
+     itself (see update808Status). */
+  const est=blEstimatePitch(buf); if(!est) return null;
+  let m=est.midi; while(m>60) m-=12; while(m<24) m+=12; return m;
 }
 function update808Status(buf){
+  /* DISPLAY ONLY (build 0.6, FL parity): this used to re-root the
+     808 channel from detectRoot on every call — one of the movers
+     that put Beat Lab's keys a world away from FL's. The root is
+     set by assignment (C5, FL's sampler root) or by hand (Root
+     Note control), never by a detector. */
   const ch=S.channels.bass808;
-  if(buf||ch.buffer){ const r=detectRoot(ch.buffer); if(r){ ch.root=r; $("status808").textContent="Root: "+noteName(r)+" (detected from the 808 sample)"; return; } }
   $("status808").textContent="Root: "+noteName(ch.root)+" ("+(ch.sampleName? ch.sampleName : "built-in 808")+")";
 }
 if($("btnTune808")) $("btnTune808").onclick=()=>{
   const ch=S.channels.bass808;
-  if(ch.buffer){ const r=detectRoot(ch.buffer); if(r) ch.root=r; }
-  if(!S.flipKey){ setStatus("808 root set to "+noteName(ch.root)+". Analyze your flip first so the roll highlights the flip’s scale."); update808Status(); buildRoll(); return; }
+  /* no detector touches the root (build 0.6, FL parity) — Tune 808
+     points the roll at the 808; its root is C5 unless Keith moved
+     it with the Root Note control. */
+  if(!S.flipKey){ setStatus("808 root is "+noteName(ch.root)+". Analyze your flip first so the roll highlights the flip’s scale."); update808Status(); buildRoll(); return; }
   S.rollChannel="bass808"; $("rollChannel").value="bass808";
   update808Status(); buildRoll();
   setStatus("808 tuned: root "+noteName(ch.root)+". Piano Roll is on the 808 — scale notes tinted, roots gold, out-of-key notes flag red against "+keyLabel(S.projectKey.root,S.projectKey.mode)+".");
@@ -6414,7 +6477,7 @@ if($("btnRollHelper")) $("btnRollHelper").onclick=()=>{
 if($("btnTune808")) $("btnTune808").onclick=()=>{
   const ch=S.order.map(id=>S.channels[id]).find(c=>c && c.type==="808") || S.channels.bass808;
   if(!ch){ setStatus("No 808 channel in this project."); return; }
-  if(ch.buffer){ const r=detectRoot(ch.buffer); if(r) ch.root=r; }
+  /* root untouched here too — display + roll focus only (build 0.6) */
   S.rollChannel=ch.id; const rs=$("rollChannel"); if(rs) rs.value=ch.id;
   $("status808").textContent="Root: "+noteName(ch.root)+" ("+(ch.sampleName||"built-in 808")+")";
   buildRoll();
@@ -7491,7 +7554,7 @@ function blAddChannelOfType(type){
   let id; do{ id="usr"+(++blUsrSeq); }while(S.channels[id]);
   const bases={ sample:"Sample", drum:"Drum", "808":"808", chop:"Chop", synth:"Synth" };
   const ch=makeChannel(id, blUniqueChName(bases[type]||"Sample"), type||"sample", "");
-  if(type==="808") ch.root=36;
+  /* every channel is born at root C5 (60) — FL's sampler default, 808 channels included (Keith, 2026-11-08) */
   while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
   ch.color=BL_CH_COLORS[S.order.length % BL_CH_COLORS.length];
   S.channels[id]=ch;
@@ -22423,9 +22486,9 @@ if(typeof buildRack==="function"){
      buffer ONCE (cached per sound): autocorrelation fundamental
      for tonal one-shots, the same read best-effort for drum
      one-shots, and a chroma key estimate (root + major/minor) for
-     longer / chopped material. The channel's ROOT FOLLOWS the
-     detection; the Root Note control stays as a manual override
-     that stands until the sample changes. HONESTY RULE: a sound
+     longer / chopped material. (The ROOT-FOLLOWS-DETECTION rule
+     from the original pass is RETIRED — see the FL PARITY
+     AMENDMENT below.) HONESTY RULE: a sound
      with no clear pitch reports "no clear pitch" and its root is
      left exactly where it was — a reading is never invented.
    · THE SAMPLE SETS THE PROJECT KEY — when the loaded sample
@@ -22439,6 +22502,23 @@ if(typeof buildRack==="function"){
      the ones to avoid. Guidance, not a cage — placement and
      playing are never blocked or snapped by it, on sample, 808
      and module (synth) channels alike.
+   · FL PARITY AMENDMENT (Keith, 2026-11-08, build 0.6 — "fl studio
+     c5 sounds like the black key between c6 and d6 in beat lab. we
+     are off" + "fl doest analyse the root, it just sets it as c5
+     by default"): FL Studio NEVER analyses a sample's root — a
+     loaded sample's channel root is C5 (MIDI 60) by default and
+     pitch is relative to that fixed root. Beat Lab now matches:
+     detection keeps only its informational jobs (the header
+     pitch/key reading with Re-detect, and a chop's key estimate
+     setting the project key for the Key Guide) and NEVER moves a
+     playback root. Every channel's root is C5 by default — the
+     808 channel included — and the Root Note control is the sole
+     way a root changes, by Keith's hand. Two faults compounded in
+     0.5: the estimator misread real material (steady tones an
+     octave low through its lag-doubling step; pitch-drop attacks
+     wherever the transient pointed), and any re-rooting at all
+     breaks the FL identity. Projects 0.5 saved with a
+     detection-moved root are reset to C5 on load (below).
    ================================================================ */
 (function blDetectGuidePass(){
   if(S.keyGuide==null) S.keyGuide=false;
@@ -22453,27 +22533,11 @@ if(typeof buildRack==="function"){
       let d=buf.getChannelData(0);
       if(buf.numberOfChannels>1){ const d1=buf.getChannelData(1), m=new Float32Array(d.length);
         for(let i=0;i<d.length;i++) m[i]=(d[i]+d1[i])*0.5; d=m; }
-      /* ---- fundamental: normalized autocorrelation, loudest window ---- */
-      const W=Math.min(d.length, Math.floor(sr*0.3));
-      if(W>sr*0.03){
-        let wStart=0, wBest=-1; const hop=Math.max(1,Math.floor(sr*0.05)), wLim=Math.min(d.length-W, Math.floor(sr*8));
-        for(let s0=0;;s0+=hop){ let e=0; for(let i=s0;i<s0+W;i+=16) e+=d[i]*d[i];
-          if(e>wBest){ wBest=e; wStart=s0; } if(s0>=wLim) break; }
-        const minLag=Math.max(2,Math.floor(sr/1200)), maxLag=Math.min(Math.floor(sr/28), W-2);
-        const ac=new Float32Array(maxLag+2);
-        let bestLag=-1, bestVal=0;
-        for(let lag=minLag;lag<=maxLag;lag++){ let s=0, r=0; const n=W-lag;
-          for(let i=0;i<n;i++){ const a=d[wStart+i]; s+=a*d[wStart+i+lag]; r+=a*a; }
-          const v=r>1e-12? s/r : 0; ac[lag]=v; if(v>bestVal){ bestVal=v; bestLag=lag; } }
-        if(bestLag>0 && bestVal>=0.55){ /* periodicity strong enough to call it a pitch */
-          if(bestLag*2<=maxLag && ac[bestLag*2]>=bestVal*0.92) bestLag*=2; /* prefer the true fundamental over its octave */
-          const a=ac[bestLag-1]||bestVal, b=bestVal, c=ac[bestLag+1]||bestVal;
-          const shift=(a-c)/(2*(a-2*b+c)||1);
-          const freq=sr/(bestLag+ (isFinite(shift)? clamp(shift,-0.5,0.5) : 0));
-          const mf=69+12*Math.log2(freq/440), midi=Math.round(mf);
-          if(midi>=16 && midi<=96) out.midi=midi;
-        }
-      }
+      /* ---- fundamental: the shared estimator (first-strong-peak
+         normalized autocorrelation over several windows, settled
+         reads outvote the attack — see blEstimatePitch) ---- */
+      const est=blEstimatePitch(buf);
+      if(est) out.midi=est.midi;
       /* ---- key estimate: chroma + Krumhansl profiles (longer material) ---- */
       if(buf.duration>=1.5){
         const win=Math.floor(sr*0.25), hopW=win, maxWin=Math.min(64, Math.floor(d.length/win));
@@ -22523,10 +22587,11 @@ if(typeof buildRack==="function"){
     if(!res){ res=blAnalyseBuffer(ch.buffer); detCache.set(sig, res); }
     ch.detected={ midi:res.midi, keyRoot:res.keyRoot, keyMode:res.keyMode, sig:sig };
     let keySet=false;
-    if(res.midi!=null){ ch.root=res.midi;
-      if(ch.id===S.rollChannel){ const srEl=$("sampRoot"); if(srEl) srEl.value=String(ch.root); }
-      if(ch.id==="bass808"){ const st=$("status808"); if(st) st.textContent="Root: "+noteName(ch.root)+" (detected from the sample)"; }
-    }
+    /* FL PARITY (build 0.6): the detected pitch is REPORTED, never
+       imposed — ch.root is not touched here, or anywhere in this
+       pass. Roots sit at C5 (FL's sampler default) unless Keith
+    	moves them with the Root Note control. */
+    if(ch.id==="bass808"){ const st=$("status808"); if(st) st.textContent="Root: "+noteName(ch.root)+" ("+(ch.sampleName||"built-in 808")+")"; }
     if(res.keyRoot!=null && (ch.type==="chop" || ch.buffer.duration>=2)){
       blSetProjectKeyFromSample(res.keyRoot, res.keyMode); keySet=true;
     }
@@ -22542,20 +22607,19 @@ if(typeof buildRack==="function"){
   if(typeof assignSoundToChannel==="function" && !assignSoundToChannel._blDetectWrapped){
     const _adPrev=assignSoundToChannel;
     const _adWrap=async function(i, chId){
-      const ch0=S.channels[chId], prevRoot=ch0? ch0.root : null;
       const r=await _adPrev.apply(this, arguments);
       try{
         const ch=S.channels[chId]; if(!ch || !ch.buffer) return r;
         const item=(typeof library!=="undefined" && library[i])? library[i] : null;
+        if(ch.type==="808"){ /* a fresh sample on the 808 channel sits at FL's sampler root, C5 — the same place FL puts it. (0.5's update808Status/detection used to re-root it to a misread of the sample, which is why the keys disagreed with FL.) */
+          ch.root=60;
+          if(ch.id===S.rollChannel){ const srEl=$("sampRoot"); if(srEl) srEl.value="60"; }
+          const st=$("status808"); if(st && ch.id==="bass808") st.textContent="Root: "+noteName(ch.root)+" ("+(ch.sampleName||"built-in 808")+")";
+        }
         const res=blApplyDetection(ch);
         if(res){
-          if(res.midi==null && ch.type==="808" && prevRoot!=null){ /* the 808's older built-in detector guesses unconditionally — the honesty rule wins: no clear pitch, root stays */
-            ch.root=prevRoot;
-            const st=$("status808"); if(st) st.textContent="Root: "+noteName(ch.root)+" ("+(ch.sampleName||"built-in 808")+") — no clear pitch detected, root unchanged";
-            syncDetectUI();
-          }
           let msg;
-          if(res.midi!=null) msg="Detected root "+noteName(res.midi)+" in “"+(item? item.name : ch.sampleName||"the sample")+"” → "+ch.name+" — the channel's root follows the sample now (Root Note overrides it until the sample changes).";
+          if(res.midi!=null) msg="Detected pitch "+noteName(res.midi)+" in “"+(item? item.name : ch.sampleName||"the sample")+"” → "+ch.name+" — that's the sample's own pitch, shown for tuning and the key guide. The root stays at "+noteName(ch.root)+" so the keys match FL Studio; Root Note moves it by hand.";
           else msg="“"+(item? item.name : ch.sampleName||"That sample")+"” → "+ch.name+": no clear pitch detected — the root stays at "+noteName(ch.root)+".";
           if(res.keySet) msg+=" The sample's key sets the project: "+keyLabel(res.keyRoot, res.keyMode)+" (Project Key stays yours to change).";
           setStatus(msg);
@@ -22574,7 +22638,7 @@ if(typeof buildRack==="function"){
     if(!ch || !ch.buffer){ el.textContent=""; return; }
     if(!ch.detected){ el.textContent="Pitch: not analysed"; return; }
     let t= ch.detected.midi!=null? ("Detected: "+noteName(ch.detected.midi)) : "Detected: no clear pitch";
-    if(ch.detected.midi!=null && ch.root!==ch.detected.midi) t+=" · root overridden → "+noteName(ch.root);
+    if(ch.detected.midi!=null) t+=" · root "+noteName(ch.root);
     if(ch.detected.keyRoot!=null) t+=" · key "+NOTE_NAMES[ch.detected.keyRoot]+" "+ch.detected.keyMode;
     el.textContent=t;
   }
@@ -22595,16 +22659,16 @@ if(typeof buildRack==="function"){
     if(tools && !$("rollDetect")){
       const det=document.createElement("span"); det.className="small mono"; det.id="rollDetect";
       det.style.cssText="color:var(--teal);margin-left:6px";
-      det.title="Pitch/key detection for the loaded channel's sample — the channel root follows the detected pitch; the Root Note control overrides it until the sample changes. A sound with no clear pitch says so and keeps its root.";
+      det.title="Pitch/key detection for the loaded channel's sample — the detected pitch is reported for tuning and the key guide only; it never moves the channel root (FL parity: roots sit at C5 unless the Root Note control moves them). A sound with no clear pitch says so.";
       const vv=$("rollVoicesWrap");
       if(vv && vv.parentElement===tools) vv.after(det); else tools.appendChild(det);
       const rb=document.createElement("button"); rb.type="button"; rb.className="btn sm"; rb.id="rollRedetect";
       rb.textContent="⟳ Re-detect";
-      rb.title="Re-analyse the loaded channel's sample and re-apply its detected root (and the project key, for chops/loops)";
+      rb.title="Re-analyse the loaded channel's sample — refreshes its detected pitch reading (and the project key, for chops/loops). The channel root is never moved.";
       rb.onclick=()=>{ const ch=S.channels[S.rollChannel];
         if(!ch || !ch.buffer){ setStatus("Nothing loaded on "+(ch? ch.name : "the roll channel")+" to detect — assign a sample first."); return; }
         const res=window.blRedetect(ch); if(!res) return;
-        setStatus(res.midi!=null? ("Re-detected: "+ch.name+" root is "+noteName(res.midi)+" — the Root Note follows the sample.") : (ch.name+": no clear pitch on re-analysis — root left at "+noteName(ch.root)+".")+(res.keySet? " Project key is now "+keyLabel(res.keyRoot,res.keyMode)+", set by the sample." : ""));
+        setStatus(res.midi!=null? ("Re-detected: "+ch.name+" — the sample's pitch reads "+noteName(res.midi)+"; the root stays at "+noteName(ch.root)+" (FL parity — detection reports, it never re-roots).") : (ch.name+": no clear pitch on re-analysis — root left at "+noteName(ch.root)+".")+(res.keySet? " Project key is now "+keyLabel(res.keyRoot,res.keyMode)+", set by the sample." : ""));
       };
       det.after(rb);
       const gb=document.createElement("button"); gb.type="button"; gb.className="pill"; gb.id="rollGuideBtn";
@@ -22635,6 +22699,17 @@ if(typeof buildRack==="function"){
     loadClipsFromProject=function(p){ _ldPrev(p);
       try{ if(p && p.channels) Object.keys(p.channels).forEach(id=>{ const ch=S.channels[id];
         if(ch && p.channels[id].detected) ch.detected=p.channels[id].detected; });
+        /* 0.5 migration (FL parity, build 0.6): a root sitting exactly
+           on the detected pitch was put there by 0.5's
+           root-follows-detection — reset it to C5 (60) so the keys
+           match FL again. A root set by hand to any other value, and
+           the root Keith set by hand ON the detected pitch after
+           seeing the reading, are indistinguishable here; C5 is the
+           FL default and the Root Note control re-sets any root in
+           one move. */
+        if(p && p.channels) Object.keys(p.channels).forEach(id=>{ const ch=S.channels[id];
+          if(ch && ch.detected && ch.detected.midi!=null && ch.root===ch.detected.midi && ch.root!==60){
+            ch.root=60; if(id===S.rollChannel){ const srEl=$("sampRoot"); if(srEl) srEl.value="60"; } } });
         S.keyGuide=!!(p && p.keyGuide);
         const gb=$("rollGuideBtn"); if(gb){ gb.textContent="Key guide: "+(S.keyGuide? "On":"Off"); gb.classList.toggle("on", !!S.keyGuide); }
         syncDetectUI(); blGuideKbSync(); if(S.keyGuide) buildRoll();
