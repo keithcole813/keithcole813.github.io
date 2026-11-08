@@ -98,7 +98,7 @@
   }
   #ver { text-align:center; font-size:13px; font-weight:700; letter-spacing:3px; color:rgba(255,255,255,.55); text-shadow:0 1px 6px rgba(0,0,0,.45); pointer-events:none; }
   #titleUI { position:absolute; left:0; right:0; bottom:0; z-index:9; display:flex; flex-direction:column; align-items:center; gap:9px; padding-bottom:max(10px, env(safe-area-inset-bottom)); pointer-events:none; }   /* the bottom column (v0.74): strip + version flow in order — a column cannot overlap itself in any viewport */
-  #selectStack { position:absolute; top:60%; left:0; right:0; z-index:9; display:none; flex-direction:column; align-items:center; gap:7px; pointer-events:none; }   /* name + best + START stacked right under the title cloud, the original mock's layout (Keith v0.74) */
+  #selectStack { position:absolute; top:60%; left:0; right:0; z-index:9; display:none; flex-direction:column; align-items:center; gap:7px; pointer-events:none; padding:12px 0 14px; background:radial-gradient(ellipse 62% 100% at 50% 46%, rgba(10,5,26,.44), rgba(10,5,26,0) 72%); }   /* name + best + START stacked right under the title cloud, the original mock's layout (Keith v0.74). The soft halo (v0.74.1): bright dress clouds drift behind the title, and in a browser's shorter viewport the stack floats over sky, not the dark mountains — the halo guarantees the words read in every sky, no hard box edges */
   #charL, #charR { position:absolute; top:53.5%; z-index:9; width:52px; height:74px; border:0; padding:0; cursor:pointer; pointer-events:auto; background:linear-gradient(180deg,#ffd94d,#ff9d2e); filter:drop-shadow(0 3px 0 rgba(20,8,0,.55)) drop-shadow(0 0 14px rgba(255,170,40,.35)); }
   #charL { left:8px; clip-path:polygon(0 50%, 100% 0, 100% 100%); }
   #charR { right:8px; clip-path:polygon(100% 50%, 0 0, 0 100%); }
@@ -108,15 +108,15 @@
   .scard { width:72px; height:80px; border-radius:12px; border:3px solid rgba(255,255,255,.18); background-size:cover; background-position:center 18%; padding:0; cursor:pointer; pointer-events:auto; filter:brightness(.6); }
   .scard.sel { border-color:#ffcd40; filter:brightness(1); box-shadow:0 0 16px rgba(255,190,50,.55); }
   #startBtn { margin-top:9px; display:none; white-space:nowrap; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:20px; letter-spacing:1px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:11px 30px; box-shadow:0 4px 0 #b3541e, 0 8px 18px rgba(0,0,0,.35); cursor:pointer; animation:pulse 1.1s ease-in-out infinite; }   /* in-flow in the select stack now (v0.74) — the old absolute anchor is gone for good */
-  /* SHORT SCREENS (landscape): the select stack + bottom column compact, still flow-ordered (Keith v0.74) */
-  @media (max-height: 560px) {
-    #selectStack { top:56.5%; gap:5px; }
-    #charName { font-size:21px; }
-    #charBest { font-size:13px; }
-    #startBtn { font-size:17px; padding:8px 24px; margin-top:5px; }
-    .scard { width:56px; height:62px; border-radius:10px; }
+  /* SHORT + LANDSCAPE SCREENS: the select stack + bottom column compact, still flow-ordered (Keith v0.74; landscape keyed by orientation v0.74.1 — a landscape tablet's CSS height sailed over a height-only ceiling and the compact rules never engaged, crushing the strip onto the button) */
+  @media (max-height: 560px), (orientation: landscape) and (max-height: 780px) {
+    #selectStack { top:54%; gap:5px; padding:7px 0 9px; }
+    #charName { font-size:20px; }
+    #charBest { font-size:12.5px; }
+    #startBtn { font-size:16px; padding:7px 22px; margin-top:5px; }
+    .scard { width:54px; height:60px; border-radius:10px; }
     #titleUI { gap:6px; }
-    #charL, #charR { top:42%; width:44px; height:62px; }
+    #charL, #charR { top:42%; width:42px; height:58px; }
   }
   /* the display face (Keith's leaderboard mock, 2026-11-07): Luckiest Guy, self-hosted —
      helper text, the board, and every headline share it now */
@@ -146,7 +146,7 @@
   <button id="charL" aria-label="Previous character"></button>
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><button id="startBtn">START GAME</button></div>
-  <div id="titleUI"><div id="strip"></div><div id="ver">v0.74</div></div>
+  <div id="titleUI"><div id="strip"></div><div id="ver">v0.74.1</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -160,7 +160,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.74 ==============================
+/* ============================== 6LOUD demo v0.74.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
