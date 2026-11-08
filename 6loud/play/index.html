@@ -139,7 +139,7 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.70.3</div>
+  <div id="ver">v0.71</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -153,7 +153,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.70.3 ==============================
+/* ============================== 6LOUD demo v0.71 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -866,7 +866,7 @@ let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
 let doubleArmed = false, doubleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps) */
-let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0, hangTY = 0;
+let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0, hangTY = 0, noLand = false;   /* noLand: the ledge-slip plunge ONLY — that fall never lands (v0.71) */
 /* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
    rapid jump taps inside the window climb up (SAVE); otherwise he slips
    (climbfall) and the plunge is Fall 2. His eyes lock the final rule. */
@@ -994,7 +994,11 @@ function recSample() {
   if (dist <= courseDist) { REC.lastDist = dist; return; }   /* the staircase (and a race's seam) is never recorded: samples start AT the course — in distance units (v0.52) */
   const mv = playerAnim().move;
   let code = mv === 'run' ? 0 : mv === 'runjump' ? 7 : mv === 'basic' ? 1 : (mv === 'flip' || mv === 'diveflip') ? 2 : (mv === 'diveroll' || mv === 'roll3' || mv === 'roll4') ? 3 : mv === 'armsopen' ? 4 : 0;
-  if (slipPlat) code = 5; else if (!grounded && !airMove && !hangPlat && vy > 40) code = 6;   /* 5 = ledge slip, 6 = Fall 2 plunge — from the FIRST sample off the lip (v0.52): at vy > 260 up to two samples still coded as RUN, so LaShmoove visibly RAN off cloud edges into the air before his fall pose started (Keith, 2026-11-07 14:15) */
+  if (slipPlat) code = 5;
+  else if (!grounded && !airMove && !hangPlat && vy > 40) {
+    /* 6 = a DOOMED plunge only (v0.71): the slip release (noLand) or a fall with no cloud below within reach — the same test playerAnim poses by. A fall that will LAND records as the arms-open air pose (4) and the ghost lands it too. From the first sample off the lip (v0.52), so he never runs on air. */
+    if (noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py && p.y - py < 640)) code = 6;
+  }
   REC.frames.push([Math.round(dist - Math.max(REC.lastDist, courseDist)), Math.round(py), code, (champMode || flareT > 0) ? 1 : 0]);   /* course-space delta + the charge flag (Keith v0.30) */
   REC.lastDist = dist;
 }
@@ -1377,7 +1381,7 @@ function startRun() {
   resetWorld();
   px = -200; py = BAND_Y[2]; vy = 0; grounded = plats[0];   /* v0.69.2 (Keith): start on the LEFT side of the first cloud, a step in from its tip, so the whole cloud runs out ahead. px is cosmetic here — the recorder, the race clock and the ghost all run on dist, so stored runs (his and every future one) perform exactly as recorded; lab-verified before shipping. */
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
-  airMove = null; dead = false; hangPlat = null; slipPlat = null; slipT = 0; struggleTaps = 0; held = false; pressT = 0; lastHold = 0;
+  airMove = null; dead = false; hangPlat = null; slipPlat = null; slipT = 0; struggleTaps = 0; held = false; pressT = 0; lastHold = 0; noLand = false;
   flipped = false; flipMove = null; landMove = null; landT = 0; puffs = []; trail = [];
   airGrav = 1; flipArmed = false; rollArmed = false;
   camX = px - viewW * PLAYER_XF; camY = -560; camSmY = -560; camBgY = -560; zoom = 1; shake = 0;
@@ -1478,7 +1482,7 @@ function backToTitle() {   /* MAIN MENU on the wipeout screen: back to the title
   mode = 'title';
   G = null; GR = null; RACE = null;   /* the next startRun preps a fresh race */
   plats = []; worldEnd = 0; puffs = []; trail = []; motes = [];
-  champMode = false; flareT = 0; bannerT = 0; crownFlash = 0; surgeFlash = 0; dead = false; hangPlat = null; slipPlat = null;
+  champMode = false; flareT = 0; bannerT = 0; crownFlash = 0; surgeFlash = 0; dead = false; hangPlat = null; slipPlat = null; noLand = false;
   mScene = 'day'; titleMusicOn = true; stepsGateOn = false; playTrack();   /* the select screen plays bg 1 (Keith v0.63) — and the CHANGE RUNNER tap is the gesture that lets it start */
   $('over').style.display = 'none'; $('center').style.display = ''; $('ver').style.display = '';
 }
@@ -1644,7 +1648,7 @@ function update(dt) {
       px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* same rigid ride through the slip */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
-    if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; }   /* fingers go — the Fall 2 plunge (no landing, no grab: airMove stays null) */
+    if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; noLand = true; }   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either */
   } else if (!grounded) {
     vy += GRAV * airGrav * dt; py += vy * dt; airT += dt;
     /* the flip cue: an armed jump converts at the top of the arc */
@@ -1654,8 +1658,8 @@ function update(dt) {
       zoom = Math.min(1.07, zoom + 0.03);
     }
     if (flipped) flipT += dt;
-    /* landing exists ONLY off a jump — no jump, no landing (Keith) */
-    if (airMove || px < openerEnd) for (const p of plats) {   /* opener exception: the staircase lands a no-jump runner (Keith v0.43) */
+    /* a fall CAN land on a cloud (Keith v0.71 — retires the v0.4 jump-only landing rule and its v0.43 staircase exception, now just the general case). The one fall that never lands is the ledge-slip plunge (noLand). */
+    if (!noLand) for (const p of plats) {
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
@@ -1775,7 +1779,11 @@ function playerAnim() {
   if (hangPlat) { const idx = 5 + pingpong(Math.floor(time * 10), 2); return { move: 'armsopen', idx, feetAdj: (PSKIN.dangle[idx] || HANG_HANDS) - HANG_HANDS }; }   // ONLY frames 5-6: 3-4 are the open-hand REACH and 7 starts PEELING one hand off the grip — Keith caught it mid-hang in v0.33.2 play: 'he lets go and grabs back' (v0.33.3). feetAdj keeps the hands glued while the body sways.
   if (slipPlat) { if (PSKIN.man.climbfall) return { move: 'climbfall', idx: Math.min(PSKIN.man.climbfall.n - 1, Math.floor(slipT * 30)) };   // the real Climb Attempt and Fall plays ONE WAY, once
     return { move: 'armsopen', idx: 5 + Math.min(3, Math.floor(slipT / SLIP_DUR * 4)) }; }   /* fallback: ONE WAY from the grip into the peel (5,6 grip -> 7 peeling -> 8 folding). NEVER a restart at frame 0 and never a pingpong — the old slip restarted the whole arms-open motion and swept back UP through the grip frames: a visible let-go-and-grab before the fall (Keith's video, v0.38) */
-  if (!grounded && !airMove && vy > 260) { const m = PSKIN.man.fall2 ? 'fall2' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(time * 14), PSKIN.man[m].n) }; }   // the fatal plunge (Fall 2)
+  if (!grounded && !airMove && vy > 260) {
+    const doomed = noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py && p.y - py < 640);
+    if (doomed) { const m = PSKIN.man.fall2 ? 'fall2' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(time * 14), PSKIN.man[m].n) }; }   // the fatal plunge (Fall 2)
+    return { move: 'armsopen', idx: 15 + Math.floor(airT * 18) % 10 };   /* a fall with a cloud coming: the reaching descent, then he LANDS (Keith v0.71) */
+  }
   if (!grounded) {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
     if (flipped && flipMove && flipT < PSKIN.man[flipMove].n / 30)
