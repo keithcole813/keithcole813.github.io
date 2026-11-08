@@ -82,9 +82,6 @@
     #board { padding:9px 12px 11px; margin-bottom:10px; border-radius:14px; }
     #board .boardTitle { font-size:14px; margin-bottom:4px; }
     #board .onlineLine { font-size:13px; margin-bottom:5px; }
-    #charName { top:65.5%; }
-    #charBest { top:70.2%; }
-    #startBtn { bottom:calc(4.6% + 84px); }   /* title stack on short screens (Keith v0.73.1): the button was bottom:19vh while the name/best lines are top-% — on his iPhone the two systems collided and START GAME sat on the LOCAL BEST line. Here the button anchors off the strip (same 4.6% base + its height + a gap) and the best line lifts clear. Tall screens keep the approved layout. */
     #over .rowMedal { padding:4px 10px 4px 6px; margin:5px 0; border-radius:11px; gap:8px; }
     #over .rowMedal .rName, #over .rowMedal .rFeet { font-size:16px; }
     #over .medal { width:32px; height:32px; font-size:10px; }
@@ -108,7 +105,13 @@
   #strip { position:absolute; left:0; right:0; bottom:4.6%; z-index:9; display:none; justify-content:center; gap:10px; pointer-events:none; }
   .scard { width:64px; height:72px; border-radius:12px; border:3px solid rgba(255,255,255,.18); background-size:cover; background-position:center 18%; padding:0; cursor:pointer; pointer-events:auto; filter:brightness(.6); }
   .scard.sel { border-color:#ffcd40; filter:brightness(1); box-shadow:0 0 16px rgba(255,190,50,.55); }
-  #startBtn { position:absolute; left:0; right:0; margin:0 auto; width:max-content; bottom:19vh; z-index:9; display:none; white-space:nowrap; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:19px; letter-spacing:1px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:10px 28px; box-shadow:0 4px 0 #b3541e, 0 8px 18px rgba(0,0,0,.35); cursor:pointer; animation:pulse 1.1s ease-in-out infinite; }   /* centered by margin, NOT transform — the pulse keyframes animate transform:scale and ate the old translateX centering, throwing the button off the right edge (Keith's screenshot, v0.58) */
+  #startBtn { position:absolute; left:0; right:0; margin:0 auto; width:max-content; bottom:19vh; z-index:9; display:none; white-space:nowrap; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:19px; letter-spacing:1px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:10px 28px; box-shadow:0 4px 0 #b3541e, 0 8px 18px rgba(0,0,0,.35); cursor:pointer; animation:pulse 1.1s ease-in-out infinite; }
+  /* TITLE STACK ON SHORTER SCREENS (Keith v0.73.3): this block MUST stay after the #startBtn base rule — v0.73.1 put these rules in the earlier media block and the later base rules silently overrode them, so the fix never took effect (his browser shot proved it). The disease: on iPhone browsers, vh measures the LARGE viewport (toolbars hidden) while top-% measures the visible one, so bottom:19vh parks the button up on the LOCAL BEST line. Here the button anchors off the strip in % + px (no vh), and the best line lifts clear. */
+  @media (max-height: 900px) {
+    #charName { top:65.5%; }
+    #charBest { top:70.2%; }
+    #startBtn { bottom:calc(4.6% + 84px); }
+  }   /* centered by margin, NOT transform — the pulse keyframes animate transform:scale and ate the old translateX centering, throwing the button off the right edge (Keith's screenshot, v0.58) */
   /* the display face (Keith's leaderboard mock, 2026-11-07): Luckiest Guy, self-hosted —
      helper text, the board, and every headline share it now */
   @font-face { font-family:'Luckiest Guy'; font-style:normal; font-weight:400; font-display:swap; src:url(assets/fonts/luckiest-guy-latin-ext.woff2) format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
@@ -140,7 +143,7 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.73.2</div>
+  <div id="ver">v0.73.3</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -154,7 +157,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.73.2 ==============================
+/* ============================== 6LOUD demo v0.73.3 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
