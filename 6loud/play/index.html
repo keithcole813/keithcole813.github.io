@@ -118,7 +118,7 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.70.1</div>
+  <div id="ver">v0.70.2</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -132,7 +132,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.70.1 ==============================
+/* ============================== 6LOUD demo v0.70.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -755,10 +755,10 @@ for (const mv of Object.keys(YORO_MANIFEST)) {
 }
 /* cloud platform art: measured surface line (fraction of drawn height) + aspect */
 const CLOUDS = {
-  '01':{surf:0.431, asp:0.264}, '11':{surf:0.551, asp:0.276}, '14':{surf:0.408, asp:0.262},
-  '16':{surf:0.492, asp:0.295}, '17':{surf:0.532, asp:0.274}, '24':{surf:0.481, asp:0.324},
-  '02':{surf:0.532, asp:0.378}, '12':{surf:0.441, asp:0.538}, '18':{surf:0.468, asp:0.434},
-  '23':{surf:0.473, asp:0.440} };   /* v0.69.2: the floor drops +0.36 everywhere (Keith's .55 on cloud-11) — he sinks in, mushroom-soft, and the drooped front/back tips reach the floor line instead of leaving him floating */
+  '01':{surf:0.251, asp:0.264}, '11':{surf:0.371, asp:0.276}, '14':{surf:0.228, asp:0.262},
+  '16':{surf:0.312, asp:0.295}, '17':{surf:0.352, asp:0.274}, '24':{surf:0.301, asp:0.324},
+  '02':{surf:0.352, asp:0.378}, '12':{surf:0.261, asp:0.538}, '18':{surf:0.288, asp:0.434},
+  '23':{surf:0.293, asp:0.440} };   /* the floor's history: original surf -> v0.69.2 dropped it +0.36 (Keith's .55 pick on cloud-11) -> v0.70.2 RAISED it back halfway (+0.18) after his phone verdict on .55: "running waist deep." Half the sink-in, tips still met. */
 const LONGC = ['01','11','14','16','17','24'], ISLAND = ['02','12','18','23'];
 const WISPY = ['06','13','19','22'];
 Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n] = im; }, 'assets/cloud-' + n + '.webp', true));
@@ -855,7 +855,7 @@ const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
    on that tip, ~55% of the cloud's drawn height below the surface
    line, body dangling under the end of the cloud. Hands sit ~300
    above his soles in the dangle cycle (bobbing ±25). */
-const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.19, GRIP_DX = 0.04;   /* 0.55 -> 0.19 in v0.69.2: the floor dropped +0.36, so the grip fraction drops the same amount and his hands stay on the SAME point of the cloud image */
+const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.37, GRIP_DX = 0.04;   /* grip fraction tracks the floor so his hands stay on the SAME point of the cloud image: 0.55 original, 0.19 at the deep floor (v0.69.2), 0.37 at the halfway raise (v0.70.2) — surf + GRIP_FRAC is invariant per cloud */
 const HANDS_DANGLE = { 3: 269, 4: 292, 5: 315, 6: 324, 7: 323 };   /* hand height per dangle frame, measured off the shipped art */
 const LASH_DANGLE = { 3: 268, 4: 299, 5: 323, 6: 332, 7: 329 };   /* LaShmoove's dangle: 6lade's table scaled per-frame by his measured figure extent (v0.56) */
 const YORO_DANGLE = { 3: 252, 4: 263, 5: 273, 6: 281, 7: 292 };   /* Yorokobi's dangle, MEASURED from her shipped frames (v0.70): the table-to-pixel-extent factor is per-frame and agrees between 6lade's and LaShmoove's sets to ~0.001 (idx3 .646, idx4 .657, idx5 .677, idx6 .702, idx7 .746); her extents (390/400/403/401/391) x those factors give this table */
