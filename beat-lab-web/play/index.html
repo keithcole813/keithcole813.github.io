@@ -11912,11 +11912,20 @@ setStatus("Beat Lab ready — tracks are independent now: every track is a singl
 .mkcard .segrow .btn.on{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
 .octrow{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:4px}
 .octrow .octval{font-family:"JetBrains Mono",monospace;font-size:15px;color:var(--gold);min-width:30px;text-align:center}
-.kbwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg2);margin-top:12px}
-.kb{position:relative;min-width:540px;height:128px;touch-action:none;user-select:none;-webkit-user-select:none}
-.kb .wk{position:absolute;bottom:0;background:#efe9da;border:1px solid #8d8570;border-top:none;border-radius:0 0 4px 4px;cursor:pointer}
-.kb .bk{position:absolute;top:0;height:62%;background:#17171c;border:1px solid #000;border-radius:0 0 3px 3px;z-index:2;cursor:pointer}
-.kb .wk.on,.kb .bk.on{background:var(--gold)}
+/* KEYBOARD UNIFICATION (Keith, 2026-11-08): the Drum Machine's audition
+   strip is the app's keyboard — its key design (ivory/ebony gradients,
+   bevel shadows, radii, 60% black-key proportion, gold lit gradients)
+   and its dark seated housing now style EVERY .kb keyboard: the Piano
+   Roll's bottom keyboard (#rollKb), the Modules shared audition
+   keyboard (#blSharedKb) and the legacy synth keyboard (#mkKeys).
+   Keys keep the shared contract: [data-midi] elements lit via .on
+   (own presses) and .on+.exton (external MIDI, watchdog-painted). */
+.kbwrap{overflow-x:auto;border:1px solid #141417;border-radius:10px;background:#1b1a17;margin-top:12px;padding:6px}
+.kb{position:relative;min-width:540px;height:88px;touch-action:none;user-select:none;-webkit-user-select:none}
+.kb .wk{position:absolute;bottom:0;background:linear-gradient(180deg,#f4f1e8,#d9d5c8);border:1px solid #8a877c;border-radius:0 0 5px 5px;box-shadow:inset 0 -6px 8px rgba(0,0,0,.18),0 3px 4px rgba(0,0,0,.4);cursor:pointer}
+.kb .bk{position:absolute;top:0;height:60%;background:linear-gradient(180deg,#3a382f,#131210);border:1px solid #000;border-radius:0 0 4px 4px;box-shadow:0 4px 5px rgba(0,0,0,.5);z-index:2;cursor:pointer}
+.kb .wk.on,.kb .wk:active{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
+.kb .bk.on,.kb .bk:active{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
 /* Hammond drawbars */
 .b3bars{display:flex;gap:4px;overflow-x:auto;padding:4px 2px 8px}
 .b3bar{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:44px;flex:1}
@@ -13593,7 +13602,7 @@ function blBuildKeyboard(kb){
   });
   Object.keys(blacks).forEach(ms=>{
     const m=+ms, d=document.createElement("div"); d.className="bk"; d.dataset.midi=m;
-    d.style.left=((blacks[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.62)+"%";
+    d.style.left=((blacks[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.64)+"%";
     kb.appendChild(d);
   });
   const down=e=>{
@@ -16499,7 +16508,7 @@ function blBlockKeyboard(kb, block){
   });
   Object.keys(blacks).forEach(ms=>{
     const m=+ms, d=document.createElement("div"); d.className="bk"; d.dataset.midi=m;
-    d.style.left=((blacks[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.62)+"%";
+    d.style.left=((blacks[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.64)+"%";
     kb.appendChild(d);
   });
   const down=e=>{
@@ -16827,8 +16836,7 @@ if(typeof renameChannel==="function"){
    ================================================================ */
 #rollKbBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 #rollKbBar .pill.on{background:var(--gold);color:#171308;border-color:var(--gold)}
-#rollKb{height:104px}
-@media (max-width:640px){ #rollKb{height:84px} }
+#rollKb{height:88px} /* unified with the Drum Machine audition strip — one height on phone and desktop alike, so the strip stays one compact playable row and the control bar above it never moves */
 </style>
 <script>
 "use strict";
@@ -16904,7 +16912,7 @@ function blBuildRollKb(){
   });
   Object.keys(blackAt).forEach(ms=>{
     const m=+ms, d=document.createElement("div"); d.className="bk"; d.dataset.midi=m;
-    d.style.left=((blackAt[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.62)+"%";
+    d.style.left=((blackAt[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.64)+"%";
     kb.appendChild(d);
   });
   const lab=$("kbOctLab"); if(lab) lab.textContent=noteName(base)+" – "+noteName(top);
@@ -17760,7 +17768,7 @@ function blSharedKbBuild(){
   });
   Object.keys(blacks).forEach(ms=>{
     const m=+ms, d=document.createElement("div"); d.className="bk"; d.dataset.midi=m;
-    d.style.left=((blacks[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.62)+"%";
+    d.style.left=((blacks[ms]+0.68)*wPct)+"%"; d.style.width=(wPct*0.64)+"%";
     kb.appendChild(d);
   });
   const down=e=>{
@@ -19700,7 +19708,8 @@ if(typeof buildRack==="function"){
    yourself) and this "exton" marker (so the light survives other code
    that toggles "on" — e.g. Chord Lock's timed flash — and can always be
    found and cleared). The style is the keyboards' own lit colour. */
-.kb .wk.exton,.kb .bk.exton{background:var(--gold)}
+.kb .wk.exton{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
+.kb .bk.exton{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
 </style>
 <script>
 "use strict";
@@ -20165,11 +20174,11 @@ if(typeof buildRack==="function"){
 .dmkeys{display:none;margin-top:10px;background:#1b1a17;border:1px solid #141417;border-radius:10px;padding:8px}
 .dmkeys.show{display:block}
 .dmkeys .dmkeyshead{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#d9d9de;text-transform:uppercase;margin-bottom:6px}
-.dmkeystrip{position:relative;height:86px}
+.dmkeystrip{position:relative;height:88px}
 .dmkeyw{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#f4f1e8,#d9d5c8);border:1px solid #8a877c;border-radius:0 0 5px 5px;box-shadow:inset 0 -6px 8px rgba(0,0,0,.18),0 3px 4px rgba(0,0,0,.4);cursor:pointer;padding:0}
-.dmkeyw:active,.dmkeyw.hit{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
-.dmkeyb{position:absolute;top:0;height:52px;background:linear-gradient(180deg,#3a382f,#131210);border:1px solid #000;border-radius:0 0 4px 4px;box-shadow:0 4px 5px rgba(0,0,0,.5);cursor:pointer;z-index:2;padding:0}
-.dmkeyb:active,.dmkeyb.hit{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
+.dmkeyw:active,.dmkeyw.hit,.dmkeyw.on,.dmkeyw.exton{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
+.dmkeyb{position:absolute;top:0;height:53px;background:linear-gradient(180deg,#3a382f,#131210);border:1px solid #000;border-radius:0 0 4px 4px;box-shadow:0 4px 5px rgba(0,0,0,.5);cursor:pointer;z-index:2;padding:0}
+.dmkeyb:active,.dmkeyb.hit,.dmkeyb.on,.dmkeyb.exton{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
 @media (max-width:760px){.mpcface{grid-template-columns:1fr}}
 .dmgrid.mode8 .dmpad{min-height:132px}
 .dmgrid.mode8 .dmpad .dmname{font-size:13px}
