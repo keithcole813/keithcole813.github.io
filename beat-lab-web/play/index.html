@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
 <script>/* Theme boot (Keith, 2026-11-07): apply the saved app theme before first paint — no flash of Default. App-level preference only (localStorage), never part of a project file. */ try{var _blThemeBoot=localStorage.getItem("beatlab.theme.v1");if(_blThemeBoot&&_blThemeBoot!=="default")document.documentElement.setAttribute("data-theme",_blThemeBoot);}catch(e){}</script>
+<script>/* Emulation boot (Keith, 2026-11-07): apply the saved emulation before first paint, beside the theme boot — layout preference only (localStorage), never part of a project file. The full Emulation pass at the end of the body reads the same key. */ try{var _blEmuBoot=localStorage.getItem("beatlab.emu.v1");if(_blEmuBoot&&_blEmuBoot!=="default")document.documentElement.setAttribute("data-emu",_blEmuBoot);}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
 <title>Beat Lab Web Beta v1.0</title>
@@ -18557,6 +18558,23 @@ if(typeof triggerChannel==="function"){
 @media (max-width:768px){
   .transport{position:static !important;top:auto !important}
 }
+/* ================================================================
+   MIXER: MASTER STRIP NOT LOCKED ON PHONE (Keith, 2026-11-07)
+   The MASTER strip was position:sticky;left:0;z-index:3 inside the
+   horizontally scrolling mixer board, so on iPhone the channel
+   strips' knob needles ("notches") painted on top of it as the
+   board scrolled under the pinned strip. Keith's call: no lock —
+   on phone / small-tablet widths the MASTER strip gives up its
+   sticky pin, its left offset, its z-index layer and its drop
+   shadow, and sits in the same scroll flow as the channel strips,
+   sliding away with them; every master control is reached again
+   by scrolling the board back. Desktop keeps the pinned strip
+   exactly as before. Nothing else inside #mixerStrips is pinned
+   or layered above the scroll flow, so the overlap cannot recur.
+   ================================================================ */
+@media (max-width:768px){
+  #mixerStrips .masterstrip{position:static !important;left:auto !important;z-index:auto !important;box-shadow:none !important}
+}
 #blHelpPanel .blhelpitem{border-top:1px solid var(--line);padding:10px 0}
 #blHelpPanel .blhelpitem:first-of-type{border-top:none;padding-top:2px}
 #blHelpPanel .blhelpitem h3{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
@@ -19938,6 +19956,802 @@ if(typeof buildRack==="function"){
     else if(fails>=MAXFAILS){ cleanup(); clearInterval(settle); }
   }, 1000);
   setTimeout(function(){ clearInterval(settle); }, 30000);
+})();
+</script>
+
+<style>
+/* ================= Drum Machine view — FPC pad page ================= */
+#blViewDrums{min-width:0}
+.wrap.blv-drums>.blv-arrange,.wrap.blv-drums>#blViewMixer,.wrap.blv-drums>#blViewRoll,.wrap.blv-drums>#blViewSynth,.wrap.blv-drums>#blViewSampler,.wrap.blv-drums>#blViewOptions{display:none!important}
+.wrap.blv-arrange>#blViewDrums,.wrap.blv-mixer>#blViewDrums,.wrap.blv-roll>#blViewDrums,.wrap.blv-synth>#blViewDrums,.wrap.blv-sampler>#blViewDrums,.wrap.blv-options>#blViewDrums{display:none!important}
+.dmtools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dmtools select{max-width:230px}
+.dmbankbtns{display:inline-flex;gap:4px}
+.dmbankbtns .btn.on{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
+.dmtransport{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px;margin:10px 0}
+.dmtransport .btn{min-height:40px}
+.dmtransport .btn.rec-on{background:var(--red);color:#fff;border-color:var(--red)}
+#dmPosReadout{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--gold);margin-left:auto;text-align:right}
+.dmgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dmpad{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);padding:8px 8px 7px;min-height:92px;text-align:left;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column;gap:4px;font:inherit}
+.dmpad .dmstrip{position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--dmc,#8a8371)}
+.dmpad .dmrow1{display:flex;align-items:baseline;gap:6px;padding-left:6px}
+.dmpad .dmnum{font-weight:900;font-size:15px}
+.dmpad .dmnote{font-size:10px;color:var(--dim);font-family:"JetBrains Mono",monospace}
+.dmpad .dmkey{margin-left:auto;font-size:9px;font-weight:900;color:var(--faint);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.dmpad .dmname{padding-left:6px;font-size:11.5px;font-weight:700;line-height:1.25;word-break:break-word;color:var(--ink)}
+.dmpad .dmname.empty{color:var(--faint);font-weight:400;font-style:italic}
+.dmpad.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.dmpad.hit{background:var(--dmc,#8a8371)}
+.dmpad.hit .dmname,.dmpad.hit .dmnum{color:#141311}
+.dmpad.hit .dmnote{color:#141311}
+.dmpad.hit .dmkey{color:#141311;border-color:rgba(0,0,0,.35)}
+.dmpad.dragover{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.dmset{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.dmset h3{font-size:11px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin:0 0 8px}
+.dmsetgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
+.dmsetgrid label{display:block;font-size:11px;color:var(--dim);margin-bottom:4px}
+.dmsetgrid input[type=range]{width:100%}
+.dmsetgrid select{width:100%}
+.dmval{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--gold)}
+@media (max-width:640px){
+  .dmgrid{gap:6px}
+  .dmpad{min-height:76px;padding:6px 6px 5px}
+  .dmpad .dmname{font-size:10px}
+  .dmpad .dmnum{font-size:13px}
+  #dmPosReadout{margin-left:0;width:100%;text-align:left}
+}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   DRUM MACHINE TAB — FPC-STYLE PAD PAGE (Keith, 2026-11-07)
+   A seventh view tab, DRUM MACHINE, sitting after PIANO ROLL;
+   OPTIONS stays last, as always. The page mirrors the Piano Roll
+   page's shape: a header cluster (kit picker · bank A/B · target
+   channel picker, like the roll's channel picker), the main area
+   — a 4×4 pad grid where the roll grid would be — and a per-pad
+   settings strip under it, where FPC puts its pad controls.
+   FPC model, kept to its essentials:
+   · 16 pads per bank, TWO banks (A/B). Grid is FPC/MPC order:
+     top row pads 13–16, bottom row pads 1–4. Pad i answers MIDI
+     note 36+i (bank A), 52+i (bank B) — the FPC note layout.
+   · Each pad holds ONE library sound (same library, same decode
+     path — getLibBuffer and its spelling cascade — as channel
+     assignment), a pad colour, and per-pad VOLUME / PAN / TUNE /
+     CUT group + CUT ITSELF, exactly FPC's pad strip.
+   · Cut groups choke: a hit stops every ringing voice in its
+     group; CUT ITSELF decides whether a pad also chokes its own
+     previous hit. Voices play one-shot into the master bus,
+     beside the channel strips.
+   · Kit presets are Keith's own FPC kits from his FL setup —
+     SWUM MPC and boi1da mpkmini first (his current pair), plus
+     the other harvested kits — laid out in FPC stored pad order
+     from MAPPINGS.md when their sounds are in the library.
+   THE PAGE'S OWN TRANSPORT: Play / Stop / Record / Rec-mode live
+   on this page only and drive the app's ONE scheduler
+   (blPlayToggle / setPlaying) and the ONE record arm
+   (#btnRecord) — there is no second clock. Starting or stopping
+   here is the same transport the other views see; leaving the
+   page stops nothing. While the transport plays with Rec armed,
+   pad hits write into the CURRENT sequence on the page's TARGET
+   channel through recordEvent — the app's existing record model
+   (velocity kept, per-channel quantize, ADD / OVERWRITE obeyed).
+   Input: pointer/tap (pen pressure where the device gives it),
+   typing keys 1-4/Q-R/A-F/Z-V across the 4×4, and external MIDI
+   notes 36–67 while this view is up — the hit pad lights, the
+   same visual echo the MPK key-lighting gives the keyboards.
+   State (banks, assignments, per-pad settings, target) rides
+   projectJSON / loadClipsFromProject, so it saves, loads,
+   autosaves and undoes like every other part of the project.
+   ================================================================ */
+(function blDrumMachine(){
+  const wrap=document.querySelector(".wrap"); if(!wrap) return;
+
+  /* ---------------- state ---------------- */
+  const DM_ROWS=[[12,13,14,15],[8,9,10,11],[4,5,6,7],[0,1,2,3]]; /* visual rows, FPC order */
+  const DM_KEYS=["1","2","3","4","q","w","e","r","a","s","d","f","z","x","c","v"];
+  function dmCatColor(name){
+    const n=(name||"").toLowerCase();
+    if(/kick/.test(n)) return "#d94f30";
+    if(/snare/.test(n)) return "#e8b33c";
+    if(/clap/.test(n)) return "#d669b0";
+    if(/(open|oh)/.test(n) && /(hat|hh)/.test(n)) return "#57c7d4";
+    if(/(hat|hh|shaker|tamb)/.test(n)) return "#3fb8a6";
+    if(/808/.test(n)) return "#b08850";
+    if(/(perc|rim|glass|crash|cym)/.test(n)) return "#7bc950";
+    return "#8a8371";
+  }
+  function dmEmptyPad(){ return { key:null, name:"", color:"#8a8371", vol:0.9, pan:0, tune:0, cut:0, cutSelf:true, buf:null, _missing:false, _res:null }; }
+  function dmPadFromFile(key, file){ const p=dmEmptyPad(); p.key=key; p.name=file; p.color=dmCatColor(file); return p; }
+  function dmKitBank(kitName){
+    const files=(typeof BL_KITS!=="undefined" && BL_KITS && BL_KITS[kitName])||[];
+    const out=[];
+    for(let i=0;i<16;i++) out.push(files[i]? dmPadFromFile("kit/"+kitName+"/"+files[i], files[i]) : dmEmptyPad());
+    return out;
+  }
+  const DM={ bank:"A", sel:0, target:null, kit:"SWUM MPC", viewActive:false, _timer:null,
+    banks:{ A:dmKitBank("SWUM MPC"), B:Array.from({length:16}, dmEmptyPad) } };
+  function dmSelPad(){ return DM.banks[DM.bank][DM.sel]; }
+
+  /* ---------------- page skeleton (mirrors the Piano Roll page) ---------------- */
+  const holder=document.createElement("div"); holder.id="blViewDrums";
+  const rollHolder=$("blViewRoll");
+  if(rollHolder && rollHolder.parentNode===wrap) rollHolder.after(holder); else wrap.appendChild(holder);
+  const sec=document.createElement("section"); sec.className="panel"; sec.id="page-drums";
+  sec.innerHTML=
+    '<h2>Drum Machine — <span style="color:var(--gold)">FPC</span>'+
+      '<span class="tools dmtools">'+
+        '<label class="hlabel">Kit: <select id="dmKitSel" title="Load one of Keith’s FPC kits into the current bank, in FPC pad order"></select></label>'+
+        '<span class="dmbankbtns"><button type="button" class="btn sm" id="dmBankA">Bank A</button><button type="button" class="btn sm" id="dmBankB">Bank B</button></span>'+
+        '<label class="hlabel">Record to: <select id="dmTargetSel" title="Target channel — recorded pad hits land in the current sequence on this channel"></select></label>'+
+      '</span>'+
+    '</h2>'+
+    '<div id="dmPadInfo" class="small" style="margin-bottom:6px">Pad 1 selected.</div>'+
+    '<div class="small" style="margin-bottom:4px">16 pads per bank, two banks, FPC layout (pads 1–4 on the bottom row). Tap a pad to play it and select it; its sound, volume, pan, tune and cut group live in the strip under the grid. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C1 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it there.</div>'+
+    '<div class="dmtransport">'+
+      '<button type="button" class="btn gold" id="dmPlayBtn">▶ Play</button>'+
+      '<button type="button" class="btn" id="dmStopBtn">■ Stop</button>'+
+      '<button type="button" class="btn" id="dmRecBtn">● Rec</button>'+
+      '<button type="button" class="btn sm" id="dmRecModeBtn">Rec: ADD</button>'+
+      '<span class="small">This page’s transport — runs the current sequence here for playing along and recording pad hits.</span>'+
+      '<span id="dmPosReadout">Bar 1 · Beat 1 · 0:00</span>'+
+    '</div>'+
+    '<div class="dmgrid" id="dmGrid"></div>'+
+    '<div class="dmset">'+
+      '<h3 id="dmSetTitle">Pad settings</h3>'+
+      '<div class="dmsetgrid">'+
+        '<div><label>Sound</label><select id="dmSoundSel" title="The library sound on the selected pad"></select></div>'+
+        '<div><label>Volume <span class="dmval" id="dmVolVal"></span></label><input type="range" id="dmVol" min="0" max="100" /></div>'+
+        '<div><label>Pan <span class="dmval" id="dmPanVal"></span></label><input type="range" id="dmPan" min="-50" max="50" /></div>'+
+        '<div><label>Tune <span class="dmval" id="dmTuneVal"></span></label><input type="range" id="dmTune" min="-12" max="12" step="1" /></div>'+
+        '<div><label>Cut group</label><select id="dmCutSel" title="Pads in the same cut group choke each other — a new hit silences the group’s ringing voices"><option value="0">Off</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>'+
+        '<div><label>Pad</label><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn sm" id="dmCutSelfBtn">Cut itself: On</button><button type="button" class="btn sm" id="dmClearPadBtn">Clear pad</button></span></div>'+
+      '</div>'+
+    '</div>';
+  holder.appendChild(sec);
+
+  /* ---------------- library link (same model as channel assignment) ---------------- */
+  function dmLibKeyOfItem(it){ return it.group==="Starter Sounds"? "shared/"+it.name : "kit/"+it.group+"/"+it.name; }
+  function dmFindLib(pad){
+    if(!pad || !pad.name) return -1;
+    for(let i=0;i<library.length;i++){ const it=library[i];
+      if(it.builtin && pad.key && dmLibKeyOfItem(it)===pad.key) return i; }
+    for(let i=0;i<library.length;i++){ if(library[i].name===pad.name) return i; }
+    return -1;
+  }
+  function dmResolve(pad){
+    if(pad.buf) return Promise.resolve(pad.buf);
+    if(pad._res) return pad._res;
+    const idx=dmFindLib(pad);
+    if(idx<0){ pad._missing=true; dmRenderPads(); return Promise.resolve(null); }
+    pad._res=getLibBuffer(idx).then(b=>{ pad.buf=b; pad._missing=false; pad._res=null; dmRenderPads(); return b; })
+      .catch(()=>{ pad._missing=true; pad._res=null; dmRenderPads(); return null; });
+    return pad._res;
+  }
+  function dmAssignLibIdx(bank, idx, libIdx){
+    const pad=DM.banks[bank][idx], it=library[libIdx]; if(!pad || !it) return;
+    pad.key= it.builtin? dmLibKeyOfItem(it) : "lib:"+it.name;
+    pad.name=it.name; pad.color=dmCatColor(it.name); pad.buf=null; pad._missing=false; pad._res=null;
+    dmResolve(pad);
+    if(typeof markDirty==="function") markDirty();
+    dmRenderPads(); dmRenderPanel();
+    setStatus(it.name+" → Drum Machine pad "+(idx+1)+" (Bank "+bank+").");
+  }
+
+  /* ---------------- playback: one-shot into the master bus, cut groups choke ---------------- */
+  const DM_VOICES=[]; const DM_HELD={};
+  function dmPadEl(idx){ return document.querySelector('#dmGrid .dmpad[data-idx="'+idx+'"]'); }
+  function dmLight(bank, idx){
+    if(bank!==DM.bank) return;
+    const el=dmPadEl(idx); if(!el) return;
+    el.classList.add("hit");
+    clearTimeout(el._dmT);
+    el._dmT=setTimeout(()=>{ if(!DM_HELD[bank+idx]) el.classList.remove("hit"); }, 170);
+  }
+  function dmHold(bank, idx, on){
+    DM_HELD[bank+idx]=on;
+    if(bank!==DM.bank) return;
+    const el=dmPadEl(idx); if(!el) return;
+    clearTimeout(el._dmT);
+    el.classList.toggle("hit", !!on);
+  }
+  function dmRecordHit(bank, idx, vel){
+    if(!S.recording || !S.playing) return;
+    const ch=DM.target && S.channels[DM.target]; if(!ch) return;
+    /* the hit lands as a NOTE at the pad's own FPC pitch (bank A:
+       36+pad, bank B: 52+pad) — the same note layout the pads
+       answer to — so a recorded pass keeps WHICH pad was played,
+       exactly as FPC writes pad performances into the roll */
+    recordEvent({chId:ch.id, kind:"note", midi:(bank==="B"? 52 : 36)+idx, vel});
+  }
+  function dmPlayNow(bank, idx, vel){
+    const pad=DM.banks[bank][idx]; if(!pad || !pad.buf || typeof AC==="undefined" || !AC || !master) return;
+    const t=AC.currentTime+0.01, grp=pad.cut|0;
+    for(let i=DM_VOICES.length-1;i>=0;i--){ const v=DM_VOICES[i];
+      const samePad=(v.bank===bank && v.idx===idx), sameGrp=(grp>0 && v.grp===grp);
+      if((sameGrp && !samePad) || (samePad && pad.cutSelf)){
+        try{ v.g.gain.setTargetAtTime(0.0001, t, 0.004); v.src.stop(t+0.03); }catch(e){}
+        DM_VOICES.splice(i,1);
+      }
+    }
+    const src=AC.createBufferSource(); src.buffer=pad.buf;
+    src.playbackRate.value=Math.pow(2, (((pad.tune||0)+(S.masterPitch||0)+(S.masterFine||0)/100))/12);
+    const g=AC.createGain(); g.gain.value=Math.max(0.01, vel)*(pad.vol!=null? pad.vol : 0.9);
+    src.connect(g);
+    if(AC.createStereoPanner){ const pn=AC.createStereoPanner(); pn.pan.value=pad.pan||0; g.connect(pn); pn.connect(master); }
+    else g.connect(master);
+    try{ src.start(t); }catch(e){ return; }
+    const voice={bank:bank, idx:idx, grp:grp, src:src, g:g};
+    DM_VOICES.push(voice);
+    src.onended=()=>{ const i=DM_VOICES.indexOf(voice); if(i>=0) DM_VOICES.splice(i,1); };
+    dmRecordHit(bank, idx, vel);
+  }
+  function dmTrigger(bank, idx, vel){
+    const pad=DM.banks[bank] && DM.banks[bank][idx]; if(!pad) return;
+    if(bank===DM.bank && DM.sel!==idx){ DM.sel=idx; dmRenderPads(); dmRenderPanel(); }
+    dmLight(bank, idx);
+    if(!pad.key){ setStatus("Pad "+(idx+1)+" (Bank "+bank+") is empty — pick a sound for it in the strip under the grid, drag one onto it, or load a kit."); return; }
+    ensureCtx(); if(AC.state==="suspended") AC.resume();
+    if(!pad.buf){
+      dmResolve(pad).then(b=>{ if(b) dmPlayNow(bank, idx, vel);
+        else setStatus("Pad "+(idx+1)+": “"+pad.name+"” is not in the library right now — relink the sounds folder or pick another sound for the pad."); });
+      return;
+    }
+    dmPlayNow(bank, idx, vel);
+  }
+
+  /* ---------------- rendering ---------------- */
+  function dmBuildGrid(){
+    const grid=$("dmGrid"); if(!grid) return; grid.innerHTML="";
+    DM_ROWS.forEach((row, r)=>{
+      row.forEach((idx, c)=>{
+        const b=document.createElement("button"); b.type="button"; b.className="dmpad"; b.dataset.idx=idx;
+        b.innerHTML='<span class="dmstrip"></span><span class="dmrow1"><span class="dmnum"></span><span class="dmnote"></span><span class="dmkey">'+DM_KEYS[r*4+c].toUpperCase()+'</span></span><span class="dmname"></span>';
+        b.addEventListener("pointerdown", e=>{
+          e.preventDefault();
+          let v=0.92;
+          if(e.pointerType==="pen" && e.pressure>0) v=Math.max(0.15, e.pressure);
+          else if(e.pointerType==="touch" && e.pressure>0) v=Math.min(1, Math.max(0.2, e.pressure));
+          dmTrigger(DM.bank, idx, v);
+        });
+        b.addEventListener("dragover", e=>{ e.preventDefault(); b.classList.add("dragover"); });
+        b.addEventListener("dragleave", ()=>b.classList.remove("dragover"));
+        b.addEventListener("drop", e=>{ e.preventDefault(); b.classList.remove("dragover");
+          const li=parseInt(e.dataTransfer.getData("text/sound-idx"), 10);
+          if(!isNaN(li)){ DM.sel=idx; dmAssignLibIdx(DM.bank, idx, li); } });
+        grid.appendChild(b);
+      });
+    });
+  }
+  function dmRenderPads(){
+    document.querySelectorAll("#dmGrid .dmpad").forEach(el=>{
+      const idx=+el.dataset.idx, pad=DM.banks[DM.bank][idx]; if(!pad) return;
+      el.style.setProperty("--dmc", pad.color||"#8a8371");
+      el.querySelector(".dmnum").textContent=idx+1;
+      el.querySelector(".dmnote").textContent=noteName(36+idx);
+      const nm=el.querySelector(".dmname");
+      nm.textContent= pad._missing? pad.name+" — not in library" : (pad.name || "— empty —");
+      nm.classList.toggle("empty", !pad.name);
+      el.classList.toggle("sel", idx===DM.sel);
+      el.title="Pad "+(idx+1)+" · "+noteName(36+idx)+(pad.name? " · "+pad.name : " · empty")+(pad.cut? " · cut group "+pad.cut : "");
+    });
+    const info=$("dmPadInfo"), pad=dmSelPad();
+    if(info && pad) info.textContent="Bank "+DM.bank+" · Pad "+(DM.sel+1)+" ("+noteName(36+DM.sel)+")"+(pad.name? " — "+pad.name : " — empty")+(pad.cut? " · cut group "+pad.cut+(pad.cutSelf? " · cuts itself" : "") : "")+".";
+    const ba=$("dmBankA"), bb=$("dmBankB");
+    if(ba) ba.classList.toggle("on", DM.bank==="A");
+    if(bb) bb.classList.toggle("on", DM.bank==="B");
+  }
+  function dmFillSoundSelect(selEl, pad){
+    if(!selEl) return;
+    selEl.innerHTML="";
+    const o0=document.createElement("option"); o0.value=""; o0.textContent="— empty —"; selEl.appendChild(o0);
+    const groups={};
+    library.forEach((it, i)=>{ const g=it.builtin? (it.group||"Built-in") : "Browser sounds"; (groups[g]=groups[g]||[]).push(i); });
+    Object.keys(groups).forEach(g=>{
+      const og=document.createElement("optgroup"); og.label=g;
+      groups[g].forEach(i=>{ const o=document.createElement("option"); o.value=String(i); o.textContent=library[i].name; og.appendChild(o); });
+      selEl.appendChild(og);
+    });
+    const idx=dmFindLib(pad);
+    selEl.value= idx>=0? String(idx) : "";
+  }
+  function dmFillTarget(){
+    const selEl=$("dmTargetSel"); if(!selEl) return;
+    selEl.innerHTML="";
+    S.order.forEach(id=>{ const ch=S.channels[id]; if(!ch) return;
+      const o=document.createElement("option"); o.value=id; o.textContent=ch.name; selEl.appendChild(o); });
+    if(!DM.target || !S.channels[DM.target])
+      DM.target=(S.order.find(id=>S.channels[id] && S.channels[id].type==="drum")) || S.rollChannel || S.order[0] || null;
+    if(DM.target) selEl.value=DM.target;
+  }
+  function dmRenderPanel(){
+    const pad=dmSelPad(); if(!pad) return;
+    const title=$("dmSetTitle");
+    if(title) title.textContent="Pad "+(DM.sel+1)+" · "+noteName(36+DM.sel)+(pad.name? " — "+pad.name : " — empty");
+    dmFillSoundSelect($("dmSoundSel"), pad);
+    const vol=$("dmVol"); if(vol){ vol.value=Math.round(pad.vol*100); $("dmVolVal").textContent=Math.round(pad.vol*100)+"%"; }
+    const pan=$("dmPan"); if(pan){ pan.value=Math.round(pad.pan*50);
+      $("dmPanVal").textContent= pad.pan===0? "C" : (pad.pan<0? "L"+Math.round(-pad.pan*50) : "R"+Math.round(pad.pan*50)); }
+    const tune=$("dmTune"); if(tune){ tune.value=pad.tune; $("dmTuneVal").textContent=(pad.tune>0? "+":"")+pad.tune+" st"; }
+    const cut=$("dmCutSel"); if(cut) cut.value=String(pad.cut||0);
+    const csb=$("dmCutSelfBtn"); if(csb) csb.textContent="Cut itself: "+(pad.cutSelf? "On":"Off");
+    const ks=$("dmKitSel"); if(ks) ks.value=DM.kit||"";
+  }
+  function dmRenderAll(){ dmRenderPads(); dmRenderPanel(); dmSyncTransport(); }
+
+  /* ---------------- page transport (drives the one shared scheduler + record arm) ---------------- */
+  function dmSyncTransport(){
+    const pb=$("dmPlayBtn"); if(pb) pb.textContent= S.playing? "❚❚ Pause" : (S.paused? "▶ Resume" : "▶ Play");
+    const rb=$("dmRecBtn"); if(rb) rb.classList.toggle("rec-on", !!S.recording);
+    const rm=$("dmRecModeBtn"); if(rm) rm.textContent="Rec: "+(S.recMode==="overwrite"? "OVERWRITE":"ADD");
+    const ro=$("dmPosReadout"); if(ro){
+      let txt="Bar 1 · Beat 1 · 0:00";
+      if(S.playing && typeof AC!=="undefined" && AC && playT0!=null){
+        const pos=Math.max(0, (AC.currentTime-playT0)/stepDurSec());
+        const bar=Math.floor(pos/16)+1, beat=Math.floor((pos%16)/4)+1, secs=pos*stepDurSec();
+        const mm=Math.floor(secs/60), ss=Math.floor(secs%60);
+        txt="Bar "+bar+" · Beat "+beat+" · "+mm+":"+(ss<10? "0":"")+ss;
+      }
+      const sn=(S.seqNames && S.seqNames[S.pattern]) || ("Sequence "+(S.pattern+1));
+      ro.textContent="SEQ "+(S.pattern+1)+" · "+sn+" · "+txt;
+    }
+  }
+  function dmOnShow(){
+    dmFillTarget(); dmRenderAll();
+    if(DM._timer) clearInterval(DM._timer);
+    DM._timer=setInterval(dmSyncTransport, 120);
+  }
+  function dmOnHide(){ if(DM._timer){ clearInterval(DM._timer); DM._timer=null; } }
+
+  /* ---------------- controls wiring ---------------- */
+  (function dmWire(){
+    const kitSel=$("dmKitSel");
+    if(kitSel){
+      const o0=document.createElement("option"); o0.value=""; o0.textContent="Load kit…"; kitSel.appendChild(o0);
+      ["SWUM MPC","boi1da mpkmini","MURDA PADKONTROL","NM Contra PADKONTROL","TYLER WOLF PADKONTROL"].forEach(k=>{
+        const o=document.createElement("option"); o.value=k; o.textContent=k; kitSel.appendChild(o); });
+      const oe=document.createElement("option"); oe.value="__empty"; oe.textContent="Empty bank"; kitSel.appendChild(oe);
+      kitSel.onchange=()=>{
+        const v=kitSel.value; if(!v) return;
+        if(v==="__empty"){ DM.banks[DM.bank]=Array.from({length:16}, dmEmptyPad); DM.kit="";
+          setStatus("Bank "+DM.bank+" cleared — 16 empty pads."); }
+        else{ DM.banks[DM.bank]=dmKitBank(v); DM.kit=v;
+          DM.banks[DM.bank].forEach(p=>{ if(p.key) dmResolve(p); });
+          setStatus(v+" loaded into Bank "+DM.bank+" — Keith’s FPC layout, pads 1–"+(((typeof BL_KITS!=="undefined" && BL_KITS[v])||[]).length)+" filled in FPC order."); }
+        DM.sel=0;
+        if(typeof markDirty==="function") markDirty();
+        dmRenderAll();
+      };
+    }
+    const ba=$("dmBankA"), bb=$("dmBankB");
+    if(ba) ba.onclick=()=>{ DM.bank="A"; dmRenderAll(); };
+    if(bb) bb.onclick=()=>{ DM.bank="B"; dmRenderAll(); };
+    const tg=$("dmTargetSel");
+    if(tg) tg.onchange=()=>{ DM.target=tg.value||null;
+      if(typeof markDirty==="function") markDirty();
+      const ch=DM.target && S.channels[DM.target];
+      setStatus("Drum Machine records onto "+(ch? ch.name : "—")+" — pad hits land in the current sequence on that channel while this page’s transport plays with Rec armed."); };
+    const ss=$("dmSoundSel");
+    if(ss) ss.onchange=()=>{
+      const pad=dmSelPad(); if(!pad) return;
+      if(ss.value===""){ pad.key=null; pad.name=""; pad.buf=null; pad._missing=false; pad._res=null;
+        if(typeof markDirty==="function") markDirty();
+        dmRenderPads(); dmRenderPanel(); setStatus("Pad "+(DM.sel+1)+" cleared of its sound — volume, pan, tune and cut settings stay."); }
+      else dmAssignLibIdx(DM.bank, DM.sel, +ss.value);
+    };
+    const vol=$("dmVol"); if(vol){
+      vol.oninput=()=>{ const pad=dmSelPad(); pad.vol=+vol.value/100; $("dmVolVal").textContent=vol.value+"%"; };
+      vol.onchange=()=>{ if(typeof markDirty==="function") markDirty(); };
+    }
+    const pan=$("dmPan"); if(pan){
+      pan.oninput=()=>{ const pad=dmSelPad(); pad.pan=+pan.value/50;
+        $("dmPanVal").textContent= pad.pan===0? "C" : (pad.pan<0? "L"+Math.round(-pad.pan*50) : "R"+Math.round(pad.pan*50)); };
+      pan.onchange=()=>{ if(typeof markDirty==="function") markDirty(); };
+    }
+    const tune=$("dmTune"); if(tune){
+      tune.oninput=()=>{ const pad=dmSelPad(); pad.tune=+tune.value;
+        $("dmTuneVal").textContent=(pad.tune>0? "+":"")+pad.tune+" st"; };
+      tune.onchange=()=>{ if(typeof markDirty==="function") markDirty(); };
+    }
+    const cut=$("dmCutSel"); if(cut) cut.onchange=()=>{ const pad=dmSelPad(); pad.cut=+cut.value;
+      if(typeof markDirty==="function") markDirty(); dmRenderPads();
+      setStatus("Pad "+(DM.sel+1)+" cut group: "+(pad.cut? "group "+pad.cut+" — hits choke the group’s ringing voices." : "off — this pad chokes nobody.")); };
+    const csb=$("dmCutSelfBtn"); if(csb) csb.onclick=()=>{ const pad=dmSelPad(); pad.cutSelf=!pad.cutSelf;
+      if(typeof markDirty==="function") markDirty(); dmRenderPanel(); dmRenderPads();
+      setStatus("Pad "+(DM.sel+1)+" cut itself: "+(pad.cutSelf? "on — retriggering chokes its own ringing hit." : "off — its own hits may overlap.")); };
+    const cp=$("dmClearPadBtn"); if(cp) cp.onclick=()=>{ const pad=dmSelPad();
+      pad.key=null; pad.name=""; pad.buf=null; pad._missing=false; pad._res=null;
+      if(typeof markDirty==="function") markDirty(); dmRenderPads(); dmRenderPanel();
+      setStatus("Pad "+(DM.sel+1)+" cleared — its volume, pan, tune and cut settings stay."); };
+    const pb=$("dmPlayBtn"); if(pb) pb.onclick=()=>{ blPlayToggle(); dmSyncTransport(); };
+    const sb=$("dmStopBtn"); if(sb) sb.onclick=()=>{ setPlaying(false); uiStep=-1; dmSyncTransport(); };
+    const rb=$("dmRecBtn"); if(rb) rb.onclick=()=>{ const b=$("btnRecord"); if(b) b.click(); dmSyncTransport(); };
+    const rm=$("dmRecModeBtn"); if(rm) rm.onclick=()=>{ toggleRecMode(); dmSyncTransport(); };
+  })();
+
+  /* ---------------- typing keys across the 4×4 ---------------- */
+  document.addEventListener("keydown", e=>{
+    if(!DM.viewActive || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const t=e.target, tag=(t && t.tagName || "").toLowerCase();
+    if(tag==="textarea" || tag==="select" || tag==="input" || (t && t.isContentEditable)) return;
+    const ki=DM_KEYS.indexOf((e.key||"").toLowerCase()); if(ki<0) return;
+    e.preventDefault();
+    dmTrigger(DM.bank, DM_ROWS[Math.floor(ki/4)][ki%4], 0.92);
+  });
+
+  /* ---------------- external MIDI: pads answer notes 36–67 on this page ---------------- */
+  if(typeof onMidiMessage==="function" && !onMidiMessage._blDmWrapped){
+    const _dmMidiPrev=onMidiMessage;
+    const dmMidiWrap=function(msg){
+      try{
+        if(DM.viewActive && msg && msg.data && msg.data.length>=2){
+          const cmd=msg.data[0]&0xf0;
+          if(cmd===0x90 || cmd===0x80){
+            const note=msg.data[1], velRaw=msg.data[2]||0;
+            let bank=null, idx=-1;
+            if(note>=36 && note<=51){ bank="A"; idx=note-36; }
+            else if(note>=52 && note<=67){ bank="B"; idx=note-52; }
+            if(idx>=0){
+              if(cmd===0x90 && velRaw>0){ dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); }
+              else dmHold(bank, idx, false);
+              return;
+            }
+          }
+        }
+      }catch(e){}
+      return _dmMidiPrev(msg);
+    };
+    dmMidiWrap._blDmWrapped=true;
+    onMidiMessage=dmMidiWrap;
+  }
+
+  /* ---------------- persistence: rides the project file + undo snapshots ---------------- */
+  function dmSerPad(p){ return { key:p.key||null, name:p.name||"", color:p.color, vol:p.vol, pan:p.pan, tune:p.tune, cut:p.cut, cutSelf:!!p.cutSelf }; }
+  function dmResetFactory(){
+    DM.banks={ A:dmKitBank("SWUM MPC"), B:Array.from({length:16}, dmEmptyPad) };
+    DM.bank="A"; DM.sel=0; DM.target=null; DM.kit="SWUM MPC";
+    dmFillTarget(); dmRenderAll();
+  }
+  function dmRestore(d){
+    if(!d || !d.banks){ dmResetFactory(); return; }
+    const banks={A:[],B:[]};
+    ["A","B"].forEach(bn=>{
+      const arr=d.banks[bn]||[];
+      for(let i=0;i<16;i++){ const s=arr[i], p=dmEmptyPad();
+        if(s){ p.key=s.key||null; p.name=s.name||""; p.color=s.color||dmCatColor(p.name);
+          p.vol=(s.vol!=null && isFinite(+s.vol))? +s.vol : 0.9;
+          p.pan=isFinite(+s.pan)? +s.pan : 0;
+          p.tune=Math.round(+s.tune||0); p.cut=Math.round(+s.cut||0); p.cutSelf=s.cutSelf!==false; }
+        banks[bn].push(p);
+      }
+    });
+    DM.banks=banks;
+    DM.bank=(d.bank==="B")? "B" : "A";
+    DM.sel=Math.min(15, Math.max(0, Math.round(+d.sel||0)));
+    DM.target=d.target||null; DM.kit=d.kit||"";
+    DM.banks.A.concat(DM.banks.B).forEach(p=>{ if(p.key) dmResolve(p); });
+    dmFillTarget(); dmRenderAll();
+  }
+  const _dmPjPrev=projectJSON;
+  projectJSON=function(){
+    const p=_dmPjPrev();
+    p.drums={ v:1, bank:DM.bank, sel:DM.sel, target:DM.target, kit:DM.kit,
+      banks:{ A:DM.banks.A.map(dmSerPad), B:DM.banks.B.map(dmSerPad) } };
+    return p;
+  };
+  const _dmLcpPrev=loadClipsFromProject;
+  loadClipsFromProject=function(p){
+    _dmLcpPrev(p);
+    if(p && p.drums) dmRestore(p.drums);
+    else if(p) dmResetFactory();
+  };
+
+  /* ---------------- view tab: after Piano Roll, Options stays last ---------------- */
+  const tabsBar=$("blViewTabs");
+  if(tabsBar){
+    const b=document.createElement("button"); b.type="button"; b.className="vtab"; b.dataset.view="drums"; b.setAttribute("role","tab"); b.textContent="Drum Machine";
+    b.onclick=()=>window.blSetView("drums");
+    const rollBtn=tabsBar.querySelector('.vtab[data-view="roll"]');
+    if(rollBtn) rollBtn.after(b); else tabsBar.appendChild(b);
+  }
+  const _dmViewPrev=window.blSetView;
+  window.blSetView=function(v, silent){
+    if(v==="drums"){
+      wrap.classList.remove("blv-arrange","blv-mixer","blv-roll","blv-synth","blv-sampler","blv-options");
+      wrap.classList.add("blv-drums");
+      if(tabsBar) tabsBar.querySelectorAll(".vtab").forEach(x=>{ const on=x.dataset.view==="drums"; x.classList.toggle("on", on); x.setAttribute("aria-selected", on? "true":"false"); });
+      try{ localStorage.setItem("beatlab.viewtab.v1","drums"); localStorage.setItem("beatlab.viewtab.drums","1"); localStorage.setItem("beatlab.viewtab.extra",""); localStorage.setItem("beatlab.viewtab.options",""); }catch(e){}
+      DM.viewActive=true; dmOnShow();
+      try{ window.scrollTo(0,0); }catch(e){}
+      if(!silent) setStatus("Drum Machine — FPC pads: two banks of 16, your kits on board. This page’s transport runs the sequence here; arm Rec and pad hits record onto the target channel.");
+      return;
+    }
+    if(DM.viewActive){ DM.viewActive=false; dmOnHide(); }
+    wrap.classList.remove("blv-drums");
+    try{ localStorage.setItem("beatlab.viewtab.drums",""); }catch(e){}
+    _dmViewPrev(v, silent);
+  };
+
+  /* ---------------- init ---------------- */
+  dmBuildGrid();
+  dmFillTarget();
+  dmRenderAll();
+  let dmWant=""; try{ dmWant=localStorage.getItem("beatlab.viewtab.drums")||""; }catch(e){}
+  if(dmWant==="1" && window.blSetView) window.blSetView("drums", true);
+})();
+</script>
+<style>
+/* ================================================================
+   EMULATION (Keith, 2026-11-07) — Options → Appearance → Emulation.
+   LAYOUT ONLY, the partner of Theme (colours): [data-emu] on <html>
+   re-docks / re-orders the app's EXISTING views and panels — no
+   view's internals change, no audio / project / channel / sequence
+   state is touched, and an open project sounds identical before
+   and after a switch. Default = no [data-emu] = today's exact
+   arrangement. HARD RULES: the OPTIONS tab never moves (the script
+   below re-pins it last after every reorder, and this picker lives
+   in Options); every tab stays present with its existing label;
+   ALL layout rules live inside (min-width:1024px) — at phone
+   widths every emulation falls back to the current stacked layout.
+   The view system's own hides use !important, so the dock rules
+   below carry !important with higher-specificity selectors
+   (:root[data-emu] …) to win only the combos they name.
+   ================================================================ */
+#blEmuSel{width:100%;max-width:340px;min-height:44px;font-size:13px}
+#blZoneBar{display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--gold2);border-radius:8px;padding:7px 9px;margin:0 0 10px}
+#blZoneBar .blzone-label{font-size:10px;font-weight:900;letter-spacing:1.4px;color:var(--gold);text-transform:uppercase;margin-right:2px}
+#blZoneBar .btn{min-height:36px}
+#blZoneBar .btn.on{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
+/* emphasis: an emulation's lead tab carries a gold underline when it is not the open one */
+:root[data-emu] #blBarTabs .vtab:first-child:not(.on){box-shadow:inset 0 -3px 0 var(--gold2)}
+
+@media (min-width:1024px){
+  /* ---------- PRO TOOLS: MASTER strip to the END of the board ---------- */
+  :root[data-emu="protools"] #mixerStrips .masterstrip{order:999;position:static;left:auto;z-index:auto;box-shadow:none}
+
+  /* ---------- LOGIC PRO: Edit centre · Mixer right panel · Piano Roll bottom dock ·
+       Modules / Sampler open as panels under the arrangement ---------- */
+  :root[data-emu="logic"] .wrap.blv-arrange,
+  :root[data-emu="logic"] .wrap.blv-roll{padding-right:352px}
+  :root[data-emu="logic"] .wrap.blv-arrange>#blViewMixer,
+  :root[data-emu="logic"] .wrap.blv-roll>#blViewMixer{display:block!important;position:fixed;top:64px;right:0;bottom:0;width:340px;z-index:45;overflow-y:auto;overflow-x:hidden;background:var(--bg2);border-left:1px solid var(--line);padding:8px;box-shadow:-12px 0 24px rgba(0,0,0,.35)}
+  :root[data-emu="logic"] #blViewMixer #mixerStrips{flex-direction:column;flex-wrap:nowrap;overflow:visible;align-items:stretch}
+  :root[data-emu="logic"] #blViewMixer #mixerStrips .bstrip,
+  :root[data-emu="logic"] #blViewMixer #mixerStrips .strip{width:auto!important;flex:none}
+  :root[data-emu="logic"] #blViewMixer #mixerStrips .masterstrip{position:static;left:auto;z-index:auto;box-shadow:none}
+  :root[data-emu="logic"] .wrap.blv-roll>.blv-arrange{display:block!important}
+  :root[data-emu="logic"] .wrap.blv-arrange>#blViewRoll{display:block!important}
+  :root[data-emu="logic"] .wrap.blv-synth>.blv-arrange,
+  :root[data-emu="logic"] .wrap.blv-sampler>.blv-arrange{display:block!important}
+
+  /* ---------- ABLETON LIVE: Mixer strip panel + Modules device chain docked
+       beneath the arrangement on the Edit view ---------- */
+  :root[data-emu="ableton"] .wrap.blv-arrange>#blViewMixer{display:block!important}
+  :root[data-emu="ableton"] .wrap.blv-arrange>#blViewSynth{display:block!important}
+  :root[data-emu="ableton"] .wrap.blv-arrange #page-mixer{max-height:380px;overflow-y:auto}
+
+  /* ---------- REASON STUDIO: rack first, Edit docked below it as the sequencer ---------- */
+  :root[data-emu="reason"] .wrap.blv-synth>.blv-arrange{display:block!important}
+
+  /* ---------- CUBASE: lower zone under the arrangement (Piano Roll / Sampler tabs) ---------- */
+  :root[data-emu="cubase"] .wrap.blv-roll>.blv-arrange,
+  :root[data-emu="cubase"] .wrap.blv-sampler>.blv-arrange{display:block!important}
+  :root[data-emu="cubase"] #blZoneBar.emu-on{display:flex}
+}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   EMULATION (Keith, 2026-11-07) — Theme + Emulation, two
+   INDEPENDENT options. Theme (above) is colours only; Emulation
+   is menu/layout arrangement only. The per-DAW furniture map,
+   drawn from the movable-pieces inventory listed for Keith
+   2026-11-07 and applied here ("map it as you go"):
+   · DEFAULT — the current arrangement, untouched (holders and
+     tabs restored to their recorded original positions).
+   · PRO TOOLS — Edit/Mix duality: opens on Edit; in the Mixer
+     the MASTER strip moves to the END of the board (CSS order,
+     desktop only).
+   · FL STUDIO — rack-first: opens on Piano Roll (its step rack
+     already leads that page); tab emphasis Roll → Drum Machine
+     → Edit → Mixer; the Mixer stays a full view.
+   · ABLETON LIVE — arrangement-first: opens on Edit with the
+     Mixer docked as a strip panel beneath the arrangement and
+     Modules as a device-chain panel under it alongside.
+   · LOGIC PRO — Keith's approved 2026-11-01 map: Edit in the
+     centre (its lane headers are the left track column), Mixer
+     docked as a right-side panel with MASTER first, Piano Roll
+     docked full-width along the bottom, Sampler and Modules
+     opening as panels under the arrangement.
+   · REASON STUDIO — rack-first: opens on Modules (the rack),
+     with Edit docked below it as the sequencer lane.
+   · CUBASE — project window: opens on Edit; a lower zone under
+     the arrangement hosts Piano Roll and Sampler as zone tabs
+     (the zone bar rides above whichever zone panel is open).
+   HOW: [data-emu] on <html> + the CSS above + re-docking the
+   existing view holders in the DOM (moves, never copies — the
+   same panels, same handlers, detach placeholders ride inside
+   their holders exactly as the app's own view moves treat them).
+   The choice persists in localStorage ("beatlab.emu.v1") like
+   the theme and is NEVER written into project files. Detached
+   pop-outs get the attribute mirrored, like the theme. Phone
+   widths (<1024px): no moves, default tab order, no dock CSS —
+   the current stacked layout, per the fallback rule.
+   ================================================================ */
+(function blEmulation(){
+  var EMU_KEY="beatlab.emu.v1";
+  var EMUS=["default","protools","fl","ableton","logic","reason","cubase"];
+  var LABELS={default:"Default",protools:"Pro Tools",fl:"FL Studio",ableton:"Ableton Live",logic:"Logic Pro",reason:"Reason Studio",cubase:"Cubase"};
+  var OPENING={default:null,protools:"arrange",fl:"roll",ableton:"arrange",logic:"arrange",reason:"synth",cubase:"arrange"};
+  var TAB_ORDER={
+    default:["arrange","mixer","roll","drums","synth","sampler","options"],
+    protools:["arrange","mixer","roll","drums","synth","sampler","options"],
+    fl:["roll","drums","arrange","mixer","synth","sampler","options"],
+    ableton:["arrange","mixer","roll","drums","synth","sampler","options"],
+    logic:["arrange","mixer","roll","drums","synth","sampler","options"],
+    reason:["synth","arrange","roll","drums","mixer","sampler","options"],
+    cubase:["arrange","mixer","roll","drums","synth","sampler","options"]
+  };
+  var NOTES={
+    default:"today’s arrangement, exactly as built — tabs, docks and the MASTER strip all back where they were.",
+    protools:"Edit/Mix duality — opens on Edit, and in the Mixer the MASTER strip rides at the END of the board (rightmost) in this emulation only.",
+    fl:"rack-first — opens on the Piano Roll with its step rack leading; Drum Machine sits beside the rack pages, Edit (playlist) next, Mixer stays a full view.",
+    ableton:"arrangement-first — opens on Edit with the Mixer docked as a strip panel beneath the arrangement and Modules as a device-chain panel under it.",
+    logic:"tracks in the centre (lane headers as the left column), Mixer docked as a right-side panel with MASTER first, Piano Roll docked full-width along the bottom; Modules and Sampler open as panels under the arrangement.",
+    reason:"rack-first — opens on Modules (the rack) with Edit docked below it as the sequencer lane.",
+    cubase:"project window — opens on Edit; a lower zone under the arrangement hosts the Piano Roll and Sampler as zone tabs."
+  };
+  var DESK=window.matchMedia? window.matchMedia("(min-width:1024px)") : {matches:true};
+  function gid(id){ return document.getElementById(id); }
+  var wrap=document.querySelector(".wrap");
+  var cur="default";
+  try{ var saved=localStorage.getItem(EMU_KEY); if(saved && EMUS.indexOf(saved)>=0) cur=saved; }catch(e){}
+
+  /* ---------- record the holders' original homes (Default = restore these) ---------- */
+  var HOLDER_IDS=["blViewMixer","blViewRoll","blViewSynth","blViewSampler"];
+  var homes={};
+  HOLDER_IDS.forEach(function(id){ var el=gid(id); if(el && el.parentNode) homes[id]={parent:el.parentNode, next:el.nextSibling}; });
+  function restoreHolders(){
+    HOLDER_IDS.forEach(function(id){ var el=gid(id), h=homes[id]; if(!el || !h) return;
+      try{ if(h.next && h.next.parentNode===h.parent) h.parent.insertBefore(el, h.next); else h.parent.appendChild(el); }catch(e){}
+    });
+  }
+
+  /* ---------- tab order (Options pinned LAST in every emulation) ---------- */
+  function orderTabs(name){
+    try{
+      var region=gid("blBarTabs") || gid("blViewTabs"); if(!region) return;
+      var order=(DESK.matches? (TAB_ORDER[name]||TAB_ORDER.default) : TAB_ORDER.default).slice();
+      var btns={};
+      region.querySelectorAll(".vtab").forEach(function(b){ btns[b.dataset.view]=b; });
+      order.forEach(function(v){ if(btns[v]){ region.appendChild(btns[v]); delete btns[v]; } });
+      Object.keys(btns).forEach(function(v){ if(v!=="options") region.appendChild(btns[v]); });
+      if(btns.options) region.appendChild(btns.options); /* HARD RULE: Options is always the last tab */
+    }catch(e){}
+  }
+
+  /* ---------- holder re-docking per emulation (desktop only) ---------- */
+  function dockHolders(name){
+    restoreHolders();
+    if(!wrap || !DESK.matches || name==="default") return;
+    try{
+      if(name==="logic"){ var r=gid("blViewRoll"); if(r) wrap.appendChild(r); var ls=gid("blViewSynth"); if(ls) wrap.appendChild(ls); var lm=gid("blViewSampler"); if(lm) wrap.appendChild(lm); } /* roll → bottom dock; Modules / Sampler → bottom panels under the arrangement */
+      if(name==="ableton"){ var m=gid("blViewMixer"); if(m) wrap.appendChild(m); var s=gid("blViewSynth"); if(s) wrap.appendChild(s); } /* mixer, then device chain, under the arrangement */
+      if(name==="cubase"){ var r2=gid("blViewRoll"); if(r2) wrap.appendChild(r2); var s2=gid("blViewSampler"); if(s2) wrap.appendChild(s2); } /* lower-zone panels to the bottom */
+      if(name==="reason"){ var sy=gid("blViewSynth"), lay=wrap.querySelector(".layout");
+        if(sy && lay && lay.parentNode===wrap) wrap.insertBefore(sy, lay); /* rack above the Edit stack */ }
+    }catch(e){}
+  }
+
+  /* ---------- Cubase lower-zone bar ---------- */
+  var zoneBar=document.createElement("div"); zoneBar.id="blZoneBar";
+  zoneBar.innerHTML='<span class="blzone-label">Lower Zone</span>'+
+    '<button type="button" class="btn sm" data-zone="roll">Piano Roll</button>'+
+    '<button type="button" class="btn sm" data-zone="sampler">Sampler</button>'+
+    '<button type="button" class="btn sm" data-zone="arrange">Close zone</button>';
+  zoneBar.querySelectorAll("[data-zone]").forEach(function(b){
+    b.onclick=function(){ if(window.blSetView) window.blSetView(b.dataset.zone); };
+  });
+  function currentView(){
+    if(!wrap) return "arrange";
+    var m=(" "+wrap.className+" ").match(/ blv-([a-z]+) /);
+    return m? m[1] : "arrange";
+  }
+  function syncZone(){
+    try{
+      var on = cur==="cubase" && DESK.matches && wrap && (currentView()==="roll" || currentView()==="sampler");
+      zoneBar.classList.toggle("emu-on", !!on);
+      if(on){
+        var holder=gid(currentView()==="roll"? "blViewRoll" : "blViewSampler");
+        if(holder && holder.parentNode) holder.parentNode.insertBefore(zoneBar, holder);
+        zoneBar.querySelectorAll("[data-zone]").forEach(function(b){ b.classList.toggle("on", b.dataset.zone===currentView()); });
+      } else if(zoneBar.parentNode) zoneBar.parentNode.removeChild(zoneBar);
+    }catch(e){}
+  }
+
+  /* ---------- pop-out mirroring (like the theme) ---------- */
+  function syncPopouts(){
+    try{
+      if(typeof blDock==="undefined") return;
+      Object.keys(blDock).forEach(function(k){
+        var d=blDock[k];
+        if(d && d.mode==="pop" && d.win && !d.win.closed && d.win.document){
+          var de=d.win.document.documentElement;
+          if(cur==="default") de.removeAttribute("data-emu"); else de.setAttribute("data-emu", cur);
+        }
+      });
+    }catch(e){}
+  }
+  try{
+    if(typeof blDetach==="function" && !blDetach._blEmuWrapped){
+      var _bdPrev2=blDetach;
+      var _bdWrap2=function(){ var r=_bdPrev2.apply(this, arguments); setTimeout(syncPopouts, 60); setTimeout(syncPopouts, 400); return r; };
+      _bdWrap2._blEmuWrapped=true; blDetach=_bdWrap2;
+    }
+  }catch(e){}
+
+  /* ---------- the picker: Options → Appearance, beside Theme ---------- */
+  var sel=null;
+  try{
+    var panel=gid("blOptionsPanel");
+    if(panel && !gid("blEmuSel")){
+      var themeSel=gid("blThemeSel");
+      var group=themeSel? themeSel.closest(".bloptgroup") : null;
+      if(!group){ group=document.createElement("div"); group.className="bloptgroup";
+        var h=document.createElement("h3"); h.textContent="Appearance"; group.appendChild(h); panel.appendChild(group); }
+      var lab=document.createElement("label"); lab.className="hlabel"; lab.style.cssText="display:flex;gap:8px;align-items:center;margin-top:8px";
+      var lt=document.createElement("span"); lt.textContent="Emulation:"; lab.appendChild(lt);
+      sel=document.createElement("select"); sel.id="blEmuSel";
+      sel.title="Layout emulation — rearranges menus, tabs and docks only (furniture, never sound, data or playback). Independent of Theme: any theme pairs with any emulation. The Options tab never moves. Saved on this device, never in project files. Desktop-width layouts; phones keep the stacked layout.";
+      EMUS.forEach(function(t){ var o=document.createElement("option"); o.value=t; o.textContent=LABELS[t]; sel.appendChild(o); });
+      sel.value=cur;
+      sel.onchange=function(){ applyEmu(sel.value, false); };
+      lab.appendChild(sel); group.appendChild(lab);
+    } else { sel=gid("blEmuSel"); }
+  }catch(e){}
+
+  /* ---------- view changes keep the Cubase zone bar in place ---------- */
+  try{
+    if(typeof window.blSetView==="function" && !window.blSetView._blEmuWrapped){
+      var _svPrev=window.blSetView;
+      var _svWrap=function(){ var r=_svPrev.apply(this, arguments); setTimeout(syncZone, 30); return r; };
+      _svWrap._blEmuWrapped=true; window.blSetView=_svWrap;
+    }
+  }catch(e){}
+
+  /* ---------- apply ---------- */
+  function applyEmu(name, silent){
+    if(EMUS.indexOf(name)<0) name="default";
+    cur=name;
+    if(name==="default") document.documentElement.removeAttribute("data-emu");
+    else document.documentElement.setAttribute("data-emu", name);
+    try{ localStorage.setItem(EMU_KEY, name); }catch(e){}
+    if(sel) sel.value=name;
+    orderTabs(name);
+    dockHolders(name);
+    syncPopouts();
+    var open=OPENING[name];
+    if(open && window.blSetView) { try{ window.blSetView(open, true); }catch(e){} }
+    syncZone();
+    if(typeof window.blBarSyncOffset==="function"){ try{ window.blBarSyncOffset(); }catch(e){} }
+    if(!silent && typeof setStatus==="function")
+      setStatus("Emulation: "+LABELS[name]+" — "+NOTES[name]+" Layout only: theme, sound, project data and playback are untouched, and the Options tab stays last.");
+  }
+
+  /* resize across the desktop boundary: re-dock / fall back, never re-open a view */
+  var lastDesk=DESK.matches;
+  function onDeskChange(){
+    if(DESK.matches===lastDesk) return; lastDesk=DESK.matches;
+    orderTabs(cur); dockHolders(cur); syncZone();
+  }
+  try{ if(DESK.addEventListener) DESK.addEventListener("change", onDeskChange); else if(DESK.addListener) DESK.addListener(onDeskChange); }catch(e){}
+  window.addEventListener("resize", function(){ setTimeout(onDeskChange, 120); });
+
+  /* ---------- init: restore the saved emulation (opens on its home view) ---------- */
+  applyEmu(cur, true);
+  if(cur!=="default" && typeof setStatus==="function")
+    setStatus("Emulation: "+LABELS[cur]+" — "+NOTES[cur]+" Layout only; your theme and project are untouched, and the Options tab stays last.");
 })();
 </script>
 </body>
