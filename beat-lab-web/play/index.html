@@ -746,7 +746,7 @@ a{color:var(--teal)}
             <div class="small" style="margin-top:4px">Chord + progression generators and the 808 roll all follow this key.</div>
           </div>
           <div class="ctl"><h3>808 status</h3>
-            <div class="mono" id="status808" style="font-size:13px">Root: C2 (built-in 808)</div>
+            <div class="mono" id="status808" style="font-size:13px">Root: C3 (built-in 808)</div>
             <div class="small" style="margin-top:4px">The 808’s root is set from the ROOT NOTE control in the Piano Roll header — load the 808 channel in the roll and set its root there, so the roll plays the note you draw.</div>
           </div>
         </div>
@@ -818,7 +818,7 @@ a{color:var(--teal)}
    ============================================================ */
 const $ = id => document.getElementById(id);
 const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-const noteName = m => NOTE_NAMES[((m%12)+12)%12] + (Math.floor(m/12)-1);
+const noteName = m => NOTE_NAMES[((m%12)+12)%12] + Math.floor(m/12); /* FL Studio labels (Keith, 2026-11-08): octave = floor(midi/12) — MIDI 60 reads C5, 36 reads C3. DISPLAY ONLY: MIDI numbers, stored roots, saved projects and pitches are unchanged. */
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const db2g = db => Math.pow(10, db/20);
 
@@ -1970,7 +1970,7 @@ function buildRoll(){
 })();
 (function fillChordControls(){
   const roots=$("chordRoot"); for(let m=36;m<=60;m++){ const o=document.createElement("option"); o.value=m; o.textContent=noteName(m); roots.appendChild(o); }
-  roots.value=50; // D3
+  roots.value=50; // D4 (FL label)
   const steps=$("chordStep"), hs=$("rollHelperStep"); /* hs: helper panel retired (MIDI Templates) — may be absent */
   for(let s=0;s<16;s++){ [steps,hs].forEach(selEl=>{ if(!selEl) return; const o=document.createElement("option"); o.value=s; o.textContent="Step "+(s+1); selEl.appendChild(o); }); }
 })();
@@ -1992,7 +1992,7 @@ function degreeChord(deg, cx){
   const root=S.projectKey.root, mode=S.projectKey.mode;
   const scaleIv = mode==="minor"? [0,2,3,5,7,8,10,12,14,15,17] : [0,2,4,5,7,9,11,12,14,16,17];
   const triMinor = mode==="minor"? [true,false,true,false,false,true,true] : [false,true,true,false,false,true,true];
-  const base=48+root; // around octave 3/4
+  const base=48+root; // around octave 4/5 (FL labels)
   const r=base+scaleIv[deg];
   let ivs= triMinor[deg]? [0,3,7] : [0,4,7];
   if(cx>=1) ivs.push(triMinor[deg]?10:11);
@@ -3922,7 +3922,7 @@ const _u808Prev=update808Status; update808Status=function(b){ if(!S.channels.bas
   $("padPageDn").onclick=()=>setPadPage(S.padPage-1);
   $("chopKeysBtn").onclick=e=>{ S.chopKeysMode= S.chopKeysMode==="chromatic"? "pitched":"chromatic";
     e.target.textContent="Keys on chops: "+(S.chopKeysMode==="chromatic"?"Chromatic slices":"Selected slice, pitched");
-    setStatus("On a chop channel, the keys now "+(S.chopKeysMode==="chromatic"?"run the slices chromatically from C2 — 25 keys reach 25 slices with no paging.":"play the selected slice pitched across the keys.")); };
+    setStatus("On a chop channel, the keys now "+(S.chopKeysMode==="chromatic"?"run the slices chromatically from C4 — 25 keys reach 25 slices with no paging.":"play the selected slice pitched across the keys.")); };
   $("polyBtn").onclick=e=>{ const ch=(S.channels[S.selected] && S.channels[S.selected].type==="chop")? S.channels[S.selected] : S.channels.chop;
     if(!ch){ setStatus("No chop channel right now."); return; }
     ch.poly=!ch.poly; e.target.textContent="Slices: "+(ch.poly?"Poly":"Choke (mono)");
@@ -13588,7 +13588,7 @@ function blSynthUnmap(){
   blSynthStat("Unmapped “"+ch.name+"” — it is back to its previous sound: the built-in synth placeholder it had before mapping (or silence if it never had a sound loaded).");
 }
 
-/* ---------------- audition keyboard (2 octaves + top C, C4–C6) ---------------- */
+/* ---------------- audition keyboard (2 octaves + top C, C5–C7 in FL labels) ---------------- */
 const BL_KB_HELD={};
 function blBuildKeyboard(kb){
   if(!kb) return;
@@ -19384,7 +19384,7 @@ try{ ptRender(); }catch(e){}
 
   /* ---------- message formatting (plain terms) ---------- */
   var NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-  function nName(n){ try{ if(typeof noteName==="function") return noteName(n); }catch(e){} return NOTE_NAMES[((n%12)+12)%12]+(Math.floor(n/12)-1); }
+  function nName(n){ try{ if(typeof noteName==="function") return noteName(n); }catch(e){} return NOTE_NAMES[((n%12)+12)%12]+Math.floor(n/12); } /* FL labels — same convention as noteName */
   function fmtMsg(d){
     if(!d || !d.length) return "Message";
     var st=d[0], cmd=st&0xf0, ch=(st&0x0f)+1;
@@ -20336,13 +20336,13 @@ if(typeof buildRack==="function"){
     '</div>'+
     '<div class="dmsoftkeys" role="group" aria-label="LCD soft keys — their jobs follow the LCD view"><button type="button" class="btn sm" data-soft="0"></button><button type="button" class="btn sm" data-soft="1"></button><button type="button" class="btn sm" data-soft="2"></button><button type="button" class="btn sm" data-soft="3"></button></div>'+
     '<div id="dmPadInfo" class="small" style="margin-bottom:6px">Pad 1 selected.</div>'+
-    '<div class="small" style="margin-bottom:4px">FPC’s three zones: the pad strip on top, the pad matrix on the left, the layer editor on the right. Each pad holds up to four layers — a hit plays every layer whose velocity range catches it. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C1 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it into the selected layer. The page opens in the 8-pad version for the MPK Mini MK3 — its 16 pad-hits (Bank A, then Bank B) land on this bank’s 16 pads in order; the 16-pad version is one toggle away, and both versions are views of the same assignments.</div>'+
+    '<div class="small" style="margin-bottom:4px">FPC’s three zones: the pad strip on top, the pad matrix on the left, the layer editor on the right. Each pad holds up to four layers — a hit plays every layer whose velocity range catches it. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C3 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it into the selected layer. The page opens in the 8-pad version for the MPK Mini MK3 — its 16 pad-hits (Bank A, then Bank B) land on this bank’s 16 pads in order; the 16-pad version is one toggle away, and both versions are views of the same assignments.</div>'+
     /* ---- ZONE 1: main pad properties strip (FPC top strip) ---- */
     '<div class="dmtopstrip" id="dmTopStrip">'+
       '<span class="dmnav"><button type="button" class="btn sm" id="dmPrevPad" title="Previous pad (of 32, across both banks)">◀</button><button type="button" class="btn sm" id="dmNextPad" title="Next pad (of 32, across both banks)">▶</button></span>'+
       '<span class="dmpadread" id="dmPadReadout">Pad 1/64</span>'+
       '<span class="dmsoundname" id="dmPadSoundName">— empty —</span>'+
-      '<span class="dmmidinote" id="dmMidiNote">Midi Note C1 · 36</span>'+
+      '<span class="dmmidinote" id="dmMidiNote">Midi Note C3 · 36</span>'+
       '<button type="button" class="btn sm" id="dmMuteBtn" title="Mute — silences this pad everywhere">M Mute</button>'+
       '<button type="button" class="btn sm" id="dmSoloBtn" title="Solo — on this page, only soloed pads sound">S Solo</button>'+
       '<span class="dmmini">Vol <input type="range" id="dmVol" min="0" max="100" /><span class="dmval" id="dmVolVal"></span></span>'+
@@ -21318,7 +21318,7 @@ if(typeof buildRack==="function"){
 
   /* ================================================================
      AUDITION KEYS (MPK Mini layout only — the MPC2000XL layout has
-     none, true to the hardware). A 25-key strip (C3–C5, root C4)
+     none, true to the hardware). A 25-key strip (C4–C6, root C5 — FL labels)
      mirroring his MPK Mini's keys: plays the SELECTED pad's layered
      sound chromatically through the same voice path (layers,
      envelope, its mixer strip), answers his physical keys on
