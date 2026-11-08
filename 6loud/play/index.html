@@ -82,6 +82,9 @@
     #board { padding:9px 12px 11px; margin-bottom:10px; border-radius:14px; }
     #board .boardTitle { font-size:14px; margin-bottom:4px; }
     #board .onlineLine { font-size:13px; margin-bottom:5px; }
+    #charName { top:65.5%; }
+    #charBest { top:70.2%; }
+    #startBtn { bottom:calc(4.6% + 84px); }   /* title stack on short screens (Keith v0.73.1): the button was bottom:19vh while the name/best lines are top-% — on his iPhone the two systems collided and START GAME sat on the LOCAL BEST line. Here the button anchors off the strip (same 4.6% base + its height + a gap) and the best line lifts clear. Tall screens keep the approved layout. */
     #over .rowMedal { padding:4px 10px 4px 6px; margin:5px 0; border-radius:11px; gap:8px; }
     #over .rowMedal .rName, #over .rowMedal .rFeet { font-size:16px; }
     #over .medal { width:32px; height:32px; font-size:10px; }
@@ -143,7 +146,7 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.73</div>
+  <div id="ver">v0.73.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -157,7 +160,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.73 ==============================
+/* ============================== 6LOUD demo v0.73.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -2131,7 +2134,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false, dbShown = false, charUiShown = true, hudShown = true, sbShown = false;
+let puShown = false, dbShown = false, charUiShown = false, hudShown = true, sbShown = false;   /* charUiShown starts FALSE (v0.73.1): mode starts 'title', so an initial true made the first-frame guard skip itself forever — the photo strip kept its CSS display:none on a fresh load while the arrows/name/best (visible by default) made the title look complete. Keith's iPhone shot caught it. */
 let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
