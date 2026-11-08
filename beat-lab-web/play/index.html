@@ -12,8 +12,8 @@
 <script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. */ var BL_VERSION="v1.0"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
 <style>
 :root{
   --bg:#141311; --bg2:#1c1a17; --panel:#22201c; --panel2:#2a2721; --line:#3a362d;
@@ -19994,6 +19994,187 @@ if(typeof buildRack==="function"){
 .dmsetgrid input[type=range]{width:100%}
 .dmsetgrid select{width:100%}
 .dmval{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--gold)}
+/* ---- FPC three zones: (1) top pad strip · (3) matrix left · (2) layer editor right ---- */
+.dmtopstrip{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0}
+.dmtopstrip .dmnav{display:flex;gap:4px}
+.dmtopstrip .dmpadread{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--gold);font-weight:700;white-space:nowrap}
+.dmtopstrip .dmsoundname{font-weight:900;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.dmtopstrip .dmmidinote{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--dim);white-space:nowrap}
+.dmtopstrip .btn.on{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
+.dmtopstrip .btn.mute-on{background:var(--red);color:#fff;border-color:var(--red)}
+.dmtopstrip .dmmini{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:900;letter-spacing:.6px;color:var(--dim);text-transform:uppercase}
+.dmtopstrip .dmmini input[type=range]{width:74px}
+.dmtopstrip select{max-width:110px}
+.dmzones{display:grid;grid-template-columns:minmax(290px,5fr) minmax(330px,7fr);gap:12px;align-items:start;margin-top:4px}
+.dmzonehead{font-size:11px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;font-weight:900;margin:0 0 8px}
+.dmpad .dmflags{padding-left:6px;display:flex;gap:4px}
+.dmpad .dmflag{font-size:8.5px;font-weight:900;border-radius:3px;padding:1px 5px;border:1px solid var(--line);color:var(--dim)}
+.dmpad .dmflag.m{background:var(--red);color:#fff;border-color:var(--red)}
+.dmpad .dmflag.s{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
+.dmpad.muted{opacity:.55}
+.dmlaytools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.dmlayer{border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:7px 8px;margin-bottom:6px}
+.dmlayer.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.dmlayrow1{display:flex;gap:6px;align-items:center}
+.dmlaynum{width:30px;height:30px;flex:none;border-radius:7px;border:1px solid var(--line);background:var(--btn);color:var(--ink);font-weight:900}
+.dmlayer.sel .dmlaynum{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
+.dmlaysnd{flex:1;min-width:110px}
+.dmlaygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 10px;margin-top:6px}
+.dmlaygrid label{display:block;font-size:10px;color:var(--dim);margin-bottom:2px}
+.dmlaygrid input[type=range]{width:100%}
+.dmvel{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.dmvel label{font-size:10px;color:var(--dim);font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+.dmvel input[type=number]{width:58px;padding:4px 5px}
+.dmvelbar{position:relative;flex:1;min-width:90px;height:10px;background:var(--step);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.dmvelbar>div{position:absolute;top:0;bottom:0;background:var(--gold);opacity:.85}
+.dmwavewrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.dmwavewrap h4{font-size:10px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;margin:0 0 5px}
+#dmWaveCanvas,#dmEnvCanvas{width:100%;height:96px;background:var(--bg2);border:1px solid var(--line);border-radius:8px;display:block}
+.dmenvgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px;margin-top:8px}
+.dmenvgrid label{display:block;font-size:10px;color:var(--dim);margin-bottom:2px}
+.dmenvgrid input[type=range]{width:100%}
+/* ---- MPC2000XL face (Keith's machine): hardware wins placement —
+   editor/controls LEFT, pad matrix RIGHT in its dark charcoal field;
+   phone stacks matrix first, editor below. LCD strip + red REC. ---- */
+@media (min-width:901px){.dmzones>.dmzone-layers{order:1}.dmzones>.dmzone-matrix{order:2}}
+.dmzone-matrix{background:#26262b;border:1px solid #141417;border-radius:12px;padding:12px;box-shadow:inset 0 2px 12px rgba(0,0,0,.6),0 4px 14px rgba(0,0,0,.35)}
+.dmzone-matrix .dmzonehead{color:#d9d9de}
+.dmzone-matrix .small{color:#a9a9b2}
+/* REALISTIC RUBBER PADS (Keith's photo is the standard): light warm-grey
+   rubber, beveled edges catching light top-left, soft inner shading, a
+   drop shadow seating each pad in the dark field; a press dips the pad;
+   a hit keeps its identity colour as a lit tint over the rubber. */
+#blViewDrums .dmpad,.mpcpad{
+  background:
+    radial-gradient(120% 90% at 30% 18%,rgba(255,255,255,.55),rgba(255,255,255,0) 55%),
+    linear-gradient(160deg,#e3e1da 0%,#cfccc2 38%,#b9b6aa 72%,#a7a499 100%);
+  border:1px solid #6d6a60;border-radius:12px;color:#26241f;
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,.85),
+    inset 0 -6px 10px rgba(70,66,55,.35),
+    inset 3px 0 6px rgba(255,255,255,.35),
+    inset -3px 0 6px rgba(70,66,55,.22),
+    0 5px 0 #3c3a34,
+    0 9px 14px rgba(0,0,0,.55);
+  transition:transform .045s ease,box-shadow .045s ease}
+#blViewDrums .dmpad:active,.mpcpad:active{transform:translateY(3px);
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,.7),
+    inset 0 -3px 7px rgba(70,66,55,.4),
+    inset 3px 0 6px rgba(255,255,255,.3),
+    inset -3px 0 6px rgba(70,66,55,.25),
+    0 2px 0 #3c3a34,
+    0 4px 8px rgba(0,0,0,.55)}
+#blViewDrums .dmpad.hit,.mpcpad.hit{
+  background:
+    radial-gradient(120% 90% at 30% 18%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),
+    linear-gradient(160deg,var(--dmc,#8a8371) 0%,var(--dmc,#8a8371) 100%);
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,.65),
+    inset 0 -6px 10px rgba(0,0,0,.28),
+    0 5px 0 #3c3a34,
+    0 0 18px var(--dmc,#8a8371),
+    0 9px 14px rgba(0,0,0,.55)}
+#blViewDrums .dmpad .dmnote{color:#55555c}
+#blViewDrums .dmpad .dmname{color:#1d1d20}
+#blViewDrums .dmpad .dmname.empty{color:#7a7a82}
+#blViewDrums .dmpad .dmkey{color:#55555c;border-color:#8f8f98}
+#blViewDrums .dmpad.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 3px 0 #4a4a51}
+.dmlcd{display:flex;gap:16px;flex-wrap:wrap;align-items:center;background:linear-gradient(180deg,#0c110b,#141b10);border:2px solid #05070a;border-radius:8px;padding:9px 12px;margin:10px 0 2px;box-shadow:inset 0 2px 14px rgba(0,0,0,.85);font-family:"JetBrains Mono",monospace;color:#aef29a}
+.dmlcd .lcdlab{display:block;font-size:9px;letter-spacing:1.4px;color:#759c63;font-weight:700}
+.dmlcd .lcdval{font-size:13px;font-weight:700;white-space:nowrap}
+#dmLcdPos{color:#ffc46b}
+#dmLcdRec{color:#ff5347;font-weight:900;font-size:12px;letter-spacing:1px;opacity:.25}
+#dmLcdRec.on{opacity:1}
+.dmmodetoggle{display:inline-flex;gap:4px}
+.dmmodetoggle .btn.on,.dmhalfbar .btn.on{background:var(--gold);color:#1c1503;border-color:var(--gold2)}
+.dmhalfbar{display:none;gap:4px;margin-bottom:8px}
+.dmhalfbar.show{display:flex}
+#dmRecBtn{border-color:#a33327;color:#ff8a76}
+/* ---- MPC2000XL detachable window: the hardware twin (own styling) ---- */
+#dmMpcPanel{display:none;background:#cfcbc0;border:2px solid #8f8b80;border-radius:14px;padding:14px;color:#26241f;box-shadow:0 14px 34px rgba(0,0,0,.5);max-width:980px}
+#dmMpcPanel .mpcbrand{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+#dmMpcPanel .mpcbrand .mpcword{font-weight:900;font-size:21px;letter-spacing:1px;color:#b3312a}
+#dmMpcPanel .mpcbrand .mpcmodel{font-weight:900;font-size:15px;letter-spacing:2px;color:#4a473f;border-bottom:3px solid #b3312a;padding-bottom:1px}
+#dmMpcPanel .mpcbrand .mpcsub{font-size:10px;letter-spacing:1.6px;color:#6d695e;font-weight:700}
+.mpcface{display:grid;grid-template-columns:250px 1fr;gap:14px}
+.mpclcd{background:linear-gradient(180deg,#0c110b,#141b10);border:3px solid #23211c;border-radius:8px;padding:10px 12px;box-shadow:inset 0 2px 14px rgba(0,0,0,.85);font-family:"JetBrains Mono",monospace;color:#aef29a;margin-bottom:10px}
+.mpclcd .lcdlab{display:block;font-size:9px;letter-spacing:1.4px;color:#759c63;font-weight:700}
+.mpclcd .lcdval{font-size:13px;font-weight:700;white-space:nowrap}
+.mpclcd .mpclcdgrid{display:flex;gap:14px;flex-wrap:wrap}
+#mpcLcdPos{color:#ffc46b}
+#mpcLcdRec{color:#ff5347;font-weight:900;font-size:12px;letter-spacing:1px;opacity:.25}
+#mpcLcdRec.on{opacity:1}
+.mpcvar{display:flex;gap:10px;align-items:stretch;background:#c3bfb3;border:1px solid #a19d90;border-radius:10px;padding:10px}
+.mpcvar input[type=range]{writing-mode:vertical-lr;direction:rtl;width:26px;height:170px;accent-color:#b3312a}
+.mpcvar .mpcvarlab{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#55524a;text-transform:uppercase;writing-mode:vertical-lr}
+.mpcwheelwrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:10px}
+#mpcWheel{width:118px;height:118px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4c4a45,#26241f 70%);border:3px solid #171512;box-shadow:0 5px 12px rgba(0,0,0,.45),inset 0 2px 5px rgba(255,255,255,.25);cursor:ns-resize;position:relative;touch-action:none}
+#mpcWheel::after{content:"";position:absolute;left:50%;top:7px;width:5px;height:20px;margin-left:-2.5px;border-radius:3px;background:#d8d4c8}
+.mpcwheelwrap label{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#55524a;text-transform:uppercase}
+.mpcwheelwrap select{max-width:170px;background:#e8e5db;color:#26241f;border-color:#a19d90}
+.mpcfns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mpcfns .btn{background:#33549e;border-color:#24407c;color:#eaf0ff}
+.mpcfns .btn.on{background:#e8b33c;border-color:#c98f1b;color:#1c1503}
+.mpctrans{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.mpctrans .btn{background:#e8e5db;color:#26241f;border-color:#a19d90;min-height:40px}
+.mpctrans .btn.recbtn{background:#b3312a;border-color:#8c231d;color:#fff;font-weight:900}
+.mpctrans .btn.recbtn.rec-on{background:#e33d31;box-shadow:0 0 0 2px #ffb3ab}
+.mpcknobs{display:flex;gap:16px;margin-bottom:10px}
+.mpcknobs label{font-size:10px;font-weight:900;letter-spacing:1px;color:#d9d9de;text-transform:uppercase;display:block;margin-bottom:3px}
+.mpcknobs input[type=range]{width:130px;accent-color:#e8b33c}
+.mpcfield{background:#26262b;border:1px solid #141417;border-radius:12px;padding:12px;box-shadow:inset 0 2px 12px rgba(0,0,0,.6)}
+.mpcgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mpcpad{position:relative;border:1px solid #55555c;border-radius:10px;background:linear-gradient(180deg,#d8d8dc,#babac0);color:#1d1d20;padding:8px;min-height:84px;text-align:left;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden;display:flex;flex-direction:column;gap:4px;font:inherit;box-shadow:0 3px 0 #4a4a51,inset 0 1px 0 rgba(255,255,255,.75)}
+.mpcpad .dmnum{font-weight:900;font-size:15px}
+.mpcpad .dmname{font-size:11.5px;font-weight:700;line-height:1.25;word-break:break-word}
+.mpcpad .dmname.empty{color:#7a7a82;font-weight:400;font-style:italic}
+.mpcpad.sel{border-color:#e8b33c;box-shadow:0 0 0 2px #e8b33c,inset 0 2px 3px rgba(255,255,255,.85),inset 0 -6px 10px rgba(70,66,55,.35),0 5px 0 #3c3a34,0 9px 14px rgba(0,0,0,.55)}
+#dmMpcPanel .mpcpad{
+  background:
+    radial-gradient(120% 90% at 30% 18%,rgba(255,255,255,.55),rgba(255,255,255,0) 55%),
+    linear-gradient(160deg,#e3e1da 0%,#cfccc2 38%,#b9b6aa 72%,#a7a499 100%);
+  border:1px solid #6d6a60;border-radius:12px;
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,.85),
+    inset 0 -6px 10px rgba(70,66,55,.35),
+    inset 3px 0 6px rgba(255,255,255,.35),
+    inset -3px 0 6px rgba(70,66,55,.22),
+    0 5px 0 #3c3a34,
+    0 9px 14px rgba(0,0,0,.55)}
+#dmMpcPanel .mpcpad.hit{
+  background:
+    radial-gradient(120% 90% at 30% 18%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),
+    linear-gradient(160deg,var(--dmc,#8a8371) 0%,var(--dmc,#8a8371) 100%);
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,.65),
+    inset 0 -6px 10px rgba(0,0,0,.28),
+    0 5px 0 #3c3a34,
+    0 0 18px var(--dmc,#8a8371),
+    0 9px 14px rgba(0,0,0,.55)}
+.mpcpad.muted{opacity:.55}
+/* LCD soft-key views */
+.lcdviews{margin-top:8px;border-top:1px solid rgba(174,242,154,.25);padding-top:7px}
+.lcdviewtxt{font-family:"JetBrains Mono",monospace;font-size:11.5px;line-height:1.5;color:#aef29a;white-space:pre-wrap;min-height:34px}
+.lcdviewtxt b{color:#ffc46b}
+.lcdsoftrow{display:flex;gap:6px;margin-top:7px}
+.lcdsoftrow .lcdsoft{flex:1;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:.6px;color:#0d120c;background:#aef29a;border-radius:3px;padding:2px 3px;white-space:nowrap;overflow:hidden}
+.dmsoftkeys{display:flex;gap:6px;margin:0 0 8px}
+.dmsoftkeys .btn{flex:1}
+/* audition keys (MPK Mini layout only) */
+.dmkeys{display:none;margin-top:10px;background:#1b1a17;border:1px solid #141417;border-radius:10px;padding:8px}
+.dmkeys.show{display:block}
+.dmkeys .dmkeyshead{font-size:10px;font-weight:900;letter-spacing:1.2px;color:#d9d9de;text-transform:uppercase;margin-bottom:6px}
+.dmkeystrip{position:relative;height:86px}
+.dmkeyw{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#f4f1e8,#d9d5c8);border:1px solid #8a877c;border-radius:0 0 5px 5px;box-shadow:inset 0 -6px 8px rgba(0,0,0,.18),0 3px 4px rgba(0,0,0,.4);cursor:pointer;padding:0}
+.dmkeyw:active,.dmkeyw.hit{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
+.dmkeyb{position:absolute;top:0;height:52px;background:linear-gradient(180deg,#3a382f,#131210);border:1px solid #000;border-radius:0 0 4px 4px;box-shadow:0 4px 5px rgba(0,0,0,.5);cursor:pointer;z-index:2;padding:0}
+.dmkeyb:active,.dmkeyb.hit{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
+@media (max-width:760px){.mpcface{grid-template-columns:1fr}}
+.dmgrid.mode8 .dmpad{min-height:132px}
+.dmgrid.mode8 .dmpad .dmname{font-size:13px}
+.dmgrid.mode8 .dmpad .dmnum{font-size:17px}
+@media (max-width:900px){.dmzones{grid-template-columns:1fr}.dmwavewrap{grid-template-columns:1fr}}
 @media (max-width:640px){
   .dmgrid{gap:6px}
   .dmpad{min-height:76px;padding:6px 6px 5px}
@@ -20016,10 +20197,22 @@ if(typeof buildRack==="function"){
    · 16 pads per bank, TWO banks (A/B). Grid is FPC/MPC order:
      top row pads 13–16, bottom row pads 1–4. Pad i answers MIDI
      note 36+i (bank A), 52+i (bank B) — the FPC note layout.
-   · Each pad holds ONE library sound (same library, same decode
+   · FPC's THREE ZONES (Keith, 2026-11-07, from the wikisound FPC
+     reference): (1) the main pad-properties strip across the TOP —
+     prev/next pad, "Pad N/32", sound name, the pad's Midi Note,
+     Mute / Solo, pad Volume / Pan / Tune, Cut group + Cut itself;
+     (3) the pad MATRIX on the left; (2) the LAYER editor on the
+     right. Each pad holds up to FOUR layers (FPC-style): every
+     layer has its own library sound (same library, same decode
      path — getLibBuffer and its spelling cascade — as channel
-     assignment), a pad colour, and per-pad VOLUME / PAN / TUNE /
-     CUT group + CUT ITSELF, exactly FPC's pad strip.
+     assignment), Volume / Pan / Tune, a VELOCITY RANGE (a hit
+     plays every layer whose range contains the hit velocity), and
+     an ADSR envelope drawn + knobbed beside the layer's waveform
+     mini-display; Create / Delete layer and Spread Even ride the
+     editor. Pad Volume / Pan / Tune are the pad's master scale
+     over its layers. Single-sound pads from older projects/kits
+     migrate to a one-layer pad (full 0–127 range, neutral
+     envelope) and sound unchanged.
    · Cut groups choke: a hit stops every ringing voice in its
      group; CUT ITSELF decides whether a pad also chokes its own
      previous hit. Voices play one-shot into the master bus,
@@ -20062,17 +20255,48 @@ if(typeof buildRack==="function"){
     if(/(perc|rim|glass|crash|cym)/.test(n)) return "#7bc950";
     return "#8a8371";
   }
-  function dmEmptyPad(){ return { key:null, name:"", color:"#8a8371", vol:0.9, pan:0, tune:0, cut:0, cutSelf:true, buf:null, _missing:false, _res:null }; }
-  function dmPadFromFile(key, file){ const p=dmEmptyPad(); p.key=key; p.name=file; p.color=dmCatColor(file); return p; }
+  /* FPC layers: a pad holds up to FOUR layers; a hit plays every layer
+     whose velocity range contains the hit velocity. The neutral
+     envelope + full 0–127 range make a one-layer pad sound exactly
+     like the old single-sound pad (migration path for kits/projects). */
+  function dmNeutralEnv(){ return { a:0.003, d:0.06, s:1, r:0.015 }; }
+  function dmEmptyLayer(){ return { key:null, name:"", vol:1, pan:0, tune:0, velLo:0, velHi:127, env:dmNeutralEnv(), buf:null, _missing:false, _res:null }; }
+  function dmLayerFromFile(key, file){ const l=dmEmptyLayer(); l.key=key; l.name=file; return l; }
+  function dmEmptyPad(){ const p={ key:null, name:"", color:"#8a8371", vol:0.9, pan:0, tune:0, cut:0, cutSelf:true, mute:false, solo:false, scaleVol:1, chanId:null, varParam:"tune", varOff:0, buf:null, _missing:false, _res:null, layers:[dmEmptyLayer()] }; return p; }
+  function dmPadFromFile(key, file){ const p=dmEmptyPad(); p.key=key; p.name=file; p.color=dmCatColor(file); p.layers=[dmLayerFromFile(key, file)]; return p; }
+  function dmEnsureLayers(pad){
+    if(!pad) return;
+    if(!Array.isArray(pad.layers) || !pad.layers.length){
+      const l=dmEmptyLayer(); if(pad.key){ l.key=pad.key; l.name=pad.name||""; } pad.layers=[l];
+    }
+    if(pad.layers.length>4) pad.layers.length=4;
+    pad.layers.forEach(l=>{ if(!l.env) l.env=dmNeutralEnv();
+      l.velLo=Math.min(127, Math.max(0, Math.round(+l.velLo||0)));
+      l.velHi=Math.min(127, Math.max(0, Math.round(isFinite(+l.velHi)? +l.velHi : 127))); });
+  }
+  function dmSyncMirror(pad){ /* pad.key/name mirror layer 1 — top strip + grid read them */
+    dmEnsureLayers(pad); const l0=pad.layers[0];
+    pad.key=l0? (l0.key||null) : null; pad.name=l0? (l0.name||"") : "";
+    pad._missing=!!(l0 && l0._missing); if(pad.name) pad.color=dmCatColor(pad.name);
+  }
+  function dmAnySolo(){ let any=false; DM_BANKS.forEach(bn=>DM.banks[bn].forEach(p=>{ if(p.solo) any=true; })); return any; }
+  function dmAudible(pad){ if(!pad || pad.mute) return false; if(dmAnySolo() && !pad.solo) return false; return true; }
   function dmKitBank(kitName){
     const files=(typeof BL_KITS!=="undefined" && BL_KITS && BL_KITS[kitName])||[];
     const out=[];
     for(let i=0;i<16;i++) out.push(files[i]? dmPadFromFile("kit/"+kitName+"/"+files[i], files[i]) : dmEmptyPad());
     return out;
   }
-  const DM={ bank:"A", sel:0, target:null, kit:"SWUM MPC", viewActive:false, _timer:null,
-    banks:{ A:dmKitBank("SWUM MPC"), B:Array.from({length:16}, dmEmptyPad) } };
+  const DM_BANKS=["A","B","C","D"]; /* MPC2000XL: four pad banks */
+  function dmBankIdx(bank){ const i=DM_BANKS.indexOf(bank); return i<0? 0 : i; }
+  const DM={ bank:"A", sel:0, selLayer:0, padMode:8, half:0, target:null, kit:"SWUM MPC", viewActive:false, _timer:null, _layerSig:"",
+    routing:"one", scope:"whole", fullLevel:false, levels:"off", repeatOn:false, repeatDiv:"16", lastHit:null,
+    banks:{ A:dmKitBank("SWUM MPC"), B:Array.from({length:16}, dmEmptyPad), C:Array.from({length:16}, dmEmptyPad), D:Array.from({length:16}, dmEmptyPad) } };
   function dmSelPad(){ return DM.banks[DM.bank][DM.sel]; }
+  function dmSelLayer(){ const p=dmSelPad(); if(!p) return null; dmEnsureLayers(p);
+    DM.selLayer=Math.min(p.layers.length-1, Math.max(0, DM.selLayer|0)); return p.layers[DM.selLayer]; }
+  function dmPadMidi(bank, idx){ return 36+dmBankIdx(bank)*16+idx; } /* A:36+ · B:52+ · C:68+ · D:84+ */
+  function dmPadGlobal(){ return dmBankIdx(DM.bank)*16+DM.sel; } /* "Pad N/64" across the four banks */
 
   /* ---------------- page skeleton (mirrors the Piano Roll page) ---------------- */
   const holder=document.createElement("div"); holder.id="blViewDrums";
@@ -20083,30 +20307,90 @@ if(typeof buildRack==="function"){
     '<h2>Drum Machine — <span style="color:var(--gold)">FPC</span>'+
       '<span class="tools dmtools">'+
         '<label class="hlabel">Kit: <select id="dmKitSel" title="Load one of Keith’s FPC kits into the current bank, in FPC pad order"></select></label>'+
-        '<span class="dmbankbtns"><button type="button" class="btn sm" id="dmBankA">Bank A</button><button type="button" class="btn sm" id="dmBankB">Bank B</button></span>'+
+        '<span class="dmbankbtns"><button type="button" class="btn sm" id="dmBankA">Bank A</button><button type="button" class="btn sm" id="dmBankB">Bank B</button><button type="button" class="btn sm" id="dmBankC">Bank C</button><button type="button" class="btn sm" id="dmBankD">Bank D</button></span>'+
+        '<label class="hlabel">Record routing: <select id="dmRoutingSel" title="One Track — every pad records onto the target channel at its own FPC note. Track Per Pad — each pad records onto its own channel (its mixer strip), at its root"><option value="one">One Track</option><option value="perpad">Track Per Pad</option></select></label>'+
+        '<label class="hlabel">Layout: <select id="dmLayoutSel" title="Pad layout — presentation only: same kit, banks, layers and bindings under both. MPK Mini = his controller’s 8 pads + audition keys; MPC2000XL = the 16-pad hardware face, no keys (pitch via 16 Levels)"><option value="mpk">MPK Mini</option><option value="mpc">MPC2000XL</option></select></label>'+
         '<label class="hlabel">Record to: <select id="dmTargetSel" title="Target channel — recorded pad hits land in the current sequence on this channel"></select></label>'+
       '</span>'+
     '</h2>'+
+    /* ---- MPC2000XL-style LCD strip: the page's readouts live here ---- */
+    '<div class="dmlcd" id="dmLcd" aria-label="Drum Machine display">'+
+      '<span><span class="lcdlab">Kit</span><span class="lcdval" id="dmLcdKit">SWUM MPC</span></span>'+
+      '<span><span class="lcdlab">Bank</span><span class="lcdval" id="dmLcdBank">A</span></span>'+
+      '<span><span class="lcdlab">Pad</span><span class="lcdval" id="dmLcdPad">1/64</span></span>'+
+      '<span><span class="lcdlab">Sound</span><span class="lcdval" id="dmLcdSound">—</span></span>'+
+      '<span><span class="lcdlab">Sequence</span><span class="lcdval" id="dmLcdSeq">SEQ 1</span></span>'+
+      '<span><span class="lcdlab">Tempo</span><span class="lcdval" id="dmLcdTempo">95 BPM</span></span>'+
+      '<span><span class="lcdlab">Bar:Beat</span><span class="lcdval" id="dmLcdPos">1:1</span></span>'+
+      '<span id="dmLcdRec">● REC</span>'+
+      '<div class="lcdviews" style="flex:1 1 100%"><div class="lcdviewtxt" id="dmLcdView"></div><div class="lcdsoftrow" id="dmLcdSoft"></div></div>'+
+    '</div>'+
+    '<div class="dmsoftkeys" role="group" aria-label="LCD soft keys — their jobs follow the LCD view"><button type="button" class="btn sm" data-soft="0"></button><button type="button" class="btn sm" data-soft="1"></button><button type="button" class="btn sm" data-soft="2"></button><button type="button" class="btn sm" data-soft="3"></button></div>'+
     '<div id="dmPadInfo" class="small" style="margin-bottom:6px">Pad 1 selected.</div>'+
-    '<div class="small" style="margin-bottom:4px">16 pads per bank, two banks, FPC layout (pads 1–4 on the bottom row). Tap a pad to play it and select it; its sound, volume, pan, tune and cut group live in the strip under the grid. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C1 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it there.</div>'+
+    '<div class="small" style="margin-bottom:4px">FPC’s three zones: the pad strip on top, the pad matrix on the left, the layer editor on the right. Each pad holds up to four layers — a hit plays every layer whose velocity range catches it. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C1 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it into the selected layer. The page opens in the 8-pad version for the MPK Mini MK3 — its 16 pad-hits (Bank A, then Bank B) land on this bank’s 16 pads in order; the 16-pad version is one toggle away, and both versions are views of the same assignments.</div>'+
+    /* ---- ZONE 1: main pad properties strip (FPC top strip) ---- */
+    '<div class="dmtopstrip" id="dmTopStrip">'+
+      '<span class="dmnav"><button type="button" class="btn sm" id="dmPrevPad" title="Previous pad (of 32, across both banks)">◀</button><button type="button" class="btn sm" id="dmNextPad" title="Next pad (of 32, across both banks)">▶</button></span>'+
+      '<span class="dmpadread" id="dmPadReadout">Pad 1/64</span>'+
+      '<span class="dmsoundname" id="dmPadSoundName">— empty —</span>'+
+      '<span class="dmmidinote" id="dmMidiNote">Midi Note C1 · 36</span>'+
+      '<button type="button" class="btn sm" id="dmMuteBtn" title="Mute — silences this pad everywhere">M Mute</button>'+
+      '<button type="button" class="btn sm" id="dmSoloBtn" title="Solo — on this page, only soloed pads sound">S Solo</button>'+
+      '<span class="dmmini">Vol <input type="range" id="dmVol" min="0" max="100" /><span class="dmval" id="dmVolVal"></span></span>'+
+      '<span class="dmmini">Pan <input type="range" id="dmPan" min="-50" max="50" /><span class="dmval" id="dmPanVal"></span></span>'+
+      '<span class="dmmini">Tune <input type="range" id="dmTune" min="-12" max="12" step="1" /><span class="dmval" id="dmTuneVal"></span></span>'+
+      '<span class="dmmini">Cut <select id="dmCutSel" title="Cut group — pads in the same group choke each other; a new hit silences the group’s ringing voices"><option value="0">Off</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></span>'+
+      '<button type="button" class="btn sm" id="dmCutSelfBtn">Cut itself: On</button>'+
+      '<span class="dmmini">Scale Vol <input type="range" id="dmScaleVol" min="0" max="100" title="Scale Vol (FPC) — how much strike velocity drives this pad’s volume: 100% = full velocity control, 0% = every hit full" /><span class="dmval" id="dmScaleVal"></span></span>'+
+      '<button type="button" class="btn sm" id="dmFullLevelBtn" title="FULL LEVEL (MPC2000XL) — pads always strike at velocity 127 while on">Full Level</button>'+
+      '<span class="dmmini">16 Levels <select id="dmLevelsSel" title="16 LEVELS (MPC2000XL) — the 16 pads become 16 levels of the selected pad’s sound: Tune pitches it across the pads, Velocity plays it at fixed ascending velocities"><option value="off">Off</option><option value="tune">Tune</option><option value="vel">Velocity</option></select></span>'+
+      '<span class="dmmini">Note Variation <select id="dmVarSel" title="Note Variation (the MPK stick / MPC slider) rides the last-hit pad’s chosen parameter — a performance offset, centre restores the set value"><option value="tune">Tune</option><option value="attack">Attack</option><option value="decay">Decay</option></select></span>'+
+      '<span class="dmpadread" id="dmPadChan" title="This pad’s own mixer channel — its strip at the Mixer tab processes the pad’s sound"></span>'+
+      '<button type="button" class="btn sm" id="dmClearPadBtn">Clear pad</button>'+
+    '</div>'+
     '<div class="dmtransport">'+
       '<button type="button" class="btn gold" id="dmPlayBtn">▶ Play</button>'+
       '<button type="button" class="btn" id="dmStopBtn">■ Stop</button>'+
       '<button type="button" class="btn" id="dmRecBtn">● Rec</button>'+
       '<button type="button" class="btn sm" id="dmRecModeBtn">Rec: ADD</button>'+
-      '<span class="small">This page’s transport — runs the current sequence here for playing along and recording pad hits.</span>'+
+      '<button type="button" class="btn sm" id="dmTapBtn" title="Tap Tempo — tap in time to set the sequence tempo, MPC-style">Tap</button>'+
+      '<button type="button" class="btn sm" id="dmRepeatBtn" title="NOTE REPEAT (MPC2000XL) — hold a pad and it retriggers at the chosen division, at the strike’s velocity, while held">Note Repeat</button>'+
+      '<select id="dmRepeatDiv" title="Note Repeat division"><option value="4">1/4</option><option value="8">1/8</option><option value="8t">1/8T</option><option value="16" selected>1/16</option><option value="16t">1/16T</option><option value="32">1/32</option></select>'+
+      '<span class="dmmodetoggle" role="group" aria-label="Transport scope"><button type="button" class="btn sm" id="dmScopeAlone" title="Drum Machine Alone — this transport plays/records ONLY the kit’s tracks; the rest of the beat stays silent">Drums Alone</button><button type="button" class="btn sm" id="dmScopeWhole" title="Whole Beat — the transport plays the full beat, kit included">Whole Beat</button></span>'+
+      '<span class="small">Arm Rec, press Play, play the beat out on the pads — the sequence loops and keeps recording (ADD layers passes, OVERWRITE replaces). Alone scope: only the kit’s tracks sound.</span>'+
       '<span id="dmPosReadout">Bar 1 · Beat 1 · 0:00</span>'+
     '</div>'+
-    '<div class="dmgrid" id="dmGrid"></div>'+
-    '<div class="dmset">'+
-      '<h3 id="dmSetTitle">Pad settings</h3>'+
-      '<div class="dmsetgrid">'+
-        '<div><label>Sound</label><select id="dmSoundSel" title="The library sound on the selected pad"></select></div>'+
-        '<div><label>Volume <span class="dmval" id="dmVolVal"></span></label><input type="range" id="dmVol" min="0" max="100" /></div>'+
-        '<div><label>Pan <span class="dmval" id="dmPanVal"></span></label><input type="range" id="dmPan" min="-50" max="50" /></div>'+
-        '<div><label>Tune <span class="dmval" id="dmTuneVal"></span></label><input type="range" id="dmTune" min="-12" max="12" step="1" /></div>'+
-        '<div><label>Cut group</label><select id="dmCutSel" title="Pads in the same cut group choke each other — a new hit silences the group’s ringing voices"><option value="0">Off</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div>'+
-        '<div><label>Pad</label><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn sm" id="dmCutSelfBtn">Cut itself: On</button><button type="button" class="btn sm" id="dmClearPadBtn">Clear pad</button></span></div>'+
+    '<div class="dmzones">'+
+      /* ---- ZONE 3: pad matrix (left) ---- */
+      '<div class="dmzone-matrix">'+
+        '<h3 class="dmzonehead" id="dmMatrixHead">Pads — Bank A</h3>'+
+        '<div class="dmhalfbar" id="dmHalfBar" role="group" aria-label="8-pad paging — which half of the bank is showing"><button type="button" class="btn sm" id="dmHalf0">Pads 1–8</button><button type="button" class="btn sm" id="dmHalf1">Pads 9–16</button><span class="small">MPK Bank A shows 1–8 · Bank B shows 9–16</span></div>'+
+        '<div class="dmgrid" id="dmGrid"></div>'+
+        '<div class="small" style="margin-top:6px">BANK A · BANK B — switch banks up top. Pads 1–4 sit on the bottom row, FPC order.</div>'+
+        '<div class="dmkeys" id="dmKeys"><div class="dmkeyshead">Audition Keys — the selected pad’s sound, pitched · MPK Mini layout</div><div class="dmkeystrip" id="dmKeyStrip"></div></div>'+
+      '</div>'+
+      /* ---- ZONE 2: layer properties (right) ---- */
+      '<div class="dmzone-layers">'+
+        '<h3 class="dmzonehead" id="dmSetTitle">Layers</h3>'+
+        '<div class="dmlaytools" style="border:1px solid var(--gold2);border-radius:8px;padding:8px;background:var(--panel2)"><label class="hlabel" style="flex:1;min-width:200px">Pad sound — click a pad, pick here: <select id="dmPadSoundSel" title="Click-first assignment: the sound for the selected pad’s current layer. The pad takes the sound’s name; its mixer channel follows."></select></label></div>'+
+        '<div class="dmlaytools">'+
+          '<button type="button" class="btn sm gold" id="dmLayerCreate">Create layer</button>'+
+          '<button type="button" class="btn sm" id="dmLayerDelete">Delete layer</button>'+
+          '<button type="button" class="btn sm" id="dmSpreadEven" title="Split the 0–127 velocity range evenly across this pad’s layers">Spread Even</button>'+
+          '<span class="small">Soft hits and hard hits can play different sounds — set each layer’s velocity range.</span>'+
+        '</div>'+
+        '<div id="dmLayersBox"></div>'+
+        '<div class="dmwavewrap">'+
+          '<div><h4>Layer waveform</h4><canvas id="dmWaveCanvas" width="330" height="96"></canvas></div>'+
+          '<div><h4>Envelope — selected layer</h4><canvas id="dmEnvCanvas" width="330" height="96"></canvas>'+
+            '<div class="dmenvgrid">'+
+              '<div><label>Attack <span class="dmval" id="dmEnvAVal"></span></label><input type="range" id="dmEnvA" min="1" max="500" step="1" /></div>'+
+              '<div><label>Decay <span class="dmval" id="dmEnvDVal"></span></label><input type="range" id="dmEnvD" min="5" max="1000" step="5" /></div>'+
+              '<div><label>Sustain <span class="dmval" id="dmEnvSVal"></span></label><input type="range" id="dmEnvS" min="0" max="100" step="1" /></div>'+
+              '<div><label>Release <span class="dmval" id="dmEnvRVal"></span></label><input type="range" id="dmEnvR" min="5" max="2000" step="5" /></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
       '</div>'+
     '</div>';
   holder.appendChild(sec);
@@ -20120,23 +20404,37 @@ if(typeof buildRack==="function"){
     for(let i=0;i<library.length;i++){ if(library[i].name===pad.name) return i; }
     return -1;
   }
-  function dmResolve(pad){
-    if(pad.buf) return Promise.resolve(pad.buf);
-    if(pad._res) return pad._res;
-    const idx=dmFindLib(pad);
-    if(idx<0){ pad._missing=true; dmRenderPads(); return Promise.resolve(null); }
-    pad._res=getLibBuffer(idx).then(b=>{ pad.buf=b; pad._missing=false; pad._res=null; dmRenderPads(); return b; })
-      .catch(()=>{ pad._missing=true; pad._res=null; dmRenderPads(); return null; });
-    return pad._res;
+  function dmResolveLayer(pad, layer){
+    if(!layer) return Promise.resolve(null);
+    if(layer.buf) return Promise.resolve(layer.buf);
+    if(layer._res) return layer._res;
+    if(!layer.key){ return Promise.resolve(null); }
+    const idx=dmFindLib(layer);
+    if(idx<0){ layer._missing=true; if(pad) dmSyncMirror(pad); dmRenderPads(); return Promise.resolve(null); }
+    layer._res=getLibBuffer(idx).then(b=>{ layer.buf=b; layer._missing=false; layer._res=null;
+        if(pad) dmSyncMirror(pad); dmRenderPads(); dmDrawWave(); return b; })
+      .catch(()=>{ layer._missing=true; layer._res=null; dmRenderPads(); return null; });
+    return layer._res;
   }
-  function dmAssignLibIdx(bank, idx, libIdx){
+  function dmResolve(pad){
+    if(!pad) return Promise.resolve(null);
+    dmEnsureLayers(pad);
+    return Promise.all(pad.layers.map(l=>dmResolveLayer(pad, l))).then(bs=>{ dmSyncMirror(pad); return bs; });
+  }
+  function dmAssignLibIdx(bank, idx, libIdx, layerIdx){
     const pad=DM.banks[bank][idx], it=library[libIdx]; if(!pad || !it) return;
-    pad.key= it.builtin? dmLibKeyOfItem(it) : "lib:"+it.name;
-    pad.name=it.name; pad.color=dmCatColor(it.name); pad.buf=null; pad._missing=false; pad._res=null;
-    dmResolve(pad);
+    dmEnsureLayers(pad);
+    const li=(layerIdx!=null)? Math.min(pad.layers.length-1, Math.max(0, layerIdx|0))
+      : ((bank===DM.bank && idx===DM.sel)? DM.selLayer : 0);
+    const layer=pad.layers[li]; if(!layer) return;
+    layer.key= it.builtin? dmLibKeyOfItem(it) : "lib:"+it.name;
+    layer.name=it.name; layer.buf=null; layer._missing=false; layer._res=null;
+    DM.selLayer=li;
+    dmSyncMirror(pad);
+    dmResolveLayer(pad, layer);
     if(typeof markDirty==="function") markDirty();
-    dmRenderPads(); dmRenderPanel();
-    setStatus(it.name+" → Drum Machine pad "+(idx+1)+" (Bank "+bank+").");
+    DM._layerSig=""; dmRenderPads(); dmRenderPanel();
+    setStatus(it.name+" → Drum Machine pad "+(idx+1)+" layer "+(li+1)+" (Bank "+bank+").");
   }
 
   /* ---------------- playback: one-shot into the master bus, cut groups choke ---------------- */
@@ -20144,61 +20442,232 @@ if(typeof buildRack==="function"){
   function dmPadEl(idx){ return document.querySelector('#dmGrid .dmpad[data-idx="'+idx+'"]'); }
   function dmLight(bank, idx){
     if(bank!==DM.bank) return;
-    const el=dmPadEl(idx); if(!el) return;
-    el.classList.add("hit");
-    clearTimeout(el._dmT);
-    el._dmT=setTimeout(()=>{ if(!DM_HELD[bank+idx]) el.classList.remove("hit"); }, 170);
+    [dmPadEl(idx), dmMpcPadEl(idx)].forEach(el=>{ if(!el) return;
+      el.classList.add("hit");
+      clearTimeout(el._dmT);
+      el._dmT=setTimeout(()=>{ if(!DM_HELD[bank+idx]) el.classList.remove("hit"); }, 170);
+    });
   }
   function dmHold(bank, idx, on){
     DM_HELD[bank+idx]=on;
+    if(!on && DM_REPEAT.key===bank+idx) dmRepeatStop();
     if(bank!==DM.bank) return;
-    const el=dmPadEl(idx); if(!el) return;
-    clearTimeout(el._dmT);
-    el.classList.toggle("hit", !!on);
+    [dmPadEl(idx), dmMpcPadEl(idx)].forEach(el=>{ if(!el) return;
+      clearTimeout(el._dmT);
+      el.classList.toggle("hit", !!on);
+    });
+  }
+  function dmMpcPadEl(idx){ return document.querySelector('#dmMpcGrid .mpcpad[data-idx="'+idx+'"]'); }
+  /* ---- pad ↔ channel binding: ONE binding serves the Mixer strip,
+     Track-Per-Pad recording and the Piano Roll correspondence. The
+     channel is a full Beat Lab channel (own strip, FX, roll lane),
+     auto-created/found on first use and named for the pad's sound. */
+  function dmEnsurePadChannel(bank, idx){
+    const pad=DM.banks[bank] && DM.banks[bank][idx]; if(!pad) return null;
+    if(pad.chanId && S.channels[pad.chanId]) return S.channels[pad.chanId];
+    const stableId="dmpad"+bank+idx;
+    let ch=S.channels[stableId]||null;
+    if(!ch){
+      if(typeof makeChannel!=="function") return null;
+      dmSyncMirror(pad);
+      const base=(pad.name||"").replace(/\.(wav|mp3|ogg|flac)$/i,"") || ("Pad "+(dmBankIdx(bank)*16+idx+1));
+      const name=(typeof blUniqueChName==="function")? blUniqueChName(base) : base;
+      ch=makeChannel(stableId, name, "drum", "");
+      while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
+      try{ ch.color=BL_CH_COLORS[S.order.length % BL_CH_COLORS.length]; }catch(e){}
+      S.channels[stableId]=ch; S.order.push(stableId);
+      try{ if(typeof AC!=="undefined" && AC && typeof master!=="undefined" && master && typeof buildChain==="function" && typeof verbBus!=="undefined")
+        liveNodes[stableId]=buildChain(AC, ch, master, verbBus, delayBus, true); }catch(e){}
+      const li=dmFindLib(pad);
+      if(li>=0 && typeof assignSoundToChannel==="function"){ try{ assignSoundToChannel(li, stableId); }catch(e){} }
+      if(typeof refreshChannelNames==="function") refreshChannelNames();
+      if(typeof buildRack==="function") buildRack();
+      if(typeof buildMixer==="function") buildMixer();
+      dmFillTarget();
+    }
+    pad.chanId=stableId;
+    return ch;
   }
   function dmRecordHit(bank, idx, vel){
     if(!S.recording || !S.playing) return;
+    /* Parity with the Piano Roll (Keith's defining principle): pad
+       hits write through recordEvent — the very path the roll's live
+       recording uses — so quantize (per-channel grid, on = snapped,
+       off = raw), swing, ADD/OVERWRITE and loop passes behave
+       identically; the notes ARE roll notes on the channel. */
+    if(DM.routing==="perpad"){
+      const ch=dmEnsurePadChannel(bank, idx); if(!ch) return;
+      recordEvent({chId:ch.id, kind:"note", midi:(ch.root!=null? ch.root : 60), vel});
+      return;
+    }
     const ch=DM.target && S.channels[DM.target]; if(!ch) return;
-    /* the hit lands as a NOTE at the pad's own FPC pitch (bank A:
-       36+pad, bank B: 52+pad) — the same note layout the pads
-       answer to — so a recorded pass keeps WHICH pad was played,
-       exactly as FPC writes pad performances into the roll */
-    recordEvent({chId:ch.id, kind:"note", midi:(bank==="B"? 52 : 36)+idx, vel});
+    /* One Track: the hit lands as a NOTE at the pad's own FPC pitch
+       (bank A 36+, B 52+, C 68+, D 84+) so a recorded pass keeps
+       WHICH pad was played, exactly as FPC writes performances */
+    recordEvent({chId:ch.id, kind:"note", midi:dmPadMidi(bank, idx), vel});
   }
-  function dmPlayNow(bank, idx, vel){
-    const pad=DM.banks[bank][idx]; if(!pad || !pad.buf || typeof AC==="undefined" || !AC || !master) return;
+  function dmPadDest(pad){
+    /* the pad's own mixer channel is its voice's home: live hits run
+       through that strip (EQ/comp/heat/crusher/fader) like any
+       channel sound; master is only the pre-binding fallback */
+    try{ if(pad && pad.chanId && typeof liveNodes!=="undefined" && liveNodes[pad.chanId] && liveNodes[pad.chanId].input) return liveNodes[pad.chanId].input; }catch(e){}
+    return master;
+  }
+  function dmPlayLayer(bank, idx, pad, layer, vel, t, grp, tuneOff){
+    if(!layer.buf) return null;
+    const env=layer.env||dmNeutralEnv();
+    const varEff=dmVarEffective(pad); /* Note Variation performance offset (0 at centre) */
+    const a=Math.max(0.001, (+env.a||0.003)*varEff.aMul), d=Math.max(0.005, (+env.d||0.06)*varEff.dMul),
+          s=Math.min(1, Math.max(0, isFinite(+env.s)? +env.s : 1)), r=Math.max(0.005, +env.r||0.015);
+    const sv=(pad.scaleVol!=null && isFinite(+pad.scaleVol))? Math.min(1, Math.max(0, +pad.scaleVol)) : 1;
+    const velFac=(1-sv)+sv*Math.min(1, Math.max(0, vel)); /* Scale Vol: 1 = velocity rules, 0 = every hit full */
+    const peak=Math.max(0.0008, velFac)*(pad.vol!=null? pad.vol : 0.9)*(layer.vol!=null? layer.vol : 1);
+    const dest=dmPadDest(pad);
+    const src=AC.createBufferSource(); src.buffer=layer.buf;
+    src.playbackRate.value=Math.pow(2, (((pad.tune||0)+(layer.tune||0)+(tuneOff||0)+varEff.tuneOff+(S.masterPitch||0)+(S.masterFine||0)/100))/12);
+    const g=AC.createGain();
+    /* ADSR one-shot envelope: attack → peak, decay → sustain, hold,
+       then a release fade across the tail of the buffer */
+    const dur=layer.buf.duration/Math.max(0.05, src.playbackRate.value);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(peak, t+a);
+    g.gain.linearRampToValueAtTime(Math.max(0.0001, peak*s), t+a+d);
+    const relStart=t+Math.max(a+d, dur-r);
+    g.gain.setValueAtTime(Math.max(0.0001, peak*s), relStart);
+    g.gain.linearRampToValueAtTime(0.0001, relStart+r);
+    src.connect(g);
+    const pan=Math.min(1, Math.max(-1, (pad.pan||0)+(layer.pan||0)));
+    if(AC.createStereoPanner){ const pn=AC.createStereoPanner(); pn.pan.value=pan; g.connect(pn); pn.connect(dest); }
+    else g.connect(dest);
+    try{ src.start(t); }catch(e){ return null; }
+    const voice={bank:bank, idx:idx, grp:grp, src:src, g:g, layer:layer};
+    DM_VOICES.push(voice);
+    src.onended=()=>{ const i=DM_VOICES.indexOf(voice); if(i>=0) DM_VOICES.splice(i,1); };
+    return voice;
+  }
+  function dmPlayNow(bank, idx, vel, tuneOff, recNote){
+    const pad=DM.banks[bank][idx]; if(!pad || typeof AC==="undefined" || !AC || !master) return;
+    dmEnsureLayers(pad);
+    if(recNote!=null){ /* audition keys: record at the PLAYED pitch, same routing */
+      if(S.recording && S.playing){
+        if(DM.routing==="perpad"){ const ch=dmEnsurePadChannel(bank, idx); if(ch) recordEvent({chId:ch.id, kind:"note", midi:recNote, vel}); }
+        else { const ch=DM.target && S.channels[DM.target]; if(ch) recordEvent({chId:ch.id, kind:"note", midi:recNote, vel}); }
+      }
+    }
+    else dmRecordHit(bank, idx, vel);
+    if(!dmAudible(pad)) return; /* mute silences everywhere; solo isolates the audition */
+    const v127=Math.round(Math.min(1, Math.max(0, vel))*127);
+    const layers=pad.layers.filter(l=>l.key && l.buf && v127>=(l.velLo|0) && v127<=(l.velHi!=null? l.velHi : 127));
+    if(!layers.length) return;
     const t=AC.currentTime+0.01, grp=pad.cut|0;
     for(let i=DM_VOICES.length-1;i>=0;i--){ const v=DM_VOICES[i];
       const samePad=(v.bank===bank && v.idx===idx), sameGrp=(grp>0 && v.grp===grp);
       if((sameGrp && !samePad) || (samePad && pad.cutSelf)){
-        try{ v.g.gain.setTargetAtTime(0.0001, t, 0.004); v.src.stop(t+0.03); }catch(e){}
+        try{ v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0.0001, t, 0.004); v.src.stop(t+0.03); }catch(e){}
         DM_VOICES.splice(i,1);
       }
     }
-    const src=AC.createBufferSource(); src.buffer=pad.buf;
-    src.playbackRate.value=Math.pow(2, (((pad.tune||0)+(S.masterPitch||0)+(S.masterFine||0)/100))/12);
-    const g=AC.createGain(); g.gain.value=Math.max(0.01, vel)*(pad.vol!=null? pad.vol : 0.9);
-    src.connect(g);
-    if(AC.createStereoPanner){ const pn=AC.createStereoPanner(); pn.pan.value=pad.pan||0; g.connect(pn); pn.connect(master); }
-    else g.connect(master);
-    try{ src.start(t); }catch(e){ return; }
-    const voice={bank:bank, idx:idx, grp:grp, src:src, g:g};
-    DM_VOICES.push(voice);
-    src.onended=()=>{ const i=DM_VOICES.indexOf(voice); if(i>=0) DM_VOICES.splice(i,1); };
-    dmRecordHit(bank, idx, vel);
+    layers.forEach(l=>{ const voice=dmPlayLayer(bank, idx, pad, l, vel, t, grp, tuneOff);
+      if(voice) voice.baseRate=voice.src.playbackRate.value; });
+    /* Note Variation rides the ringing voices too (tune param) */
+    if(pad.varParam==="tune" && pad.varOff) DM_VOICES.forEach(v=>{ if(v.bank===bank && v.idx===idx && v.baseRate)
+      try{ v.src.playbackRate.value=v.baseRate*Math.pow(2, (pad.varOff*12)/12); }catch(e){} });
+  }
+  /* ---- NOTE VARIATION (MPC2000XL slider, via the MPK stick) ----
+     A performance offset on the last-hit pad, never a destructive
+     edit: centre restores the set value; recorded hits take the
+     varied value because they pass through the same playback path. */
+  function dmVarEffective(pad, layer){
+    const off=pad.varOff||0, out={tuneOff:0, aMul:1, dMul:1};
+    if(pad.varParam==="tune") out.tuneOff=off*12;
+    else if(pad.varParam==="attack") out.aMul=Math.pow(2, off);
+    else if(pad.varParam==="decay") out.dMul=Math.pow(2, off);
+    return out;
+  }
+  /* ---- NOTE REPEAT engine (MPC2000XL): a lit page toggle; a pad
+     HELD continuously retriggers at the TC division with the
+     channel's swing, at the strike velocity, until release — and
+     repeated hits record exactly as played (they pass dmPlayNow).
+     GUARD vs the MPK's HARDWARE repeat: the page engine arms on a
+     hold and its first tick checks the pad is STILL held after one
+     full division; hardware pulse trains drop the hold between
+     pulses, so their ticks never fire — pulses play as plain hits,
+     never re-repeated. Two sources compose, never double. ---- */
+  const DM_REPEAT={ timer:null, key:null, bank:null, idx:0, vel:0.9, tick:0 };
+  function dmRepeatInterval(){
+    const div=DM.repeatDiv||"16";
+    const beats= div==="4"? 1 : div==="8"? 0.5 : div==="8t"? 1/3 : div==="16t"? 1/6 : div==="32"? 0.125 : 0.25;
+    return (60/Math.max(30, S.bpm||95))*beats*1000;
+  }
+  function dmRepeatSwingMs(){
+    const ch=(DM.routing==="perpad" && DM_REPEAT.bank)? (dmEnsurePadChannelQuiet(DM_REPEAT.bank, DM_REPEAT.idx)) : (DM.target && S.channels[DM.target]);
+    let sw=0; try{ sw=(typeof blSwingOf==="function" && ch)? blSwingOf(ch) : 0; }catch(e){}
+    return sw*dmRepeatInterval();
+  }
+  function dmEnsurePadChannelQuiet(bank, idx){ const p=DM.banks[bank] && DM.banks[bank][idx]; return (p && p.chanId && S.channels[p.chanId]) || null; }
+  function dmRepeatStop(){
+    if(DM_REPEAT.timer){ clearTimeout(DM_REPEAT.timer); DM_REPEAT.timer=null; }
+    DM_REPEAT.key=null;
+  }
+  function dmRepeatArm(bank, idx, vel){
+    if(!DM.repeatOn) return;
+    const key=bank+idx;
+    if(DM_REPEAT.key===key) return;
+    dmRepeatStop();
+    DM_REPEAT.key=key; DM_REPEAT.bank=bank; DM_REPEAT.idx=idx; DM_REPEAT.vel=vel; DM_REPEAT.tick=0;
+    const step=()=>{
+      DM_REPEAT.timer=null;
+      if(DM_REPEAT.key!==key) return;
+      if(!DM_HELD[key]){ dmRepeatStop(); return; } /* released — or a hardware pulse gap: no re-repeat */
+      dmPlayNow(bank, idx, DM_REPEAT.vel);
+      dmLight(bank, idx);
+      DM_REPEAT.tick++;
+      const swingDelay= (DM_REPEAT.tick%2===1)? dmRepeatSwingMs() : 0;
+      DM_REPEAT.timer=setTimeout(step, Math.max(24, dmRepeatInterval()+swingDelay));
+    };
+    DM_REPEAT.timer=setTimeout(step, dmRepeatInterval());
   }
   function dmTrigger(bank, idx, vel){
     const pad=DM.banks[bank] && DM.banks[bank][idx]; if(!pad) return;
-    if(bank===DM.bank && DM.sel!==idx){ DM.sel=idx; dmRenderPads(); dmRenderPanel(); }
+    dmEnsureLayers(pad);
+    if(DM.fullLevel) vel=1; /* FULL LEVEL: every strike at 127 */
+    /* 16 LEVELS: the grid becomes levels of the SELECTED pad's sound */
+    let sndBank=bank, sndIdx=idx, tuneOff=0;
+    if(DM.levels && DM.levels!=="off"){
+      sndBank=DM.bank; sndIdx=DM.sel;
+      if(DM.levels==="vel") vel=(idx+1)/16;
+      else if(DM.levels==="tune") tuneOff=idx-8;
+    }
+    const sndPad=DM.banks[sndBank][sndIdx];
+    if(bank===DM.bank && DM.sel!==idx && (!DM.levels || DM.levels==="off")){ DM.sel=idx; DM._layerSig=""; dmRenderPads(); dmRenderPanel(); }
+    DM.lastHit={ bank:sndBank, idx:sndIdx, hitBank:bank, hitIdx:idx };
     dmLight(bank, idx);
-    if(!pad.key){ setStatus("Pad "+(idx+1)+" (Bank "+bank+") is empty — pick a sound for it in the strip under the grid, drag one onto it, or load a kit."); return; }
+    dmLcdHit();
+    if(!sndPad || !sndPad.layers.some(l=>l.key)){ setStatus("Pad "+(sndIdx+1)+" (Bank "+sndBank+") is empty — click the pad, then pick its sound in the editor (Pad sound picker up top), drag one onto it, or load a kit."); return; }
     ensureCtx(); if(AC.state==="suspended") AC.resume();
-    if(!pad.buf){
-      dmResolve(pad).then(b=>{ if(b) dmPlayNow(bank, idx, vel);
-        else setStatus("Pad "+(idx+1)+": “"+pad.name+"” is not in the library right now — relink the sounds folder or pick another sound for the pad."); });
+    dmEnsurePadChannel(sndBank, sndIdx);
+    const v127=Math.round(Math.min(1, Math.max(0, vel))*127);
+    const need=sndPad.layers.filter(l=>l.key && !l.buf && v127>=(l.velLo|0) && v127<=(l.velHi!=null? l.velHi : 127));
+    if(need.length){
+      Promise.all(need.map(l=>dmResolveLayer(sndPad, l))).then(()=>{
+        if(sndPad.layers.some(l=>l.key && !l.buf && l._missing))
+          setStatus("Pad "+(sndIdx+1)+": a layer sound is not in the library right now — relink the sounds folder or pick another sound for the layer.");
+        dmPlayNow(sndBank, sndIdx, vel, tuneOff);
+      });
       return;
     }
-    dmPlayNow(bank, idx, vel);
+    dmPlayNow(sndBank, sndIdx, vel, tuneOff);
+  }
+  function dmLcdHit(){
+    const lh=DM.lastHit; if(!lh) return;
+    const pad=DM.banks[lh.bank] && DM.banks[lh.bank][lh.idx]; if(!pad) return;
+    dmSyncMirror(pad);
+    const lp=$("dmLcdPad"), ls=$("dmLcdSound");
+    if(lp) lp.textContent=(dmBankIdx(lh.bank)*16+lh.idx+1)+"/64 · "+lh.bank+(lh.idx+1);
+    if(ls) ls.textContent=pad.name || "— empty —";
+    const mp=$("mpcLcdPad"), ms=$("mpcLcdSound");
+    if(mp) mp.textContent=(dmBankIdx(lh.bank)*16+lh.idx+1)+"/64 · "+lh.bank+(lh.idx+1);
+    if(ms) ms.textContent=pad.name || "— empty —";
   }
 
   /* ---------------- rendering ---------------- */
@@ -20207,14 +20676,20 @@ if(typeof buildRack==="function"){
     DM_ROWS.forEach((row, r)=>{
       row.forEach((idx, c)=>{
         const b=document.createElement("button"); b.type="button"; b.className="dmpad"; b.dataset.idx=idx;
-        b.innerHTML='<span class="dmstrip"></span><span class="dmrow1"><span class="dmnum"></span><span class="dmnote"></span><span class="dmkey">'+DM_KEYS[r*4+c].toUpperCase()+'</span></span><span class="dmname"></span>';
+        b.innerHTML='<span class="dmstrip"></span><span class="dmrow1"><span class="dmnum"></span><span class="dmnote"></span><span class="dmkey">'+DM_KEYS[r*4+c].toUpperCase()+'</span></span><span class="dmname"></span><span class="dmflags"></span>';
         b.addEventListener("pointerdown", e=>{
           e.preventDefault();
           let v=0.92;
           if(e.pointerType==="pen" && e.pressure>0) v=Math.max(0.15, e.pressure);
           else if(e.pointerType==="touch" && e.pressure>0) v=Math.min(1, Math.max(0.2, e.pressure));
+          DM_HELD[DM.bank+idx]=true;
           dmTrigger(DM.bank, idx, v);
+          dmRepeatArm(DM.bank, idx, DM.fullLevel? 1 : v);
         });
+        const release=()=>{ if(DM_HELD[DM.bank+idx]) dmHold(DM.bank, idx, false); };
+        b.addEventListener("pointerup", release);
+        b.addEventListener("pointercancel", release);
+        b.addEventListener("lostpointercapture", release);
         b.addEventListener("dragover", e=>{ e.preventDefault(); b.classList.add("dragover"); });
         b.addEventListener("dragleave", ()=>b.classList.remove("dragover"));
         b.addEventListener("drop", e=>{ e.preventDefault(); b.classList.remove("dragover");
@@ -20227,20 +20702,26 @@ if(typeof buildRack==="function"){
   function dmRenderPads(){
     document.querySelectorAll("#dmGrid .dmpad").forEach(el=>{
       const idx=+el.dataset.idx, pad=DM.banks[DM.bank][idx]; if(!pad) return;
+      dmEnsureLayers(pad); dmSyncMirror(pad);
       el.style.setProperty("--dmc", pad.color||"#8a8371");
       el.querySelector(".dmnum").textContent=idx+1;
-      el.querySelector(".dmnote").textContent=noteName(36+idx);
+      el.querySelector(".dmnote").textContent=noteName(dmPadMidi(DM.bank, idx));
       const nm=el.querySelector(".dmname");
-      nm.textContent= pad._missing? pad.name+" — not in library" : (pad.name || "— empty —");
+      const filled=pad.layers.filter(l=>l.key).length;
+      nm.textContent= pad._missing? pad.name+" — not in library" : (pad.name? pad.name+(filled>1? " · "+filled+" layers" : "") : "— empty —");
       nm.classList.toggle("empty", !pad.name);
+      const fl=el.querySelector(".dmflags");
+      if(fl) fl.innerHTML=(pad.mute? '<span class="dmflag m">MUTE</span>' : "")+(pad.solo? '<span class="dmflag s">SOLO</span>' : "");
       el.classList.toggle("sel", idx===DM.sel);
-      el.title="Pad "+(idx+1)+" · "+noteName(36+idx)+(pad.name? " · "+pad.name : " · empty")+(pad.cut? " · cut group "+pad.cut : "");
+      el.classList.toggle("muted", !!pad.mute);
+      el.title="Pad "+(idx+1)+" · "+noteName(dmPadMidi(DM.bank, idx))+(pad.name? " · "+pad.name : " · empty")+" · "+filled+" layer"+(filled===1? "" : "s")+(pad.cut? " · cut group "+pad.cut : "");
     });
     const info=$("dmPadInfo"), pad=dmSelPad();
-    if(info && pad) info.textContent="Bank "+DM.bank+" · Pad "+(DM.sel+1)+" ("+noteName(36+DM.sel)+")"+(pad.name? " — "+pad.name : " — empty")+(pad.cut? " · cut group "+pad.cut+(pad.cutSelf? " · cuts itself" : "") : "")+".";
-    const ba=$("dmBankA"), bb=$("dmBankB");
-    if(ba) ba.classList.toggle("on", DM.bank==="A");
-    if(bb) bb.classList.toggle("on", DM.bank==="B");
+    if(info && pad){ dmEnsureLayers(pad);
+      info.textContent="Bank "+DM.bank+" · Pad "+(dmPadGlobal()+1)+"/64 ("+noteName(dmPadMidi(DM.bank, DM.sel))+" · MIDI "+dmPadMidi(DM.bank, DM.sel)+")"+(pad.name? " — "+pad.name : " — empty")+" · "+pad.layers.length+" layer"+(pad.layers.length===1? "" : "s")+(pad.mute? " · MUTED" : "")+(pad.solo? " · SOLO" : "")+(pad.cut? " · cut group "+pad.cut+(pad.cutSelf? " · cuts itself" : "") : "")+"."; }
+    const mh=$("dmMatrixHead"); if(mh) mh.textContent="Pads — Bank "+DM.bank;
+    ["A","B","C","D"].forEach(bn=>{ const b=$("dmBank"+bn); if(b) b.classList.toggle("on", DM.bank===bn); });
+    dmRenderMpcPads();
   }
   function dmFillSoundSelect(selEl, pad){
     if(!selEl) return;
@@ -20265,20 +20746,159 @@ if(typeof buildRack==="function"){
       DM.target=(S.order.find(id=>S.channels[id] && S.channels[id].type==="drum")) || S.rollChannel || S.order[0] || null;
     if(DM.target) selEl.value=DM.target;
   }
+  function dmPanTxt(p){ return p===0? "C" : (p<0? "L"+Math.round(-p*50) : "R"+Math.round(p*50)); }
   function dmRenderPanel(){
     const pad=dmSelPad(); if(!pad) return;
+    dmEnsureLayers(pad); dmSyncMirror(pad);
     const title=$("dmSetTitle");
-    if(title) title.textContent="Pad "+(DM.sel+1)+" · "+noteName(36+DM.sel)+(pad.name? " — "+pad.name : " — empty");
-    dmFillSoundSelect($("dmSoundSel"), pad);
+    if(title) title.textContent="Layers — Pad "+(DM.sel+1)+" · "+noteName(dmPadMidi(DM.bank, DM.sel))+(pad.name? " — "+pad.name : " — empty");
+    /* Zone 1 top strip */
+    const ro=$("dmPadReadout"); if(ro) ro.textContent="Pad "+(dmPadGlobal()+1)+"/64";
+    const sn=$("dmPadSoundName"); if(sn) sn.textContent=pad.name || "— empty —";
+    const mn=$("dmMidiNote"); if(mn) mn.textContent="Midi Note "+noteName(dmPadMidi(DM.bank, DM.sel))+" · "+dmPadMidi(DM.bank, DM.sel);
+    const mb=$("dmMuteBtn"); if(mb) mb.classList.toggle("mute-on", !!pad.mute);
+    const sb2=$("dmSoloBtn"); if(sb2) sb2.classList.toggle("on", !!pad.solo);
     const vol=$("dmVol"); if(vol){ vol.value=Math.round(pad.vol*100); $("dmVolVal").textContent=Math.round(pad.vol*100)+"%"; }
-    const pan=$("dmPan"); if(pan){ pan.value=Math.round(pad.pan*50);
-      $("dmPanVal").textContent= pad.pan===0? "C" : (pad.pan<0? "L"+Math.round(-pad.pan*50) : "R"+Math.round(pad.pan*50)); }
+    const pan=$("dmPan"); if(pan){ pan.value=Math.round(pad.pan*50); $("dmPanVal").textContent=dmPanTxt(pad.pan); }
     const tune=$("dmTune"); if(tune){ tune.value=pad.tune; $("dmTuneVal").textContent=(pad.tune>0? "+":"")+pad.tune+" st"; }
     const cut=$("dmCutSel"); if(cut) cut.value=String(pad.cut||0);
     const csb=$("dmCutSelfBtn"); if(csb) csb.textContent="Cut itself: "+(pad.cutSelf? "On":"Off");
     const ks=$("dmKitSel"); if(ks) ks.value=DM.kit||"";
+    const scv=$("dmScaleVol"); if(scv){ const sv=(pad.scaleVol!=null? pad.scaleVol : 1); scv.value=Math.round(sv*100); $("dmScaleVal").textContent=Math.round(sv*100)+"%"; }
+    const pch=$("dmPadChan"); if(pch){ const ch=pad.chanId && S.channels[pad.chanId];
+      pch.textContent= ch? "→ Mixer: "+ch.name : "→ Mixer: binds on first hit"; }
+    const pss=$("dmPadSoundSel"); if(pss) dmFillSoundSelect(pss, dmSelLayer() || pad);
+    const vs=$("dmVarSel"); if(vs) vs.value=pad.varParam||"tune";
+    const rt=$("dmRoutingSel"); if(rt) rt.value=DM.routing||"one";
+    dmRenderLayers();
   }
-  function dmRenderAll(){ dmRenderPads(); dmRenderPanel(); dmSyncTransport(); }
+  /* ---------------- Zone 2: layer rows, waveform, envelope ---------------- */
+  function dmRenderLayers(){
+    const box=$("dmLayersBox"); if(!box) return;
+    const pad=dmSelPad(); if(!pad) return;
+    dmEnsureLayers(pad);
+    const layer=dmSelLayer();
+    const sig=DM.bank+"|"+DM.sel+"|"+DM.selLayer+"|"+pad.layers.map(l=>(l.key||"")+"/"+l.velLo+"-"+l.velHi).join(",");
+    if(sig!==DM._layerSig){
+      DM._layerSig=sig;
+      box.innerHTML="";
+      pad.layers.forEach((l, li)=>{
+        const row=document.createElement("div"); row.className="dmlayer"+(li===DM.selLayer? " sel" : "");
+        row.innerHTML=
+          '<div class="dmlayrow1"><button type="button" class="dmlaynum" title="Select layer '+(li+1)+'">'+(li+1)+'</button>'+
+          '<select class="dmlaysnd" title="The library sound on layer '+(li+1)+'"></select></div>'+
+          '<div class="dmlaygrid">'+
+            '<div><label>Volume <span class="dmval lv"></span></label><input type="range" class="lvol" min="0" max="100" /></div>'+
+            '<div><label>Pan <span class="dmval lp"></span></label><input type="range" class="lpan" min="-50" max="50" /></div>'+
+            '<div><label>Tune <span class="dmval lt"></span></label><input type="range" class="ltune" min="-12" max="12" step="1" /></div>'+
+          '</div>'+
+          '<div class="dmvel"><label>Velocity</label><input type="number" class="vlo" min="0" max="127" /><span class="small">–</span><input type="number" class="vhi" min="0" max="127" />'+
+          '<span class="dmvelbar"><div></div></span><span class="small">hits in this range play this layer</span></div>';
+        const num=row.querySelector(".dmlaynum");
+        num.onclick=()=>{ DM.selLayer=li; DM._layerSig=""; dmRenderPanel(); };
+        const snd=row.querySelector(".dmlaysnd");
+        dmFillSoundSelect(snd, l);
+        snd.onchange=()=>{ if(snd.value===""){ l.key=null; l.name=""; l.buf=null; l._missing=false; l._res=null; DM.selLayer=li; dmSyncMirror(pad); if(typeof markDirty==="function") markDirty(); DM._layerSig=""; dmRenderPads(); dmRenderPanel(); }
+          else { DM.selLayer=li; dmAssignLibIdx(DM.bank, DM.sel, +snd.value, li); } };
+        const lv=row.querySelector(".lv"), lp=row.querySelector(".lp"), lt=row.querySelector(".lt");
+        const vol=row.querySelector(".lvol"), pan=row.querySelector(".lpan"), tune=row.querySelector(".ltune");
+        const syncL=()=>{ lv.textContent=Math.round(l.vol*100)+"%"; lp.textContent=dmPanTxt(l.pan); lt.textContent=(l.tune>0? "+":"")+l.tune+" st"; };
+        vol.value=Math.round(l.vol*100); pan.value=Math.round(l.pan*50); tune.value=l.tune; syncL();
+        vol.oninput=()=>{ l.vol=+vol.value/100; syncL(); };
+        pan.oninput=()=>{ l.pan=+pan.value/50; syncL(); };
+        tune.oninput=()=>{ l.tune=+tune.value; syncL(); };
+        [vol,pan,tune].forEach(el=>el.onchange=()=>{ if(typeof markDirty==="function") markDirty(); });
+        const vlo=row.querySelector(".vlo"), vhi=row.querySelector(".vhi"), bar=row.querySelector(".dmvelbar>div");
+        const syncV=()=>{ vlo.value=l.velLo; vhi.value=l.velHi;
+          bar.style.left=(l.velLo/127*100)+"%"; bar.style.width=(Math.max(0, l.velHi-l.velLo+1)/128*100)+"%"; };
+        syncV();
+        const applyV=()=>{ let lo=Math.min(127, Math.max(0, Math.round(+vlo.value||0))), hi=Math.min(127, Math.max(0, Math.round(+vhi.value||0)));
+          if(hi<lo){ const tmp=lo; lo=hi; hi=tmp; } l.velLo=lo; l.velHi=hi; syncV();
+          if(typeof markDirty==="function") markDirty(); };
+        vlo.onchange=applyV; vhi.onchange=applyV;
+        box.appendChild(row);
+      });
+    }
+    /* envelope controls follow the selected layer */
+    if(layer){
+      const env=layer.env||(layer.env=dmNeutralEnv());
+      const ea=$("dmEnvA"), ed=$("dmEnvD"), es=$("dmEnvS"), er=$("dmEnvR");
+      if(ea){ ea.value=Math.round(env.a*1000); $("dmEnvAVal").textContent=Math.round(env.a*1000)+" ms"; }
+      if(ed){ ed.value=Math.round(env.d*1000); $("dmEnvDVal").textContent=Math.round(env.d*1000)+" ms"; }
+      if(es){ es.value=Math.round(env.s*100); $("dmEnvSVal").textContent=Math.round(env.s*100)+"%"; }
+      if(er){ er.value=Math.round(env.r*1000); $("dmEnvRVal").textContent=Math.round(env.r*1000)+" ms"; }
+    }
+    dmDrawWave(); dmDrawEnv();
+  }
+  function dmDrawWave(){
+    const cv=$("dmWaveCanvas"); if(!cv || !cv.getContext) return;
+    const ctx=cv.getContext("2d"), W=cv.width, H=cv.height;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle="#171512"; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle="rgba(184,176,156,.25)"; ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
+    const layer=dmSelLayer();
+    if(!layer || !layer.buf){ ctx.fillStyle="#8a8371"; ctx.font="11px Archivo, sans-serif";
+      ctx.fillText(layer && layer.name? layer.name+" — loading…" : "No sound on this layer", 10, H/2-8); return; }
+    const data=layer.buf.getChannelData(0), step=Math.max(1, Math.floor(data.length/W));
+    ctx.strokeStyle="#e8b33c"; ctx.beginPath();
+    for(let x=0;x<W;x++){ let mn=0, mx=0; const off=x*step;
+      for(let j=0;j<step;j+=Math.max(1, Math.floor(step/24))){ const v=data[off+j]||0; if(v<mn) mn=v; if(v>mx) mx=v; }
+      ctx.moveTo(x+0.5, (1-(mx+1)/2)*H); ctx.lineTo(x+0.5, (1-(mn+1)/2)*H+1); }
+    ctx.stroke();
+  }
+  function dmDrawEnv(){
+    const cv=$("dmEnvCanvas"); if(!cv || !cv.getContext) return;
+    const ctx=cv.getContext("2d"), W=cv.width, H=cv.height, padB=14, top=10;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle="#171512"; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle="rgba(184,176,156,.25)"; ctx.beginPath(); ctx.moveTo(0,H-padB); ctx.lineTo(W,H-padB); ctx.stroke();
+    const layer=dmSelLayer(); if(!layer) return;
+    const env=layer.env||dmNeutralEnv();
+    const aW=Math.max(6, Math.min(W*0.3, env.a*160)), dW=Math.max(8, Math.min(W*0.3, env.d*90)), rW=Math.max(8, Math.min(W*0.3, env.r*45));
+    const sW=Math.max(16, W-aW-dW-rW-8);
+    const peakY=top, susY=top+(1-Math.min(1, Math.max(0, env.s)))*(H-padB-top), baseY=H-padB;
+    const x0=4, x1=x0+aW, x2=x1+dW, x3=x2+sW, x4=Math.min(W-4, x3+rW);
+    ctx.strokeStyle="#3fb8a6"; ctx.lineWidth=2; ctx.beginPath();
+    ctx.moveTo(x0, baseY); ctx.lineTo(x1, peakY); ctx.lineTo(x2, susY); ctx.lineTo(x3, susY); ctx.lineTo(x4, baseY); ctx.stroke();
+    ctx.lineWidth=1; ctx.fillStyle="#e8b33c";
+    [[x0,baseY],[x1,peakY],[x2,susY],[x3,susY],[x4,baseY]].forEach(pt=>{ ctx.beginPath(); ctx.arc(pt[0], pt[1], 3, 0, Math.PI*2); ctx.fill(); });
+    ctx.fillStyle="#8a8371"; ctx.font="9px Archivo, sans-serif";
+    ctx.fillText("ATT", x0+2, H-3); ctx.fillText("DEC", x1+2, H-3); ctx.fillText("SUS", x2+2, H-3); ctx.fillText("REL", x3+2, H-3);
+  }
+  function dmSpreadEven(){
+    const pad=dmSelPad(); if(!pad) return; dmEnsureLayers(pad);
+    const n=pad.layers.length;
+    pad.layers.forEach((l, i)=>{ l.velLo=Math.round(i*128/n); l.velHi=Math.round((i+1)*128/n)-1; });
+    if(typeof markDirty==="function") markDirty();
+    DM._layerSig=""; dmRenderPanel();
+    setStatus("Pad "+(DM.sel+1)+": velocity range spread even across "+n+" layer"+(n===1? "" : "s")+" — "+pad.layers.map(l=>l.velLo+"–"+l.velHi).join(" · ")+".");
+  }
+  function dmRenderAll(){ dmRenderPads(); dmRenderPanel(); dmSyncTransport(); dmApplyMode(); }
+  /* 8-pad (MPK Mini) vs 16-pad version — ONE 16-pad-per-bank data
+     model; the version is only a view of it. 8-pad shows the current
+     half (pads 1–8 or 9–16) at generous size, paged like the MPK's
+     own Bank A/B halves. */
+  function dmApplyMode(){
+    const grid=$("dmGrid"); if(grid){ grid.classList.toggle("mode8", DM.padMode===8); grid.classList.toggle("mode16", DM.padMode!==8); }
+    document.querySelectorAll("#dmGrid .dmpad").forEach(el=>{
+      const idx=+el.dataset.idx;
+      el.style.display= (DM.padMode===8 && ((DM.half===0 && idx>7) || (DM.half===1 && idx<8)))? "none" : "";
+    });
+    const hb=$("dmHalfBar"); if(hb) hb.classList.toggle("show", DM.padMode===8);
+    const h0=$("dmHalf0"), h1=$("dmHalf1");
+    if(h0) h0.classList.toggle("on", DM.half===0);
+    if(h1) h1.classList.toggle("on", DM.half===1);
+    const lay=$("dmLayoutSel"); if(lay) lay.value= DM.padMode===8? "mpk" : "mpc";
+    /* layout contents: MPK Mini = 8 pads + audition keys;
+       MPC2000XL = 16 pads, NO keys (pitch via 16 Levels) */
+    const keys=$("dmKeys"); if(keys) keys.classList.toggle("show", DM.padMode===8);
+    const mh=$("dmMatrixHead");
+    if(mh) mh.textContent= DM.padMode===8? "Pads "+(DM.half===0? "1–8" : "9–16")+" — Bank "+DM.bank+" · MPK Mini view" : "Pads — Bank "+DM.bank;
+  }
+  function dmSetPadMode(mode, silent){
+    DM.padMode= (mode===16)? 16 : 8;
+    if(typeof markDirty==="function") markDirty();
+    dmApplyMode();
+    if(!silent) setStatus("Drum Machine layout: "+(DM.padMode===8? "MPK Mini — 8 pads (showing "+(DM.half===0? "1–8" : "9–16")+" of Bank "+DM.bank+") plus the audition keys. Same kit and state — presentation only." : "MPC2000XL — the full 16-pad hardware face, no audition keys (pitch plays through 16 Levels). Same kit and state — presentation only."));
+  }
 
   /* ---------------- page transport (drives the one shared scheduler + record arm) ---------------- */
   function dmSyncTransport(){
@@ -20286,16 +20906,38 @@ if(typeof buildRack==="function"){
     const rb=$("dmRecBtn"); if(rb) rb.classList.toggle("rec-on", !!S.recording);
     const rm=$("dmRecModeBtn"); if(rm) rm.textContent="Rec: "+(S.recMode==="overwrite"? "OVERWRITE":"ADD");
     const ro=$("dmPosReadout"); if(ro){
-      let txt="Bar 1 · Beat 1 · 0:00";
+      let txt="Bar 1 · Beat 1 · 0:00", bb="1:1";
       if(S.playing && typeof AC!=="undefined" && AC && playT0!=null){
         const pos=Math.max(0, (AC.currentTime-playT0)/stepDurSec());
         const bar=Math.floor(pos/16)+1, beat=Math.floor((pos%16)/4)+1, secs=pos*stepDurSec();
         const mm=Math.floor(secs/60), ss=Math.floor(secs%60);
         txt="Bar "+bar+" · Beat "+beat+" · "+mm+":"+(ss<10? "0":"")+ss;
+        bb=bar+":"+beat;
       }
       const sn=(S.seqNames && S.seqNames[S.pattern]) || ("Sequence "+(S.pattern+1));
       ro.textContent="SEQ "+(S.pattern+1)+" · "+sn+" · "+txt;
+      /* LCD strip — the 2000XL screen: sequence, tempo, bar:beat */
+      const set=(id, v)=>{ const el=$(id); if(el) el.textContent=v; };
+      set("dmLcdSeq", "SEQ "+(S.pattern+1)+" · "+sn);
+      set("dmLcdTempo", (S.bpm||95)+" BPM");
+      set("dmLcdPos", bb);
+      set("mpcLcdSeq", "SEQ "+(S.pattern+1)+" · "+sn);
+      set("mpcLcdTempo", (S.bpm||95)+" BPM");
+      set("mpcLcdPos", bb);
+      const lr=$("dmLcdRec"); if(lr) lr.classList.toggle("on", !!S.recording);
+      const mr=$("mpcLcdRec"); if(mr) mr.classList.toggle("on", !!S.recording);
+      const kit=$("dmLcdKit"); if(kit) kit.textContent=DM.kit||"— custom —";
+      const mk=$("mpcLcdKit"); if(mk) mk.textContent=DM.kit||"— custom —";
+      const bk=$("dmLcdBank"); if(bk) bk.textContent=DM.bank;
+      const mb2=$("mpcLcdBank"); if(mb2) mb2.textContent=DM.bank;
     }
+    const sa=$("dmScopeAlone"), sw=$("dmScopeWhole");
+    if(sa) sa.classList.toggle("on", DM.scope==="alone");
+    if(sw) sw.classList.toggle("on", DM.scope!=="alone");
+    const rpb=$("dmRepeatBtn"); if(rpb) rpb.classList.toggle("on", !!DM.repeatOn);
+    const flb=$("dmFullLevelBtn"); if(flb) flb.classList.toggle("on", !!DM.fullLevel);
+    dmMpcSyncVis();
+    dmLcdRender();
   }
   function dmOnShow(){
     dmFillTarget(); dmRenderAll();
@@ -20319,14 +20961,14 @@ if(typeof buildRack==="function"){
         else{ DM.banks[DM.bank]=dmKitBank(v); DM.kit=v;
           DM.banks[DM.bank].forEach(p=>{ if(p.key) dmResolve(p); });
           setStatus(v+" loaded into Bank "+DM.bank+" — Keith’s FPC layout, pads 1–"+(((typeof BL_KITS!=="undefined" && BL_KITS[v])||[]).length)+" filled in FPC order."); }
-        DM.sel=0;
+        DM.sel=0; DM.selLayer=0; DM._layerSig="";
         if(typeof markDirty==="function") markDirty();
         dmRenderAll();
       };
     }
     const ba=$("dmBankA"), bb=$("dmBankB");
-    if(ba) ba.onclick=()=>{ DM.bank="A"; dmRenderAll(); };
-    if(bb) bb.onclick=()=>{ DM.bank="B"; dmRenderAll(); };
+    if(ba) ba.onclick=()=>{ DM.bank="A"; DM.selLayer=0; DM._layerSig=""; dmRenderAll(); };
+    if(bb) bb.onclick=()=>{ DM.bank="B"; DM.selLayer=0; DM._layerSig=""; dmRenderAll(); };
     const tg=$("dmTargetSel");
     if(tg) tg.onchange=()=>{ DM.target=tg.value||null;
       if(typeof markDirty==="function") markDirty();
@@ -20361,14 +21003,162 @@ if(typeof buildRack==="function"){
       if(typeof markDirty==="function") markDirty(); dmRenderPanel(); dmRenderPads();
       setStatus("Pad "+(DM.sel+1)+" cut itself: "+(pad.cutSelf? "on — retriggering chokes its own ringing hit." : "off — its own hits may overlap.")); };
     const cp=$("dmClearPadBtn"); if(cp) cp.onclick=()=>{ const pad=dmSelPad();
-      pad.key=null; pad.name=""; pad.buf=null; pad._missing=false; pad._res=null;
+      pad.layers=[dmEmptyLayer()]; DM.selLayer=0; dmSyncMirror(pad);
+      if(typeof markDirty==="function") markDirty(); DM._layerSig=""; dmRenderPads(); dmRenderPanel();
+      setStatus("Pad "+(DM.sel+1)+" cleared — back to one empty layer; its volume, pan, tune and cut settings stay."); };
+    /* Zone 1: prev/next across all 32 pads, mute / solo */
+    const stepPad=(dir)=>{ let g=(dmPadGlobal()+dir+32)%32;
+      DM.bank= g>=16? "B" : "A"; DM.sel=g%16; DM.selLayer=0; DM._layerSig="";
+      dmRenderAll(); dmTrigger(DM.bank, DM.sel, 0.85); };
+    const pv=$("dmPrevPad"); if(pv) pv.onclick=()=>stepPad(-1);
+    const nx=$("dmNextPad"); if(nx) nx.onclick=()=>stepPad(1);
+    const mb=$("dmMuteBtn"); if(mb) mb.onclick=()=>{ const pad=dmSelPad(); pad.mute=!pad.mute;
       if(typeof markDirty==="function") markDirty(); dmRenderPads(); dmRenderPanel();
-      setStatus("Pad "+(DM.sel+1)+" cleared — its volume, pan, tune and cut settings stay."); };
-    const pb=$("dmPlayBtn"); if(pb) pb.onclick=()=>{ blPlayToggle(); dmSyncTransport(); };
-    const sb=$("dmStopBtn"); if(sb) sb.onclick=()=>{ setPlaying(false); uiStep=-1; dmSyncTransport(); };
+      setStatus("Pad "+(DM.sel+1)+(pad.mute? " muted — silent everywhere." : " unmuted.")); };
+    const sob=$("dmSoloBtn"); if(sob) sob.onclick=()=>{ const pad=dmSelPad(); pad.solo=!pad.solo;
+      if(typeof markDirty==="function") markDirty(); dmRenderPads(); dmRenderPanel();
+      setStatus("Pad "+(DM.sel+1)+(pad.solo? " soloed — on this page only soloed pads sound." : " solo off.")); };
+    /* Zone 2: layer create / delete / spread even */
+    const lc=$("dmLayerCreate"); if(lc) lc.onclick=()=>{ const pad=dmSelPad(); dmEnsureLayers(pad);
+      if(pad.layers.length>=4){ setStatus("Pad "+(DM.sel+1)+" already has four layers — that’s FPC’s max per pad."); return; }
+      pad.layers.push(dmEmptyLayer()); DM.selLayer=pad.layers.length-1;
+      if(typeof markDirty==="function") markDirty(); DM._layerSig=""; dmRenderPads(); dmRenderPanel();
+      setStatus("Pad "+(DM.sel+1)+": layer "+pad.layers.length+" created — pick its sound, then set its velocity range (or Spread Even)."); };
+    const ld=$("dmLayerDelete"); if(ld) ld.onclick=()=>{ const pad=dmSelPad(); dmEnsureLayers(pad);
+      if(pad.layers.length<=1){ setStatus("A pad always keeps one layer — clear the pad instead if you want it empty."); return; }
+      pad.layers.splice(DM.selLayer, 1); DM.selLayer=Math.max(0, DM.selLayer-1); dmSyncMirror(pad);
+      if(typeof markDirty==="function") markDirty(); DM._layerSig=""; dmRenderPads(); dmRenderPanel();
+      setStatus("Pad "+(DM.sel+1)+": layer deleted — "+pad.layers.length+" layer"+(pad.layers.length===1? "" : "s")+" left."); };
+    const se=$("dmSpreadEven"); if(se) se.onclick=dmSpreadEven;
+    /* Envelope knobs for the selected layer */
+    const envBind=(id, valId, key, scale, fmt)=>{
+      const el=$(id); if(!el) return;
+      el.oninput=()=>{ const layer=dmSelLayer(); if(!layer) return; if(!layer.env) layer.env=dmNeutralEnv();
+        layer.env[key]=+el.value/scale; const v=$(valId); if(v) v.textContent=fmt(layer.env[key]); dmDrawEnv(); };
+      el.onchange=()=>{ if(typeof markDirty==="function") markDirty(); };
+    };
+    envBind("dmEnvA","dmEnvAVal","a",1000,v=>Math.round(v*1000)+" ms");
+    envBind("dmEnvD","dmEnvDVal","d",1000,v=>Math.round(v*1000)+" ms");
+    envBind("dmEnvS","dmEnvSVal","s",100,v=>Math.round(v*100)+"%");
+    envBind("dmEnvR","dmEnvRVal","r",1000,v=>Math.round(v*1000)+" ms");
+    /* Banks C/D (2000XL four-bank model) */
+    const bc=$("dmBankC"), bd=$("dmBankD");
+    if(bc) bc.onclick=()=>{ DM.bank="C"; DM.selLayer=0; DM._layerSig=""; dmRenderAll(); };
+    if(bd) bd.onclick=()=>{ DM.bank="D"; DM.selLayer=0; DM._layerSig=""; dmRenderAll(); };
+    /* Record routing */
+    const rt=$("dmRoutingSel"); if(rt) rt.onchange=()=>{ DM.routing= rt.value==="perpad"? "perpad" : "one";
+      if(typeof markDirty==="function") markDirty();
+      setStatus(DM.routing==="perpad"? "Track Per Pad: each pad records onto its OWN channel at its root — the same channel as its mixer strip and its Piano Roll lane. Notes already recorded stay where they are." : "One Track: every pad records onto the target channel at its own FPC note. Notes already recorded stay where they are."); };
+    /* Layout dropdown (MPK Mini / MPC2000XL) + half paging */
+    const lay=$("dmLayoutSel"); if(lay) lay.onchange=()=>dmSetPadMode(lay.value==="mpc"? 16 : 8);
+    const h0=$("dmHalf0"), h1=$("dmHalf1");
+    const setHalf=(h)=>{ DM.half=h; DM.sel=h*8; DM.selLayer=0; DM._layerSig="";
+      if(typeof markDirty==="function") markDirty(); dmRenderAll();
+      setStatus("8-pad view: pads "+(h===0? "1–8" : "9–16")+" of Bank "+DM.bank+" — the MPK's Bank "+(h===0? "A" : "B")+" half."); };
+    if(h0) h0.onclick=()=>setHalf(0);
+    if(h1) h1.onclick=()=>setHalf(1);
+    /* Scale Vol (pad master) */
+    const scv=$("dmScaleVol"); if(scv){
+      scv.oninput=()=>{ const pad=dmSelPad(); pad.scaleVol=+scv.value/100; $("dmScaleVal").textContent=scv.value+"%"; };
+      scv.onchange=()=>{ if(typeof markDirty==="function") markDirty(); };
+    }
+    /* FULL LEVEL + 16 LEVELS */
+    const flb=$("dmFullLevelBtn"); if(flb) flb.onclick=()=>{ DM.fullLevel=!DM.fullLevel;
+      if(typeof markDirty==="function") markDirty(); dmSyncTransport();
+      setStatus("FULL LEVEL "+(DM.fullLevel? "ON — every pad strike lands at velocity 127, 2000XL-style." : "off — pads answer at strike velocity again.")); };
+    const lvs=$("dmLevelsSel"); if(lvs) lvs.onchange=()=>{ DM.levels=lvs.value;
+      if(typeof markDirty==="function") markDirty();
+      setStatus(DM.levels==="off"? "16 Levels off — pads play their own sounds again." : "16 LEVELS "+(DM.levels==="tune"? "TUNE" : "VELOCITY")+" — all 16 pads now play the selected pad’s layered sound ("+(dmSelPad()? (dmSelPad().name||"empty") : "")+") across the levels; its layers and envelope come with it."); };
+    /* NOTE REPEAT toggle + division */
+    const rpb=$("dmRepeatBtn"); if(rpb) rpb.onclick=()=>{ DM.repeatOn=!DM.repeatOn;
+      if(!DM.repeatOn) dmRepeatStop();
+      if(typeof markDirty==="function") markDirty(); dmSyncTransport();
+      setStatus("NOTE REPEAT "+(DM.repeatOn? "ON (lit) — hold any pad (on screen, keys, or the MPK) and it retriggers at the division with the channel’s swing, at the strike velocity, until you release. Your MPK’s own hardware repeat pulses are never re-repeated." : "off.")); };
+    const rdv=$("dmRepeatDiv"); if(rdv) rdv.onchange=()=>{ DM.repeatDiv=rdv.value; if(typeof markDirty==="function") markDirty(); };
+    /* TAP TEMPO */
+    const tapBtn=$("dmTapBtn"); if(tapBtn){ let taps=[];
+      tapBtn.onclick=()=>{ const now=performance.now();
+        taps=taps.filter(t=>now-t<2000); taps.push(now);
+        if(taps.length>5) taps.shift();
+        if(taps.length>=2){ const iv=(taps[taps.length-1]-taps[0])/(taps.length-1);
+          const bpm=Math.min(220, Math.max(50, Math.round(60000/iv)));
+          bpmSet(bpm); dmSyncTransport();
+          setStatus("Tap Tempo: "+bpm+" BPM — the sequence (and Note Repeat) follow."); }
+        else setStatus("Tap Tempo: keep tapping in time…"); };
+    }
+    /* Transport SCOPE */
+    const setScope=(s)=>{ DM.scope=s; if(typeof markDirty==="function") markDirty(); dmSyncTransport();
+      setStatus(s==="alone"? "Transport scope: DRUM MACHINE ALONE — this page’s Play runs only the kit’s tracks (target channel, or the pads’ own channels in Track Per Pad). The master transport above still plays the whole beat." : "Transport scope: WHOLE BEAT — the page transport and the master transport above are one transport playing everything."); };
+    const sa=$("dmScopeAlone"), sw=$("dmScopeWhole");
+    if(sa) sa.onclick=()=>setScope("alone");
+    if(sw) sw.onclick=()=>setScope("whole");
+    /* Click-first pad sound picker (editor zone, current layer) */
+    const pss=$("dmPadSoundSel"); if(pss) pss.onchange=()=>{
+      if(pss.value===""){ const layer=dmSelLayer(); if(layer){ layer.key=null; layer.name=""; layer.buf=null; layer._missing=false; layer._res=null; dmSyncMirror(dmSelPad()); if(typeof markDirty==="function") markDirty(); DM._layerSig=""; dmRenderPads(); dmRenderPanel(); } return; }
+      dmAssignLibIdx(DM.bank, DM.sel, +pss.value, DM.selLayer);
+      dmEnsurePadChannel(DM.bank, DM.sel); dmRenderPanel();
+    };
+    /* Note Variation parameter per pad */
+    const vs=$("dmVarSel"); if(vs) vs.onchange=()=>{ const pad=dmSelPad(); pad.varParam=vs.value;
+      pad.varOff=0; dmApplyVariationUI();
+      if(typeof markDirty==="function") markDirty();
+      setStatus("Note Variation now rides Pad "+(DM.sel+1)+"’s "+vs.value+" — work the MPK stick (or the MPC window’s left slider); centre restores the set value."); };
+    const pb=$("dmPlayBtn"); if(pb) pb.onclick=()=>{
+      /* SCOPE handover: the page transport arms the scope it owns;
+         the master transport above always runs the whole beat (its
+         own click listener clears the flag). One scheduler either
+         way — starting one while the other runs can never double. */
+      window._dmScopeAlone = (DM.scope==="alone");
+      blPlayToggle();
+      if(!S.playing) window._dmScopeAlone=false;
+      dmSyncTransport(); };
+    const sb=$("dmStopBtn"); if(sb) sb.onclick=()=>{ setPlaying(false); uiStep=-1; window._dmScopeAlone=false; dmSyncTransport(); };
     const rb=$("dmRecBtn"); if(rb) rb.onclick=()=>{ const b=$("btnRecord"); if(b) b.click(); dmSyncTransport(); };
     const rm=$("dmRecModeBtn"); if(rm) rm.onclick=()=>{ toggleRecMode(); dmSyncTransport(); };
   })();
+
+  /* ---- Note Variation control (MPK stick bend + MPC window slider) ---- */
+  function dmVarTarget(){
+    const lh=DM.lastHit;
+    if(lh && DM.banks[lh.bank] && DM.banks[lh.bank][lh.idx]) return { bank:lh.bank, idx:lh.idx, pad:DM.banks[lh.bank][lh.idx] };
+    return { bank:DM.bank, idx:DM.sel, pad:dmSelPad() };
+  }
+  function dmSetVariation(off){
+    const t=dmVarTarget(); if(!t.pad) return;
+    t.pad.varOff=Math.max(-1, Math.min(1, off));
+    if(t.pad.varParam==="tune") DM_VOICES.forEach(v=>{ if(v.bank===t.bank && v.idx===t.idx && v.baseRate)
+      try{ v.src.playbackRate.value=v.baseRate*Math.pow(2, (t.pad.varOff*12)/12); }catch(e){} });
+    dmApplyVariationUI();
+  }
+  function dmApplyVariationUI(){
+    const t=dmVarTarget(); if(!t.pad) return;
+    const pad=t.pad, off=pad.varOff||0;
+    const sl=$("mpcVarSlider"); if(sl) sl.value=Math.round(off*50);
+    if(t.bank===DM.bank && t.idx===DM.sel){
+      const tv=$("dmTuneVal");
+      if(tv){ if(pad.varParam==="tune" && off) tv.textContent=(pad.tune>0? "+":"")+pad.tune+" st → "+(((pad.tune||0)+off*12)>0? "+":"")+Math.round((pad.tune||0)+off*12)+" st (variation)";
+        else if(off) tv.textContent=(pad.tune>0? "+":"")+pad.tune+" st · variation on "+pad.varParam; }
+    }
+  }
+
+  /* ---- Transport SCOPE: Alone = only the kit's channels schedule ---- */
+  function dmKitChannelIds(){
+    const ids=new Set();
+    if(DM.routing==="perpad"){ DM_BANKS.forEach(bn=>DM.banks[bn].forEach(p=>{ if(p.chanId && S.channels[p.chanId]) ids.add(p.chanId); })); }
+    else if(DM.target && S.channels[DM.target]) ids.add(DM.target);
+    return ids;
+  }
+  if(typeof audible==="function" && !audible._dmScoped){
+    const _dmAudPrev=audible;
+    const dmAudWrap=function(ch){
+      if(window._dmScopeAlone && !dmKitChannelIds().has(ch.id)) return false;
+      return _dmAudPrev(ch);
+    };
+    dmAudWrap._dmScoped=true;
+    audible=dmAudWrap;
+  }
+  /* the master transport always speaks for the whole beat */
+  ["btnPlay","btnStop"].forEach(id=>{ const b=$(id); if(b) b.addEventListener("click", ()=>{ window._dmScopeAlone=false; }); });
 
   /* ---------------- typing keys across the 4×4 ---------------- */
   document.addEventListener("keydown", e=>{
@@ -20377,23 +21167,60 @@ if(typeof buildRack==="function"){
     if(tag==="textarea" || tag==="select" || tag==="input" || (t && t.isContentEditable)) return;
     const ki=DM_KEYS.indexOf((e.key||"").toLowerCase()); if(ki<0) return;
     e.preventDefault();
-    dmTrigger(DM.bank, DM_ROWS[Math.floor(ki/4)][ki%4], 0.92);
+    const idx=DM_ROWS[Math.floor(ki/4)][ki%4];
+    DM_HELD[DM.bank+idx]=true;
+    dmTrigger(DM.bank, idx, 0.92);
+    dmRepeatArm(DM.bank, idx, DM.fullLevel? 1 : 0.92);
+  });
+  document.addEventListener("keyup", e=>{
+    if(!DM.viewActive) return;
+    const ki=DM_KEYS.indexOf((e.key||"").toLowerCase()); if(ki<0) return;
+    const idx=DM_ROWS[Math.floor(ki/4)][ki%4];
+    if(DM_HELD[DM.bank+idx]) dmHold(DM.bank, idx, false);
   });
 
-  /* ---------------- external MIDI: pads answer notes 36–67 on this page ---------------- */
+  /* ---------------- external MIDI on this page ----------------
+     CONTROLLER TEMPLATE binding (Akai MPK Mini MK3, pre-mapped):
+     · The FIRST SIXTEEN pad notes (36–51, ascending) are the MPK's
+       16 pad-hits IN ORDER — his Bank A lands on the current bank's
+       pads 1–8, Bank B on 9–16 (paging the 8-pad view to follow) —
+       the ordered correspondence, not a per-pad factory table.
+     · Notes 52–67 / 68–83 / 84–99 address banks B / C / D directly
+       (the FPC lane layout the pads record at).
+     · Aftertouch (poly 0xA0 / channel 0xD0) NEVER retriggers a hit.
+     · Pitch bend is the stick = NOTE VARIATION on this page.
+     · Keys and everything else pass through untouched (channel 1
+       routing to Module 1 / the roll is the app's own). */
   if(typeof onMidiMessage==="function" && !onMidiMessage._blDmWrapped){
     const _dmMidiPrev=onMidiMessage;
     const dmMidiWrap=function(msg){
       try{
         if(DM.viewActive && msg && msg.data && msg.data.length>=2){
           const cmd=msg.data[0]&0xf0;
+          if(cmd===0xa0 || cmd===0xd0) return; /* aftertouch: pressure only, never a hit */
+          if(cmd===0xe0){ const bend=((msg.data[2]<<7)|(msg.data[1]||0))-8192; dmSetVariation(bend/8192); return; }
+          /* channel-1 KEYS in the MPK Mini layout answer on the
+             audition strip (pitched selected pad, lit as they play);
+             every other key, and every key in the MPC2000XL layout,
+             passes through to the app's channel-1 routing untouched */
+          if((msg.data[0]&0x0f)===0 && DM.padMode===8 && (cmd===0x90 || cmd===0x80)){
+            const kn=msg.data[1], kv2=msg.data[2]||0;
+            if(kn>=DM_KEY_LO && kn<=DM_KEY_HI){
+              if(cmd===0x90 && kv2>0) dmKeyPlay(kn, kv2/127); else dmKeyLight(kn, false);
+              return;
+            }
+          }
           if(cmd===0x90 || cmd===0x80){
             const note=msg.data[1], velRaw=msg.data[2]||0;
             let bank=null, idx=-1;
-            if(note>=36 && note<=51){ bank="A"; idx=note-36; }
+            if(note>=36 && note<=51){ bank=DM.bank; idx=note-36;
+              if(DM.padMode===8){ const needHalf= idx>=8? 1 : 0;
+                if(DM.half!==needHalf){ DM.half=needHalf; dmApplyMode(); } } }
             else if(note>=52 && note<=67){ bank="B"; idx=note-52; }
-            if(idx>=0){
-              if(cmd===0x90 && velRaw>0){ dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); }
+            else if(note>=68 && note<=83){ bank="C"; idx=note-68; }
+            else if(note>=84 && note<=99){ bank="D"; idx=note-84; }
+            if(idx>=0 && bank){
+              if(cmd===0x90 && velRaw>0){ DM_HELD[bank+idx]=true; dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); dmRepeatArm(bank, idx, DM.fullLevel? 1 : velRaw/127); }
               else dmHold(bank, idx, false);
               return;
             }
@@ -20406,38 +21233,459 @@ if(typeof buildRack==="function"){
     onMidiMessage=dmMidiWrap;
   }
 
+  /* ---------------- controller template: knobs pre-mapped ----------------
+     Template lives in Options → MIDI setup (inserted below). Knob
+     functions join the app's Learn table (kind "v"): a Learn
+     assignment for one overrides ONLY that knob; the rest keep the
+     template's CC 70–77. One state, two surfaces — a knob turn
+     moves the on-screen control via dmRenderPanel. */
+  const DM_KNOB_FNS=[["dmkvol","Drum pad — Volume (selected pad)"],["dmkpan","Drum pad — Pan"],["dmktune","Drum pad — Tune"],
+    ["dmkatk","Drum pad — Envelope Attack"],["dmkdec","Drum pad — Envelope Decay"],["dmksus","Drum pad — Envelope Sustain"],
+    ["dmkrel","Drum pad — Envelope Release"],["dmkscale","Drum pad — Scale Vol"]];
+  const DM_KNOB_CC=[70,71,72,73,74,75,76,77];
+  let dmTemplate="mpkmini3";
+  try{ dmTemplate=localStorage.getItem("beatlab.ctrltemplate.v1")||"mpkmini3"; }catch(e){}
+  function dmTemplateActive(){ return dmTemplate==="mpkmini3"; }
+  function dmApplyKnob(k, val){
+    const pad=dmSelPad(); if(!pad) return;
+    dmEnsureLayers(pad); const layer=dmSelLayer(); const v=val/127;
+    if(k===0) pad.vol=v;
+    else if(k===1) pad.pan=v*2-1;
+    else if(k===2) pad.tune=Math.round(v*24-12);
+    else if(k===3 && layer) layer.env.a=(1+v*499)/1000;
+    else if(k===4 && layer) layer.env.d=(5+v*995)/1000;
+    else if(k===5 && layer) layer.env.s=v;
+    else if(k===6 && layer) layer.env.r=(5+v*1995)/1000;
+    else if(k===7) pad.scaleVol=v;
+    dmRenderPanel();
+    clearTimeout(dmApplyKnob._t); dmApplyKnob._t=setTimeout(()=>{ if(typeof markDirty==="function") markDirty(); }, 350);
+  }
+  if(typeof allFns==="function" && !allFns._dmWrapped){
+    const _dmAllPrev=allFns;
+    const dmAllWrap=function(){ return _dmAllPrev().concat(DM_KNOB_FNS.map(f=>[f[0], f[1], "v"])); };
+    dmAllWrap._dmWrapped=true;
+    allFns=dmAllWrap;
+  }
+  if(typeof handleMidiCC==="function" && !handleMidiCC._dmWrapped){
+    const _dmCcPrev=handleMidiCC;
+    const dmCcWrap=function(cc, val, chan){
+      try{
+        const fn=(typeof findAssign==="function")? findAssign("cc", cc, chan) : null;
+        if(fn && fn.indexOf("dmk")===0){ const k=DM_KNOB_FNS.findIndex(f=>f[0]===fn); if(k>=0){ dmApplyKnob(k, val); return true; } }
+        if(fn) return _dmCcPrev(cc, val, chan); /* any other Learn assignment owns this CC outright */
+        if(dmTemplateActive()){
+          for(let k=0;k<8;k++){
+            const learned=(typeof S!=="undefined" && S.midiMap && S.midiMap.assignments[DM_KNOB_FNS[k][0]]);
+            if(!learned && DM_KNOB_CC[k]===cc){ dmApplyKnob(k, val); return true; }
+          }
+        }
+      }catch(e){}
+      return _dmCcPrev(cc, val, chan);
+    };
+    dmCcWrap._dmWrapped=true;
+    handleMidiCC=dmCcWrap;
+  }
+  /* template selector in Options → MIDI setup (the MIDI map panel) */
+  (function dmTemplateUI(){
+    const anchor=$("mapProfileSel"); if(!anchor) return;
+    const row=anchor.closest(".togglerow"); if(!row || !row.parentNode) return;
+    const d=document.createElement("div");
+    d.style.cssText="border:1px solid var(--gold2);border-radius:8px;padding:9px 10px;margin-bottom:10px;background:var(--panel2)";
+    d.innerHTML='<div style="font-size:11px;letter-spacing:1px;color:var(--gold);font-weight:900;margin-bottom:5px">CONTROLLER TEMPLATE — EVERYTHING PRE-MAPPED</div>'+
+      '<div class="togglerow" style="margin-top:0"><label class="hlabel">Template: <select id="dmTplSel"><option value="mpkmini3">Akai MPK Mini MK3</option><option value="none">None — custom map only</option></select></label>'+
+      '<span class="small" id="dmTplStatus"></span></div>'+
+      '<div class="small">With the MPK Mini MK3 template active, nothing needs hand-mapping: <b>keys</b> play channel 1 (Module 1 / the roll) as routed · <b>pads</b> strike the Drum Machine’s 16 pads in order (Bank A = 1–8, Bank B = 9–16) · <b>knobs 1–8</b> (CC 70–77) ride the selected pad’s Volume · Pan · Tune · Attack · Decay · Sustain · Release · Scale Vol · <b>Note Variation — MPK stick</b> (pitch bend) rides the last-hit pad’s Tune/Attack/Decay. MIDI Learn (in the map table below) rebinds any single item — that rebind is a custom override on the template and touches nothing else.</div>';
+    row.parentNode.insertBefore(d, row);
+    const sel=$("dmTplSel"); if(sel){ sel.value=dmTemplate;
+      sel.onchange=()=>{ dmTemplate=sel.value; try{ localStorage.setItem("beatlab.ctrltemplate.v1", dmTemplate); }catch(e){} dmTplStatusUpd();
+        setStatus("Controller template: "+(dmTemplateActive()? "Akai MPK Mini MK3 — pads, keys, knobs and the Note Variation stick are mapped already." : "off — only your custom map (Learn / profiles) drives the controller.")); }; }
+    window.dmTplStatusUpd=function(){
+      const st=$("dmTplStatus"); if(!st) return;
+      let ov=0; try{ Object.keys(S.midiMap.assignments||{}).forEach(k=>{ if(k.indexOf("dmk")===0) ov++; }); }catch(e){}
+      st.textContent= dmTemplateActive()? ("Active: MPK Mini MK3 pre-mapped"+(ov? " · "+ov+" custom override"+(ov===1? "" : "s")+" via Learn" : " · no overrides")) : "Template off";
+    };
+    window.dmTplStatusUpd();
+  })();
+
+  /* ================================================================
+     AUDITION KEYS (MPK Mini layout only — the MPC2000XL layout has
+     none, true to the hardware). A 25-key strip (C3–C5, root C4)
+     mirroring his MPK Mini's keys: plays the SELECTED pad's layered
+     sound chromatically through the same voice path (layers,
+     envelope, its mixer strip), answers his physical keys on
+     channel 1 while this layout is up (lighting as they play), and
+     records pitched notes through the very same routing as pads.
+     ================================================================ */
+  const DM_KEY_LO=48, DM_KEY_HI=72;
+  function dmKeyRecNote(bank, idx, off){
+    if(DM.routing==="perpad"){ const ch=dmEnsurePadChannel(bank, idx); return ch? (ch.root!=null? ch.root : 60)+off : null; }
+    return dmPadMidi(bank, idx)+off;
+  }
+  function dmKeyLight(midi, on){
+    const el=document.querySelector('#dmKeyStrip [data-midi="'+midi+'"]'); if(!el) return;
+    el.classList.toggle("hit", !!on);
+    if(on){ clearTimeout(el._kt); el._kt=setTimeout(()=>el.classList.remove("hit"), 220); }
+  }
+  function dmKeyPlay(midi, vel){
+    if(DM.padMode!==8) return;
+    const bank=DM.bank, idx=DM.sel, pad=dmSelPad(); if(!pad) return;
+    dmEnsureLayers(pad);
+    dmKeyLight(midi, true);
+    if(!pad.layers.some(l=>l.key)){ setStatus("The audition keys play the selected pad — Pad "+(idx+1)+" is empty. Click a pad and pick its sound first."); return; }
+    ensureCtx(); if(AC.state==="suspended") AC.resume();
+    dmEnsurePadChannel(bank, idx);
+    const off=midi-60, recNote=dmKeyRecNote(bank, idx, off);
+    const v127=Math.round(Math.min(1, Math.max(0, vel))*127);
+    const need=pad.layers.filter(l=>l.key && !l.buf && v127>=(l.velLo|0) && v127<=(l.velHi!=null? l.velHi : 127));
+    if(need.length){ Promise.all(need.map(l=>dmResolveLayer(pad, l))).then(()=>dmPlayNow(bank, idx, vel, off, recNote)); return; }
+    dmPlayNow(bank, idx, vel, off, recNote);
+  }
+  (function dmBuildKeys(){
+    const strip=$("dmKeyStrip"); if(!strip) return;
+    const whites=[]; for(let m=DM_KEY_LO;m<=DM_KEY_HI;m++){ if([0,2,4,5,7,9,11].indexOf(m%12)>=0) whites.push(m); }
+    const ww=100/whites.length;
+    let wi=0;
+    for(let m=DM_KEY_LO;m<=DM_KEY_HI;m++){
+      const isW=[0,2,4,5,7,9,11].indexOf(m%12)>=0;
+      const b=document.createElement("button"); b.type="button"; b.dataset.midi=m;
+      if(isW){ b.className="dmkeyw"; b.style.left=(wi*ww)+"%"; b.style.width=ww+"%"; wi++; }
+      else { b.className="dmkeyb"; b.style.left="calc("+(wi*ww)+"% - "+(ww*0.32)+"%)"; b.style.width=(ww*0.64)+"%"; }
+      b.title=noteName(m)+" — plays the selected pad’s sound at this pitch";
+      const play=(e)=>{ e.preventDefault(); dmKeyPlay(m, 0.92); };
+      b.addEventListener("pointerdown", play);
+      b.addEventListener("pointerenter", e=>{ if(e.buttons>0) dmKeyPlay(m, 0.92); }); /* gliss, like the app's other keyboards */
+      strip.appendChild(b);
+    }
+  })();
+
+  /* ================================================================
+     LCD SOFT-KEY VIEWS (MPC2000XL-style): the LCD is a multi-view
+     screen — Home (transport readouts) · Mixer Tracks · Sampler
+     Chops · Piano Roll Notes. The four buttons under the LCD are
+     SOFT KEYS: labels drawn in the LCD's bottom row, jobs following
+     the view. Views onto EXISTING data only (channels, the chop
+     channel's slices, the roll channel's pattern) — navigation and
+     light touches; deep editing stays in the tabs (no duplication).
+     ================================================================ */
+  DM.lcdView="home"; DM.lcdMixIdx=0; DM.lcdChopPage=0; DM.lcdNoteCh=null; DM._lcdSig="";
+  function dmLcdChannels(){
+    const ids=[]; const push=(id)=>{ if(id && S.channels[id] && ids.indexOf(id)<0) ids.push(id); };
+    push(DM.target);
+    DM_BANKS.forEach(bn=>DM.banks[bn].forEach(p=>push(p.chanId)));
+    if(!ids.length) S.order.forEach(push);
+    return ids;
+  }
+  function dmLcdData(){
+    const v=DM.lcdView;
+    if(v==="mixer"){
+      const ids=dmLcdChannels(); if(!ids.length) return { txt:"No channels yet.", soft:["—","—","—","HOME"] };
+      DM.lcdMixIdx=Math.min(ids.length-1, Math.max(0, DM.lcdMixIdx));
+      const lines=ids.slice(0,6).map((id, i)=>{ const ch=S.channels[id];
+        return (i===DM.lcdMixIdx? "▶ " : "  ")+ch.name+"  vol "+Math.round((ch.volume!=null? ch.volume : 0.8)*100)+"%  pan "+(ch.pan? Math.round(ch.pan*50) : "C")+(ch.mute? "  MUTED" : "")+(ch.solo? "  SOLO" : ""); });
+      return { txt:"MIXER TRACKS — the kit’s channels\n"+lines.join("\n"), soft:["◀ TRACK","TRACK ▶","MUTE","HOME"] };
+    }
+    if(v==="chops"){
+      const ch=S.channels.chop;
+      if(!ch || !ch.slices || !ch.slices.length) return { txt:"SAMPLER CHOPS — no chop channel / slices yet.\nChops live in the Sampler (MPC Loops).", soft:["—","—","SAMPLER","HOME"] };
+      const per=8, pages=Math.max(1, Math.ceil(ch.slices.length/per));
+      DM.lcdChopPage=Math.min(pages-1, Math.max(0, DM.lcdChopPage));
+      const lines=ch.slices.slice(DM.lcdChopPage*per, DM.lcdChopPage*per+per).map((s, i)=>
+        "Slice "+(DM.lcdChopPage*per+i+1)+": "+(s.start||0).toFixed(2)+"s – "+(s.end||0).toFixed(2)+"s");
+      return { txt:"SAMPLER CHOPS — "+ch.name+" · page "+(DM.lcdChopPage+1)+"/"+pages+"\n"+lines.join("\n"), soft:["◀ PAGE","PAGE ▶","SAMPLER","HOME"] };
+    }
+    if(v==="notes"){
+      const id=DM.lcdNoteCh || S.rollChannel || DM.target;
+      const ch=id && S.channels[id];
+      if(!ch) return { txt:"PIANO ROLL NOTES — no channel.", soft:["—","—","—","HOME"] };
+      const pat=ch.patterns[activePatIdx()];
+      const notes=(pat.notes||[]).slice().sort((a,b)=>a.step-b.step);
+      const lines=notes.slice(0,7).map(n=>"step "+(n.step+1)+" · "+noteName(n.midi)+" ("+n.midi+") · vel "+Math.round((n.vel||0.9)*127));
+      return { txt:"PIANO ROLL NOTES — "+ch.name+" · "+notes.length+" notes in SEQ "+(S.pattern+1)+"\n"+(lines.join("\n") || "(empty — play the pads with Rec on)"), soft:["◀ CHAN","CHAN ▶","ROLL","HOME"] };
+    }
+    return { txt:"", soft:["TRACKS","CHOPS","NOTES","HOME"] };
+  }
+  function dmLcdRender(){
+    const d=dmLcdData();
+    const sig=DM.lcdView+"|"+d.txt+"|"+d.soft.join(",");
+    if(sig===DM._lcdSig) return; DM._lcdSig=sig;
+    ["dmLcdView","mpcLcdView"].forEach(id=>{ const el=$(id); if(el) el.textContent=d.txt; });
+    ["dmLcdSoft","mpcLcdSoft"].forEach(id=>{ const el=$(id); if(el) el.innerHTML=d.soft.map(s=>'<span class="lcdsoft">'+s+"</span>").join(""); });
+    document.querySelectorAll("[data-soft]").forEach(b=>{ b.textContent=d.soft[+b.dataset.soft]||""; });
+    document.querySelectorAll("[data-mpcsoft]").forEach(b=>{ b.textContent=d.soft[+b.dataset.mpcsoft]||""; });
+  }
+  function dmSoftPress(i){
+    const v=DM.lcdView;
+    if(v==="home"){ DM.lcdView= ["mixer","chops","notes","home"][i] || "home"; }
+    else if(v==="mixer"){
+      const ids=dmLcdChannels();
+      if(i===0) DM.lcdMixIdx=Math.max(0, DM.lcdMixIdx-1);
+      else if(i===1) DM.lcdMixIdx=Math.min(ids.length-1, DM.lcdMixIdx+1);
+      else if(i===2){ const ch=ids[DM.lcdMixIdx] && S.channels[ids[DM.lcdMixIdx]];
+        if(ch){ ch.mute=!ch.mute; if(typeof buildMixer==="function") buildMixer(); if(typeof buildRack==="function") buildRack(); if(typeof markDirty==="function") markDirty(); } }
+      else DM.lcdView="home";
+    }
+    else if(v==="chops"){
+      if(i===0) DM.lcdChopPage=Math.max(0, DM.lcdChopPage-1);
+      else if(i===1) DM.lcdChopPage++;
+      else if(i===2){ if(window.blSetView) window.blSetView("sampler"); }
+      else DM.lcdView="home";
+    }
+    else if(v==="notes"){
+      const ids=S.order.filter(id=>S.channels[id]);
+      let cur=ids.indexOf(DM.lcdNoteCh || S.rollChannel || DM.target);
+      if(i===0 || i===1){ cur=((cur+(i===0? -1 : 1))%ids.length+ids.length)%ids.length; DM.lcdNoteCh=ids[cur]; }
+      else if(i===2){ if(window.blSetView) window.blSetView("roll"); }
+      else DM.lcdView="home";
+    }
+    DM._lcdSig=""; dmLcdRender();
+  }
+  document.querySelectorAll("[data-soft]").forEach(b=>{ b.onclick=()=>dmSoftPress(+b.dataset.soft); });
+
+  /* ================================================================
+     MPC2000XL WINDOW — the hardware twin of this page (Keith,
+     2026-11-07). A detachable panel built to his machine's face
+     (warm-grey body, dark LCD top-left, red accent, blue function
+     buttons, data wheel, left Note Variation slider, red REC,
+     charcoal pad field right). It is a registered unit with the
+     app's OWN detach machinery (blDetach / blReattach — popout or
+     floating fallback, dock state saved like every panel).
+     ONE STATE, TWO SURFACES + NO INVENTED DATA: every readout is
+     the transport area's own data (S.bpm, S.pattern, the shared
+     playhead in dmSyncTransport), every control calls the page's
+     own handlers/fields — the wheel's tempo IS bpmSet, its REC is
+     the app's record arm, its Play is the page transport with its
+     scope. NO DUPLICATION: there is no trimmer or sample recorder
+     here — the face's TRIM button opens the existing Sampler tab,
+     where MPC Loops already lives; a finished sample reaches a
+     pad through the normal assignment path.
+     ================================================================ */
+  const mpcPanel=document.createElement("section"); mpcPanel.id="dmMpcPanel";
+  mpcPanel.innerHTML=
+    '<div class="mpcbrand"><span class="mpcword">MPC</span><span class="mpcmodel">2000XL</span><span class="mpcsub">MIDI PRODUCTION CENTER — BEAT LAB TWIN</span></div>'+
+    '<div class="mpcface">'+
+      '<div class="mpcleft">'+
+        '<div class="mpclcd"><div class="mpclcdgrid">'+
+          '<span><span class="lcdlab">Kit</span><span class="lcdval" id="mpcLcdKit">SWUM MPC</span></span>'+
+          '<span><span class="lcdlab">Bank</span><span class="lcdval" id="mpcLcdBank">A</span></span>'+
+          '<span><span class="lcdlab">Sequence</span><span class="lcdval" id="mpcLcdSeq">SEQ 1</span></span>'+
+          '<span><span class="lcdlab">Tempo</span><span class="lcdval" id="mpcLcdTempo">95 BPM</span></span>'+
+          '<span><span class="lcdlab">Bar:Beat</span><span class="lcdval" id="mpcLcdPos">1:1</span></span>'+
+          '<span><span class="lcdlab">Pad</span><span class="lcdval" id="mpcLcdPad">1/64</span></span>'+
+          '<span><span class="lcdlab">Sound</span><span class="lcdval" id="mpcLcdSound">—</span></span>'+
+          '<span id="mpcLcdRec">● REC</span>'+
+        '</div><div class="lcdviews"><div class="lcdviewtxt" id="mpcLcdView"></div><div class="lcdsoftrow" id="mpcLcdSoft"></div></div></div>'+
+        '<div class="dmsoftkeys" role="group" aria-label="LCD soft keys"><button type="button" class="btn sm" data-mpcsoft="0"></button><button type="button" class="btn sm" data-mpcsoft="1"></button><button type="button" class="btn sm" data-mpcsoft="2"></button><button type="button" class="btn sm" data-mpcsoft="3"></button></div>'+
+        '<div class="mpcvar"><span class="mpcvarlab">Note Variation</span>'+
+          '<input type="range" id="mpcVarSlider" min="-50" max="50" step="1" value="0" title="NOTE VARIATION slider — rides the last-hit pad’s assigned parameter (Tune / Attack / Decay). Centre restores the set value. The MPK stick drives this same value." />'+
+          '<div><div style="font-size:10px;font-weight:900;letter-spacing:1px;color:#55524a">AFTER TOUCH / VARIATION</div>'+
+          '<div class="small" style="color:#55524a;max-width:150px">Rides the last-hit pad. Centre = the pad’s set value — a performance offset, never a destructive edit.</div>'+
+          '<label style="font-size:10px;font-weight:900;letter-spacing:1px;color:#55524a;display:block;margin-top:8px">WHEEL FIELD</label>'+
+          '<select id="mpcWheelField" title="What the data wheel adjusts — MPC-style: pick a field, wheel turns it"><option value="tempo">Tempo</option><option value="tune">Pad Tune</option><option value="vol">Pad Volume</option><option value="pan">Pad Pan</option><option value="scale">Scale Vol</option><option value="atk">Envelope Attack</option><option value="dec">Envelope Decay</option><option value="sus">Envelope Sustain</option><option value="rel">Envelope Release</option></select></div>'+
+        '</div>'+
+        '<div class="mpcwheelwrap"><div id="mpcWheel" title="DATA WHEEL — drag up/down (or mouse-wheel) to step the chosen field"></div><label>Data Wheel</label></div>'+
+        '<div class="mpcfns">'+
+          '<button type="button" class="btn sm" data-mpcbank="A">Bank A</button><button type="button" class="btn sm" data-mpcbank="B">Bank B</button><button type="button" class="btn sm" data-mpcbank="C">Bank C</button><button type="button" class="btn sm" data-mpcbank="D">Bank D</button>'+
+          '<button type="button" class="btn sm" id="mpcFullBtn">Full Level</button>'+
+          '<button type="button" class="btn sm" id="mpcLevelsBtn">16 Levels</button>'+
+          '<button type="button" class="btn sm" id="mpcRepeatBtn">Note Repeat</button>'+
+          '<button type="button" class="btn sm" id="mpcTrimBtn" title="TRIM lives in the Sampler tab (MPC Loops) — this routes there; no second trimmer">Trim → Sampler</button>'+
+        '</div>'+
+        '<div class="mpctrans">'+
+          '<button type="button" class="btn recbtn" id="mpcRecBtn">● REC</button>'+
+          '<button type="button" class="btn" id="mpcPlayBtn">▶ Play</button>'+
+          '<button type="button" class="btn" id="mpcStopBtn">■ Stop</button>'+
+          '<button type="button" class="btn" id="mpcTapBtn">Tap</button>'+
+          '<span class="small" style="color:#55524a">Scope follows the page transport (Alone / Whole Beat).</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="mpcfield">'+
+        '<div class="mpcknobs">'+
+          '<span><label>Pad Volume</label><input type="range" id="mpcKnobVol" min="0" max="127" /></span>'+
+          '<span><label>Pad Tune</label><input type="range" id="mpcKnobTune" min="0" max="127" /></span>'+
+        '</div>'+
+        '<div class="mpcgrid" id="dmMpcGrid"></div>'+
+        '<div class="small" style="color:#a9a9b2;margin-top:6px">Same 16 pads, same bank, same assignments as the page — hits light here and there together.</div>'+
+      '</div>'+
+    '</div>';
+  holder.appendChild(mpcPanel);
+  /* MPC pads: same rows/order as the page grid */
+  (function dmBuildMpcGrid(){
+    const grid=mpcPanel.querySelector("#dmMpcGrid"); if(!grid) return;
+    DM_ROWS.forEach(row=>{ row.forEach(idx=>{
+      const b=document.createElement("button"); b.type="button"; b.className="mpcpad"; b.dataset.idx=idx;
+      b.innerHTML='<span class="dmnum"></span><span class="dmname"></span>';
+      b.addEventListener("pointerdown", e=>{ e.preventDefault();
+        let v=0.92;
+        if(e.pointerType==="pen" && e.pressure>0) v=Math.max(0.15, e.pressure);
+        DM_HELD[DM.bank+idx]=true;
+        dmTrigger(DM.bank, idx, v);
+        dmRepeatArm(DM.bank, idx, DM.fullLevel? 1 : v); });
+      const release=()=>{ if(DM_HELD[DM.bank+idx]) dmHold(DM.bank, idx, false); };
+      b.addEventListener("pointerup", release); b.addEventListener("pointercancel", release);
+      grid.appendChild(b);
+    }); });
+  })();
+  function dmRenderMpcPads(){
+    document.querySelectorAll("#dmMpcGrid .mpcpad").forEach(el=>{
+      const idx=+el.dataset.idx, pad=DM.banks[DM.bank][idx]; if(!pad) return;
+      dmSyncMirror(pad);
+      el.style.setProperty("--dmc", pad.color||"#8a8371");
+      el.querySelector(".dmnum").textContent=idx+1;
+      const nm=el.querySelector(".dmname");
+      nm.textContent= pad.name || "— empty —"; nm.classList.toggle("empty", !pad.name);
+      el.classList.toggle("sel", idx===DM.sel);
+      el.classList.toggle("muted", !!pad.mute);
+      el.style.display= (DM.padMode===8 && ((DM.half===0 && idx>7) || (DM.half===1 && idx<8)))? "none" : "";
+    });
+    mpcPanel.querySelectorAll("[data-mpcbank]").forEach(b=>b.classList.toggle("on", b.dataset.mpcbank===DM.bank));
+    const fb=$("mpcFullBtn"); if(fb) fb.classList.toggle("on", !!DM.fullLevel);
+    const lb=$("mpcLevelsBtn"); if(lb){ lb.classList.toggle("on", !!(DM.levels && DM.levels!=="off")); lb.textContent="16 Levels"+(DM.levels==="tune"? ": Tune" : DM.levels==="vel"? ": Vel" : ""); }
+    const rb=$("mpcRepeatBtn"); if(rb) rb.classList.toggle("on", !!DM.repeatOn);
+    const rec=$("mpcRecBtn"); if(rec) rec.classList.toggle("rec-on", !!S.recording);
+    const kv=$("mpcKnobVol"), kt=$("mpcKnobTune"), pad=dmSelPad();
+    if(pad){ if(kv) kv.value=Math.round((pad.vol!=null? pad.vol : 0.9)*127); if(kt) kt.value=Math.round(((pad.tune||0)+12)/24*127); }
+  }
+  function dmMpcSyncVis(){
+    const el=$("dmMpcPanel"); if(!el) return;
+    const docked= !!el.closest("#blViewDrums");
+    el.style.display= docked? "none" : "block";
+  }
+  /* MPC face wiring — every control calls the page's own machinery */
+  (function dmMpcWire(){
+    mpcPanel.querySelectorAll("[data-mpcbank]").forEach(b=>{ b.onclick=()=>{ DM.bank=b.dataset.mpcbank; DM.selLayer=0; DM._layerSig=""; dmRenderAll(); }; });
+    const vs=$("mpcVarSlider"); if(vs) vs.addEventListener("input", ()=>dmSetVariation(+vs.value/50));
+    const fb=$("mpcFullBtn"); if(fb) fb.onclick=()=>{ const p=$("dmFullLevelBtn"); if(p) p.click(); dmRenderMpcPads(); };
+    const lb=$("mpcLevelsBtn"); if(lb) lb.onclick=()=>{ const sel=$("dmLevelsSel"); if(!sel) return;
+      sel.value= DM.levels==="off"? "tune" : DM.levels==="tune"? "vel" : "off";
+      sel.dispatchEvent(new Event("change")); dmRenderMpcPads(); };
+    const rb=$("mpcRepeatBtn"); if(rb) rb.onclick=()=>{ const p=$("dmRepeatBtn"); if(p) p.click(); dmRenderMpcPads(); };
+    const tb=$("mpcTrimBtn"); if(tb) tb.onclick=()=>{ if(window.blSetView) window.blSetView("sampler");
+      setStatus("TRIM lives in the Sampler (MPC Loops) — the window routes there instead of growing a second trimmer. Finish the sample there; it reaches a pad through the normal sound assignment."); };
+    mpcPanel.querySelectorAll("[data-mpcsoft]").forEach(b=>{ b.onclick=()=>dmSoftPress(+b.dataset.mpcsoft); });
+    const rec=$("mpcRecBtn"); if(rec) rec.onclick=()=>{ const p=$("dmRecBtn"); if(p) p.click(); dmRenderMpcPads(); };
+    const pl=$("mpcPlayBtn"); if(pl) pl.onclick=()=>{ const p=$("dmPlayBtn"); if(p) p.click(); };
+    const st=$("mpcStopBtn"); if(st) st.onclick=()=>{ const p=$("dmStopBtn"); if(p) p.click(); };
+    const tp=$("mpcTapBtn"); if(tp) tp.onclick=()=>{ const p=$("dmTapBtn"); if(p) p.click(); };
+    const kv=$("mpcKnobVol"); if(kv) kv.addEventListener("input", ()=>dmApplyKnob(0, +kv.value));
+    const kt=$("mpcKnobTune"); if(kt) kt.addEventListener("input", ()=>dmApplyKnob(2, +kt.value));
+    /* data wheel: drag / wheel steps the chosen field — tempo steps
+       edit the TRANSPORT's tempo via its own setter (one field) */
+    const wheel=$("mpcWheel"), field=$("mpcWheelField");
+    if(wheel){
+      const step=(dir)=>{
+        const f=field? field.value : "tempo";
+        if(f==="tempo"){ bpmSet(Math.min(220, Math.max(50, (S.bpm||95)+dir))); dmSyncTransport(); return; }
+        const pad=dmSelPad(); if(!pad) return; const layer=dmSelLayer();
+        const clamp127=(v)=>Math.min(127, Math.max(0, v));
+        if(f==="vol") dmApplyKnob(0, clamp127(Math.round((pad.vol||0)*127)+dir*3));
+        else if(f==="pan") dmApplyKnob(1, clamp127(Math.round(((pad.pan||0)+1)/2*127)+dir*3));
+        else if(f==="tune") dmApplyKnob(2, clamp127(Math.round(((pad.tune||0)+12)/24*127)+dir*2));
+        else if(f==="scale") dmApplyKnob(7, clamp127(Math.round((pad.scaleVol!=null? pad.scaleVol : 1)*127)+dir*3));
+        else if(layer){ /* envelope fields share the knob fns' own ranges */
+          const env=layer.env;
+          const cur= f==="atk"? Math.round(((env.a*1000-1)/499)*127)
+            : f==="dec"? Math.round(((env.d*1000-5)/995)*127)
+            : f==="sus"? Math.round(env.s*127)
+            : Math.round(((env.r*1000-5)/1995)*127);
+          const k= f==="atk"? 3 : f==="dec"? 4 : f==="sus"? 5 : 6;
+          dmApplyKnob(k, clamp127(cur+dir*3)); }
+      };
+      let lastY=null, acc=0;
+      wheel.addEventListener("pointerdown", e=>{ e.preventDefault(); lastY=e.clientY; acc=0; try{ wheel.setPointerCapture(e.pointerId); }catch(err){} });
+      wheel.addEventListener("pointermove", e=>{ if(lastY==null) return; acc+= (lastY-e.clientY); lastY=e.clientY;
+        while(acc>=14){ step(1); acc-=14; } while(acc<=-14){ step(-1); acc+=14; } });
+      const end=()=>{ lastY=null; };
+      wheel.addEventListener("pointerup", end); wheel.addEventListener("pointercancel", end);
+      wheel.addEventListener("wheel", e=>{ e.preventDefault(); step(e.deltaY<0? 1 : -1); }, { passive:false });
+    }
+    /* Detach button on the page header — the app's own machinery */
+    const tools=sec.querySelector("h2 .tools");
+    if(tools && typeof blDetach==="function"){
+      const b=document.createElement("button"); b.type="button"; b.className="btn sm"; b.id="dmMpcDetachBtn";
+      b.textContent="⧉ MPC2000XL Window";
+      b.title="Pop the MPC2000XL hardware twin into its own window (the app’s detach machinery) — same state, same transport data; Reattach or closing the window docks it back.";
+      b.onclick=()=>{ if(typeof blDock!=="undefined" && blDock.mpc) blReattach("mpc"); else blDetach("mpc"); dmMpcSyncVis(); };
+      tools.appendChild(b);
+    }
+    if(typeof BL_UNITS!=="undefined" && Array.isArray(BL_UNITS) && !BL_UNITS.some(u=>u.key==="mpc"))
+      BL_UNITS.push({ key:"mpc", label:"MPC2000XL", els:()=>{ const el=document.getElementById("dmMpcPanel"); return el? [el] : []; } });
+    try{ const keys=JSON.parse(localStorage.getItem("beatlab.dock.v1")||"[]");
+      if(Array.isArray(keys) && keys.indexOf("mpc")>=0 && typeof blDetach==="function") blDetach("mpc", { restore:true, noPop:true });
+    }catch(e){}
+    dmMpcSyncVis();
+  })();
+
   /* ---------------- persistence: rides the project file + undo snapshots ---------------- */
-  function dmSerPad(p){ return { key:p.key||null, name:p.name||"", color:p.color, vol:p.vol, pan:p.pan, tune:p.tune, cut:p.cut, cutSelf:!!p.cutSelf }; }
+  function dmSerLayer(l){ return { key:l.key||null, name:l.name||"", vol:l.vol, pan:l.pan, tune:l.tune,
+    velLo:l.velLo|0, velHi:(l.velHi!=null? l.velHi : 127),
+    env:{ a:(l.env&&l.env.a)||0.003, d:(l.env&&l.env.d)||0.06, s:(l.env&&isFinite(+l.env.s))? +l.env.s : 1, r:(l.env&&l.env.r)||0.015 } }; }
+  function dmSerPad(p){ dmEnsureLayers(p); dmSyncMirror(p);
+    return { key:p.key||null, name:p.name||"", color:p.color, vol:p.vol, pan:p.pan, tune:p.tune, cut:p.cut, cutSelf:!!p.cutSelf,
+      mute:!!p.mute, solo:!!p.solo, scaleVol:(p.scaleVol!=null? p.scaleVol : 1), chanId:p.chanId||null,
+      varParam:p.varParam||"tune", layers:p.layers.map(dmSerLayer) }; }
+  function dmDeserLayer(s){
+    const l=dmEmptyLayer(); if(!s) return l;
+    l.key=s.key||null; l.name=s.name||"";
+    l.vol=(s.vol!=null && isFinite(+s.vol))? +s.vol : 1;
+    l.pan=isFinite(+s.pan)? +s.pan : 0;
+    l.tune=Math.round(+s.tune||0);
+    if(s.env) l.env={ a:isFinite(+s.env.a)? +s.env.a : 0.003, d:isFinite(+s.env.d)? +s.env.d : 0.06,
+      s:isFinite(+s.env.s)? Math.min(1, Math.max(0, +s.env.s)) : 1, r:isFinite(+s.env.r)? +s.env.r : 0.015 };
+    return l;
+  }
   function dmResetFactory(){
-    DM.banks={ A:dmKitBank("SWUM MPC"), B:Array.from({length:16}, dmEmptyPad) };
-    DM.bank="A"; DM.sel=0; DM.target=null; DM.kit="SWUM MPC";
+    DM.banks={ A:dmKitBank("SWUM MPC"), B:Array.from({length:16}, dmEmptyPad), C:Array.from({length:16}, dmEmptyPad), D:Array.from({length:16}, dmEmptyPad) };
+    DM.bank="A"; DM.sel=0; DM.selLayer=0; DM.target=null; DM.kit="SWUM MPC"; DM._layerSig="";
+    DM.padMode=8; DM.half=0; DM.routing="one"; DM.scope="whole"; DM.fullLevel=false; DM.levels="off"; DM.repeatOn=false; DM.repeatDiv="16"; DM.lastHit=null;
     dmFillTarget(); dmRenderAll();
   }
   function dmRestore(d){
     if(!d || !d.banks){ dmResetFactory(); return; }
-    const banks={A:[],B:[]};
-    ["A","B"].forEach(bn=>{
+    const banks={A:[],B:[],C:[],D:[]};
+    DM_BANKS.forEach(bn=>{
       const arr=d.banks[bn]||[];
       for(let i=0;i<16;i++){ const s=arr[i], p=dmEmptyPad();
         if(s){ p.key=s.key||null; p.name=s.name||""; p.color=s.color||dmCatColor(p.name);
           p.vol=(s.vol!=null && isFinite(+s.vol))? +s.vol : 0.9;
           p.pan=isFinite(+s.pan)? +s.pan : 0;
-          p.tune=Math.round(+s.tune||0); p.cut=Math.round(+s.cut||0); p.cutSelf=s.cutSelf!==false; }
+          p.tune=Math.round(+s.tune||0); p.cut=Math.round(+s.cut||0); p.cutSelf=s.cutSelf!==false;
+          p.mute=!!s.mute; p.solo=!!s.solo;
+          p.scaleVol=(s.scaleVol!=null && isFinite(+s.scaleVol))? +s.scaleVol : 1;
+          p.chanId=s.chanId||null; p.varParam=s.varParam||"tune";
+          /* MIGRATION: projects saved before layers carry only the pad's
+             single sound — it becomes layer 1, full range, neutral
+             envelope, so the project sounds exactly as it did. Banks
+             C/D (and every newer field) default in the same spirit. */
+          if(Array.isArray(s.layers) && s.layers.length) p.layers=s.layers.slice(0,4).map(dmDeserLayer);
+          else if(p.key){ const l0=dmEmptyLayer(); l0.key=p.key; l0.name=p.name; p.layers=[l0]; }
+          dmEnsureLayers(p); dmSyncMirror(p); }
         banks[bn].push(p);
       }
     });
     DM.banks=banks;
-    DM.bank=(d.bank==="B")? "B" : "A";
+    DM.bank= DM_BANKS.indexOf(d.bank)>=0? d.bank : "A";
     DM.sel=Math.min(15, Math.max(0, Math.round(+d.sel||0)));
+    DM.selLayer=0; DM._layerSig="";
     DM.target=d.target||null; DM.kit=d.kit||"";
-    DM.banks.A.concat(DM.banks.B).forEach(p=>{ if(p.key) dmResolve(p); });
+    DM.padMode= (d.mode===16)? 16 : 8; /* fresh projects open on the MPK's 8-pad face */
+    DM.half= d.half? 1 : 0;
+    DM.routing= d.routing==="perpad"? "perpad" : "one";
+    DM.scope= d.scope==="alone"? "alone" : "whole";
+    DM.fullLevel=!!d.fullLevel;
+    DM.levels= (d.levels==="tune" || d.levels==="vel")? d.levels : "off";
+    DM.repeatOn=!!d.repeatOn; DM.repeatDiv=d.repeatDiv||"16";
+    const rdv=$("dmRepeatDiv"); if(rdv) rdv.value=DM.repeatDiv;
+    const lvs=$("dmLevelsSel"); if(lvs) lvs.value=DM.levels;
+    DM_BANKS.forEach(bn=>DM.banks[bn].forEach(p=>{ if(p.key) dmResolve(p); }));
     dmFillTarget(); dmRenderAll();
   }
   const _dmPjPrev=projectJSON;
   projectJSON=function(){
     const p=_dmPjPrev();
-    p.drums={ v:1, bank:DM.bank, sel:DM.sel, target:DM.target, kit:DM.kit,
-      banks:{ A:DM.banks.A.map(dmSerPad), B:DM.banks.B.map(dmSerPad) } };
+    p.drums={ v:3, bank:DM.bank, sel:DM.sel, target:DM.target, kit:DM.kit,
+      mode:DM.padMode, half:DM.half, routing:DM.routing, scope:DM.scope,
+      fullLevel:!!DM.fullLevel, levels:DM.levels, repeatOn:!!DM.repeatOn, repeatDiv:DM.repeatDiv,
+      banks:{ A:DM.banks.A.map(dmSerPad), B:DM.banks.B.map(dmSerPad), C:DM.banks.C.map(dmSerPad), D:DM.banks.D.map(dmSerPad) } };
     return p;
   };
   const _dmLcpPrev=loadClipsFromProject;
@@ -20477,6 +21725,17 @@ if(typeof buildRack==="function"){
   dmBuildGrid();
   dmFillTarget();
   dmRenderAll();
+  /* probe hook: lets verification drive real pad hits at exact
+     velocities (soft vs hard layer checks) and read the state back */
+  window.blDM={ DM:DM, trigger:dmTrigger, playNow:dmPlayNow, spreadEven:dmSpreadEven,
+    selPad:dmSelPad, selLayer:dmSelLayer, audible:dmAudible, voices:DM_VOICES,
+    serPad:dmSerPad, restore:dmRestore, setPadMode:dmSetPadMode, applyKnob:dmApplyKnob,
+    ensurePadChannel:dmEnsurePadChannel, kitChannelIds:dmKitChannelIds,
+    repeatArm:dmRepeatArm, repeatStop:dmRepeatStop, setVariation:dmSetVariation,
+    templateActive:dmTemplateActive };
+  /* the Learn table gains the template's drum-pad knob rows */
+  try{ if(typeof buildMidiMapTable==="function") buildMidiMapTable(); }catch(e){}
+  try{ if(typeof window.dmTplStatusUpd==="function") window.dmTplStatusUpd(); }catch(e){}
   let dmWant=""; try{ dmWant=localStorage.getItem("beatlab.viewtab.drums")||""; }catch(e){}
   if(dmWant==="1" && window.blSetView) window.blSetView("drums", true);
 })();
