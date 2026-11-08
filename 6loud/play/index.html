@@ -31,6 +31,7 @@
     text-shadow:0 2px 0 #c25e10, 0 0 16px rgba(255,180,0,.35); }
   #dist small { display:block; font-size:11px; font-weight:800; letter-spacing:3px; color:#fff; opacity:.95; text-shadow:0 1px 0 rgba(0,0,0,.5); }
   #center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:24vh; text-align:center; pointer-events:none; }
+  #dbl { position:absolute; left:50%; top:15%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; letter-spacing:1.5px; color:#00F5FF; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); display:none; pointer-events:none; animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; z-index:7; white-space:nowrap; }   /* the DOUBLE JUMP!! helper (Keith v0.70.1) — same helper language as PULL UP!!, its own slot above it; the two never show at once (air vs hang) */
   #pullup { position:absolute; left:50%; top:24%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; letter-spacing:1.5px; color:#00F5FF; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); display:none; pointer-events:none; animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; z-index:7; white-space:nowrap; }
   @keyframes puPop { 0% { transform:translateX(-50%) scale(.8); } 60% { transform:translateX(-50%) scale(1.1); } 100% { transform:translateX(-50%) scale(1); } }   /* the alert pops in with a bounce (Gemini spec, v0.55); the flash is Keith's, kept */
   @keyframes puBlink { 0% { opacity:1; } 50% { opacity:.3; } 100% { opacity:1; } }   /* softened floor (v0.55) — the hard on/off blink was part of the cheap read */
@@ -107,6 +108,7 @@
     <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
   <div id="pullup">PULL UP!!</div>
+  <div id="dbl">DOUBLE JUMP!!</div>
   <div id="center">
     <div id="tap"></div>
   </div>
@@ -116,7 +118,7 @@
   <div id="charBest"></div>
   <div id="strip"></div>
   <button id="startBtn">START GAME</button>
-  <div id="ver">v0.70</div>
+  <div id="ver">v0.70.1</div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div><div id="track"><div id="fill"><img id="cap" src="assets/cloud-01.webp" alt=""></div></div></div>
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -130,7 +132,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.70 ==============================
+/* ============================== 6LOUD demo v0.70.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -2086,7 +2088,7 @@ function resize() {
 }
 addEventListener('resize', resize);
 let lastTs = 0;
-let puShown = false, charUiShown = true, hudShown = true, sbShown = false;
+let puShown = false, dbShown = false, charUiShown = true, hudShown = true, sbShown = false;
 let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
@@ -2094,6 +2096,8 @@ function loop(ts) {
   update(dt);
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
+  const db = mode === 'run' && !grounded && !hangPlat && !slipPlat && doubleArmed && !doubleUsed;   /* DOUBLE JUMP!! helper: on screen exactly while a mid-air tap would fire the double (Keith v0.70.1) */
+  if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title';   /* the carousel lives on the title screen only (v0.56) — it gets its OWN flag: it used to borrow mb (the sound toggle's), which was title-only until v0.60 made the toggle always-visible and silently kept the arrows + name on every screen (Keith's screenshots, fixed v0.65) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('charName').style.display = cu ? 'block' : 'none'; $('charBest').style.display = cu ? 'block' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
   const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
