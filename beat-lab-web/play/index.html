@@ -8,8 +8,8 @@
 <script>/* Emulation boot (Keith, 2026-11-07): apply the saved emulation before first paint, beside the theme boot — layout preference only (localStorage), never part of a project file. The full Emulation pass at the end of the body reads the same key. */ try{var _blEmuBoot=localStorage.getItem("beatlab.emu.v1");if(_blEmuBoot&&_blEmuBoot!=="default")document.documentElement.setAttribute("data-emu",_blEmuBoot);}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
-<title>Beat Lab Web Beta v1.0</title>
-<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. */ var BL_VERSION="v1.0"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
+<title>Beat Lab Web Beta v0.5</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.5, superseding the v1.0 stamp. */ var BL_VERSION="v0.5"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -141,6 +141,40 @@ input[type=range]{accent-color:var(--gold)}
 .rollnote.sel{outline:2px solid #fff;outline-offset:0;z-index:4}
 .rollnote .rz{position:absolute;top:0;right:0;bottom:0;width:10px;cursor:ew-resize}
 .rollnote .rz::after{content:"";position:absolute;top:2px;bottom:2px;right:2px;width:3px;border-radius:2px;background:rgba(0,0,0,.35)}
+/* Playhead inside the Piano Roll (Keith, 2026-11-08: "i could not see
+   the playhead inside the piano roll") — a full-height teal line with
+   a top flag, riding over the grid at the sounding step; the old
+   per-cell .now outline stays as the step echo underneath it. */
+.rollph{position:absolute;top:0;width:2px;background:var(--teal);box-shadow:0 0 6px rgba(63,184,166,.85);z-index:5;pointer-events:none;display:none}
+.rollph::before{content:"";position:absolute;top:0;left:-4px;border:5px solid transparent;border-top:7px solid var(--teal)}
+/* Snap grid lines (Keith, 2026-11-08: "when i change the snap i need
+   the grid to change") — overlay divisions redrawn from the Snap
+   setting on every buildRoll: subdivision lines faint, beat lines
+   stronger, bar lines strongest, exactly the FL hierarchy. */
+.snapline{position:absolute;width:1px;background:rgba(242,234,216,.10);z-index:1;pointer-events:none}
+.snapline.beat{background:rgba(242,234,216,.22)}
+.snapline.bar{background:rgba(217,166,46,.5);width:2px}
+/* Select tool marquee + cursor */
+.rollgrid.tool-select .rollcell{cursor:crosshair}
+.marquee{position:absolute;border:1.5px solid var(--teal);background:rgba(63,184,166,.16);z-index:6;pointer-events:none;border-radius:2px}
+/* Key guide (Keith, 2026-11-08: "filter help in piano roll when
+   called upon") — classes exist ONLY while the Key guide toggle is
+   on: scale rows strengthen (root strongest), out-of-key rows and
+   notes dim and flag, row labels follow. Guidance, never a cage:
+   nothing here blocks placing or playing any note. */
+.rollcell.gin{background:color-mix(in srgb,var(--teal) 40%, var(--step))}
+.rollcell.groot{background:color-mix(in srgb,var(--gold) 48%, var(--step))}
+.rollcell.gout{opacity:.42}
+.rollrowlabel.gin{color:var(--teal)}
+.rollrowlabel.groot{color:var(--gold);font-weight:700}
+.rollrowlabel.gout{color:#b0523c;opacity:.6}
+.rollnote.gout{opacity:.7;border-color:var(--red)}
+.kb .wk.gkey::after,.kb .bk.gkey::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:var(--teal);pointer-events:none;z-index:3}
+.kb .wk.gkey::after{top:5px}
+.kb .bk.gkey::after{bottom:5px}
+.kb .wk.groot::after,.kb .bk.groot::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:var(--gold);pointer-events:none;z-index:3}
+.kb .wk.groot::after{top:4px}
+.kb .bk.groot::after{bottom:4px}
 /* Piano roll tools (Eraser / Splitter): with a tool active the grid owns
    the gesture — touch-action:none keeps a finger drag from scrolling the
    roll wrap or being hijacked by the browser mid-sweep / mid-slice. */
@@ -353,7 +387,7 @@ a{color:var(--teal)}
 
   <!-- ================= TRANSPORT ================= -->
   <div class="transport">
-    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v1.0</span></div>
+    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.5</span></div>
     <div class="tgroup">
       <button class="playbtn" id="btnPlay" title="Play / Stop (Space)">▶</button>
       <button class="stopbtn" id="btnStop" title="Stop and rewind">■</button>
@@ -644,11 +678,12 @@ a{color:var(--teal)}
             <button class="btn sm on" id="rollToolDraw" title="Draw tool — tap an empty cell to add a note, drag a note to move it, drag its right edge to resize">Draw</button>
             <button class="btn sm" id="rollToolErase" title="Eraser — tap a note to delete it, or drag across a run of notes to clear them. No long-press needed">Eraser</button>
             <button class="btn sm" id="rollToolSplit" title="Splitter — tap a note to cut it in two at that spot, or drag a line across stacked notes to cut them all at the same column">Split</button>
+            <button class="btn sm" id="rollToolSelect" title="Select — drag across the grid to marquee-select notes (some or all), click a note to select just it, drag a selected note to move the whole selection together, Delete removes the selection">Select</button>
             <button class="btn sm" id="btnClearRoll">Clear notes</button>
           </span>
         </h2>
         <div id="rollSelInfo">No note selected — click a note block to select it.</div>
-        <div class="small" style="margin-bottom:8px">FL-style editing: click an empty cell to add a note · drag a note to move it (up/down = pitch, auditioned as you drag on pitched channels) · drag its right edge to change its length · right-click or long-press a note to delete it. Drum channels get the same treatment — their step-grid hits show as dashed blocks and become full notes the moment you drag, resize or set their velocity. In-key rows are tinted, roots are gold, out-of-key notes flag red on the 808. Tools (top right of the Piano Roll): Draw is the editing above. Eraser — tap a note to delete it, or drag across a run of notes to clear them all; no long-press needed, which is the reliable way to delete on a phone browser. Splitter — tap a note to cut it in two at the tapped spot, or drag a vertical line across stacked notes to cut every note it crosses at that same column; the cut follows the Snap setting (Snap on = nearest grid line, Snap off = the exact sub-step position tapped), both halves keep the original pitch and velocity, notes too short to split are left alone, and each tap or drag is a single undo step.</div>
+        <div class="small" style="margin-bottom:8px">FL-style editing: click an empty cell to add a note · drag a note to move it (up/down = pitch, auditioned as you drag on pitched channels) · drag its right edge to change its length · right-click or long-press a note to delete it. Drum channels get the same treatment — their step-grid hits show as dashed blocks and become full notes the moment you drag, resize or set their velocity. In-key rows are tinted, roots are gold, out-of-key notes flag red on the 808. Tools (top right of the Piano Roll): Draw is the editing above. Eraser — tap a note to delete it, or drag across a run of notes to clear them all; no long-press needed, which is the reliable way to delete on a phone browser. Splitter — tap a note to cut it in two at the tapped spot, or drag a vertical line across stacked notes to cut every note it crosses at that same column; the cut follows the Snap setting (Snap on = nearest grid line, Snap off = the exact sub-step position tapped), both halves keep the original pitch and velocity, notes too short to split are left alone, and each tap or drag is a single undo step. Select — drag across the grid to marquee-select some or all notes, click a note to select just it, drag any selected note to move the whole selection together (relative positions kept), Delete removes the selection; a group move or delete is one undo step. The grid's lines are the Snap setting — change Snap and the divisions redraw to match. The teal line sweeping the grid in playback is the playhead, and the keyboard under the roll lights each note as it sounds. Voices (top right, beside Root note) is the channel's polyphony: Poly lets notes ring over each other; Mono (the MPC 2000's word) cuts the ringing voice the moment a new note lands — the setting for 808s and sounds that must never overlap. Pitch detection: every sample you assign is analysed — the channel's root follows the detected pitch (Root Note overrides it until the sample changes; ⟳ Re-detect re-runs it), a chop/loop's detected key sets the project key, and a sound with no clear pitch says so instead of guessing. Key guide (top right) is off unless you call it: on, the project key's scale rows light with the root strongest, out-of-key rows dim, and the keyboard marks its in-key keys — guidance only, nothing is ever blocked.</div>
         <div class="rollwrap" id="rollWrap"><div class="rollgrid" id="rollGrid"></div></div>
         <div class="velwrap"><div class="vellane" id="velLane"></div></div>
         <div class="vellabel"><span>Velocity lane</span><span class="mono" id="velReadout">Drag a bar to set that note’s velocity (1–127).</span></div>
@@ -836,6 +871,7 @@ function makeChannel(id,name,type,builtin){
     id, name, type, builtin, uid: ++chSeq,
     buffer:null, sampleName:null, missing:false,
     gainDb:0, pitch:0, fine:0, mode:"repitch", reverse:false, root:60,
+    voices:"poly", /* polyphony (Keith, 2026-11-08): "poly" = notes ring over each other (FL Sampler default); "mono" = a new hit cuts the channel's ringing voice first — FL's mono / the MPC 2000's MONO. Per channel, set from the Piano Roll header next to Root note. */
     stretch:1, fitBars:0, /* stretch = manual length multiplier (MPC repitch); fitBars>0 = length locked to that many bars at project BPM */
     volume:0.8, pan:0, mute:false, solo:false,
     fx:{ rev:0, del:0, delDiv:0.75, eqL:0, eqM:0, eqH:0, cut:18000, res:0.7, comp:-18, ratio:3, lofi:0,
@@ -943,6 +979,32 @@ function refreshChain(ch){
   n.revSend.gain.value=ch.fx.rev/100*0.9; n.delSend.gain.value=ch.fx.del/100*0.9;
 }
 const revCache={};
+/* ---------------- Voice registry: per-channel polyphony ----------------
+   (Keith, 2026-11-08: "in beat lab i was not able to set the sample
+   the polyphony like i could in fl studio (mpc 2000 calls it mono)
+   for some sounds i need them not to overlap.")
+   Every voice a channel starts registers a cut(t) here. In POLY
+   (the default, FL Sampler behaviour) voices ring over each other
+   untouched. In MONO, a new voice first cuts every voice still
+   registered on its channel IN THE SAME CONTEXT — the cut is
+   scheduled at the new note's own start time, so the lookahead
+   scheduler's future notes cut exactly when they sound, not when
+   they are scheduled. Entries are pruned as voices end. Glide has
+   its own single voice by design and never passes through here. */
+function blRegVoice(ch, ctx, cut, until){
+  if(!ch) return null;
+  const list=ch._vlist||(ch._vlist=[]);
+  for(let i=list.length-1;i>=0;i--){ if(list[i].dead || list[i].until<until-64) list.splice(i,1); }
+  const e={ ctx:ctx, cut:cut, until:until, dead:false };
+  list.push(e);
+  return e;
+}
+function blCutVoices(ch, ctx, t){
+  if(!ch || !ch._vlist) return;
+  const list=ch._vlist;
+  for(let i=list.length-1;i>=0;i--){ const e=list[i];
+    if(e.ctx===ctx && !e.dead){ e.dead=true; try{ e.cut(t); }catch(err){} list.splice(i,1); } }
+}
 function playBuffer(ctx, dest, ch, t, opts){
   opts=opts||{};
   let buf=ch.buffer; if(!buf) return false;
@@ -967,8 +1029,10 @@ function playBuffer(ctx, dest, ch, t, opts){
   g.gain.setValueAtTime(vel, t); g.gain.setTargetAtTime(0.0001, t+Math.max(0.03,dur-0.012), 0.008); // click-guard fade
   src.connect(g); g.connect(dest);
   const off = opts.reverse?0:(opts.offset||0);
+  if(ch.voices==="mono") blCutVoices(ch, ctx, t); /* MONO: the new hit silences the channel's ringing voice at its own start time */
   try{ src.start(t, off, opts.dur||undefined); }catch(e){ src.start(t); }
-  ch._liveSrc=src; src.onended=()=>{ if(ch._liveSrc===src) ch._liveSrc=null; }; /* newest voice per channel: live-bend + MPC choke target */
+  const _vent=blRegVoice(ch, ctx, function(tt){ try{ g.gain.cancelScheduledValues(tt); g.gain.setTargetAtTime(0.0001, tt, 0.004); src.stop(tt+0.06); }catch(e){} }, t+Math.max(0.1,(opts.dur||buf.duration)));
+  ch._liveSrc=src; src.onended=()=>{ if(ch._liveSrc===src) ch._liveSrc=null; if(_vent) _vent.dead=true; }; /* newest voice per channel: live-bend + MPC choke target */
   return true;
 }
 function reverseBuffer(ctx, buf, offset, dur){
@@ -978,9 +1042,11 @@ function reverseBuffer(ctx, buf, offset, dur){
   return out;
 }
 function env(g,t,peak,a,d){ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(Math.max(peak,0.0002),t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+a+d); }
-function triggerSynthDrum(ctx, dest, kind, t, vel){
+function triggerSynthDrum(ctx, dest, kind, t, vel, ch){
   const pr=Math.pow(2, ((S.masterPitch||0)+(S.masterFine||0)/100)/12);
   const g=ctx.createGain(); g.connect(dest);
+  if(ch && ch.voices==="mono"){ blCutVoices(ch, ctx, t);
+    blRegVoice(ch, ctx, function(tt){ try{ g.gain.cancelScheduledValues(tt); g.gain.setTargetAtTime(0.0001, tt, 0.004); }catch(e){} }, t+0.5); }
   if(kind==="kick"){ const o=ctx.createOscillator(), og=ctx.createGain(); o.type="sine";
     o.frequency.setValueAtTime(150*pr,t); o.frequency.exponentialRampToValueAtTime(42*pr,t+0.11);
     env(og,t,vel,0.002,0.24); o.connect(og); og.connect(g); o.start(t); o.stop(t+0.3); }
@@ -997,6 +1063,8 @@ function noiseHit(ctx, dest, t, vel, freq, dur, type){
 }
 function triggerSynth(ctx, dest, ch, t, midi, vel, durSec){
   const f=440*Math.pow(2,(midi+(BL_T||0)+(S.masterPitch||0)+(S.masterFine||0)/100-69)/12), g=ctx.createGain(); g.connect(dest);
+  if(ch.voices==="mono"){ blCutVoices(ch, ctx, t);
+    blRegVoice(ch, ctx, function(tt){ try{ g.gain.cancelScheduledValues(tt); g.gain.setTargetAtTime(0.0001, tt, 0.004); }catch(e){} }, t+Math.max(0.4,durSec+0.6)); }
   const eng=ch.engine;
   if(eng==="fm"){ const car=ctx.createOscillator(), mod=ctx.createOscillator(), mg=ctx.createGain();
     car.type="sine"; car.frequency.value=f; mod.frequency.value=f*2.01; mg.gain.setValueAtTime(f*2.4,t); mg.gain.exponentialRampToValueAtTime(f*0.2,t+0.24);
@@ -1016,13 +1084,15 @@ function trigger808(ctx, dest, ch, t, midi, vel, durSec){
   if(ch.buffer){ playBuffer(ctx, dest, ch, t, {semis: midi-ch.root+(BL_T||0), vel, dur: durSec? durSec*Math.pow(2,(midi-ch.root)/12) : undefined}); return; }
   const f=440*Math.pow(2,(midi+(BL_T||0)+(S.masterPitch||0)+(S.masterFine||0)/100-69)/12), o=ctx.createOscillator(), g=ctx.createGain();
   o.type="sine"; o.frequency.setValueAtTime(f*1.5,t); o.frequency.exponentialRampToValueAtTime(f,t+0.03);
+  if(ch.voices==="mono"){ blCutVoices(ch, ctx, t);
+    blRegVoice(ch, ctx, function(tt){ try{ g.gain.cancelScheduledValues(tt); g.gain.setTargetAtTime(0.0001, tt, 0.004); o.stop(tt+0.06); }catch(e){} }, t+Math.max(0.5,durSec+0.2)); }
   env(g,t,vel,0.003,Math.max(0.28,durSec)); o.connect(g); g.connect(dest); o.start(t); o.stop(t+Math.max(0.4,durSec+0.1));
 }
 function triggerChannel(ctx, bundle, ch, t, opts){
   opts=opts||{}; const dest=bundle.input, vel=opts.vel||0.9, stepDur=60/S.bpm/4;
   if(ch.type==="drum"){ if(ch.buffer){ if(opts.midi!=null){ /* a NOTE on a drum-typed channel (Keith's Midi 1 + Triangle.wav): the note's pitch is honoured, root-relative — only step-grid hits (no midi) stay one-shot at root */
         playBuffer(ctx,dest,ch,t,{semis:(opts.midi-ch.root)+(BL_T||0), vel, dur: opts.lenSteps? opts.lenSteps*stepDur*Math.pow(2,((opts.midi-ch.root))/12) : undefined});
-      } else playBuffer(ctx,dest,ch,t,{vel}); } else triggerSynthDrum(ctx,dest,ch.builtin,t,vel); }
+      } else playBuffer(ctx,dest,ch,t,{vel}); } else triggerSynthDrum(ctx,dest,ch.builtin,t,vel,ch); }
   else if(ch.type==="808"){ trigger808(ctx,dest,ch,t,opts.midi||36,vel, opts.lenSteps? opts.lenSteps*stepDur : stepDur*0.95); }
   else if(ch.type==="synth"){ if(ch.buffer) playBuffer(ctx,dest,ch,t,{semis:(opts.midi||ch.root)-ch.root+(BL_T||0), vel, dur: opts.lenSteps? opts.lenSteps*stepDur*Math.pow(2,((opts.midi||ch.root)-ch.root)/12) : undefined}); else triggerSynth(ctx,dest,ch,t,opts.midi||60,vel,stepDur*0.95); }
   else if(ch.type==="sample"){ if(ch.buffer) playBuffer(ctx,dest,ch,t,{semis:(opts.midi||ch.root)-ch.root+(BL_T||0), vel, dur: opts.lenSteps? opts.lenSteps*stepDur*Math.pow(2,((opts.midi||ch.root)-ch.root)/12) : undefined}); else triggerSynth(ctx,dest,ch,t,opts.midi||60,vel*0.6,stepDur); }
@@ -1031,7 +1101,7 @@ function triggerChannel(ctx, bundle, ch, t, opts){
       playBuffer(ctx,dest,ch,t,{vel, offset:sl.start, dur:sl.end-sl.start, semis:(ch.slicePitch[idx]||0), sliceIdx:idx, reverse:!!ch.sliceRev[idx]});
     } else { triggerSynth(ctx,dest,Object.assign({},ch,{engine:"pluck"}),t,60+(idx%8)*2,vel*0.7,stepDur); } }
   if(ch.fx.stutter && opts.fromStep){ const tm=blTimeMixOf(ch); if(tm>0){ const n=bundle; for(let i=1;i<3;i++){ const tt=t+stepDur*i/3;
-      if(ch.type==="drum"){ if(ch.buffer){ if(opts.midi!=null) playBuffer(ctx,dest,ch,tt,{semis:(opts.midi-ch.root)+(BL_T||0), vel:vel*(1-i*0.25)*tm}); else playBuffer(ctx,dest,ch,tt,{vel:vel*(1-i*0.25)*tm}); } else triggerSynthDrum(ctx,dest,ch.builtin,tt,vel*(1-i*0.25)*tm); } } } }
+      if(ch.type==="drum"){ if(ch.buffer){ if(opts.midi!=null) playBuffer(ctx,dest,ch,tt,{semis:(opts.midi-ch.root)+(BL_T||0), vel:vel*(1-i*0.25)*tm}); else playBuffer(ctx,dest,ch,tt,{vel:vel*(1-i*0.25)*tm}); } else triggerSynthDrum(ctx,dest,ch.builtin,tt,vel*(1-i*0.25)*tm,ch); } } } }
 }
 /* ---------------- Scheduler ---------------- */
 let schedTimer=null, nextStepTime=0, curStep=0, barCount=0, uiStep=-1;
@@ -1181,7 +1251,7 @@ function _rslRebuild(rack, grid, slice){
 function refreshStepLights(){
   const rack=$("rack"), grid=$("rollGrid"), slice=$("sliceSteps");
   if(!rack || !grid) return;
-  const sig=S.order.length+"/"+totalSteps()+"/"+(S.rollChannel||"")+"/"+grid.childElementCount+"/"+(slice? slice.childElementCount : -1);
+  const sig=S.order.length+"/"+(typeof totalSteps==="function"? totalSteps() : 16*seqBarsOf(S.pattern))+"/"+(S.rollChannel||"")+"/"+grid.childElementCount+"/"+(slice? slice.childElementCount : -1); /* totalSteps lives in a later script block — while a slow CDN script delays that block, the rAF meter loop can fire first; the guard keeps that window error-free (the long-standing totalSteps console error) */
   if(sig!==_rslSig || (_rslFirst && !_rslFirst.isConnected)){ _rslSig=sig; _rslRebuild(rack, grid, slice); }
   if(rack.getClientRects().length===0 && grid.getClientRects().length===0 && (!slice || slice.getClientRects().length===0)){
     for(let i=0;i<_rslLit.length;i++) _rslLit[i].classList.remove("now");
@@ -1574,7 +1644,7 @@ function scaleSet(){ const root=S.projectKey.root, mode=S.projectKey.mode;
      blocks on the channel's root row. Any real edit (drag, resize,
      velocity) materializes a step hit into a full note and clears the
      step, so after an edit there is one source of truth. */
-var rollEdit={ snap:1, sel:null, geom:null, items:[], tool:"draw" };
+var rollEdit={ snap:1, sel:null, selSet:[], geom:null, items:[], tool:"draw" }; /* sel = the primary selected item (status line, single-note ops); selSet = the full selection the Select tool builds — the same state widened, never a second system */
 function rollSnapPos(p){ if(!rollEdit.snap) return Math.round(p*10000)/10000;
   return Math.round((Math.round(p/rollEdit.snap)*rollEdit.snap)*10000)/10000; }
 function rollNotePos(n){ return n.step+(n.off||0); }
@@ -1627,16 +1697,43 @@ function rollDeleteItem(it){
   else if(it.kind==="step"){ pat.steps[it.stepIdx]=0; }
   if(ch.type==="drum" && it.kind!=="step" && pat.steps[Math.floor(it.pos)]) pat.steps[Math.floor(it.pos)]=0;
   if(rollEdit.sel===it) rollEdit.sel=null;
+  if(rollEdit.selSet){ const si=rollEdit.selSet.indexOf(it); if(si>=0) rollEdit.selSet.splice(si,1); }
   rollAfterEdit(ch);
   setStatus("Deleted the "+(ch.type==="chop"? "slice hit" : "note")+" from "+ch.name+" — step "+(Math.floor(it.pos)+1)+".");
 }
-function rollSelect(it){ rollEdit.sel=it||null; rollSyncSelUI(); }
+function rollSelect(it){ rollEdit.sel=it||null; rollEdit.selSet=it? [it] : []; rollSyncSelUI(); }
+function rollSetSelection(items, primary){
+  rollEdit.selSet=(items||[]).slice();
+  rollEdit.sel= primary && rollEdit.selSet.indexOf(primary)>=0? primary : (rollEdit.selSet[0]||null);
+  rollSyncSelUI();
+}
+function rollItemSelected(it){ return !!it && (it===rollEdit.sel || (rollEdit.selSet||[]).indexOf(it)>=0); }
+function rollDeleteSelection(){
+  const ch=S.channels[S.rollChannel]; if(!ch) return;
+  const set=(rollEdit.selSet||[]).slice(); if(!set.length) return;
+  const pat=ch.patterns[S.pattern];
+  /* every removal in ONE synchronous pass, then ONE rollAfterEdit —
+     the whole group delete lands as a single undo step */
+  set.forEach(it=>{
+    if(it.kind==="note"){ const i=pat.notes.indexOf(it.ref); if(i>=0) pat.notes.splice(i,1); }
+    else if(it.kind==="hit"){ const arr=pat.hits||[]; const i=arr.indexOf(it.ref); if(i>=0) arr.splice(i,1); }
+    else if(it.kind==="step"){ pat.steps[it.stepIdx]=0; }
+    if(ch.type==="drum" && it.kind!=="step" && pat.steps[Math.floor(it.pos)]) pat.steps[Math.floor(it.pos)]=0;
+  });
+  rollEdit.sel=null; rollEdit.selSet=[];
+  rollAfterEdit(ch);
+  setStatus("Deleted "+set.length+" selected "+(ch.type==="chop"? "slice hits" : "notes")+" from "+ch.name+" — one edit, so one Undo brings them all back.");
+}
 function rollSyncSelUI(){
   const info=$("rollSelInfo");
-  document.querySelectorAll("#rollGrid .rollnote").forEach(el=>el.classList.toggle("sel", !!rollEdit.sel && el._item===rollEdit.sel));
-  document.querySelectorAll("#velLane .velbar").forEach(el=>el.classList.toggle("sel", !!rollEdit.sel && el._item===rollEdit.sel));
+  document.querySelectorAll("#rollGrid .rollnote").forEach(el=>el.classList.toggle("sel", rollItemSelected(el._item)));
+  document.querySelectorAll("#velLane .velbar").forEach(el=>el.classList.toggle("sel", rollItemSelected(el._item)));
   if(!info) return;
   const it=rollEdit.sel, ch=S.channels[S.rollChannel];
+  if(ch && rollEdit.selSet && rollEdit.selSet.length>1){
+    info.textContent=rollEdit.selSet.length+" notes selected on "+ch.name+" — drag any selected note to move them all together · Delete removes the whole selection.";
+    return;
+  }
   if(!it || !ch){ info.textContent="No note selected — click a note block to select it."; return; }
   const nm= ch.type==="chop"? "Slice "+(it.midi+1) : noteName(it.midi);
   const posTxt=(Math.floor(it.pos)+1)+((it.pos%1)>0.001? " + "+(it.pos%1).toFixed(2).replace(/^0/,"") : "");
@@ -1678,26 +1775,67 @@ function rollCommitDrag(it, startPos){
   rollWriteBack(it);
   rollAfterEdit(ch);
 }
+/* Group move commit (Select tool): every selected item is written
+   back in ONE synchronous pass — step hits materialize, drum step
+   slots clear, refs update — then ONE rollAfterEdit, so the whole
+   group move is a single undo step, like every other roll gesture. */
+function rollCommitGroup(starts){
+  const ch=S.channels[S.rollChannel]; if(!ch) return; const pat=ch.patterns[S.pattern];
+  (starts||[]).forEach(gs=>{ const it=gs.it;
+    if(it.kind==="step") rollMaterialize(it, pat);
+    else if(ch.type==="drum"){ const os=Math.floor(gs.pos); if(pat.steps[os]) pat.steps[os]=0; }
+    rollWriteBack(it);
+  });
+  rollAfterEdit(ch);
+  setStatus("Moved "+(starts? starts.length : 0)+" selected notes on "+ch.name+" — relative positions kept; one Undo moves them all back.");
+}
 function rollBindNote(d, it, rows){
   d.addEventListener("contextmenu", e=>{ e.preventDefault(); e.stopPropagation(); rollDeleteItem(it); });
   d.addEventListener("pointerdown", e=>{
     if(e.button===2) return;
     e.preventDefault(); e.stopPropagation();
-    rollSelect(it);
+    /* Select tool: pressing an unselected note selects just it;
+       pressing a member of a group keeps the group (it becomes the
+       primary) and a drag then moves the WHOLE selection together.
+       No long-press delete and no resize in Select mode — those stay
+       Draw-tool gestures. Every other tool keeps the single select. */
+    const selMode= rollEdit.tool==="select";
+    if(selMode){ if(!rollItemSelected(it)) rollSetSelection([it], it); else { rollEdit.sel=it; rollSyncSelUI(); } }
+    else rollSelect(it);
+    const group= (selMode && rollEdit.selSet && rollEdit.selSet.length>1 && rollItemSelected(it))? rollEdit.selSet.slice() : null;
+    const gStarts= group? group.map(gi=>({ it:gi, pos:gi.pos, midi:gi.midi, ri:rows.findIndex(r=>r.midi===gi.midi) })) : null;
+    const gEls=new Map(), gBars=new Map();
+    if(group){
+      document.querySelectorAll("#rollGrid .rollnote").forEach(el=>{ if(el._item && group.indexOf(el._item)>=0) gEls.set(el._item, el); });
+      document.querySelectorAll("#velLane .velbar").forEach(el=>{ if(el._item && group.indexOf(el._item)>=0) gBars.set(el._item, el); });
+    }
     const startX=e.clientX, startY=e.clientY;
     const rect0=d.getBoundingClientRect(), relX=e.clientX-rect0.left;
     const rzW=Math.min(10, Math.max(5, rect0.width*0.34));
-    const mode= relX>rect0.width-rzW? "resize":"move";
+    const mode= selMode? "move" : (relX>rect0.width-rzW? "resize":"move");
     const startPos=it.pos, startMidi=it.midi, startLen=it.len;
     const ri0=rows.findIndex(r=>r.midi===startMidi);
     let moved=false, deleted=false, lastMidi=startMidi;
-    const lpTimer=setTimeout(()=>{ if(!moved){ deleted=true; rollDeleteItem(it); } }, 650);
+    const lpTimer= selMode? null : setTimeout(()=>{ if(!moved){ deleted=true; rollDeleteItem(it); } }, 650);
     try{ d.setPointerCapture(e.pointerId); }catch(err){}
     const onMove=ev=>{
       const gg=rollEdit.geom; if(!gg) return;
       const dx=ev.clientX-startX, dy=ev.clientY-startY;
       if(Math.abs(dx)+Math.abs(dy)>6){ moved=true; clearTimeout(lpTimer); }
       if(!moved) return;
+      if(group){ /* the whole selection rides one delta — relative positions and pitches are kept */
+        const maxPos=16*seqBarsOf(S.pattern)-0.01;
+        const dPos=clamp(rollSnapPos(startPos+dx/gg.pitchX), 0, maxPos)-startPos;
+        const dri=Math.round(dy/gg.pitchY);
+        gStarts.forEach(gs=>{ const gi=gs.it;
+          gi.pos=clamp(gs.pos+dPos, 0, maxPos);
+          const nri=clamp(gs.ri+dri, 0, rows.length-1); gi.midi=rows[nri].midi;
+          const el=gEls.get(gi); if(el){ el.style.left=(gg.x0+gi.pos*gg.pitchX)+"px"; el.style.top=gg.rowTops[nri]+"px"; }
+          const vb=gBars.get(gi); if(vb) vb.style.left=(gg.x0+gi.pos*gg.pitchX+gg.pitchX/2)+"px";
+        });
+        rollSyncSelUI();
+        return;
+      }
       if(mode==="move"){
         let np=clamp(rollSnapPos(startPos+dx/gg.pitchX), 0, 16*seqBarsOf(S.pattern)-0.01);
         const ri=clamp(ri0+Math.round(dy/gg.pitchY), 0, rows.length-1);
@@ -1717,6 +1855,11 @@ function rollBindNote(d, it, rows){
       clearTimeout(lpTimer);
       d.removeEventListener("pointermove", onMove); d.removeEventListener("pointerup", onUp); d.removeEventListener("pointercancel", onUp);
       if(deleted) return;
+      if(group){
+        if(!moved){ rollSetSelection([it], it); rollAudition(it.midi, it.vel); return; } /* a plain click on a group member narrows to just it, FL-style */
+        rollCommitGroup(gStarts);
+        return;
+      }
       if(!moved){ rollAudition(it.midi, it.vel); return; }
       rollCommitDrag(it, startPos);
     };
@@ -1740,14 +1883,15 @@ function rollBindNote(d, it, rows){
    into a single undo point. */
 function rollSetTool(t, silent){
   rollEdit.tool=t;
-  [["rollToolDraw","draw"],["rollToolErase","erase"],["rollToolSplit","split"]].forEach(pair=>{
+  [["rollToolDraw","draw"],["rollToolErase","erase"],["rollToolSplit","split"],["rollToolSelect","select"]].forEach(pair=>{
     const b=$(pair[0]); if(b) b.classList.toggle("on", t===pair[1]);
   });
   const grid=$("rollGrid");
-  if(grid){ grid.classList.toggle("tool-erase", t==="erase"); grid.classList.toggle("tool-split", t==="split"); }
+  if(grid){ grid.classList.toggle("tool-erase", t==="erase"); grid.classList.toggle("tool-split", t==="split"); grid.classList.toggle("tool-select", t==="select"); }
   if(silent) return;
   if(t==="erase") setStatus("Piano Roll — Eraser: tap a note to delete it, or drag across a run of notes to clear them. No holding needed.");
   else if(t==="split") setStatus("Piano Roll — Splitter: tap a note to cut it at that spot, or drag a line across stacked notes to cut them all at the same column. Cuts follow the Snap setting.");
+  else if(t==="select") setStatus("Piano Roll — Select: drag across the grid to marquee-select notes, click a note to select just it, drag a selected note to move the whole selection together, Delete removes the selection.");
   else setStatus("Piano Roll — Draw: tap an empty cell to add a note, drag a note to move it, drag its right edge to resize it.");
 }
 function rollSliceItems(list, cut){
@@ -1807,6 +1951,46 @@ function rollSplitGesture(e){
     } else {
       rollSliceItems(rollEdit.items.filter(it=> cut>it.pos && cut<it.pos+(it.len||1)), cut);
     }
+  };
+  document.addEventListener("pointermove", mv);
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointercancel", up);
+}
+/* Select tool marquee (Keith, 2026-11-08: "i need to be able to drag
+   the mouse across and select some or all"): drag a rectangle over
+   the grid — every note it touches joins the selection, live as the
+   box moves; a plain click on empty grid clears the selection. The
+   selection is rollEdit.selSet, the same state the single-note tools
+   use, widened — the status line and Delete key read it directly. */
+function rollSelectGesture(e){
+  const grid=$("rollGrid"); if(!grid) return;
+  const gg=rollEdit.geom; if(!gg || !gg.rowTops) return;
+  const rows=rollRows();
+  const rowIdxOf=new Map(rows.map((r,ri)=>[r.midi,ri]));
+  const rect=grid.getBoundingClientRect();
+  const p0={ x:e.clientX-rect.left, y:e.clientY-rect.top };
+  const box=document.createElement("div"); box.className="marquee"; grid.appendChild(box);
+  let cur=[];
+  const apply=ev=>{
+    const p1={ x:ev.clientX-rect.left, y:ev.clientY-rect.top };
+    const x0=Math.min(p0.x,p1.x), x1=Math.max(p0.x,p1.x), y0=Math.min(p0.y,p1.y), y1=Math.max(p0.y,p1.y);
+    box.style.left=x0+"px"; box.style.top=y0+"px"; box.style.width=Math.max(1,x1-x0)+"px"; box.style.height=Math.max(1,y1-y0)+"px";
+    const s0=(x0-gg.x0)/gg.pitchX, s1=(x1-gg.x0)/gg.pitchX;
+    cur=rollEdit.items.filter(it=>{
+      const ri=rowIdxOf.get(it.midi); if(ri==null) return false;
+      const iy0=gg.rowTops[ri], iy1=iy0+gg.cellH;
+      return it.pos < s1 && (it.pos+(it.len||1)) > s0 && iy0 < y1 && iy1 > y0;
+    });
+    rollSetSelection(cur, cur[0]||null);
+  };
+  apply(e);
+  const mv=ev=>apply(ev);
+  const up=()=>{ document.removeEventListener("pointermove", mv); document.removeEventListener("pointerup", up); document.removeEventListener("pointercancel", up);
+    box.remove();
+    const ch=S.channels[S.rollChannel]; if(!ch) return;
+    if(cur.length===1) setStatus("Selected 1 note on "+ch.name+" — drag it to move it, or drag a marquee to select more.");
+    else if(cur.length>1) setStatus(cur.length+" notes selected on "+ch.name+" — drag any selected note to move them all together · Delete removes the whole selection.");
+    else setStatus("Selection cleared.");
   };
   document.addEventListener("pointermove", mv);
   document.addEventListener("pointerup", up);
@@ -1884,23 +2068,29 @@ function buildRoll(){
   for(let b=0;b<nBars;b++){ const bh=document.createElement("div"); bh.className="rollbarhead"; bh.style.gridColumn="span 16"; bh.textContent="Bar "+(b+1); grid.appendChild(bh); }
   const cellEls=[];
   rows.forEach((r,ri)=>{
-    const lab=document.createElement("div"); lab.className="rollrowlabel"; lab.textContent=r.label; grid.appendChild(lab);
+    const lab=document.createElement("div"); lab.className="rollrowlabel"; lab.textContent=r.label;
+    if(ch.type!=="chop" && S.keyGuide){ const lpc=((r.midi%12)+12)%12; lab.classList.add(lpc===S.projectKey.root? "groot" : scale.has(lpc)? "gin" : "gout"); }
+    grid.appendChild(lab);
     cellEls[ri]=[];
     for(let s=0;s<totalSteps;s++){
       const c=document.createElement("button");
       const pc=((r.midi%12)+12)%12;
       c.className="rollcell"+(s%4===0?" g4":"")+(s%16===0&&s>0?" barstart":"");
-      if(ch.type!=="chop"){ if(pc===S.projectKey.root) c.classList.add("rootrow"); else if(scale.has(pc)) c.classList.add("scale"); }
+      if(ch.type!=="chop"){ if(pc===S.projectKey.root) c.classList.add("rootrow"); else if(scale.has(pc)) c.classList.add("scale");
+        if(S.keyGuide) c.classList.add(pc===S.projectKey.root? "groot" : scale.has(pc)? "gin" : "gout"); }
       c.dataset.step=s;
       c.onclick=ev=>rollCellAdd(r.midi, s, ev);
       grid.appendChild(c); cellEls[ri].push(c);
     }
   });
   /* selection survives re-renders by matching the stored note object */
-  const prevSel=rollEdit.sel;
+  const prevSel=rollEdit.sel, prevSet=rollEdit.selSet||[];
   const items=rollItems(pat, ch, rows); rollEdit.items=items;
-  rollEdit.sel=null;
-  if(prevSel){ const m=items.find(it=> (prevSel.kind!=="step" && prevSel.ref && it.ref===prevSel.ref) || (prevSel.kind==="step" && it.kind==="step" && it.stepIdx===prevSel.stepIdx)); if(m) rollEdit.sel=m; }
+  rollEdit.sel=null; rollEdit.selSet=[];
+  const matchPrev=p=>items.find(it=> (p.kind!=="step" && p.ref && it.ref===p.ref) || (p.kind==="step" && it.kind==="step" && it.stepIdx===p.stepIdx));
+  if(prevSel){ const m=matchPrev(prevSel); if(m) rollEdit.sel=m; }
+  prevSet.forEach(p=>{ const m=matchPrev(p); if(m && rollEdit.selSet.indexOf(m)<0) rollEdit.selSet.push(m); });
+  if(rollEdit.sel && rollEdit.selSet.indexOf(rollEdit.sel)<0) rollEdit.selSet.push(rollEdit.sel);
   /* geometry measured off the rendered cells (fallback = min-width layout) */
   let geom=null;
   const c00=cellEls[0] && cellEls[0][0];
@@ -1918,6 +2108,7 @@ function buildRoll(){
     const d=document.createElement("div");
     d.className="rollnote"+(it.kind==="step"?" virt":"")+(it.kind==="hit"?" hit":"");
     if(ch.type!=="chop" && S.rollChannel==="bass808"){ const pc=((it.midi%12)+12)%12; if(!scale.has(pc)) d.classList.add("outkey"); }
+    if(ch.type!=="chop" && S.keyGuide){ const pc=((it.midi%12)+12)%12; if(!scale.has(pc)) d.classList.add("gout"); }
     if(geom){ d.style.left=(geom.x0+it.pos*geom.pitchX)+"px"; d.style.top=geom.rowTops[ri]+"px";
       d.style.width=Math.max(6, it.len*geom.pitchX-2)+"px"; d.style.height=geom.cellH+"px"; }
     else { d.style.left=(52+it.pos*24)+"px"; d.style.top=(30+ri*19)+"px"; d.style.width=Math.max(6, it.len*24-2)+"px"; d.style.height="17px"; }
@@ -1928,8 +2119,42 @@ function buildRoll(){
     if(rollEdit.sel===it) d.classList.add("sel");
     grid.appendChild(d);
   });
+  rollDrawSnapLines(grid, geom, totalSteps);
+  rollEnsurePlayhead(grid, geom);
   rollBuildLane(items, geom, totalSteps, rowSet);
   rollSyncSelUI();
+}
+/* Snap grid overlay (Keith, 2026-11-08: "when i change the snap i
+   need the grid to change to show me what i am doing — it currently
+   does not"): the visible divisions ARE the Snap setting, redrawn on
+   every buildRoll — subdivision lines faint, beat (4-step) lines
+   stronger, bar (16-step) lines strongest, FL-style. Snap Off shows
+   the beat/bar frame only. Placed notes never move; only the grid
+   display (and future snapping) follows the setting. */
+function rollDrawSnapLines(grid, geom, totalSteps){
+  if(!geom || !geom.rowTops || !geom.rowTops.length) return;
+  const snap=rollEdit.snap;
+  const top=geom.rowTops[0], h=geom.rowTops[geom.rowTops.length-1]+geom.cellH-top;
+  const add=(p, cls)=>{ const l=document.createElement("div"); l.className="snapline "+cls;
+    l.style.left=(geom.x0+p*geom.pitchX-1)+"px"; l.style.top=top+"px"; l.style.height=h+"px"; grid.appendChild(l); };
+  if(!snap){ for(let p=0;p<=totalSteps;p+=4) add(p, p%16===0? "bar":"beat"); return; }
+  const n=Math.round(totalSteps/snap);
+  for(let i=0;i<=n;i++){ const p=Math.round(i*snap*1000)/1000;
+    add(p, Math.abs(p%16)<0.01? "bar" : Math.abs(p%4)<0.01? "beat" : "sub"); }
+}
+/* The roll's playhead element: created fresh with each grid build
+   (buildRoll wipes innerHTML); the v0.5 playback pass positions it
+   every frame from the scheduler's own step clock and hides it when
+   nothing is playing. */
+let rollPhEl=null, rollPhX=-1;
+function rollEnsurePlayhead(grid, geom){
+  const ph=document.createElement("div"); ph.className="rollph"; ph.id="rollPlayhead";
+  if(geom && geom.rowTops && geom.rowTops.length){
+    ph.style.top=geom.rowTops[0]+"px";
+    ph.style.height=(geom.rowTops[geom.rowTops.length-1]+geom.cellH-geom.rowTops[0])+"px";
+  }
+  if(rollPhX>=0){ ph.style.left=rollPhX+"px"; ph.style.display="block"; }
+  grid.appendChild(ph); rollPhEl=ph;
 }
 (function fillRollChannels(){
   const selEl=$("rollChannel");
@@ -1939,7 +2164,8 @@ function buildRoll(){
   selEl.onchange=()=>{ S.rollChannel=selEl.value; rollEdit.sel=null; buildRoll(); };
   const snapEl=$("rollSnap");
   if(snapEl) snapEl.onchange=()=>{ rollEdit.snap=parseFloat(snapEl.value)||0;
-    setStatus("Piano roll snap: "+snapEl.options[snapEl.selectedIndex].text+(rollEdit.snap? " — added notes, drags and resizes land on that grid." : " — free micro-timing: notes keep sub-step positions and playback honors them.")); };
+    buildRoll(); /* the grid redraws to the new snap at once (Keith, 2026-11-08) — notes already placed do not move */
+    setStatus("Piano roll snap: "+snapEl.options[snapEl.selectedIndex].text+(rollEdit.snap? " — the grid now shows those divisions, and added notes, drags and resizes land on them." : " — free micro-timing: notes keep sub-step positions and playback honors them; the grid shows the beat/bar frame.")); };
   $("btnClearRoll").onclick=()=>{ S.channels[S.rollChannel].patterns[S.pattern].notes=[]; if(rollEdit.sel && rollEdit.sel.kind==="note") rollEdit.sel=null; buildRoll(); buildSliceSteps(); markDirty(); };
   /* Piano roll tools: the Draw / Eraser / Split buttons, plus ONE
      capture-phase pointerdown on the grid. With Eraser or Split active
@@ -1947,7 +2173,7 @@ function buildRoll(){
      the notes' own Draw handlers can start a move / long-press, and
      runs the tool gesture instead. The listener lives on the grid
      element itself, so buildRoll's innerHTML rebuilds never drop it. */
-  [["rollToolDraw","draw"],["rollToolErase","erase"],["rollToolSplit","split"]].forEach(pair=>{
+  [["rollToolDraw","draw"],["rollToolErase","erase"],["rollToolSplit","split"],["rollToolSelect","select"]].forEach(pair=>{
     const b=$(pair[0]); if(b) b.onclick=()=>rollSetTool(pair[1]);
   });
   const rollGridEl=$("rollGrid");
@@ -1955,16 +2181,21 @@ function buildRoll(){
     rollGridEl.addEventListener("pointerdown", e=>{
       const t=rollEdit.tool;
       if(!t || t==="draw" || e.button===2) return;
+      if(t==="select"){ /* a press ON a note belongs to the note's own handler (select + group drag); anywhere else starts the marquee */
+        if(e.target && e.target.closest && e.target.closest(".rollnote")) return;
+        e.preventDefault(); e.stopPropagation(); rollSelectGesture(e); return;
+      }
       e.preventDefault(); e.stopPropagation();
       if(t==="erase") rollEraseGesture(e); else if(t==="split") rollSplitGesture(e);
     }, true);
   }
   rollSetTool("draw", true);
   document.addEventListener("keydown", e=>{
-    if((e.key==="Delete"||e.key==="Backspace") && rollEdit.sel){
+    if((e.key==="Delete"||e.key==="Backspace") && (rollEdit.sel || (rollEdit.selSet&&rollEdit.selSet.length))){
       const t=e.target, tag=((t&&t.tagName)||"").toLowerCase();
       if(tag==="input"||tag==="select"||tag==="textarea"||(t&&t.isContentEditable)) return;
-      const sec=$("page-roll"); if(sec && sec.classList.contains("on")){ e.preventDefault(); rollDeleteItem(rollEdit.sel); }
+      const sec=$("page-roll"); if(sec && sec.classList.contains("on")){ e.preventDefault();
+        if(rollEdit.selSet && rollEdit.selSet.length>1) rollDeleteSelection(); else if(rollEdit.sel) rollDeleteItem(rollEdit.sel); }
     }
   });
 })();
@@ -2096,11 +2327,14 @@ function genProg(){
        One entry per SONG: multi-part songs (Dior, Suge) chain their parts
        in order, each part keeping its own bar-rounded length, so the
        seams land exactly on bar lines with no gaps or overlaps. The
-       line's rhythm and pitch contour are preserved note-for-note and
-       RE-ROOTED the way the generator roots its own material: the
-       pattern's home note (its most frequent pitch — the line's tonic)
-       lands on the project key root at the generator's own anchor
-       (48 + key root). The song's native BPM is display only; the
+       notes are stamped AT THE TEMPLATE'S OWN PITCHES, note-for-note
+       as the .mid file reads — the same rows FL Studio shows for the
+       same file (Keith, 2026-11-08: he loaded the same 808 and the
+       same template in both apps at 100 BPM and Beat Lab's re-rooted
+       copy landed on different rows — D4/A3 against FL's G#5/D#5 —
+       so the 808 sounded different). These are recorded MIDI
+       templates, not generated material: no transposition to the
+       project key, ever. The song's native BPM is display only; the
        project tempo never moves. Span follows Item 16: the chained
        pattern repeats to fill the sequence's full length and trims
        cleanly at its end. */
@@ -2120,24 +2354,21 @@ function genProg(){
     const song=window.BL_FAMOUS_SONGS[styleKey.slice(5)];
     if(!song){ setStatus("That Famous 808s pattern isn't in the bundle."); return; }
     const span=bars*16;
-    const chained=[]; let coff=0; const homeCount={};
+    const chained=[]; let coff=0;
     song.parts.forEach(en=>{
       let pEnd=0; en.notes.forEach(n=>{ pEnd=Math.max(pEnd, n[0]+n[3]); });
       const pSpan=Math.max(16, Math.ceil(pEnd/16)*16);
-      en.notes.forEach(n=>{ chained.push([n[0]+coff, n[1], n[2], n[3]]); homeCount[n[1]]=(homeCount[n[1]]||0)+1; });
+      en.notes.forEach(n=>{ chained.push([n[0]+coff, n[1], n[2], n[3]]); });
       coff+=pSpan;
     });
     const patLen=coff;
-    let home=null, best=-1;
-    Object.keys(homeCount).forEach(m=>{ const c=homeCount[m]; if(c>best || (c===best && (home==null || +m<home))){ best=c; home=+m; } });
-    const delta=(48+S.projectKey.root)-home;
     pat.notes=pat.notes.filter(n=>rollNotePos(n)>=span); /* the pattern owns the span it fills */
     let written=0;
     for(let base=0; base<span; base+=patLen){
       chained.forEach(n=>{
         const pos=base+n[0]; if(pos>=span) return;
         const step=Math.floor(pos), foff=Math.round((pos-step)*1000)/1000;
-        const note={ step:step, midi:n[1]+delta, vel:Math.round(n[2]/127*1000)/1000, len:Math.max(0.1, Math.min(Math.round(n[3]*100)/100, span-pos)) };
+        const note={ step:step, midi:n[1], vel:Math.round(n[2]/127*1000)/1000, len:Math.max(0.1, Math.min(Math.round(n[3]*100)/100, span-pos)) };
         if(foff>0.0001) note.off=foff;
         pat.notes.push(note); written++;
       });
@@ -2146,7 +2377,7 @@ function genProg(){
     let extra="";
     if(song.glide){ ch.glide=true; extra=" Glide is ON for "+ch.name+" — the folder's own rule: TURN ON GLIDES FOR DIOR."; }
     buildRoll(); buildRack(); markDirty();
-    setStatus("Famous 808s: “"+song.name+"” ("+song.bpm+" BPM native) generated on "+ch.name+" — re-rooted to "+keyLabel(S.projectKey.root,S.projectKey.mode)+", "+written+" notes spanning all "+bars+" bar"+(bars>1?"s":"")+". The project BPM didn't move; all notes editable."+extra);
+    setStatus("Famous 808s: “"+song.name+"” ("+song.bpm+" BPM native) generated on "+ch.name+" — at the template's own pitches, note-for-note as the file reads in FL Studio, "+written+" notes spanning all "+bars+" bar"+(bars>1?"s":"")+". The project BPM didn't move; all notes editable."+extra);
     return;
   }
   if(HT_PROGS[styleKey]){
@@ -2444,7 +2675,7 @@ function scheduleStep(step, t){
       const hits = r.kind==="32"? [0.25,0.5,0.75] : r.kind==="trip"? [1/3,2/3] : [0.5];
       hits.forEach((f,i)=>{ const tt=t+dur*f;
         if(ch.buffer) playBuffer(AC, liveNodes[id].input, ch, tt, {vel:0.7-i*0.12});
-        else if(ch.type==="drum") triggerSynthDrum(AC, liveNodes[id].input, ch.builtin, tt, 0.7-i*0.12); });
+        else if(ch.type==="drum") triggerSynthDrum(AC, liveNodes[id].input, ch.builtin, tt, 0.7-i*0.12, ch); });
     });
   });
 }
@@ -2557,7 +2788,7 @@ $("btnExportMid").onclick=()=>{
 function projectJSON(){
   const channels={};
   S.order.forEach(id=>{ const ch=S.channels[id];
-    channels[id]={ name:ch.name, gainDb:ch.gainDb, pitch:ch.pitch, fine:ch.fine, mode:ch.mode, reverse:ch.reverse, root:ch.root, stretch:ch.stretch||1, fitBars:ch.fitBars||0,
+    channels[id]={ name:ch.name, gainDb:ch.gainDb, pitch:ch.pitch, fine:ch.fine, mode:ch.mode, reverse:ch.reverse, root:ch.root, voices:ch.voices||"poly", stretch:ch.stretch||1, fitBars:ch.fitBars||0,
       volume:ch.volume, pan:ch.pan, mute:ch.mute, solo:ch.solo, fx:ch.fx, sampleName:ch.sampleName, engine:ch.engine,
       slicePitch:ch.slicePitch, sliceRev:ch.sliceRev,
       patterns:ch.patterns.map(p=>({steps:p.steps, notes:p.notes, sub:p.sub||[], hits:p.hits||[], rollT:p.rollT||0})) };
@@ -2576,7 +2807,7 @@ $("fileProj").onchange=async e=>{ const f=e.target.files[0]; if(!f) return;
     S.projectKey=p.projectKey||S.projectKey; S.customTemplates=p.customTemplates||{}; S.starterHats=p.starterHats||null; S.chopCount=p.chopCount||8;
     if(p.order) S.order=p.order;
     Object.keys(p.channels||{}).forEach(id=>{ const src=p.channels[id], ch=S.channels[id]; if(!ch) return;
-      Object.assign(ch, {gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0, mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60, stretch:src.stretch||1, fitBars:src.fitBars||0,
+      Object.assign(ch, {gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0, mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60, voices:src.voices||"poly", stretch:src.stretch||1, fitBars:src.fitBars||0,
         volume:src.volume!=null?src.volume:0.8, pan:src.pan||0, mute:!!src.mute, solo:!!src.solo, sampleName:src.sampleName||null, engine:src.engine||"analog"});
       ch.fx=Object.assign(ch.fx, src.fx||{}); ch.slicePitch=src.slicePitch||{}; ch.sliceRev=src.sliceRev||{};
       ch.patterns=src.patterns.map(pp=>({steps:pp.steps||Array(16).fill(0), notes:pp.notes||[], sub:pp.sub||[]}));
@@ -2646,7 +2877,7 @@ async function renderMix(bars, onlyId){
         (pat.hits||[]).forEach(h=>{ if(h.step===aStep) triggerChannel(ctx, bundles[id], ch, tch + (h.off||0)*stepDur, {midi:h.midi, vel:(h.vel||0.9)*tMul}); });
         (pat.sub||[]).forEach(r=>{ if(r.step!==aStep) return; const hits=r.kind==="32"?[0.25,0.5,0.75]:r.kind==="trip"?[1/3,2/3]:[0.5];
           hits.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, tch+stepDur*fr, {vel:0.7-i*0.12});
-            else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, tch+stepDur*fr, 0.7-i*0.12); }); });
+            else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, tch+stepDur*fr, 0.7-i*0.12, ch); }); });
       });
     }
   }
@@ -6086,7 +6317,8 @@ function blApplyFamous(idx){
   /* FAMOUS 808s offering REMOVED from the sidebar (Keith, 2026-11-06
      01:49): the patterns' only home is now the Famous 808s category in
      the progression generator's Feel dropdown, where generation runs
-     through genProg (re-rooted to the project key, full span). The
+     through genProg (the template's own pitches, full span — the
+     2026-11-08 fix: no more re-rooting to the project key). The
      BL_FAMOUS data and the .mid files in the bundle are untouched. */
   if(src) panel.insertBefore(box, src); else panel.appendChild(box);
 })();
@@ -6869,7 +7101,7 @@ setStatus("Beat Lab ready — ＋ New and Templates live in the top bar (start b
       S.projectKey=p.projectKey||S.projectKey; S.customTemplates=p.customTemplates||{}; S.starterHats=p.starterHats||null; S.chopCount=p.chopCount||8;
       if(p.order) S.order=p.order.slice();
       Object.keys(p.channels||{}).forEach(id=>{ const src=p.channels[id], ch=S.channels[id]; if(!ch) return;
-        Object.assign(ch, {gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0, mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60, stretch:src.stretch||1, fitBars:src.fitBars||0,
+        Object.assign(ch, {gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0, mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60, voices:src.voices||"poly", stretch:src.stretch||1, fitBars:src.fitBars||0,
           volume:src.volume!=null?src.volume:0.8, pan:src.pan||0, mute:!!src.mute, solo:!!src.solo, sampleName:src.sampleName||null, engine:src.engine||"analog"});
         ch.fx=Object.assign(ch.fx, src.fx||{}); ch.slicePitch=src.slicePitch||{}; ch.sliceRev=src.sliceRev||{};
         ch.patterns=(src.patterns||[]).map(pp=>({steps:pp.steps||Array(16).fill(0), notes:pp.notes||[], sub:pp.sub||[]}));
@@ -7351,7 +7583,7 @@ loadClipsFromProject=function(p){
   Object.keys(p.channels||{}).forEach(id=>{
     const ch=S.channels[id]; if(!ch) return; const src=p.channels[id];
     Object.assign(ch, { gainDb:src.gainDb||0, pitch:src.pitch||0, fine:src.fine||0,
-      mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60,
+      mode:src.mode||"repitch", reverse:!!src.reverse, root:src.root||60, voices:src.voices||"poly",
       stretch:src.stretch||1, fitBars:src.fitBars||0,
       volume:src.volume!=null? src.volume:0.8, pan:src.pan||0,
       mute:!!src.mute, solo:!!src.solo, sampleName:src.sampleName||null,
@@ -9040,7 +9272,7 @@ async function ptRenderPositioned(bars, onlyId){
           (pat.sub||[]).forEach(r=>{ if(r.step!==aStep) return;
             const hits2=r.kind==="32"? [0.25,0.5,0.75] : r.kind==="trip"? [1/3,2/3] : [0.5];
             hits2.forEach((fr,i)=>{ if(ch.buffer) playBuffer(ctx, bundles[id].input, ch, tch+stepDur*fr, { vel:0.7-i*0.12 });
-              else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, tch+stepDur*fr, 0.7-i*0.12); }); });
+              else if(ch.type==="drum") triggerSynthDrum(ctx, bundles[id].input, ch.builtin, tch+stepDur*fr, 0.7-i*0.12, ch); }); });
         });
       }
     }
@@ -9550,7 +9782,7 @@ function blDuplicateChannel(cid){
   while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
   ch.fx=Object.assign(ch.fx, deep(src.fx||{}));
   ch.buffer=src.buffer||null; ch.sampleName=src.sampleName||null; ch.missing=!!src.missing;
-  ["gainDb","pitch","fine","mode","reverse","root","stretch","fitBars","volume","pan","engine","color","glide","glideTime"].forEach(k=>{ if(src[k]!==undefined) ch[k]=src[k]; });
+  ["gainDb","pitch","fine","mode","reverse","root","voices","stretch","fitBars","volume","pan","engine","color","glide","glideTime"].forEach(k=>{ if(src[k]!==undefined) ch[k]=src[k]; });
   ch.mute=!!src.mute; ch.solo=!!src.solo;
   ch.slicePitch=deep(src.slicePitch||{}); ch.sliceRev=deep(src.sliceRev||{});
   ch.slices=Array.isArray(src.slices)? src.slices.slice() : [];
@@ -11926,6 +12158,21 @@ setStatus("Beat Lab ready — tracks are independent now: every track is a singl
 .kb .bk{position:absolute;top:0;height:60%;background:linear-gradient(180deg,#3a382f,#131210);border:1px solid #000;border-radius:0 0 4px 4px;box-shadow:0 4px 5px rgba(0,0,0,.5);z-index:2;cursor:pointer}
 .kb .wk.on,.kb .wk:active{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
 .kb .bk.on,.kb .bk:active{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
+/* Note names printed on the white keys (Keith, 2026-11-08: "lets
+   write the notes on top of the white keys") — FL-style labels at the
+   foot of every white key on every .kb keyboard; black keys stay
+   unlabelled. Quiet dark lettering on the ivory, deepened (not
+   lightened) on the gold lit state so the name never fights it. */
+.kb .wk .kblab{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.02em;color:#6b675a;pointer-events:none}
+.kb .wk.on .kblab,.kb .wk:active .kblab,.kb .wk.exton .kblab,.kb .wk.pbon .kblab{color:#3d2c05}
+/* Playback key light (Keith, 2026-11-08: "when piano roll is playing
+   i need the keys to light up what note we are on") — the roll
+   keyboard lights each sounding note for its length. Its OWN class,
+   parallel to .on (own presses) and .exton (external MIDI): neither
+   system adds or removes the other's class, so a key held by two
+   systems releases only when both are done. Same gold gradients. */
+.kb .wk.pbon{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
+.kb .bk.pbon{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
 /* Hammond drawbars */
 .b3bars{display:flex;gap:4px;overflow-x:auto;padding:4px 2px 8px}
 .b3bar{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:44px;flex:1}
@@ -13598,6 +13845,7 @@ function blBuildKeyboard(kb){
   whites.forEach((m,i)=>{
     const d=document.createElement("div"); d.className="wk"; d.dataset.midi=m;
     d.style.left=(i*wPct)+"%"; d.style.width=wPct+"%"; d.style.top="0"; d.style.height="100%";
+    const kl=document.createElement("span"); kl.className="kblab"; kl.textContent=noteName(m); d.appendChild(kl); /* note name on the white key (Keith, 2026-11-08) */
     kb.appendChild(d);
   });
   Object.keys(blacks).forEach(ms=>{
@@ -16504,6 +16752,7 @@ function blBlockKeyboard(kb, block){
   whites.forEach((m,i)=>{
     const d=document.createElement("div"); d.className="wk"; d.dataset.midi=m;
     d.style.left=(i*wPct)+"%"; d.style.width=wPct+"%"; d.style.top="0"; d.style.height="100%";
+    const kl=document.createElement("span"); kl.className="kblab"; kl.textContent=noteName(m); d.appendChild(kl); /* note name on the white key (Keith, 2026-11-08) */
     kb.appendChild(d);
   });
   Object.keys(blacks).forEach(ms=>{
@@ -16908,6 +17157,7 @@ function blBuildRollKb(){
   whites.forEach((m,i)=>{
     const d=document.createElement("div"); d.className="wk"; d.dataset.midi=m;
     d.style.left=(i*wPct)+"%"; d.style.width=wPct+"%"; d.style.top="0"; d.style.height="100%";
+    const kl=document.createElement("span"); kl.className="kblab"; kl.textContent=noteName(m); d.appendChild(kl); /* note name on the white key (Keith, 2026-11-08) */
     kb.appendChild(d);
   });
   Object.keys(blackAt).forEach(ms=>{
@@ -17764,6 +18014,7 @@ function blSharedKbBuild(){
   whites.forEach((m,i)=>{
     const d=document.createElement("div"); d.className="wk"; d.dataset.midi=m;
     d.style.left=(i*wPct)+"%"; d.style.width=wPct+"%"; d.style.top="0"; d.style.height="100%";
+    const kl=document.createElement("span"); kl.className="kblab"; kl.textContent=noteName(m); d.appendChild(kl); /* note name on the white key (Keith, 2026-11-08) */
     kb.appendChild(d);
   });
   Object.keys(blacks).forEach(ms=>{
@@ -20177,6 +20428,8 @@ if(typeof buildRack==="function"){
 .dmkeystrip{position:relative;height:88px}
 .dmkeyw{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#f4f1e8,#d9d5c8);border:1px solid #8a877c;border-radius:0 0 5px 5px;box-shadow:inset 0 -6px 8px rgba(0,0,0,.18),0 3px 4px rgba(0,0,0,.4);cursor:pointer;padding:0}
 .dmkeyw:active,.dmkeyw.hit,.dmkeyw.on,.dmkeyw.exton{background:linear-gradient(180deg,#ffe9a8,#e8b33c)}
+.dmkeyw .kblab{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.02em;color:#6b675a;pointer-events:none}
+.dmkeyw:active .kblab,.dmkeyw.hit .kblab,.dmkeyw.on .kblab,.dmkeyw.exton .kblab{color:#3d2c05}
 .dmkeyb{position:absolute;top:0;height:53px;background:linear-gradient(180deg,#3a382f,#131210);border:1px solid #000;border-radius:0 0 4px 4px;box-shadow:0 4px 5px rgba(0,0,0,.5);cursor:pointer;z-index:2;padding:0}
 .dmkeyb:active,.dmkeyb.hit,.dmkeyb.on,.dmkeyb.exton{background:linear-gradient(180deg,#8a6a14,#e8b33c)}
 @media (max-width:760px){.mpcface{grid-template-columns:1fr}}
@@ -21357,7 +21610,8 @@ if(typeof buildRack==="function"){
     for(let m=DM_KEY_LO;m<=DM_KEY_HI;m++){
       const isW=[0,2,4,5,7,9,11].indexOf(m%12)>=0;
       const b=document.createElement("button"); b.type="button"; b.dataset.midi=m;
-      if(isW){ b.className="dmkeyw"; b.style.left=(wi*ww)+"%"; b.style.width=ww+"%"; wi++; }
+      if(isW){ b.className="dmkeyw"; b.style.left=(wi*ww)+"%"; b.style.width=ww+"%"; wi++;
+        const kl=document.createElement("span"); kl.className="kblab"; kl.textContent=noteName(m); b.appendChild(kl); /* note name on the white key (Keith, 2026-11-08) */ }
       else { b.className="dmkeyb"; b.style.left="calc("+(wi*ww)+"% - "+(ww*0.32)+"%)"; b.style.width=(ww*0.64)+"%"; }
       b.title=noteName(m)+" — plays the selected pad’s sound at this pitch";
       const play=(e)=>{ e.preventDefault(); dmKeyPlay(m, 0.92); };
@@ -22020,6 +22274,372 @@ if(typeof buildRack==="function"){
   applyEmu(cur, true);
   if(cur!=="default" && typeof setStatus==="function")
     setStatus("Emulation: "+LABELS[cur]+" — "+NOTES[cur]+" Layout only; your theme and project are untouched, and the Options tab stays last.");
+})();
+</script>
+<script>
+"use strict";
+/* ================================================================
+   v0.5 ROLL PASS (Keith, 2026-11-08) — three Piano Roll pieces from
+   his FL Studio comparison, built onto the app's existing state:
+   1 · VOICES — the roll channel's polyphony control beside Root
+       note in the roll header: Poly (notes ring over each other,
+       FL Sampler default) or Mono (a new note cuts the ringing
+       voice — FL's mono, the MPC 2000's MONO). The setting lives on
+       the channel (ch.voices), saves with the project, and the cut
+       itself happens in the voice registry in the engine.
+   2 · PLAYBACK KEY LIGHTING — "when piano roll is playing i need
+       the keys to light up what note we are on": while the roll's
+       channel sounds in playback (whole-beat transport AND the
+       roll's own Play roll preview), the bottom keyboard lights
+       each note for exactly its written length; simultaneous notes
+       light together. Lights carry their OWN class (.pbon) with
+       their own per-tone counts — parallel to .on (own presses) and
+       .exton (external MIDI's reference-counted lights) — so no
+       system can steal or strand another's light: a key held by two
+       systems releases only when both are done. Lights clear on
+       stop/pause, channel switch and sequence switch (a signature
+       watch, the same trick the external-MIDI watchdog uses), and a
+       note outside the keyboard's octave window simply has no key.
+   3 · THE ROLL PLAYHEAD — "i could not see the playhead inside the
+       piano roll": buildRoll plants the .rollph line in the grid;
+       this loop moves it every frame from the scheduler's own step
+       clock (uiStep / nextStepTime for the transport, blRpStep /
+       blRpNext for the roll preview), interpolating inside the step
+       so it sweeps instead of hopping, and keeps it in view inside
+       the scrolling roll wrap while playing.
+   ================================================================ */
+(function blV05RollPass(){
+  /* ---- 1 · Voices control ---- */
+  try{
+    const chSel=$("rollChannel");
+    const tools=(chSel && chSel.closest(".tools")) || document.querySelector("#page-roll>h2 .tools");
+    if(tools && !$("rollVoices")){
+      const lab=document.createElement("label"); lab.className="hlabel"; lab.id="rollVoicesWrap";
+      lab.title="Voices — this channel's polyphony (FL Studio's Sampler setting; the MPC 2000 calls the cutting mode Mono). Poly: notes ring over each other. Mono: a new note cuts the voice still ringing, so the sound never overlaps itself.";
+      lab.appendChild(document.createTextNode("Voices: "));
+      const sel=document.createElement("select"); sel.id="rollVoices";
+      sel.innerHTML='<option value="poly">Poly</option><option value="mono">Mono (cut)</option>';
+      lab.appendChild(sel);
+      const rootWrap=$("rollRootWrap");
+      if(rootWrap && rootWrap.parentElement===tools) rootWrap.after(lab); else tools.insertBefore(lab, tools.firstChild);
+      const syncVoices=()=>{ const rc=S.channels[S.rollChannel]; if(rc && sel.value!==(rc.voices==="mono"? "mono":"poly")) sel.value=(rc.voices==="mono")? "mono":"poly"; };
+      sel.onchange=()=>{ const rc=S.channels[S.rollChannel]; if(!rc) return; rc.voices=sel.value; markDirty();
+        setStatus(rc.name+" voices: "+(sel.value==="mono"? "MONO — a new note cuts the one still ringing; this sound will never overlap itself." : "POLY — notes ring over each other, FL Sampler style.")); };
+      const _srv=setRollChannel; setRollChannel=function(id, jump){ _srv(id, jump); syncVoices(); };
+      const _brv=buildRoll; buildRoll=function(){ _brv(); syncVoices(); };
+      syncVoices();
+    }
+  }catch(e){}
+
+  /* ---- 2 · playback key lighting ---- */
+  const pbCount={}; let pbQueue=[], pbSig="";
+  function pbPaint(midi){
+    const kb=$("rollKb"); if(!kb) return;
+    const k=kb.querySelector('[data-midi="'+midi+'"]');
+    if(k) k.classList.toggle("pbon", (pbCount[midi]||0)>0);
+  }
+  function pbClear(){
+    Object.keys(pbCount).forEach(m=>{ delete pbCount[m]; pbPaint(+m); });
+    pbQueue=[];
+  }
+  try{
+    if(typeof triggerChannel==="function" && !triggerChannel._blPbWrapped){
+      const _tcPrev=triggerChannel;
+      const _tcWrap=function(ctx, bundle, ch, t, opts){
+        try{
+          if(ch && ch.id===S.rollChannel && ch.type!=="chop" && typeof AC!=="undefined" && AC && (S.playing || (typeof blRpTimer!=="undefined" && blRpTimer))){
+            const midi=(opts && opts.midi!=null)? opts.midi : ch.root;
+            const dur=((opts && opts.lenSteps)? opts.lenSteps : 1)*stepDurSec();
+            pbQueue.push({ midi:midi, t0:t, t1:t+Math.max(0.05,dur), on:false });
+          }
+        }catch(e){}
+        return _tcPrev.apply(this, arguments);
+      };
+      _tcWrap._blPbWrapped=true;
+      triggerChannel=_tcWrap;
+    }
+  }catch(e){}
+
+  /* ---- 3 · playhead driver (shares the lighting loop) ---- */
+  function phFrame(playing, preview){
+    const ph=(typeof rollPhEl!=="undefined")? rollPhEl : null;
+    if(!ph) return;
+    const gg=rollEdit.geom;
+    if(!gg || !AC){ ph.style.display="none"; if(typeof rollPhX!=="undefined") rollPhX=-1; return; }
+    let pos=-1;
+    const sd=stepDurSec();
+    if(preview && typeof blRpStep!=="undefined" && typeof blRpNext!=="undefined")
+      pos=blRpStep + clamp((AC.currentTime-(blRpNext-sd))/sd, 0, 1);
+    else if(playing)
+      pos=seqBarPos*16 + uiStep + clamp((AC.currentTime-(nextStepTime-sd))/sd, 0, 1);
+    const total=16*seqBarsOf(S.pattern);
+    if(pos<0 || pos>total){ ph.style.display="none"; rollPhX=-1; return; }
+    const x=Math.round(gg.x0 + pos*gg.pitchX - 1);
+    rollPhX=x;
+    ph.style.left=x+"px";
+    if(gg.rowTops && gg.rowTops.length){ ph.style.top=gg.rowTops[0]+"px"; ph.style.height=(gg.rowTops[gg.rowTops.length-1]+gg.cellH-gg.rowTops[0])+"px"; }
+    ph.style.display="block";
+    const wrap=$("rollWrap");
+    if(wrap && wrap.clientWidth>0){
+      const viewL=wrap.scrollLeft, viewR=viewL+wrap.clientWidth;
+      if(x<viewL+30 || x>viewR-30) wrap.scrollLeft=Math.max(0, x-wrap.clientWidth*0.35);
+    }
+  }
+
+  function pbFrame(){
+    try{
+      const playing=!!S.playing;
+      const preview=(typeof blRpTimer!=="undefined" && !!blRpTimer);
+      const sig=S.rollChannel+"|"+S.pattern+"|"+(S.kbBase||48);
+      if(sig!==pbSig){ pbSig=sig; pbClear(); } /* channel / sequence / octave switch: no light survives */
+      if((!playing && !preview) || !AC){
+        if(pbQueue.length || Object.keys(pbCount).length) pbClear(); /* stop / pause: everything dark */
+      } else {
+        const now=AC.currentTime;
+        for(let i=pbQueue.length-1;i>=0;i--){ const q=pbQueue[i];
+          if(!q.on && now>=q.t0){ q.on=true; pbCount[q.midi]=(pbCount[q.midi]||0)+1; pbPaint(q.midi); }
+          if(q.on && now>=q.t1){ pbCount[q.midi]=Math.max(0,(pbCount[q.midi]||1)-1); if(!pbCount[q.midi]) delete pbCount[q.midi]; pbPaint(q.midi); pbQueue.splice(i,1); }
+          else if(!q.on && now>q.t1+0.5) pbQueue.splice(i,1); /* its moment passed unsounded (scheduler stall) — drop it */
+        }
+      }
+      phFrame(playing, preview);
+    }catch(e){}
+    requestAnimationFrame(pbFrame);
+  }
+  requestAnimationFrame(pbFrame);
+})();
+</script>
+<script>
+"use strict";
+/* ================================================================
+   DETECTION · THE SAMPLE SETS THE KEY · KEY GUIDE (Keith,
+   2026-11-08: "build drums, chop sample, program 808. what sets
+   the project root note is the sample… i dont think ive ever
+   changed the root key in any daw ive used besides manipulating
+   the sample. so what i think i need is detection per channel. and
+   then filter help in piano roll when called upon.")
+   · DETECTION PER CHANNEL — every assignment through the sound
+     funnel (library pick, drag, file load) analyses the decoded
+     buffer ONCE (cached per sound): autocorrelation fundamental
+     for tonal one-shots, the same read best-effort for drum
+     one-shots, and a chroma key estimate (root + major/minor) for
+     longer / chopped material. The channel's ROOT FOLLOWS the
+     detection; the Root Note control stays as a manual override
+     that stands until the sample changes. HONESTY RULE: a sound
+     with no clear pitch reports "no clear pitch" and its root is
+     left exactly where it was — a reading is never invented.
+   · THE SAMPLE SETS THE PROJECT KEY — when the loaded sample
+     carries a key estimate (chops / loop-length material), the
+     project key takes its root + mode, visibly, in the one shared
+     state the generators and the guide read. Still changeable by
+     hand afterwards, any time.
+   · KEY GUIDE — a Piano Roll toggle, OFF by default, that only
+     helps when called upon: scale rows light (root strongest),
+     out-of-key rows, labels, notes and keyboard keys dim/mark as
+     the ones to avoid. Guidance, not a cage — placement and
+     playing are never blocked or snapped by it, on sample, 808
+     and module (synth) channels alike.
+   ================================================================ */
+(function blDetectGuidePass(){
+  if(S.keyGuide==null) S.keyGuide=false;
+
+  /* ---------------- analysis ---------------- */
+  const detCache=new Map();
+  function sigOf(ch){ return ch && ch.buffer? (ch.sampleName||"?")+"|"+ch.buffer.duration.toFixed(3)+"|"+ch.buffer.length : null; }
+  function blAnalyseBuffer(buf){
+    const out={ midi:null, keyRoot:null, keyMode:null };
+    try{
+      const sr=buf.sampleRate;
+      let d=buf.getChannelData(0);
+      if(buf.numberOfChannels>1){ const d1=buf.getChannelData(1), m=new Float32Array(d.length);
+        for(let i=0;i<d.length;i++) m[i]=(d[i]+d1[i])*0.5; d=m; }
+      /* ---- fundamental: normalized autocorrelation, loudest window ---- */
+      const W=Math.min(d.length, Math.floor(sr*0.3));
+      if(W>sr*0.03){
+        let wStart=0, wBest=-1; const hop=Math.max(1,Math.floor(sr*0.05)), wLim=Math.min(d.length-W, Math.floor(sr*8));
+        for(let s0=0;;s0+=hop){ let e=0; for(let i=s0;i<s0+W;i+=16) e+=d[i]*d[i];
+          if(e>wBest){ wBest=e; wStart=s0; } if(s0>=wLim) break; }
+        const minLag=Math.max(2,Math.floor(sr/1200)), maxLag=Math.min(Math.floor(sr/28), W-2);
+        const ac=new Float32Array(maxLag+2);
+        let bestLag=-1, bestVal=0;
+        for(let lag=minLag;lag<=maxLag;lag++){ let s=0, r=0; const n=W-lag;
+          for(let i=0;i<n;i++){ const a=d[wStart+i]; s+=a*d[wStart+i+lag]; r+=a*a; }
+          const v=r>1e-12? s/r : 0; ac[lag]=v; if(v>bestVal){ bestVal=v; bestLag=lag; } }
+        if(bestLag>0 && bestVal>=0.55){ /* periodicity strong enough to call it a pitch */
+          if(bestLag*2<=maxLag && ac[bestLag*2]>=bestVal*0.92) bestLag*=2; /* prefer the true fundamental over its octave */
+          const a=ac[bestLag-1]||bestVal, b=bestVal, c=ac[bestLag+1]||bestVal;
+          const shift=(a-c)/(2*(a-2*b+c)||1);
+          const freq=sr/(bestLag+ (isFinite(shift)? clamp(shift,-0.5,0.5) : 0));
+          const mf=69+12*Math.log2(freq/440), midi=Math.round(mf);
+          if(midi>=16 && midi<=96) out.midi=midi;
+        }
+      }
+      /* ---- key estimate: chroma + Krumhansl profiles (longer material) ---- */
+      if(buf.duration>=1.5){
+        const win=Math.floor(sr*0.25), hopW=win, maxWin=Math.min(64, Math.floor(d.length/win));
+        const chroma=new Float32Array(12);
+        const freqs=[]; for(let m=36;m<=83;m++) freqs.push(440*Math.pow(2,(m-69)/12));
+        let usedWin=0;
+        for(let w=0;w<maxWin;w++){ const off=w*hopW; let rms=0;
+          for(let i=off;i<off+win;i+=8) rms+=d[i]*d[i];
+          if(rms<1e-6) continue; usedWin++;
+          for(let f=0;f<freqs.length;f++){ const fr=freqs[f], k=2*Math.PI*fr/sr, cw=Math.cos(k), coeff=2*cw;
+            let s1=0, s2=0;
+            for(let i=0;i<win;i++){ const s0=d[off+i]+coeff*s1-s2; s2=s1; s1=s0; }
+            const mag=Math.sqrt(Math.max(0, s1*s1+s2*s2-2*cw*s1*s2));
+            chroma[(f+36)%12]+=mag; }
+        }
+        if(usedWin>=4){
+          const MAJ=[6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+          const MIN=[6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+          const pearson=(xs,ys)=>{ const n=12; let mx=0,my=0; for(let i=0;i<n;i++){ mx+=xs[i]; my+=ys[i]; } mx/=n; my/=n;
+            let num=0,dx=0,dy=0; for(let i=0;i<n;i++){ num+=(xs[i]-mx)*(ys[i]-my); dx+=(xs[i]-mx)*(xs[i]-mx); dy+=(ys[i]-my)*(ys[i]-my); }
+            return dx>0&&dy>0? num/Math.sqrt(dx*dy) : 0; };
+          let best={ r:0, root:0, mode:"major" };
+          for(let root=0;root<12;root++){ [MAJ,MIN].forEach((prof,mi)=>{
+            const rot=prof.map((_,i)=>prof[(i-root+12)%12]);
+            const r=pearson(chroma, rot);
+            if(r>best.r) best={ r:r, root:root, mode: mi? "minor":"major" };
+          }); }
+          if(best.r>=0.5){ out.keyRoot=best.root; out.keyMode=best.mode; }
+        }
+      }
+    }catch(e){}
+    return out;
+  }
+
+  /* ---------------- apply ---------------- */
+  function blSetProjectKeyFromSample(root, mode){
+    S.projectKey={ root:root, mode:mode };
+    const pl=$("projKeyLabel"); if(pl) pl.textContent=keyLabel(root, mode);
+    const pg=$("progKeyLabel"); if(pg) pg.textContent=NOTE_NAMES[root]+" "+mode;
+    const pr=$("pkRoot"), pm=$("pkMode");
+    if(pr) pr.value=String(root); if(pm) pm.value=mode;
+  }
+  function blApplyDetection(ch, force){
+    if(!ch || !ch.buffer) return null;
+    const sig=sigOf(ch); if(!sig) return null;
+    let res=force? null : detCache.get(sig);
+    if(!res){ res=blAnalyseBuffer(ch.buffer); detCache.set(sig, res); }
+    ch.detected={ midi:res.midi, keyRoot:res.keyRoot, keyMode:res.keyMode, sig:sig };
+    let keySet=false;
+    if(res.midi!=null){ ch.root=res.midi;
+      if(ch.id===S.rollChannel){ const srEl=$("sampRoot"); if(srEl) srEl.value=String(ch.root); }
+      if(ch.id==="bass808"){ const st=$("status808"); if(st) st.textContent="Root: "+noteName(ch.root)+" (detected from the sample)"; }
+    }
+    if(res.keyRoot!=null && (ch.type==="chop" || ch.buffer.duration>=2)){
+      blSetProjectKeyFromSample(res.keyRoot, res.keyMode); keySet=true;
+    }
+    syncDetectUI();
+    if(keySet || ch.id===S.rollChannel){ try{ buildRoll(); }catch(e){} }
+    markDirty();
+    return { midi:res.midi, keyRoot:res.keyRoot, keyMode:res.keyMode, keySet:keySet };
+  }
+  window.blApplyDetection=blApplyDetection;
+  window.blRedetect=function(ch){ if(!ch || !ch.buffer) return null; const sig=sigOf(ch); if(sig) detCache.delete(sig); return blApplyDetection(ch, true); };
+
+  /* every assignment through the funnel gets detected */
+  if(typeof assignSoundToChannel==="function" && !assignSoundToChannel._blDetectWrapped){
+    const _adPrev=assignSoundToChannel;
+    const _adWrap=async function(i, chId){
+      const ch0=S.channels[chId], prevRoot=ch0? ch0.root : null;
+      const r=await _adPrev.apply(this, arguments);
+      try{
+        const ch=S.channels[chId]; if(!ch || !ch.buffer) return r;
+        const item=(typeof library!=="undefined" && library[i])? library[i] : null;
+        const res=blApplyDetection(ch);
+        if(res){
+          if(res.midi==null && ch.type==="808" && prevRoot!=null){ /* the 808's older built-in detector guesses unconditionally — the honesty rule wins: no clear pitch, root stays */
+            ch.root=prevRoot;
+            const st=$("status808"); if(st) st.textContent="Root: "+noteName(ch.root)+" ("+(ch.sampleName||"built-in 808")+") — no clear pitch detected, root unchanged";
+            syncDetectUI();
+          }
+          let msg;
+          if(res.midi!=null) msg="Detected root "+noteName(res.midi)+" in “"+(item? item.name : ch.sampleName||"the sample")+"” → "+ch.name+" — the channel's root follows the sample now (Root Note overrides it until the sample changes).";
+          else msg="“"+(item? item.name : ch.sampleName||"That sample")+"” → "+ch.name+": no clear pitch detected — the root stays at "+noteName(ch.root)+".";
+          if(res.keySet) msg+=" The sample's key sets the project: "+keyLabel(res.keyRoot, res.keyMode)+" (Project Key stays yours to change).";
+          setStatus(msg);
+        }
+      }catch(e){}
+      return r;
+    };
+    _adWrap._blDetectWrapped=true;
+    assignSoundToChannel=_adWrap;
+  }
+
+  /* ---------------- header readout + re-detect + guide toggle ---------------- */
+  function syncDetectUI(){
+    const el=$("rollDetect"); if(!el) return;
+    const ch=S.channels[S.rollChannel];
+    if(!ch || !ch.buffer){ el.textContent=""; return; }
+    if(!ch.detected){ el.textContent="Pitch: not analysed"; return; }
+    let t= ch.detected.midi!=null? ("Detected: "+noteName(ch.detected.midi)) : "Detected: no clear pitch";
+    if(ch.detected.midi!=null && ch.root!==ch.detected.midi) t+=" · root overridden → "+noteName(ch.root);
+    if(ch.detected.keyRoot!=null) t+=" · key "+NOTE_NAMES[ch.detected.keyRoot]+" "+ch.detected.keyMode;
+    el.textContent=t;
+  }
+  window.blSyncDetectUI=syncDetectUI;
+  function blGuideKbSync(){
+    const kb=$("rollKb"); if(!kb) return;
+    const root=S.projectKey.root, scale=scaleSet();
+    kb.querySelectorAll("[data-midi]").forEach(k=>{
+      const pc=((+k.dataset.midi)%12+12)%12;
+      k.classList.toggle("groot", !!S.keyGuide && pc===root);
+      k.classList.toggle("gkey", !!S.keyGuide && pc!==root && scale.has(pc));
+    });
+  }
+  window.blGuideKbSync=blGuideKbSync;
+  try{
+    const chSel=$("rollChannel");
+    const tools=(chSel && chSel.closest(".tools")) || document.querySelector("#page-roll>h2 .tools");
+    if(tools && !$("rollDetect")){
+      const det=document.createElement("span"); det.className="small mono"; det.id="rollDetect";
+      det.style.cssText="color:var(--teal);margin-left:6px";
+      det.title="Pitch/key detection for the loaded channel's sample — the channel root follows the detected pitch; the Root Note control overrides it until the sample changes. A sound with no clear pitch says so and keeps its root.";
+      const vv=$("rollVoicesWrap");
+      if(vv && vv.parentElement===tools) vv.after(det); else tools.appendChild(det);
+      const rb=document.createElement("button"); rb.type="button"; rb.className="btn sm"; rb.id="rollRedetect";
+      rb.textContent="⟳ Re-detect";
+      rb.title="Re-analyse the loaded channel's sample and re-apply its detected root (and the project key, for chops/loops)";
+      rb.onclick=()=>{ const ch=S.channels[S.rollChannel];
+        if(!ch || !ch.buffer){ setStatus("Nothing loaded on "+(ch? ch.name : "the roll channel")+" to detect — assign a sample first."); return; }
+        const res=window.blRedetect(ch); if(!res) return;
+        setStatus(res.midi!=null? ("Re-detected: "+ch.name+" root is "+noteName(res.midi)+" — the Root Note follows the sample.") : (ch.name+": no clear pitch on re-analysis — root left at "+noteName(ch.root)+".")+(res.keySet? " Project key is now "+keyLabel(res.keyRoot,res.keyMode)+", set by the sample." : ""));
+      };
+      det.after(rb);
+      const gb=document.createElement("button"); gb.type="button"; gb.className="pill"; gb.id="rollGuideBtn";
+      gb.title="Key guide — off by default, help only when called: scale rows light (the root strongest), out-of-key rows and keys dim as the ones to avoid. Guidance only — notes can still be placed and played anywhere.";
+      const syncGb=()=>{ gb.textContent="Key guide: "+(S.keyGuide? "On":"Off"); gb.classList.toggle("on", !!S.keyGuide); };
+      gb.onclick=()=>{ S.keyGuide=!S.keyGuide; syncGb(); try{ buildRoll(); }catch(e){} blGuideKbSync(); markDirty();
+        setStatus(S.keyGuide? ("Key guide ON — "+keyLabel(S.projectKey.root,S.projectKey.mode)+": scale rows are lit (root strongest), out-of-key rows dimmed, and the keyboard marks its in-key keys. It guides only; nothing is blocked or snapped.") : "Key guide off — the roll is back to its plain grid."); };
+      rb.after(gb);
+      syncGb();
+    }
+  }catch(e){}
+  try{
+    const _bgPrev=buildRoll; buildRoll=function(){ const r=_bgPrev.apply(this, arguments); try{ syncDetectUI(); blGuideKbSync(); }catch(e){} return r; };
+    const _bkPrev=blBuildRollKb; blBuildRollKb=function(){ const r=_bkPrev.apply(this, arguments); try{ blGuideKbSync(); }catch(e){} return r; };
+    const _sgPrev=setRollChannel; setRollChannel=function(id, jump){ const r=_sgPrev.apply(this, arguments); try{ syncDetectUI(); }catch(e){} return r; };
+    syncDetectUI(); blGuideKbSync();
+  }catch(e){}
+
+  /* ---------------- persistence ---------------- */
+  try{
+    const _pdPrev=projectJSON;
+    projectJSON=function(){ const p=_pdPrev();
+      try{ S.order.forEach(id=>{ const ch=S.channels[id], c=p.channels && p.channels[id];
+        if(c){ if(ch.detected) c.detected=JSON.parse(JSON.stringify(ch.detected)); } }); }catch(e){}
+      p.keyGuide=!!S.keyGuide;
+      return p; };
+    const _ldPrev=loadClipsFromProject;
+    loadClipsFromProject=function(p){ _ldPrev(p);
+      try{ if(p && p.channels) Object.keys(p.channels).forEach(id=>{ const ch=S.channels[id];
+        if(ch && p.channels[id].detected) ch.detected=p.channels[id].detected; });
+        S.keyGuide=!!(p && p.keyGuide);
+        const gb=$("rollGuideBtn"); if(gb){ gb.textContent="Key guide: "+(S.keyGuide? "On":"Off"); gb.classList.toggle("on", !!S.keyGuide); }
+        syncDetectUI(); blGuideKbSync(); if(S.keyGuide) buildRoll();
+      }catch(e){} };
+  }catch(e){}
 })();
 </script>
 </body>
