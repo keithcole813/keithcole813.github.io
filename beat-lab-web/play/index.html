@@ -6,10 +6,11 @@
 <meta name="color-scheme" content="dark" />
 <script>/* Theme boot (Keith, 2026-11-07): apply the saved app theme before first paint — no flash of Default. App-level preference only (localStorage), never part of a project file. */ try{var _blThemeBoot=localStorage.getItem("beatlab.theme.v1");if(_blThemeBoot&&_blThemeBoot!=="default")document.documentElement.setAttribute("data-theme",_blThemeBoot);}catch(e){}</script>
 <script>/* Emulation boot (Keith, 2026-11-07): apply the saved emulation before first paint, beside the theme boot — layout preference only (localStorage), never part of a project file. The full Emulation pass at the end of the body reads the same key. */ try{var _blEmuBoot=localStorage.getItem("beatlab.emu.v1");if(_blEmuBoot&&_blEmuBoot!=="default")document.documentElement.setAttribute("data-emu",_blEmuBoot);}catch(e){}</script>
+<script>/* Mobile boot (Keith, 2026-11-08): apply the saved Mobile layout before first paint, beside the theme and emulation boots — its own category, NOT a theme (no colours) and NOT an emulation (no DAW furniture). App-level preference only (localStorage "beatlab.mobile.v1": auto / on / off), never part of a project file. Auto = on at phone widths (≤820px, the app's own phone breakpoint). The full Mobile pass at the end of the body reads the same key and keeps the attribute in sync across the width boundary. */ try{var _blMobBoot=localStorage.getItem("beatlab.mobile.v1")||"auto";if(_blMobBoot==="on"||(_blMobBoot==="auto"&&window.matchMedia&&window.matchMedia("(max-width: 820px)").matches))document.documentElement.setAttribute("data-mobile","on");}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
-<title>Beat Lab Web Beta v0.10</title>
-<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.8 (the Piano Roll repair — the roll opens loaded with a channel again — plus the twelve called notes: MPK knob pickup from the current value, the knob-window audition keyboard with Piano Roll / Modules key routing, no Drum Machine audition keys, one hit per pad press with the transport stopped, a low-latency audio setting, Drum Machine loop-record ADD with a beats/bars record-length choice, pad = sequence channel = mixer channel in every record routing, automatic multitrack placement when a channel is created, and 4/4 as the standing default), superseding the 0.7 stamp. BUILD 0.9 (Keith, 2026-11-08): the Drum Machine page loses the whole framed block he circled — the LCD readout panel, both TRACKS / CHOPS / NOTES / HOME soft-key rows, the "Bank A · Pad 1/64" status line, and the pad-properties strip under it (VOL/PAN/TUNE, Mute/Solo, 16 Levels, Note Variation, "binds on first hit", all of it) — pads and the page transport stay; and the pad LAYER editor's Volume / Pan / Tune are now the tied mixer channel's fader / pan / pitch: one set of values written through both ways (dmSyncLayerMix / blDmMixBack), never two copies that drift. */ var BL_VERSION="v0.10"; /* BUILD 0.10 (Keith, 2026-11-08): the wiring update, shipped with the 0.9 content. A BLANK new project is now exactly one sequencer channel named "chan 1" — no sound in it — born wired to Drum Machine pad 1, the first Edit placeholder track and its mixer channel; the old "audio 1" + kick/snare/hihat + omnisphere default template is superseded ("audio 1" is a WAV channel and carries no MIDI / no sequencer presence). The Drum Machine starts with NO sounds loaded and NO modules are loaded by default: pads and modules are added one by one, and each addition runs the full chain (sequence channel → Edit channel → mixer channel) at load time, never on first touch. The Edit window stands 8 tracks tall from the start — blank placeholder tracks that real channels fall into in arrival order, growing one by one past 8 — and Edit order IS mixer order (one shared order). The Piano Roll always shows. ONE metronome, on the main (top) transport only, and its setting is captured by every playback context in the app. */ try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
+<title>Beat Lab Web Beta v0.11</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.8 (the Piano Roll repair — the roll opens loaded with a channel again — plus the twelve called notes: MPK knob pickup from the current value, the knob-window audition keyboard with Piano Roll / Modules key routing, no Drum Machine audition keys, one hit per pad press with the transport stopped, a low-latency audio setting, Drum Machine loop-record ADD with a beats/bars record-length choice, pad = sequence channel = mixer channel in every record routing, automatic multitrack placement when a channel is created, and 4/4 as the standing default), superseding the 0.7 stamp. BUILD 0.9 (Keith, 2026-11-08): the Drum Machine page loses the whole framed block he circled — the LCD readout panel, both TRACKS / CHOPS / NOTES / HOME soft-key rows, the "Bank A · Pad 1/64" status line, and the pad-properties strip under it (VOL/PAN/TUNE, Mute/Solo, 16 Levels, Note Variation, "binds on first hit", all of it) — pads and the page transport stay; and the pad LAYER editor's Volume / Pan / Tune are now the tied mixer channel's fader / pan / pitch: one set of values written through both ways (dmSyncLayerMix / blDmMixBack), never two copies that drift. */ var BL_VERSION="v0.11"; /* BUILD 0.11 (Keith, 2026-11-08): the MOBILE layout — its own category in Options → Appearance, beside Theme and Emulation ("beatlab.mobile.v1": Auto / On / Off; Auto = phone widths ≤820px). Not a theme (colours untouched) and not an emulation (no DAW furniture moves): while Mobile is on, the Drum Machine tab is gone, the MPK knob bank never opens, the fixed tab bar and the whole transport scroll with the page instead of pinning over the tab's content, and the mixer goes slimline — every channel strip keeps ONE row of basic knobs (the lead Gain · Pan · Pitch group), its fader, value readout and Mute/Solo, and the MASTER strip keeps just its fader and VU. Everything hidden stays in the project and in the engine; desktop with Mobile Off (or Auto on a wide screen) is exactly v0.10. */ /* BUILD 0.10 (Keith, 2026-11-08): the wiring update, shipped with the 0.9 content. A BLANK new project is now exactly one sequencer channel named "chan 1" — no sound in it — born wired to Drum Machine pad 1, the first Edit placeholder track and its mixer channel; the old "audio 1" + kick/snare/hihat + omnisphere default template is superseded ("audio 1" is a WAV channel and carries no MIDI / no sequencer presence). The Drum Machine starts with NO sounds loaded and NO modules are loaded by default: pads and modules are added one by one, and each addition runs the full chain (sequence channel → Edit channel → mixer channel) at load time, never on first touch. The Edit window stands 8 tracks tall from the start — blank placeholder tracks that real channels fall into in arrival order, growing one by one past 8 — and Edit order IS mixer order (one shared order). The Piano Roll always shows. ONE metronome, on the main (top) transport only, and its setting is captured by every playback context in the app. */ try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -24061,6 +24062,189 @@ setTimeout(()=>blV10Safe(()=>{
   if(alreadyV10) return;
   if((!blV10HasContent() || blV10TemplateShaped()) && typeof blTrulyBlank==="function") blTrulyBlank();
 }), 1800);
+</script>
+
+<style>
+/* ================================================================
+   MOBILE LAYOUT (Keith, 2026-11-08) — Options → Appearance →
+   Mobile layout. Its own category: NOT a theme (Theme above is
+   colours only) and NOT an emulation (Emulation rearranges DAW
+   furniture on desktop; this is the phone presentation of THIS
+   app). Every rule keys off [data-mobile="on"] on <html>, set by
+   the boot snippet / the pass below from "beatlab.mobile.v1"
+   (auto / on / off). With Mobile off, none of this exists and the
+   app is exactly as built. What Mobile does:
+   1 · THE WHOLE TRANSPORT SCROLLS WITH THE TAB. The view tab bar
+       is viewport-FIXED today and carries the transport cluster
+       (Play/Stop/Loop + position readout) inside it, and the
+       title/transport card sticks beneath it — on a phone that
+       pinned stack eats the screen and never moves. In Mobile
+       both go back into the normal page flow: scroll and they
+       scroll away with the tab you are on, so the whole screen
+       belongs to the tab's content.
+   2 · NOT ALL THE TABS. The Drum Machine tab is removed (button
+       hidden, view unreachable — the pass below also redirects
+       any attempt to open it, and restores away from it). The
+       remaining tabs — Edit · Mixer · Piano Roll · Modules ·
+       Sampler · Options — wrap onto two rows of big touch
+       targets instead of hiding in a sideways scroller.
+   3 · NO KNOB BANK. The MPK knob bank window and its opener
+       button are gone, and the pass below refuses to open it
+       (hardware CCs included) while Mobile is on.
+   4 · SLIMLINE MIXER, ONE ROW OF BASIC KNOBS. Each channel strip
+       keeps only its lead Gain · Pan · Pitch knob row (the
+       [data-g="gp"] group), a short fader + VU, its value readout
+       and Mute/Solo — EQ, comp, limit/heat, crusher, cuts, FX,
+       width, the colour picker and the Select button all hide
+       (their values stay in the project and keep sounding; they
+       are one Mobile-off away). The MASTER strip keeps just its
+       name, fader and VU.
+   ================================================================ */
+#blMobileSel{width:100%;max-width:340px;min-height:44px;font-size:13px}
+
+/* --- 1 · tab bar + transport back in the page flow --- */
+:root[data-mobile="on"] #blViewTabs{position:static!important;top:auto!important;left:auto!important;right:auto!important;z-index:auto;flex-direction:column;align-items:stretch;overflow:visible!important;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:6px}
+:root[data-mobile="on"] .wrap{padding-top:10px!important}
+:root[data-mobile="on"] .transport{position:static!important;top:auto!important;padding:8px}
+:root[data-mobile="on"] #blBarTransport{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 10px}
+:root[data-mobile="on"] #blBarTabs{flex-wrap:wrap;overflow:visible!important}
+:root[data-mobile="on"] #blBarTabs .vtab{flex:1 1 30%;min-height:48px}
+:root[data-mobile="on"] .statusline{max-height:2.9em;overflow:hidden}
+
+/* --- 2 · trimmed tabs: no Drum Machine --- */
+:root[data-mobile="on"] .vtab[data-view="drums"]{display:none!important}
+:root[data-mobile="on"] #blViewDrums{display:none!important}
+
+/* --- 3 · no knob bank --- */
+:root[data-mobile="on"] #blKp{display:none!important}
+:root[data-mobile="on"] #blKpBtn{display:none!important}
+
+/* --- 4 · slimline mixer: one basic knob row per channel --- */
+:root[data-mobile="on"] #mixerStrips{gap:6px}
+:root[data-mobile="on"] #mixerStrips .bstrip{padding:7px 5px}
+:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip){width:132px!important}
+:root[data-mobile="on"] #mixerStrips .bstrip .kgroup{display:none!important}
+:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip) .kgroup:has(>.krow[data-g="gp"]){display:block!important;border-top:none;margin-top:2px;padding-top:2px}
+:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"]{flex-wrap:nowrap!important;justify-content:space-between}
+:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"] .knob{width:34px!important;height:34px!important}
+:root[data-mobile="on"] #mixerStrips .bstrip .colpick,
+:root[data-mobile="on"] #mixerStrips .bstrip .selbtn,
+:root[data-mobile="on"] #mixerStrips .bstrip .frail{display:none!important}
+:root[data-mobile="on"] #mixerStrips .bstrip input[type=range].vert{height:104px!important}
+:root[data-mobile="on"] #mixerStrips .bstrip .vu{height:104px!important}
+:root[data-mobile="on"] #mixerStrips .masterstrip{width:96px!important}
+:root[data-mobile="on"] #mixerStrips .masterstrip .kgroup,
+:root[data-mobile="on"] #mixerStrips .masterstrip .small{display:none!important}
+:root[data-mobile="on"] #mixerStrips .masterstrip .faderRow{flex:none;height:auto;margin-top:8px}
+
+/* --- compact panels: less scroll to the work --- */
+:root[data-mobile="on"] .panel{padding:10px}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   MOBILE LAYOUT (Keith, 2026-11-08) — the picker + the guards.
+   Mode lives in localStorage "beatlab.mobile.v1" (auto / on /
+   off), an app-level preference like Theme and Emulation, never
+   in project files. Auto (the default) = on at phone widths
+   (≤820px, the app's phone breakpoint), off above it; the pass
+   re-evaluates when the width crosses the line, so rotating or
+   resizing never strands the layout. Turning Mobile on:
+   · closes the MPK knob bank if it is open and wraps its opener
+     so it cannot open (the CC70–77 hardware path lands on the
+     same wrapped opener);
+   · wraps blSetView so "drums" can never become the view, and
+     moves you to Edit if you were standing on the Drum Machine;
+   · leaves every sound, setting and project value untouched —
+     hidden mixer controls keep their values and keep sounding.
+   ================================================================ */
+(function blMobileLayout(){
+  var KEY="beatlab.mobile.v1";
+  var MODES=["auto","on","off"];
+  var MQ=window.matchMedia? window.matchMedia("(max-width: 820px)") : {matches:false};
+  var mode="auto";
+  try{ var saved=localStorage.getItem(KEY); if(saved && MODES.indexOf(saved)>=0) mode=saved; }catch(e){}
+  function effective(){ return mode==="on" || (mode==="auto" && MQ.matches); }
+  function currentView(){
+    var w=document.querySelector(".wrap"); if(!w) return "arrange";
+    var m=(" "+w.className+" ").match(/ blv-([a-z]+) /);
+    return m? m[1] : "arrange";
+  }
+  var sel=null, lastOn=null;
+  function apply(silent){
+    var on=effective();
+    if(on===lastOn && silent) { if(sel) sel.value=mode; return; }
+    lastOn=on;
+    if(on) document.documentElement.setAttribute("data-mobile","on");
+    else document.documentElement.removeAttribute("data-mobile");
+    if(sel) sel.value=mode;
+    if(on){
+      try{ if(window.BL_KP && BL_KP.open && typeof window.blKpClose==="function") window.blKpClose(); }catch(e){}
+      if(currentView()==="drums" && typeof window.blSetView==="function"){
+        try{ window.blSetView("arrange", true); }catch(e){}
+      }
+    }
+    if(!silent && typeof setStatus==="function")
+      setStatus(on
+        ? "Mobile layout ON — no Drum Machine tab, no knob bank, the tab bar and the whole transport scroll with the page, and the mixer is slimline: one row of basic knobs (Gain · Pan · Pitch), fader and Mute/Solo per channel. Everything hidden keeps its value and keeps sounding."
+        : "Mobile layout "+(mode==="off"? "OFF" : "on Auto")+" — the full desktop presentation: every tab, the knob bank, the pinned transport and the full mixer are back. Nothing about your project changed.");
+  }
+
+  /* ---------- the picker: Options → Appearance, beside Theme + Emulation ---------- */
+  try{
+    var panel=document.getElementById("blOptionsPanel");
+    if(panel && !document.getElementById("blMobileSel")){
+      var emuSel=document.getElementById("blEmuSel"), themeSel=document.getElementById("blThemeSel");
+      var group=(emuSel && emuSel.closest(".bloptgroup")) || (themeSel && themeSel.closest(".bloptgroup")) || null;
+      if(!group){
+        group=document.createElement("div"); group.className="bloptgroup";
+        var h=document.createElement("h3"); h.textContent="Appearance"; group.appendChild(h);
+        panel.appendChild(group);
+      }
+      var lab=document.createElement("label"); lab.className="hlabel"; lab.style.cssText="display:flex;gap:8px;align-items:center;margin-top:8px";
+      var lt=document.createElement("span"); lt.textContent="Mobile layout:"; lab.appendChild(lt);
+      sel=document.createElement("select"); sel.id="blMobileSel";
+      sel.title="The phone presentation of Beat Lab — its own category, beside Theme (colours) and Emulation (desktop DAW layouts); it is neither. On: trimmed tabs (no Drum Machine), no MPK knob bank, the tab bar and transport scroll with the page, and a slimline mixer with one row of basic knobs per channel. Auto turns it on at phone widths only. Saved on this device, never in project files; sound, data and playback are untouched.";
+      [["auto","Auto — on for phones"],["on","On"],["off","Off"]].forEach(function(pair){
+        var o=document.createElement("option"); o.value=pair[0]; o.textContent=pair[1]; sel.appendChild(o);
+      });
+      sel.value=mode;
+      sel.onchange=function(){ mode=sel.value; try{ localStorage.setItem(KEY, mode); }catch(e){} apply(false); };
+      lab.appendChild(sel); group.appendChild(lab);
+      var note=document.createElement("div"); note.className="small"; note.style.marginTop="6px";
+      note.textContent="Mobile is a layout of its own — not a colour theme and not a DAW emulation. On a phone: no Drum Machine tab, no MPK knob bank, the tab bar and the whole transport scroll with the page instead of pinning over it, and the mixer goes slimline with one row of basic knobs (Gain · Pan · Pitch) per channel. Desktop stays exactly as it is.";
+      group.appendChild(note);
+    } else { sel=document.getElementById("blMobileSel"); }
+  }catch(e){}
+
+  /* ---------- guards: Drum Machine view + knob bank stay shut while Mobile is on ---------- */
+  try{
+    if(typeof window.blSetView==="function" && !window.blSetView._blMobileWrapped){
+      var _svPrevM=window.blSetView;
+      var _svWrapM=function(v, silent){ if(effective() && v==="drums") v="arrange"; return _svPrevM.call(this, v, silent); };
+      _svWrapM._blMobileWrapped=true; window.blSetView=_svWrapM;
+    }
+  }catch(e){}
+  try{
+    if(typeof window.blKpOpen==="function" && !window.blKpOpen._blMobileWrapped){
+      var _kpPrevM=window.blKpOpen;
+      var _kpWrapM=function(){ if(effective()) return; return _kpPrevM.apply(this, arguments); };
+      _kpWrapM._blMobileWrapped=true; window.blKpOpen=_kpWrapM;
+    }
+  }catch(e){}
+
+  /* ---------- width boundary (Auto) ---------- */
+  function onMq(){ apply(true); }
+  try{ if(MQ.addEventListener) MQ.addEventListener("change", onMq); else if(MQ.addListener) MQ.addListener(onMq); }catch(e){}
+  window.addEventListener("resize", function(){ if(mode==="auto") apply(true); });
+
+  window.blMobileMode=function(){ return mode; };
+  window.blMobileOn=effective;
+
+  apply(true);
+  if(effective() && typeof setStatus==="function")
+    setStatus("Beat Lab ready — Mobile layout is on: Edit · Mixer · Piano Roll · Modules · Sampler · Options (no Drum Machine, no knob bank), the tab bar and the whole transport scroll with the page, and the mixer is slimline with one row of basic knobs per channel. Switch it under Options → Appearance → Mobile layout.");
+})();
 </script>
 </body>
 </html>
