@@ -67,6 +67,7 @@
   .rankings .rrow.top1{border-color:var(--line); background:rgba(247,181,0,.13)}
   .rankings .rrow.top1 .rk{color:var(--gold2)}
   .rankings .rrow .who{font-weight:800; letter-spacing:.08em; font-size:1.05rem}
+  .rankings .rrow .tag{color:var(--dim); font-weight:700; font-size:.8rem; letter-spacing:.05em}
   .rankings .rrow .ft{margin-left:auto; font-weight:900; color:var(--gold2); font-size:1.05rem}
   .rankings .rrow .ft small{color:var(--dim); font-weight:600; font-size:.78rem; letter-spacing:.06em}
   .rankings .live{display:flex; align-items:center; gap:8px; color:var(--dim); font-size:.92rem; margin-top:4px}
@@ -99,6 +100,12 @@
 
   <img class="strip" src="clouds-strip.png" alt="A row of real clouds — the platforms of 6loud">
 
+  <section class="rankings" id="rankings">
+    <h2>♛ Global Rankings — Live</h2>
+    <div class="live"><span class="dot"></span><span id="rtop">The top 20 distances in the world, straight from the game.</span></div>
+    <div id="rrows"><p class="dim" style="margin-top:10px">Loading the board…</p></div>
+    <p class="dim" style="margin-top:12px; font-size:.9rem">Pulled live from the game's global leaderboard — every run that makes the top 20 posts here.</p>
+  </section>
   <section>
     <h2>Named for the song</h2>
     <p>Keith Cole and 6lade have a song called <strong>“6loud”</strong> — 6lade rapping about
@@ -151,12 +158,6 @@
     the top 10 distances from every player, live. Take the crown at home — then take the board.</p>
   </section>
 
-  <section class="rankings" id="rankings">
-    <h2>♛ Global Rankings — Live</h2>
-    <div class="live"><span class="dot"></span><span id="rtop">The top 20 distances in the world, straight from the game.</span></div>
-    <div id="rrows"><p class="dim" style="margin-top:10px">Loading the board…</p></div>
-    <p class="dim" style="margin-top:12px; font-size:.9rem">Pulled live from the game's global leaderboard — every run that makes the top 20 posts here.</p>
-  </section>
 
   <section class="status">
     <h2>Play it now</h2>
@@ -175,11 +176,11 @@
 <script>
 (function(){
   var SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
-  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzYSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
   var H = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
   var box = document.getElementById('rrows'), top = document.getElementById('rtop');
   function fmt(n){ return Number(n).toLocaleString('en-US'); }
-  function row(rank, initials, ft){
+  function row(rank, initials, ft, ch){
     var d = document.createElement('div');
     d.className = 'rrow' + (rank === 1 ? ' top1' : '');
     var rk = document.createElement('span'); rk.className = 'rk';
@@ -188,11 +189,13 @@
     var f = document.createElement('span'); f.className = 'ft';
     f.textContent = fmt(ft) + ' ';
     var sm = document.createElement('small'); sm.textContent = 'FT'; f.appendChild(sm);
-    d.appendChild(rk); d.appendChild(who); d.appendChild(f);
+    d.appendChild(rk); d.appendChild(who); if (ch) { var tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = ch; d.appendChild(tg); } d.appendChild(f);
     return d;
   }
+  var NAMES = { blade: '6LADE', lash: 'LASHMOOVE', yoro: 'YOROKOBI', ivey: 'POISON IVEY', sayori: 'SAYORI' };
+  function charOf(rep){ try { var c = (JSON.parse(rep) || {}).char; return NAMES[c] || ''; } catch (e) { return ''; } }
   function load(){
-    fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=20', { headers: H })
+    fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=20', { headers: H })
       .then(function(r){ return r.json(); })
       .then(function(rows){
         box.innerHTML = '';
@@ -200,7 +203,7 @@
           box.innerHTML = '<p class="dim" style="margin-top:10px">No runs on the board yet — be the first.</p>';
           return;
         }
-        rows.forEach(function(r, i){ box.appendChild(row(i + 1, r.initials, r.dist_ft)); });
+        rows.forEach(function(r, i){ box.appendChild(row(i + 1, r.initials, r.dist_ft, charOf(r.replay))); });
       })
       .catch(function(){
         box.innerHTML = '<p class="dim" style="margin-top:10px">The board lives in the game — beat a run and check the wipeout screen.</p>';
