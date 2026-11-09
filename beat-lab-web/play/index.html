@@ -8,8 +8,8 @@
 <script>/* Emulation boot (Keith, 2026-11-07): apply the saved emulation before first paint, beside the theme boot — layout preference only (localStorage), never part of a project file. The full Emulation pass at the end of the body reads the same key. */ try{var _blEmuBoot=localStorage.getItem("beatlab.emu.v1");if(_blEmuBoot&&_blEmuBoot!=="default")document.documentElement.setAttribute("data-emu",_blEmuBoot);}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
-<title>Beat Lab Web Beta v0.7</title>
-<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.8 (the Piano Roll repair — the roll opens loaded with a channel again — plus the twelve called notes: MPK knob pickup from the current value, the knob-window audition keyboard with Piano Roll / Modules key routing, no Drum Machine audition keys, one hit per pad press with the transport stopped, a low-latency audio setting, Drum Machine loop-record ADD with a beats/bars record-length choice, pad = sequence channel = mixer channel in every record routing, automatic multitrack placement when a channel is created, and 4/4 as the standing default), superseding the 0.7 stamp. */ var BL_VERSION="v0.8"; try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
+<title>Beat Lab Web Beta v0.10</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.8 (the Piano Roll repair — the roll opens loaded with a channel again — plus the twelve called notes: MPK knob pickup from the current value, the knob-window audition keyboard with Piano Roll / Modules key routing, no Drum Machine audition keys, one hit per pad press with the transport stopped, a low-latency audio setting, Drum Machine loop-record ADD with a beats/bars record-length choice, pad = sequence channel = mixer channel in every record routing, automatic multitrack placement when a channel is created, and 4/4 as the standing default), superseding the 0.7 stamp. BUILD 0.9 (Keith, 2026-11-08): the Drum Machine page loses the whole framed block he circled — the LCD readout panel, both TRACKS / CHOPS / NOTES / HOME soft-key rows, the "Bank A · Pad 1/64" status line, and the pad-properties strip under it (VOL/PAN/TUNE, Mute/Solo, 16 Levels, Note Variation, "binds on first hit", all of it) — pads and the page transport stay; and the pad LAYER editor's Volume / Pan / Tune are now the tied mixer channel's fader / pan / pitch: one set of values written through both ways (dmSyncLayerMix / blDmMixBack), never two copies that drift. */ var BL_VERSION="v0.10"; /* BUILD 0.10 (Keith, 2026-11-08): the wiring update, shipped with the 0.9 content. A BLANK new project is now exactly one sequencer channel named "chan 1" — no sound in it — born wired to Drum Machine pad 1, the first Edit placeholder track and its mixer channel; the old "audio 1" + kick/snare/hihat + omnisphere default template is superseded ("audio 1" is a WAV channel and carries no MIDI / no sequencer presence). The Drum Machine starts with NO sounds loaded and NO modules are loaded by default: pads and modules are added one by one, and each addition runs the full chain (sequence channel → Edit channel → mixer channel) at load time, never on first touch. The Edit window stands 8 tracks tall from the start — blank placeholder tracks that real channels fall into in arrival order, growing one by one past 8 — and Edit order IS mixer order (one shared order). The Piano Roll always shows. ONE metronome, on the main (top) transport only, and its setting is captured by every playback context in the app. */ try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -387,7 +387,7 @@ a{color:var(--teal)}
 
   <!-- ================= TRANSPORT ================= -->
   <div class="transport">
-    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.7</span></div>
+    <div class="brand"><span class="name">BEAT <em>LAB</em></span><span class="beta">WEB BETA</span><span class="version" id="blVersion">v0.10</span></div>
     <div class="tgroup">
       <button class="playbtn" id="btnPlay" title="Play / Stop (Space)">▶</button>
       <button class="stopbtn" id="btnStop" title="Stop and rewind">■</button>
@@ -5817,11 +5817,11 @@ buildMixer=function(){
       oninput:val=>{ f.cut=Math.round(val); rc(); syncFxIfSel(); } }).el);
     const pwRow=d.querySelector('[data-g="pw"]');
     pwRow.appendChild(blKnob({ label:"PAN", min:-1, max:1, value:ch.pan, def:0, fmt:v=> v===0? "C" : (v<0? "L"+Math.round(-v*100) : "R"+Math.round(v*100)),
-      oninput:val=>{ ch.pan=Math.round(val*100)/100; rc(); } }).el);
+      oninput:val=>{ ch.pan=Math.round(val*100)/100; rc(); if(window.blDmMixBack) window.blDmMixBack(ch); } }).el);
     pwRow.appendChild(blKnob({ label:"WIDTH", min:0, max:2, value:st.width, def:1, fmt:v=>Math.round(v*100)+"%",
       oninput:val=>{ st.width=Math.round(val*100)/100; rc(); } }).el);
     const fader=d.querySelector(".vert"), fval=d.querySelector(".val");
-    fader.oninput=()=>{ ch.volume=fader.value/100; fval.textContent=fader.value+"%"; refreshChain(ch); };
+    fader.oninput=()=>{ ch.volume=fader.value/100; fval.textContent=fader.value+"%"; refreshChain(ch); if(window.blDmMixBack) window.blDmMixBack(ch); };
     d.querySelector('[data-ms="m"]').onclick=e=>{ ch.mute=!ch.mute; e.target.classList.toggle("m-on", ch.mute); buildRack(); };
     d.querySelector('[data-ms="s"]').onclick=e=>{ ch.solo=!ch.solo; e.target.classList.toggle("s-on", ch.solo); buildRack(); };
     const cp=d.querySelector(".colpick"); cp.value=chColor(ch);
@@ -6994,10 +6994,10 @@ function blxModal(build){
 const _blxDoNew=$("btnNewProj").onclick;
 $("btnNewProj").onclick=()=>{
   blxModal((card, close)=>{
-    card.innerHTML='<div class="blModalMsg"><b>Start a new track</b><br/>Start blank loads the default template: a wave track “audio 1”, and a first sequence “drums 1” holding three empty sequencer channels — kick, snare, hihat — plus an instrument track “omnisphere” mapped to an Omnisphere module. Five tracks in the Edit window, five mixer channels; assign your own sounds to kick / snare / hihat and you are ready to make a beat. Nothing is loaded in the Piano Roll. Or start from a template with its kit, BPM and starter patterns in place.</div>';
+    card.innerHTML='<div class="blModalMsg"><b>Start a new track</b><br/>Start blank gives you exactly one sequencer channel — “chan 1”, no sound in it — already mapped to Drum Machine pad 1, the first Edit track and its mixer channel. The Drum Machine starts empty and no modules are loaded: load sounds pad by pad and add modules one by one, and every one lands wired in the sequencer, the Edit window and the mixer at once. The Edit window stands eight tracks tall — blank placeholders the new channels fall into. Or start from a template with its kit, BPM and starter patterns in place.</div>';
     const wrap=document.createElement("div"); wrap.className="newchoices";
     const b1=document.createElement("button"); b1.className="btn gold newchoice"; b1.type="button";
-    b1.innerHTML='Start Blank<span>Default template — audio 1 + drums 1 (kick · snare · hihat · omnisphere): 5 tracks, 5 mixer channels</span>';
+    b1.innerHTML='Start Blank<span>Blank template — one channel “chan 1” (no sound), wired to pad 1, the Edit window and the mixer</span>';
     b1.onclick=()=>{ close();
       const go=()=>{ if(_blxDoNew) _blxDoNew(); if(typeof blTrulyBlank==="function") blTrulyBlank(); S._blDirty=false; };
       if(S._blDirty) showConfirm("Start blank? Your current project's edits will be cleared.", "Start blank", go); else go(); };
@@ -20647,41 +20647,20 @@ if(typeof buildRack==="function"){
         '<label class="hlabel">Layout: <select id="dmLayoutSel" title="Pad layout — presentation only: same kit, banks, layers and bindings under both. MPK Mini = his controller’s 8 pads; MPC2000XL = the 16-pad hardware face (pitch via 16 Levels)"><option value="mpk">MPK Mini</option><option value="mpc">MPC2000XL</option></select></label>'+
       '</span>'+
     '</h2>'+
-    /* ---- MPC2000XL-style LCD strip: the page's readouts live here ---- */
-    '<div class="dmlcd" id="dmLcd" aria-label="Drum Machine display">'+
-      '<span><span class="lcdlab">Kit</span><span class="lcdval" id="dmLcdKit">SWUM MPC</span></span>'+
-      '<span><span class="lcdlab">Bank</span><span class="lcdval" id="dmLcdBank">A</span></span>'+
-      '<span><span class="lcdlab">Pad</span><span class="lcdval" id="dmLcdPad">1/64</span></span>'+
-      '<span><span class="lcdlab">Sound</span><span class="lcdval" id="dmLcdSound">—</span></span>'+
-      '<span><span class="lcdlab">Sequence</span><span class="lcdval" id="dmLcdSeq">SEQ 1</span></span>'+
-      '<span><span class="lcdlab">Tempo</span><span class="lcdval" id="dmLcdTempo">95 BPM</span></span>'+
-      '<span><span class="lcdlab">Bar:Beat</span><span class="lcdval" id="dmLcdPos">1:1</span></span>'+
-      '<span id="dmLcdRec">● REC</span>'+
-      '<div class="lcdviews" style="flex:1 1 100%"><div class="lcdviewtxt" id="dmLcdView"></div><div class="lcdsoftrow" id="dmLcdSoft"></div></div>'+
-    '</div>'+
-    '<div class="dmsoftkeys" role="group" aria-label="LCD soft keys — their jobs follow the LCD view"><button type="button" class="btn sm" data-soft="0"></button><button type="button" class="btn sm" data-soft="1"></button><button type="button" class="btn sm" data-soft="2"></button><button type="button" class="btn sm" data-soft="3"></button></div>'+
-    '<div id="dmPadInfo" class="small" style="margin-bottom:6px">Pad 1 selected.</div>'+
-    '<div class="small" style="margin-bottom:4px">FPC’s three zones: the pad strip on top, the pad matrix on the left, the layer editor on the right. Each pad holds up to four layers — a hit plays every layer whose velocity range catches it. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C3 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it into the selected layer. The page opens in the 8-pad version for the MPK Mini MK3 — its 16 pad-hits (Bank A, then Bank B) land on this bank’s 16 pads in order; the 16-pad version is one toggle away, and both versions are views of the same assignments.</div>'+
-    /* ---- ZONE 1: main pad properties strip (FPC top strip) ---- */
-    '<div class="dmtopstrip" id="dmTopStrip">'+
-      '<span class="dmnav"><button type="button" class="btn sm" id="dmPrevPad" title="Previous pad (of 32, across both banks)">◀</button><button type="button" class="btn sm" id="dmNextPad" title="Next pad (of 32, across both banks)">▶</button></span>'+
-      '<span class="dmpadread" id="dmPadReadout">Pad 1/64</span>'+
-      '<span class="dmsoundname" id="dmPadSoundName">— empty —</span>'+
-      '<span class="dmmidinote" id="dmMidiNote">Midi Note C3 · 36</span>'+
-      '<button type="button" class="btn sm" id="dmMuteBtn" title="Mute — silences this pad everywhere">M Mute</button>'+
-      '<button type="button" class="btn sm" id="dmSoloBtn" title="Solo — on this page, only soloed pads sound">S Solo</button>'+
-      '<span class="dmmini">Vol <input type="range" id="dmVol" min="0" max="100" /><span class="dmval" id="dmVolVal"></span></span>'+
-      '<span class="dmmini">Pan <input type="range" id="dmPan" min="-50" max="50" /><span class="dmval" id="dmPanVal"></span></span>'+
-      '<span class="dmmini">Tune <input type="range" id="dmTune" min="-12" max="12" step="1" /><span class="dmval" id="dmTuneVal"></span></span>'+
-      '<span class="dmmini">Cut <select id="dmCutSel" title="Cut group — pads in the same group choke each other; a new hit silences the group’s ringing voices"><option value="0">Off</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></span>'+
-      '<button type="button" class="btn sm" id="dmCutSelfBtn">Cut itself: On</button>'+
-      '<span class="dmmini">Scale Vol <input type="range" id="dmScaleVol" min="0" max="100" title="Scale Vol (FPC) — how much strike velocity drives this pad’s volume: 100% = full velocity control, 0% = every hit full" /><span class="dmval" id="dmScaleVal"></span></span>'+
-      '<button type="button" class="btn sm" id="dmFullLevelBtn" title="FULL LEVEL (MPC2000XL) — pads always strike at velocity 127 while on">Full Level</button>'+
-      '<span class="dmmini">16 Levels <select id="dmLevelsSel" title="16 LEVELS (MPC2000XL) — the 16 pads become 16 levels of the selected pad’s sound: Tune pitches it across the pads, Velocity plays it at fixed ascending velocities"><option value="off">Off</option><option value="tune">Tune</option><option value="vel">Velocity</option></select></span>'+
-      '<span class="dmmini">Note Variation <select id="dmVarSel" title="Note Variation (the MPK stick / MPC slider) rides the last-hit pad’s chosen parameter — a performance offset, centre restores the set value"><option value="tune">Tune</option><option value="attack">Attack</option><option value="decay">Decay</option></select></span>'+
-      '<span class="dmpadread" id="dmPadChan" title="This pad’s own mixer channel — its strip at the Mixer tab processes the pad’s sound"></span>'+
-      '<button type="button" class="btn sm" id="dmClearPadBtn">Clear pad</button>'+
-    '</div>'+
+    /* 0.9 (Keith): the LCD readout panel, both TRACKS / CHOPS / NOTES / HOME
+       soft-key rows and the "Bank A · Pad 1/64" status line are REMOVED —
+       the pads and the page transport below are the page. (The MPC2000XL
+       layout face keeps its own LCD; every writer to the removed readouts
+       was already guarded, so nothing else changes.) */
+    '<div class="small" style="margin-bottom:4px">The pad matrix on the left, the layer editor on the right. Each pad holds up to four layers — a hit plays every layer whose velocity range catches it. Typing keys 1–4 · Q–R · A–F · Z–V play the pads, and on this page an MPK’s pads (notes C3 up: bank A, then bank B) play them too. Drag a browser sound onto a pad to load it into the selected layer. The page opens in the 8-pad version for the MPK Mini MK3 — its 16 pad-hits (Bank A, then Bank B) land on this bank’s 16 pads in order; the 16-pad version is one toggle away, and both versions are views of the same assignments.</div>'+
+    /* 0.9 (Keith): the pad-properties strip (VOL / PAN / TUNE sliders,
+       Mute / Solo, Cut, Scale Vol, Full Level, 16 Levels, Note Variation,
+       the "binds on first hit" line, Clear pad) is REMOVED with the LCD
+       block above — a pad's mixing lives on its tied mixer channel, and
+       its Volume / Pan / Tune live on the layer card, which now writes
+       through to that channel (see dmSyncLayerMix). The pad state fields
+       themselves (vol / pan / tune / cut / mute / solo …) are untouched;
+       only this second editing surface is gone. */
     '<div class="dmtransport">'+
       '<button type="button" class="btn gold" id="dmPlayBtn">▶ Play</button>'+
       '<button type="button" class="btn" id="dmStopBtn">■ Stop</button>'+
@@ -20850,6 +20829,47 @@ if(typeof buildRack==="function"){
     try{ if(pad && pad.chanId && typeof liveNodes!=="undefined" && liveNodes[pad.chanId] && liveNodes[pad.chanId].input) return liveNodes[pad.chanId].input; }catch(e){}
     return master;
   }
+  /* ---- Layer card ⇄ tied Mixer channel: ONE set of values (Keith, 0.9:
+     "make sure when i edit these, its also represented in the mixer") ----
+     The layer card's Volume / Pan / Tune and the pad's mixer channel
+     (fader / pan / pitch) are the same numbers shown in two places,
+     never two copies that can drift apart. The card writes the pad's
+     EFFECTIVE values — pad × layer, exactly what dmPlayLayer plays —
+     into the tied channel and refreshes its chain and strip; the
+     mixer's fader / PAN knob write back into the pad's represented
+     layer through window.blDmMixBack (hooked in buildMixer), so a
+     mixer edit shows on the card the moment the panel renders.
+     pad._mixLayer remembers which layer the channel currently
+     represents — the one last edited on the card, or the selected
+     layer when the panel renders. The VELOCITY range stays layer-only:
+     a mixer channel has no counterpart for it. */
+  function dmSyncLayerMix(pad, layer){
+    if(!pad || !layer) return;
+    let ch=pad.chanId && S.channels[pad.chanId];
+    if(!ch){ /* standing the tied channel up is the same binding a first hit makes */
+      const bn=DM_BANKS.find(b=>DM.banks[b].indexOf(pad)>=0); if(!bn) return;
+      ch=dmEnsurePadChannel(bn, DM.banks[bn].indexOf(pad)); if(!ch) return;
+    }
+    pad._mixLayer=Math.max(0, pad.layers.indexOf(layer));
+    ch.volume=Math.min(1, Math.max(0, (pad.vol!=null? pad.vol : 0.9) * (layer.vol!=null? layer.vol : 1)));
+    ch.pan=Math.min(1, Math.max(-1, (pad.pan||0) + (layer.pan||0)));
+    ch.pitch=Math.round((pad.tune||0) + (layer.tune||0));
+    if(typeof refreshChain==="function") refreshChain(ch);
+    if(typeof buildMixerSoon==="function") buildMixerSoon();
+  }
+  window.blDmMixBack=function(ch){ /* Mixer → card: the strip's fader / PAN knob moved on a pad's tied channel */
+    if(!ch || !ch.id) return;
+    let pad=null;
+    DM_BANKS.forEach(bn=>DM.banks[bn].forEach(p=>{ if(p.chanId===ch.id) pad=p; }));
+    if(!pad) return;
+    dmEnsureLayers(pad);
+    const l=pad.layers[Math.min(pad.layers.length-1, Math.max(0, pad._mixLayer||0))] || pad.layers[0]; if(!l) return;
+    const pv=(pad.vol!=null && pad.vol>0.01)? pad.vol : 0.9;
+    l.vol=Math.min(1, Math.max(0, ch.volume/pv));
+    l.pan=Math.min(1, Math.max(-1, ch.pan-(pad.pan||0)));
+    l.tune=Math.max(-12, Math.min(12, Math.round((ch.pitch||0)-(pad.tune||0))));
+    if(pad===dmSelPad()){ DM._layerSig=""; dmRenderPanel(); }
+  };
   function dmPlayLayer(bank, idx, pad, layer, vel, t, grp, tuneOff){
     if(!layer.buf) return null;
     const env=layer.env||dmNeutralEnv();
@@ -20924,11 +20944,11 @@ if(typeof buildRack==="function"){
      HELD continuously retriggers at the TC division with the
      channel's swing, at the strike velocity, until release — and
      repeated hits record exactly as played (they pass dmPlayNow).
-     GUARD vs the MPK's HARDWARE repeat: the page engine arms on a
-     hold and its first tick checks the pad is STILL held after one
-     full division; hardware pulse trains drop the hold between
-     pulses, so their ticks never fire — pulses play as plain hits,
-     never re-repeated. Two sources compose, never double. ---- */
+     GUARD vs the MPK's HARDWARE repeat: hardware pulse trains are
+     stopped at the MIDI door now (see dmMidiPadOn — a pulse is not
+     a new press, so it never becomes a hit at all); this engine's
+     own first tick still checks the pad is STILL held after one
+     full division before repeating. Two sources compose, never double. ---- */
   const DM_REPEAT={ timer:null, key:null, bank:null, idx:0, vel:0.9, tick:0 };
   function dmRepeatInterval(){
     const div=DM.repeatDiv||"16";
@@ -21109,6 +21129,9 @@ if(typeof buildRack==="function"){
     const vs=$("dmVarSel"); if(vs) vs.value=pad.varParam||"tune";
     const rt=$("dmRoutingSel"); if(rt) rt.value=DM.routing||"one";
     dmRenderLayers();
+    /* the tied mixer channel represents the selected layer — selecting
+       a pad or a layer re-points the strip at that layer's values */
+    const _sml=dmSelLayer(); if(_sml) dmSyncLayerMix(pad, _sml);
   }
   /* ---------------- Zone 2: layer rows, waveform, envelope ---------------- */
   function dmRenderLayers(){
@@ -21142,9 +21165,9 @@ if(typeof buildRack==="function"){
         const vol=row.querySelector(".lvol"), pan=row.querySelector(".lpan"), tune=row.querySelector(".ltune");
         const syncL=()=>{ lv.textContent=Math.round(l.vol*100)+"%"; lp.textContent=dmPanTxt(l.pan); lt.textContent=(l.tune>0? "+":"")+l.tune+" st"; };
         vol.value=Math.round(l.vol*100); pan.value=Math.round(l.pan*50); tune.value=l.tune; syncL();
-        vol.oninput=()=>{ l.vol=+vol.value/100; syncL(); };
-        pan.oninput=()=>{ l.pan=+pan.value/50; syncL(); };
-        tune.oninput=()=>{ l.tune=+tune.value; syncL(); };
+        vol.oninput=()=>{ l.vol=+vol.value/100; syncL(); dmSyncLayerMix(pad, l); };
+        pan.oninput=()=>{ l.pan=+pan.value/50; syncL(); dmSyncLayerMix(pad, l); };
+        tune.oninput=()=>{ l.tune=+tune.value; syncL(); dmSyncLayerMix(pad, l); };
         [vol,pan,tune].forEach(el=>el.onchange=()=>{ if(typeof markDirty==="function") markDirty(); });
         const vlo=row.querySelector(".vlo"), vhi=row.querySelector(".vhi"), bar=row.querySelector(".dmvelbar>div");
         const syncV=()=>{ vlo.value=l.velLo; vhi.value=l.velHi;
@@ -21537,13 +21560,77 @@ if(typeof buildRack==="function"){
      · Pitch bend is the stick = NOTE VARIATION on this page.
      · Keys and everything else pass through untouched (channel 1
        routing to Module 1 / the roll is the app's own). */
+
+  /* ONE HIT PER PRESS (Keith — bug, still open after 0.8's transport
+     gate): holding an MPK pad must sound exactly once. The page's
+     own Note Repeat was already gated in 0.8, so the repeats he
+     still hears arrive WITH the MIDI stream itself:
+       · a Note On re-sent for a pad that is still down (switch
+         bounce, a device that double-delivers) used to retrigger
+         unconditionally — neither pad branch ever asked whether
+         the pad was already held before firing;
+       · the MPK's hardware Note Repeat, latched on the unit, spits
+         a train of gated note on/off pulses for as long as the pad
+         is held, and every pulse played as a fresh hit.
+     A press is therefore tracked as a SESSION (DM_PRESS):
+       · a Note On while the pad is down is the same press — never
+         a new hit. A Note On a few ms after a Note Off
+         (DM_GATE_GAP — faster than any human re-press) is a gate
+         blip or bounce, not a tap.
+       · a pulse train PROVES itself: while a pad is physically
+         held the MPK keeps streaming aftertouch for it, so
+         aftertouch arriving just after a Note Off means that Note
+         Off was a hardware gate, not a release. From then on the
+         session is a TRAIN and its pulses are swallowed until a
+         Note Off is followed by silence (no aftertouch, no next
+         pulse) — the true release.
+     Deliberate fast taps never trip it: a tap's Note Off is
+     followed by NO aftertouch (the finger is gone), so no train is
+     ever proven and every tap fires. The page's own Note Repeat
+     (deliberate, lit, transport-gated) never passes through here —
+     it calls dmPlayNow directly — and is untouched. */
+  const DM_PRESS={}; let DM_LAST_OFF_KEY=null;
+  const DM_GATE_GAP=40;    /* ms — a note-off→note-on gap no human re-press beats */
+  const DM_AT_WINDOW=200;  /* ms after a note-off in which aftertouch proves the pad still down */
+  const DM_TRAIN_END=220;  /* ms of post-note-off silence that ends a proven train */
+  function dmPressProve(key){
+    const ss=DM_PRESS[key]; if(!ss) return;
+    if(ss.trainTimer){ clearTimeout(ss.trainTimer); ss.trainTimer=null; }
+    if(ss.train) return; /* proof of life — the hold continues */
+    if(ss.offAt && performance.now()-ss.offAt<=DM_AT_WINDOW) ss.train=true;
+  }
+  function dmMidiPadOn(bank, idx, velRaw){
+    const key=bank+idx, now=performance.now(), ss=DM_PRESS[key];
+    if(DM_HELD[key]) return; /* still down — the same press, never a new hit */
+    if(ss && ss.train){ if(ss.trainTimer){ clearTimeout(ss.trainTimer); ss.trainTimer=null; } return; } /* a pulse of a proven hold */
+    if(ss && ss.offAt && now-ss.offAt<DM_GATE_GAP) return; /* gate/bounce gap */
+    if(ss) ss.offAt=0;
+    DM_HELD[key]=true; dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); dmRepeatArm(bank, idx, DM.fullLevel? 1 : velRaw/127);
+  }
+  function dmMidiPadOff(bank, idx){
+    const key=bank+idx, ss=DM_PRESS[key] || (DM_PRESS[key]={ offAt:0, train:false, trainTimer:null });
+    ss.offAt=performance.now(); DM_LAST_OFF_KEY=key;
+    if(ss.trainTimer){ clearTimeout(ss.trainTimer); ss.trainTimer=null; }
+    if(ss.train) ss.trainTimer=setTimeout(()=>{ ss.train=false; ss.trainTimer=null; }, DM_TRAIN_END);
+    dmHold(bank, idx, false);
+  }
+  function dmMidiPadPressure(bank, idx){ dmPressProve(bank+idx); }
+  function dmMidiPadMap(note){ /* pressure bookkeeping only — no bank/half side effects */
+    if(note>=36 && note<=51) return [DM.bank, note-36];
+    if(note>=52 && note<=67) return ["B", note-52];
+    if(note>=68 && note<=83) return ["C", note-68];
+    if(note>=84 && note<=99) return ["D", note-84];
+    return null;
+  }
+
   if(typeof onMidiMessage==="function" && !onMidiMessage._blDmWrapped){
     const _dmMidiPrev=onMidiMessage;
     const dmMidiWrap=function(msg){
       try{
         if(DM.viewActive && msg && msg.data && msg.data.length>=2){
           const cmd=msg.data[0]&0xf0;
-          if(cmd===0xa0 || cmd===0xd0) return; /* aftertouch: pressure only, never a hit */
+          if(cmd===0xa0){ const pm=dmMidiPadMap(msg.data[1]); if(pm) dmMidiPadPressure(pm[0], pm[1]); return; } /* aftertouch: pressure only, never a hit — but it proves a pad is still held (see DM_PRESS) */
+          if(cmd===0xd0){ if(DM_LAST_OFF_KEY) dmPressProve(DM_LAST_OFF_KEY); return; } /* channel pressure: same proof, for the pad last released */
           if(cmd===0xe0){ const bend=((msg.data[2]<<7)|(msg.data[1]||0))-8192; dmSetVariation(bend/8192); return; }
           /* channel-1 KEYS: 0.8 (Keith) — the Drum Machine has no
              audition keys any more. Keys belong to the knob-bank
@@ -21560,8 +21647,8 @@ if(typeof buildRack==="function"){
             else if(note>=68 && note<=83){ bank="C"; idx=note-68; }
             else if(note>=84 && note<=99){ bank="D"; idx=note-84; }
             if(idx>=0 && bank){
-              if(cmd===0x90 && velRaw>0){ DM_HELD[bank+idx]=true; dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); dmRepeatArm(bank, idx, DM.fullLevel? 1 : velRaw/127); }
-              else dmHold(bank, idx, false);
+              if(cmd===0x90 && velRaw>0) dmMidiPadOn(bank, idx, velRaw);
+              else dmMidiPadOff(bank, idx);
               return;
             }
           }
@@ -21575,6 +21662,12 @@ if(typeof buildRack==="function"){
            stay gated to this tab, exactly as before. */
         if(!DM.viewActive && msg && msg.data && msg.data.length>=2 && (msg.data[0]&0x0f)===9){
           const cmd=msg.data[0]&0xf0;
+          /* aftertouch on the pad channel: never a hit, and it still
+             passes through below exactly as before — but observe it:
+             it proves a held pad, which is what stops the MPK's
+             hardware pulse trains (see DM_PRESS) */
+          if(cmd===0xa0){ const pm=dmMidiPadMap(msg.data[1]); if(pm) dmMidiPadPressure(pm[0], pm[1]); }
+          else if(cmd===0xd0){ if(DM_LAST_OFF_KEY) dmPressProve(DM_LAST_OFF_KEY); }
           if(cmd===0x90 || cmd===0x80){
             const note=msg.data[1], velRaw=msg.data[2]||0;
             let bank=null, idx=-1;
@@ -21585,8 +21678,8 @@ if(typeof buildRack==="function"){
             else if(note>=68 && note<=83){ bank="C"; idx=note-68; }
             else if(note>=84 && note<=99){ bank="D"; idx=note-84; }
             if(idx>=0 && bank){
-              if(cmd===0x90 && velRaw>0){ DM_HELD[bank+idx]=true; dmTrigger(bank, idx, velRaw/127); dmHold(bank, idx, true); dmRepeatArm(bank, idx, DM.fullLevel? 1 : velRaw/127); }
-              else dmHold(bank, idx, false);
+              if(cmd===0x90 && velRaw>0) dmMidiPadOn(bank, idx, velRaw);
+              else dmMidiPadOff(bank, idx);
               return;
             }
           }
@@ -23583,6 +23676,391 @@ setTimeout(()=>{
 }, 950);
 try{ setStatus("Beat Lab "+(window.BL_VERSION||"v0.8")+" ready — the Piano Roll is back (it opens on your last selected channel), the MPK knobs pick up from where the value sits, the keys live under the knob bank with a Piano Roll / Modules selector, the Drum Machine records loop-after-loop onto each pad’s own channel, and everything runs in 4/4."); }catch(e){}
 })();
+</script>
+<style>
+/* ================================================================
+   BUILD 0.10 — Edit placeholder tracks + Piano Roll always shows.
+   Placeholder lanes are real rows in the Edit lane list: dashed,
+   muted, inert — a channel that arrives (pad sound, module map,
+   add track) takes the next one in arrival order, and past eight
+   real tracks the placeholders keep growing one by one.
+   ================================================================ */
+.blPhLane .ptHead{background:transparent;border-right-style:dashed}
+.blPhLane .ptName{color:var(--faint)}
+.blPhBody{display:flex;align-items:center;padding:0 12px;color:var(--faint);font-size:11px;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(242,237,225,.018) 10px,rgba(242,237,225,.018) 20px)}
+/* Piano Roll ALWAYS shows (Keith, 0.10): the roll holder is visible
+   in every main view — Edit, Mixer, Drum Machine, Modules, Sampler,
+   Options — docked under the view, never hidden away. */
+.wrap.blv-arrange>#blViewRoll,.wrap.blv-mixer>#blViewRoll,.wrap.blv-drums>#blViewRoll,
+.wrap.blv-synth>#blViewRoll,.wrap.blv-sampler>#blViewRoll,.wrap.blv-options>#blViewRoll{display:block!important}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   BUILD 0.10 — THE WIRING UPDATE (Keith, 2026-11-08, closing call
+   on the "notes for .8" pass + the comments pass; ships together
+   with the 0.9 content — pad-hold repeat fix, Drum Machine block
+   removal, layer ⇄ mixer sync).
+
+   1 · WIRED FROM THE START — every pad's sequence channel + mixer
+       channel stand wired from project start, never created on
+       first touch. A watcher (blV10PadSweep) stands a pad's
+       channel up the moment a sound sits on the pad — at load
+       time, not at hit time — in every project, templates too.
+   2 · NO MODULES BY DEFAULT — a blank project clears the Modules
+       stack completely. Modules are added ONE BY ONE: the ＋ Add
+       module button now runs the whole chain as the module lands
+       (module → a fresh sequence channel via Map's create path →
+       its Edit channel → its mixer channel).
+   3 · THE EDIT WINDOW MODEL — the Edit window opens with blank
+       placeholder tracks standing ready: eight rows tall at
+       first; channels born by loading sounds on pads (and modules,
+       same chain) fall into the placeholders in arrival order;
+       past eight real tracks, one fresh placeholder always stands
+       next (rendered one by one). Tracks stay movable, and Edit
+       order IS mixer order: the ptRender pass below reads the
+       lane order back into S.order, so dragging a lane in the
+       Edit window reorders the mixer (and the rack) to match —
+       one shared order, because every filled Edit channel is tied
+       to its mixer channel.
+   4 · THE BLANK TEMPLATE — supersedes the 2026-11-07 default
+       template (audio 1 + kick/snare/hihat + omnisphere). A blank
+       new project holds exactly ONE sequencer channel, named
+       "chan 1", no sound in it, mapped to the mixer, to the first
+       Edit placeholder, and to Drum Machine pad 1. No sequencer
+       placeholders. The Drum Machine starts with NO sounds loaded
+       on any pad, in any bank.
+   5 · AUDIO 1 HAS NO MIDI — "audio 1" is a WAV channel: it never
+       appears in the sequencer and carries no MIDI presence. The
+       blank start above contains no audio 1 at all; where a wave
+       track is added later it keeps the standing wave-only law
+       (blWaveOnly — no MIDI lane, no rack row) this pass relies on.
+   6 · PIANO ROLL ALWAYS SHOWS — CSS above keeps the roll holder
+       visible in every view, the holder is docked at the foot of
+       the page, and the roll can never be left collapsed.
+   7 · METRONOME — ONE button, on the MAIN (top) transport only
+       (#btnMetro, relabelled "Metronome" so it can be found).
+       Every playback context already runs through the one
+       scheduler whose click reads that button (the positioned /
+       Song scheduler delegates to it; the Drum Machine page and
+       the Piano Roll drive the same transport), so the setting is
+       captured everywhere by construction. No other transport
+       gets a metronome of its own.
+   ================================================================ */
+function blV10Safe(fn){ try{ return fn(); }catch(e){} }
+
+/* ---------------- 4 · the blank template: chan 1 ---------------- */
+function blV10BuildBlank(){
+  if(S.playing && typeof setPlaying==="function") setPlaying(false);
+  /* 2 · no modules loaded — the stack goes back to empty */
+  blV10Safe(()=>{
+    if(typeof BL_STACK!=="undefined" && Array.isArray(BL_STACK)){
+      BL_STACK.slice().forEach(b=>{ blV10Safe(()=>b.root.remove()); });
+      BL_STACK.length=0;
+    }
+    if(typeof blStackSyncEmpty==="function") blStackSyncEmpty();
+    if(typeof blStackRefresh==="function") blStackRefresh();
+  });
+  /* tear down whatever the superseded template built */
+  blV10Safe(()=>{
+    Object.keys(S.channels||{}).forEach(id=>{
+      const n=(typeof liveNodes!=="undefined")? liveNodes[id] : null;
+      if(n){ blV10Safe(()=>n.fader.disconnect()); blV10Safe(()=>{ if(n.analyser) n.analyser.disconnect(); }); delete liveNodes[id]; }
+      delete S.channels[id];
+    });
+  });
+  S.order=[]; S.clips=[]; S.aclips=[]; S.selClipId=null;
+  /* the one channel — a sequencer (MIDI) channel, no sound in it */
+  const ch=makeChannel("chan1", "chan 1", "drum", "");
+  while(ch.patterns.length<seqCount()) ch.patterns.push(blEmptyPat());
+  ch.blMidiOnly=true;    /* Edit shows its MIDI lane only — no wave face */
+  ch.blShowSeqLane=true; /* its sequence lane stands in the Edit window */
+  blV10Safe(()=>{ if(typeof BL_CH_COLORS!=="undefined") ch.color=BL_CH_COLORS[0]; });
+  S.channels.chan1=ch; S.order=["chan1"];
+  blV10Safe(()=>{ if(typeof AC!=="undefined" && AC && typeof master!=="undefined" && master && typeof buildChain==="function" && !liveNodes.chan1)
+    liveNodes.chan1=buildChain(AC, ch, master, verbBus, delayBus, true); });
+  S.selected="chan1"; S.rollChannel="chan1";
+  S.laneOrder=["m:chan1"]; S.laneSizes={}; if(S.laneNames) S.laneNames={};
+  const nSeq=seqCount();
+  S.seqNames=[]; for(let i=0;i<nSeq;i++) S.seqNames.push("SEQ "+(i+1));
+  if(Array.isArray(S.seqBars)){ S.seqBars=[]; for(let i=0;i<nSeq;i++) S.seqBars.push(1); }
+  S.seqMembers=[]; for(let i=0;i<nSeq;i++) S.seqMembers.push(i===0? ["chan1"] : []);
+  S.pattern=0; S.mode="pattern";
+  /* 1+4 · Drum Machine: NO sounds on any pad — and pad 1 is born
+     wired to chan 1, so the first sound loaded there (Keith starts
+     with the hi-hat) lands in a channel that already exists in the
+     sequencer, the Edit window and the mixer. */
+  blV10Safe(()=>{
+    const api=window.blDM;
+    if(api && typeof api.restore==="function"){
+      const empty=[]; for(let i=0;i<16;i++) empty.push(null);
+      api.restore({ bank:"A", sel:0, kit:"", target:null,
+        banks:{ A:empty.slice(), B:empty.slice(), C:empty.slice(), D:empty.slice() } });
+      if(api.DM){ api.DM.bank="A"; api.DM.sel=0; api.DM.target=null;
+        if(api.DM.banks && api.DM.banks.A && api.DM.banks.A[0]) api.DM.banks.A[0].chanId="chan1"; }
+    }
+  });
+  blV10Safe(()=>refreshChannelNames());
+  blV10Safe(()=>buildRack());
+  blV10Safe(()=>buildMixer());
+  blV10Safe(()=>{ if(typeof setRollChannel==="function") setRollChannel("chan1", false); else if(typeof buildRoll==="function") buildRoll(); });
+  blV10Safe(()=>{ if(typeof buildPatBtns==="function") buildPatBtns(); });
+  blV10Safe(()=>ptRender());
+  blV10Safe(()=>markDirty());
+  setStatus("Blank project — one channel, “chan 1”, no sound in it, wired from the start to Drum Machine pad 1, the first Edit track and its mixer channel. The Drum Machine starts empty and no modules are loaded: load sounds pad by pad (start with the hi-hat on pad 1) and add modules one by one — every addition lands in the sequencer, the Edit window and the mixer at once.");
+}
+if(typeof blTrulyBlank==="function"){
+  const _blV10BlankPrev=blTrulyBlank;
+  blTrulyBlank=function(){
+    const r=_blV10BlankPrev.apply(this, arguments);
+    blV10Safe(()=>blV10BuildBlank());
+    return r;
+  };
+}
+
+/* ---------------- 2 · modules: added one by one, chain on landing ---------------- */
+blV10Safe(()=>{
+  const addBtn=$("blAddSynthBtn");
+  if(addBtn && !addBtn._blV10){
+    addBtn._blV10=true;
+    const prev=addBtn.onclick;
+    addBtn.onclick=()=>{
+      if(prev) prev();
+      /* the module that just landed runs the chain immediately:
+         no track picked = Map creates its sequence channel, which
+         carries its Edit channel and mixer channel with it */
+      blV10Safe(()=>{
+        const st=(typeof BL_STACK!=="undefined" && Array.isArray(BL_STACK))? BL_STACK : [];
+        const b=st[st.length-1];
+        if(b && !b.boundId && typeof blBlockMap==="function"){
+          if(b.picker) b.picker.value="";
+          b.targetId="";
+          blBlockMap(b);
+          if(typeof ptRender==="function") ptRender();
+        }
+      });
+    };
+  }
+});
+
+/* ---------------- 1 · pads wired from the start ---------------- */
+function blV10LibKey(it){ return it.group==="Starter Sounds"? "shared/"+it.name : "kit/"+it.group+"/"+it.name; }
+function blV10FindLib(pad){
+  if(!pad || !pad.name || typeof library==="undefined") return -1;
+  for(let i=0;i<library.length;i++){ const it=library[i];
+    if(it.builtin && pad.key && blV10LibKey(it)===pad.key) return i; }
+  for(let i=0;i<library.length;i++){ if(library[i].name===pad.name) return i; }
+  return -1;
+}
+let blV10SweepSig="";
+function blV10PadSweep(){
+  /* 5 · a WAV/audio channel has no MIDI presence: wave-only channels
+     never appear in the Piano Roll's channel lists (the roll header
+     picker, the per-sequence roll picker, the knob-window key
+     picker). Their own wave faces (Edit wave lane, mixer strip,
+     wave-editor channel list) are untouched. */
+  blV10Safe(()=>{
+    ["rollChannel","rollChannelSeq","blKpKeyCh"].forEach(sid=>{
+      const sel=$(sid); if(!sel) return;
+      Array.from(sel.querySelectorAll("option")).forEach(o=>{
+        const ch=S.channels[o.value];
+        if(ch && (ch.blWaveOnly || ch.blTrack1 || ch.blWaveKind)) o.remove();
+      });
+    });
+  });
+  const api=window.blDM; if(!api || !api.DM || !api.DM.banks) return;
+  /* the Piano Roll can never be left collapsed away (6) */
+  blV10Safe(()=>{ const rp=$("page-roll"); if(rp && rp.classList.contains("collapsed")) rp.classList.remove("collapsed"); });
+  if(S.playing) return; /* a hit during playback wires itself, as before */
+  const DM=api.DM;
+  /* Cheap when nothing changed: the sweep signs the pad state and
+     only works when the signature moves — and even then it stands
+     ONE pad's channel up per tick, so wiring a full kit spreads
+     over a few seconds instead of bursting every render at once. */
+  let sig=S.order.length+"|";
+  ["A","B","C","D"].forEach(bn=>{ const bank=DM.banks[bn]; if(!bank) return;
+    bank.forEach(pad=>{ sig+=(pad? (pad.key||"")+"#"+(pad.chanId||"") : "")+","; }); });
+  if(sig===blV10SweepSig) return;
+  blV10SweepSig=sig;
+  /* pad 1 ↔ chan 1: the link stands whether or not a sound is on it */
+  if(S.channels.chan1 && DM.banks.A && DM.banks.A[0] && !DM.banks.A[0].chanId)
+    DM.banks.A[0].chanId="chan1";
+  let worked=false;
+  ["A","B","C","D"].forEach(bn=>{
+    const bank=DM.banks[bn]; if(!bank) return;
+    bank.forEach((pad, idx)=>{
+      if(!pad || worked) return;
+      const hasSound=!!(pad.key || pad.name);
+      if(hasSound && !(pad.chanId && S.channels[pad.chanId])){
+        blV10Safe(()=>api.ensurePadChannel(bn, idx));
+        worked=true; blV10SweepSig=""; /* more may be waiting — recheck next tick */
+        return;
+      }
+      /* a pre-bound channel (chan 1 on pad 1) takes the pad's sound
+         onto itself once, so sequencer playback of its recorded
+         notes sounds the pad — every other pad's channel is born
+         through dmEnsurePadChannel, which assigns at creation */
+      const ch=pad.chanId && S.channels[pad.chanId];
+      if(hasSound && ch && ch.sampleName!==pad.name && pad._v10AssignKey!==pad.key){
+        const li=blV10FindLib(pad);
+        if(li>=0 && typeof assignSoundToChannel==="function"){
+          pad._v10AssignKey=pad.key;
+          blV10Safe(()=>assignSoundToChannel(li, ch.id));
+          worked=true; blV10SweepSig="";
+        }
+      }
+    });
+  });
+}
+setInterval(()=>blV10Safe(()=>blV10PadSweep()), 1400);
+setTimeout(()=>blV10Safe(()=>blV10PadSweep()), 1200);
+
+/* ---------------- 3 · Edit placeholders + one shared order ---------------- */
+function blV10Placeholders(wrapEl){
+  wrapEl.querySelectorAll(".blPhLane").forEach(el=>el.remove());
+  const real=wrapEl.querySelectorAll(".ptLane[data-ptmidi], .ptLane[data-pttrack]").length;
+  const target=Math.max(8, real+1); /* eight standing tracks; past eight, one more placeholder, one by one */
+  for(let i=real;i<target;i++){
+    const d=document.createElement("div");
+    d.className="ptLane blPhLane"; d.setAttribute("data-blph","1");
+    d.innerHTML='<div class="ptHead"><span class="ptTrkNo">Track '+(i+1)+'</span>'+
+      '<span class="ptName">Empty</span><span class="ptChLine">Placeholder track</span></div>'+
+      '<div class="ptBody blPhBody"><span>Nothing here yet — load a sound on a drum pad or add a module, and its channel lands in the next placeholder, wired to the sequencer and the mixer.</span></div>';
+    wrapEl.appendChild(d);
+  }
+  if(target>real) blV10Safe(()=>{ if(typeof lpPositionOverlay==="function") lpPositionOverlay(); });
+}
+let blV10SyncBusy=false;
+if(typeof ptRender==="function"){
+  const _blV10PtPrev=ptRender;
+  ptRender=function(){
+    _blV10PtPrev();
+    const wrapEl=$("ptLanes"); if(!wrapEl || S._ptDrag || blV10SyncBusy) return;
+    blV10SyncBusy=true;
+    try{
+      /* Edit order IS mixer order: read the lane order back into
+         S.order — the mixer strips and the rack follow the Edit
+         window, because every filled Edit channel is tied to its
+         mixer channel. MIDI lane position speaks for its channel;
+         a wave-only channel speaks by its wave lane. */
+      if(typeof blLaneKeys==="function"){
+        const keys=blLaneKeys(), mR={}, wR={};
+        keys.forEach((k,i)=>{ if(k.charAt(0)==="m") mR[k.slice(2)]=i; else wR[k.slice(2)]=i; });
+        const rankOf=id=> (mR[id]!=null? mR[id] : (wR[id]!=null? wR[id] : 1e9));
+        const desired=S.order.slice().sort((a,b)=>rankOf(a)-rankOf(b));
+        if(desired.join("|")!==S.order.join("|")){
+          S.order=desired;
+          if(typeof buildMixer==="function") buildMixer();
+          if(typeof buildRack==="function") buildRack();
+        }
+      }
+    }catch(e){}
+    try{ blV10Placeholders(wrapEl); }catch(e){}
+    blV10SyncBusy=false;
+  };
+}
+
+/* ---------------- 6 · Piano Roll docked at the foot, always in reach ---------------- */
+blV10Safe(()=>{
+  const rh=$("blViewRoll"), wrapEl=document.querySelector(".wrap");
+  if(rh && wrapEl && rh.parentNode===wrapEl){
+    const fn=wrapEl.querySelector(".footer-note");
+    if(fn && rh.nextSibling!==fn) wrapEl.insertBefore(rh, fn);
+  }
+});
+
+/* ---------------- 7 · the one metronome, on the main transport ---------------- */
+function blV10MetroHome(){
+  /* An older pass (blMoveRecControls) had moved #btnMetro off the
+     top bar into the Piano Roll header — which is why the button
+     could not be found "up top". v0.10 puts it back on the MAIN
+     transport, beside Play/Stop, and nowhere else. */
+  const m=$("btnMetro"); if(!m) return;
+  const transport=document.querySelector(".transport");
+  const play=$("btnPlay");
+  const grp=(play && play.closest(".tgroup")) || null;
+  if(transport && grp && m.parentNode!==grp) grp.appendChild(m);
+  else if(transport && m.parentNode!==transport) transport.appendChild(m);
+}
+blV10Safe(()=>blV10MetroHome());
+blV10Safe(()=>{
+  const m=$("btnMetro"); if(!m) return;
+  m.textContent="Metronome";
+  m.title="Metronome — the one click switch for the whole app, here on the main (top) transport. Every playback context follows this setting: the Drum Machine page, the Piano Roll and Song mode all run through this same transport.";
+  const sync=()=>m.setAttribute("aria-pressed", m.classList.contains("on")? "true" : "false");
+  sync();
+  m.addEventListener("click", ()=>setTimeout(sync, 0));
+  window.blV10MetroOn=()=>m.classList.contains("on");
+});
+
+/* ---------------- boot: a content-free start IS a blank start ---------------- */
+function blV10HasContent(){
+  try{
+    for(const id of S.order){ const ch=S.channels[id]; if(!ch) continue;
+      if(ch.buffer || ch.sampleName) return true;
+      if((ch.patterns||[]).some(p=>p && (((p.steps||[]).some(s=>s)) || (p.notes||[]).length || (p.hits||[]).length))) return true;
+    }
+    if((S.clips && S.clips.length) || (S.aclips && S.aclips.length)) return true;
+    const api=window.blDM;
+    if(api && api.DM && api.DM.banks){
+      const DM=api.DM, kitFiles=(typeof BL_KITS!=="undefined" && BL_KITS && BL_KITS["SWUM MPC"])||[];
+      let factory=(DM.kit==="SWUM MPC");
+      if(factory){
+        for(let i=0;i<16;i++){ const p=DM.banks.A[i];
+          if(!p || (p.name||"")!==(kitFiles[i]||"")){ factory=false; break; } }
+        if(factory) ["B","C","D"].forEach(bn=>DM.banks[bn].forEach(p=>{ if(p && (p.key||p.name)) factory=false; }));
+      }
+      if(!factory){
+        let any=false;
+        ["A","B","C","D"].forEach(bn=>DM.banks[bn].forEach(p=>{ if(p && (p.key||p.name)) any=true; }));
+        if(any) return true;
+      }
+    }
+  }catch(e){}
+  return false;
+}
+/* The on-screen state at this point is always the app's own boot
+   state — no user project can exist yet (a saved project only ever
+   arrives through the recovery timer, below) — so the opening
+   project IS the v0.10 blank, unconditionally. The conversion runs
+   on the first tick AFTER parsing finishes, not inside the parse:
+   the full blank chain is heavy, and running it mid-parse delays
+   DOMContentLoaded on slow machines for no benefit — the first
+   frame the user can act on is already the chan 1 blank. */
+let blV10Booted=false;
+function blV10BootConvert(){
+  if(blV10Booted) return; blV10Booted=true;
+  blV10Safe(()=>{ if(typeof blTrulyBlank==="function") blTrulyBlank(); });
+  blV10Safe(()=>ptRender());
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", ()=>setTimeout(blV10BootConvert, 30));
+else setTimeout(blV10BootConvert, 30);
+blV10Safe(()=>ptRender());
+/* The autosave recovery lands on a 700 ms timer, after this script.
+   If it restores a REAL project (patterns written, clips placed,
+   channels beyond the old template), it stands untouched. If it
+   restores the OLD template's shape — the five starter channels and
+   at most pad-born channels, with nothing sequenced and nothing
+   placed — that state is a blank start wearing the old template,
+   and it converts to the v0.10 blank too. A state that is already
+   the v0.10 blank is left exactly as it stands. */
+function blV10TemplateShaped(){
+  try{
+    if((S.clips && S.clips.length) || (S.aclips && S.aclips.length)) return false;
+    const starters={ "audio 1":1, "kick":1, "snare":1, "hihat":1, "omnisphere":1 };
+    for(const id of S.order){ const ch=S.channels[id]; if(!ch) continue;
+      if(!starters[String(ch.name||"").toLowerCase()] && id.indexOf("dmpad")!==0) return false;
+      if((ch.patterns||[]).some(p=>p && (((p.steps||[]).some(s=>s)) || (p.notes||[]).length || (p.hits||[]).length))) return false;
+    }
+    return true;
+  }catch(e){ return false; }
+}
+setTimeout(()=>blV10Safe(()=>{
+  blV10MetroHome();
+  const alreadyV10 = S.order.length===1 && S.order[0]==="chan1" && S.channels.chan1;
+  if(alreadyV10) return;
+  if((!blV10HasContent() || blV10TemplateShaped()) && typeof blTrulyBlank==="function") blTrulyBlank();
+}), 1800);
 </script>
 </body>
 </html>
