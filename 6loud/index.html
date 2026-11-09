@@ -61,6 +61,18 @@
     background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#3a1503; text-decoration:none;
     font-size:1.3rem; font-weight:900; letter-spacing:.06em; box-shadow:0 10px 30px rgba(247,181,0,.35)}
   .playbtn:hover{filter:brightness(1.07)}
+  .rankings .rrow{display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:12px;
+    background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.08); margin-top:8px}
+  .rankings .rrow .rk{font-weight:900; color:var(--dim); min-width:34px; text-align:center; font-size:1.05rem}
+  .rankings .rrow.top1{border-color:var(--line); background:rgba(247,181,0,.13)}
+  .rankings .rrow.top1 .rk{color:var(--gold2)}
+  .rankings .rrow .who{font-weight:800; letter-spacing:.08em; font-size:1.05rem}
+  .rankings .rrow .ft{margin-left:auto; font-weight:900; color:var(--gold2); font-size:1.05rem}
+  .rankings .rrow .ft small{color:var(--dim); font-weight:600; font-size:.78rem; letter-spacing:.06em}
+  .rankings .live{display:flex; align-items:center; gap:8px; color:var(--dim); font-size:.92rem; margin-top:4px}
+  .rankings .dot{width:9px; height:9px; border-radius:50%; background:#43e07f; box-shadow:0 0 8px #43e07f;
+    animation:rpulse 1.6s ease-in-out infinite}
+  @keyframes rpulse{0%,100%{opacity:1}50%{opacity:.35}}
   .status{text-align:center}
   .status .big{font-size:1.12rem; font-weight:700}
   footer{text-align:center; color:var(--dim); font-size:.9rem; padding:30px 16px 36px}
@@ -139,6 +151,13 @@
     the top 10 distances from every player, live. Take the crown at home — then take the board.</p>
   </section>
 
+  <section class="rankings" id="rankings">
+    <h2>♛ Global Rankings — Live</h2>
+    <div class="live"><span class="dot"></span><span id="rtop">The top 20 distances in the world, straight from the game.</span></div>
+    <div id="rrows"><p class="dim" style="margin-top:10px">Loading the board…</p></div>
+    <p class="dim" style="margin-top:12px; font-size:.9rem">Pulled live from the game's global leaderboard — every run that makes the top 20 posts here.</p>
+  </section>
+
   <section class="status">
     <h2>Play it now</h2>
     <p class="big">6loud is live — free, in your browser.</p>
@@ -152,5 +171,43 @@
     <a href="https://keithcole813.github.io/shinobi-brawl/">Shinobi Brawl</a>
   </footer>
 </div>
+
+<script>
+(function(){
+  var SB_URL = 'https://erqydryoyxqhqntutdgf.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzYSIsInJlZiI6ImVycXlkcnlveXhxaHFudHV0ZGdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5OTA4NTksImV4cCI6MjEwOTU2Njg1OX0.UdhtAVWs-NHXkIZQd6csMZnSWtVGzGC7J29j9WlInyA';
+  var H = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+  var box = document.getElementById('rrows'), top = document.getElementById('rtop');
+  function fmt(n){ return Number(n).toLocaleString('en-US'); }
+  function row(rank, initials, ft){
+    var d = document.createElement('div');
+    d.className = 'rrow' + (rank === 1 ? ' top1' : '');
+    var rk = document.createElement('span'); rk.className = 'rk';
+    rk.textContent = (rank === 1 ? '\uD83D\uDC51 ' : '') + rank;
+    var who = document.createElement('span'); who.className = 'who'; who.textContent = initials;
+    var f = document.createElement('span'); f.className = 'ft';
+    f.textContent = fmt(ft) + ' ';
+    var sm = document.createElement('small'); sm.textContent = 'FT'; f.appendChild(sm);
+    d.appendChild(rk); d.appendChild(who); d.appendChild(f);
+    return d;
+  }
+  function load(){
+    fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=20', { headers: H })
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        box.innerHTML = '';
+        if (!rows || !rows.length){
+          box.innerHTML = '<p class="dim" style="margin-top:10px">No runs on the board yet — be the first.</p>';
+          return;
+        }
+        rows.forEach(function(r, i){ box.appendChild(row(i + 1, r.initials, r.dist_ft)); });
+      })
+      .catch(function(){
+        box.innerHTML = '<p class="dim" style="margin-top:10px">The board lives in the game — beat a run and check the wipeout screen.</p>';
+      });
+  }
+  load(); setInterval(load, 60000);
+})();
+</script>
 </body>
 </html>
