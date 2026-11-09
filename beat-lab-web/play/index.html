@@ -9,8 +9,8 @@
 <script>/* Mobile boot (Keith, 2026-11-08): apply the saved Mobile layout before first paint, beside the theme and emulation boots — its own category, NOT a theme (no colours) and NOT an emulation (no DAW furniture). App-level preference only (localStorage "beatlab.mobile.v1": auto / on / off), never part of a project file. Auto = on at phone widths (≤820px, the app's own phone breakpoint). The full Mobile pass at the end of the body reads the same key and keeps the attribute in sync across the width boundary. */ try{var _blMobBoot=localStorage.getItem("beatlab.mobile.v1")||"auto";if(_blMobBoot==="on"||(_blMobBoot==="auto"&&window.matchMedia&&window.matchMedia("(max-width: 820px)").matches))document.documentElement.setAttribute("data-mobile","on");}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxNDEzMTEiLz4KICA8cmVjdCB4PSIxMSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMTEiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIxMSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiM0ZDQ4M2QiLz4KICA8cmVjdCB4PSIzNSIgeT0iMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjQiIGZpbGw9IiNlOGIzM2MiLz4KPC9zdmc+Cg==" />
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEoElEQVR4nO3dzVXkRhiG0WrOJMCBLDxbL5yNQ3M2Xng7zgIOIeBVY2C6G/2UVJ/euTcAVCo9/VEDnNGpFfD4cP86eg308fT8chp5/SEXF/CvY+/Ad7uYiNkj7k0vIGKu2SruTb6okJmqd9h3Pb9Ya2Jmnt69dPt0CJm1ekzrLhNazPTQo6NVnwghs5Wl03rxhBYzW1ra16KgxcwelnQ2O2gxs6e5vc0KWsyMMKe7yUGLmZGm9jcpaDFTwZQOvwxazFTyVY/df/UNI90M2nSmoltdXg1azFR2rU9HDqJcDNp05ggudfpT0GLmSD736shBlA9Bm84c0ftuTWiiCJoob0E7bnBk535NaKIImiin1hw3yPFt9AJu+eP376OX8Obvf34Mvb69mKbchK704C7Z+2Haj3lKnaGrP7zW9l2j/Zjvrsp0rrYxt+yxVvuxTIkJXWlDptpyzfZjueFBV9mIJbZYu/1YZ2jQFTZgrZ73YD/WGz6hoSdBE2VY0KO/NfXU417sRx8mNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE0UQRNF0EQRNFEETRRBE0XQRBE0UQRNFEETRdBEETRRBE2UYUFXe6XuGj3uxX70YUITZWjQCVOp5z3Yj/WGT+jRG7DGFmu3H+sMD7q1GhvBOlWe4enx4f519CLOjvKuvr0env2Yr8SEPqu0MdfsuUb7MV+pCf1ZpQk1+sHZi2lKBw1zlTpywFqCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgifJt9AJu8Uft//vx129Dr//e9z//Hb2Eq8r9gX+liC/ZO+xKIV9SLe5SR47qMbe27xqrx9xavTWWmdBHiPmzraZ1tUimqDKpS0zoI8bMR1U+hMODPnLMW6y9ShhLVFj70KCPHPNZz3uoEMRao+9h+ISGnoYFnTCdz3rcy+jJ1tPIezGhiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIImiiCJoqgiSJoogiaKIImiqCJImiiCJoogiaKoIkiaKIMC3r0q4Z76nEvVd7z18PIezGhiSJoogwNOuHY0fMeEo4do+9h+IQ+ctRbrH10EGtUWPvwoFs7ZtRbrrlCGHNVWXOJoFs7VtR7rLVKIFNUWuvd0/PLafQizo4Q9Z5rrBTKNdXWeGqttceH+9fRC7mk0uuTR3/YKr06uVrE75UOGuYqc4aGHu5aa63SORqWenp+OZnQRBE0Ud6CduzgyM79mtBEETRRPgTt2MERve/WhCbKT0Gb0hzJ514vTmhRcwSXOnXkIMrVoE1pKrvW580JLWoqutWlIwdRvgzalKaSr3qcNKFFTQVTOpx85BA1I03tb9YZWtSMMKe72f8oFDV7mtvbop9yiJo9LOls8Y/tRM2WlvbVJUr/DQK9rB2UXX6xYlrTQ4+OuodoWjNXz4HY/VffpjVz9O5l0/hMa67ZavDtNk3FzR7fvYccD8T969j7CPofPfFo2YeNR3EAAAAASUVORK5CYII=" />
-<title>Beat Lab Web Beta v0.12</title>
-<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.8 (the Piano Roll repair — the roll opens loaded with a channel again — plus the twelve called notes: MPK knob pickup from the current value, the knob-window audition keyboard with Piano Roll / Modules key routing, no Drum Machine audition keys, one hit per pad press with the transport stopped, a low-latency audio setting, Drum Machine loop-record ADD with a beats/bars record-length choice, pad = sequence channel = mixer channel in every record routing, automatic multitrack placement when a channel is created, and 4/4 as the standing default), superseding the 0.7 stamp. BUILD 0.9 (Keith, 2026-11-08): the Drum Machine page loses the whole framed block he circled — the LCD readout panel, both TRACKS / CHOPS / NOTES / HOME soft-key rows, the "Bank A · Pad 1/64" status line, and the pad-properties strip under it (VOL/PAN/TUNE, Mute/Solo, 16 Levels, Note Variation, "binds on first hit", all of it) — pads and the page transport stay; and the pad LAYER editor's Volume / Pan / Tune are now the tied mixer channel's fader / pan / pitch: one set of values written through both ways (dmSyncLayerMix / blDmMixBack), never two copies that drift. */ var BL_VERSION="v0.12"; /* BUILD 0.12 (Keith, 2026-11-09): in the MOBILE layout only, the Piano Roll loses the whole control band under its grid that he crossed out on his phone — the "Velocity lane" help line ("Drag a bar to set that note's velocity (1–127)."), the keyboard control bar (both Oct buttons, the C4 – C7 range label, the Chord Lock pill, the STRUM row with its Off dropdown, and the CHANNEL "chan 1" sequencer-channel dropdown that sits beside Strum), and the Piano Roll's bottom keyboard strip (the piano keys with the C4–D6 note names). The Piano Roll grid itself, the velocity lane bars above that help line, and the Chord Generator + Progression Generator panels below all stay, on mobile and desktop alike. Everything hidden is display-only in the mobile theme: the controls, their values and Chord Lock / Strum / octave / channel state stay in the project and in the engine, and desktop (Mobile Off, or Auto on a wide screen) is exactly v0.11. SAME BUILD, Keith's follow-up directives (2026-11-09): (A) on mobile the BPM control and the Metronome move out of the title card up into the top transport (#blBarTransport), and the Metronome becomes an icon button (inline SVG) instead of the text pill — same button, same one-click state, moved not copied, restored whole on desktop; (B) on mobile the Options PROJECT and EDIT sections move to the very top of the Options view, above the PROJECT FOLDER — THIS COMPUTER panel; (C) on mobile the EXPORT — STEMS + MASTER panel sits directly under the EDIT section (right below the moved PROJECT/EDIT block) — and this placement ALSO applies on desktop, where the Export panel sits inside the Options panel immediately after the Edit group; (D) on mobile the APPEARANCE block (Theme / Emulation / Mobile layout pickers) sits directly under the Export panel. B and D are mobile-only and reverse exactly when Mobile turns off; all of A–D are moves of the existing nodes by the Mobile pass's arrange step, so every handler, value and saved state rides along. SAME BUILD, the mobile mixer repair (Keith's "Bug on mobile" screenshot, 2026-11-09): the slimline lead knob row (Gain · Pan · Pitch) overflowed its strip — the desktop two-column sizing gives every strip knobwrap a fixed 50% flex-basis, the lead knobs were each wrapped in a second knobwrap, and three-across in a nowrap row measured 150% of the 132px strip, so each strip's PITCH was pushed off its right edge onto the next strip's GAIN (the doubled GAIN he circled on Pad 1, its own PITCH off-screen). Fixed at the cause: the lead knobs are single knobwraps again (labels ride inside blKnob, BL_GP sync untouched), and in Mobile only the three wraps share the row as equal shrinkable thirds. Desktop mixer layout is unchanged. */ /* BUILD 0.11 (Keith, 2026-11-08): the MOBILE layout — its own category in Options → Appearance, beside Theme and Emulation ("beatlab.mobile.v1": Auto / On / Off; Auto = phone widths ≤820px). Not a theme (colours untouched) and not an emulation (no DAW furniture moves): while Mobile is on, the Drum Machine tab is gone, the MPK knob bank never opens, the fixed tab bar and the whole transport scroll with the page instead of pinning over the tab's content, and the mixer goes slimline — every channel strip keeps ONE row of basic knobs (the lead Gain · Pan · Pitch group), its fader, value readout and Mute/Solo, and the MASTER strip keeps just its fader and VU. Everything hidden stays in the project and in the engine; desktop with Mobile Off (or Auto on a wide screen) is exactly v0.10. */ /* BUILD 0.10 (Keith, 2026-11-08): the wiring update, shipped with the 0.9 content. A BLANK new project is now exactly one sequencer channel named "chan 1" — no sound in it — born wired to Drum Machine pad 1, the first Edit placeholder track and its mixer channel; the old "audio 1" + kick/snare/hihat + omnisphere default template is superseded ("audio 1" is a WAV channel and carries no MIDI / no sequencer presence). The Drum Machine starts with NO sounds loaded and NO modules are loaded by default: pads and modules are added one by one, and each addition runs the full chain (sequence channel → Edit channel → mixer channel) at load time, never on first touch. The Edit window stands 8 tracks tall from the start — blank placeholder tracks that real channels fall into in arrival order, growing one by one past 8 — and Edit order IS mixer order (one shared order). The Piano Roll always shows. ONE metronome, on the main (top) transport only, and its setting is captured by every playback context in the app. */ try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
+<title>Beat Lab Web Beta v0.18</title>
+<script>/* App version (Keith, 2026-11-07): BL_VERSION is the ONE source of truth for the app version — app-level only, never stored in project files. Bump it here and both the browser tab title and the in-app title card follow. BUILD NUMBER RULE (Keith, 2026-11-08): the number changes with EVERY update — this update is 0.8 (the Piano Roll repair — the roll opens loaded with a channel again — plus the twelve called notes: MPK knob pickup from the current value, the knob-window audition keyboard with Piano Roll / Modules key routing, no Drum Machine audition keys, one hit per pad press with the transport stopped, a low-latency audio setting, Drum Machine loop-record ADD with a beats/bars record-length choice, pad = sequence channel = mixer channel in every record routing, automatic multitrack placement when a channel is created, and 4/4 as the standing default), superseding the 0.7 stamp. BUILD 0.9 (Keith, 2026-11-08): the Drum Machine page loses the whole framed block he circled — the LCD readout panel, both TRACKS / CHOPS / NOTES / HOME soft-key rows, the "Bank A · Pad 1/64" status line, and the pad-properties strip under it (VOL/PAN/TUNE, Mute/Solo, 16 Levels, Note Variation, "binds on first hit", all of it) — pads and the page transport stay; and the pad LAYER editor's Volume / Pan / Tune are now the tied mixer channel's fader / pan / pitch: one set of values written through both ways (dmSyncLayerMix / blDmMixBack), never two copies that drift. */ var BL_VERSION="v0.18"; /* BUILD 0.18 (Keith, 2026-11-09): the MODULE DROPDOWN repair — "I couldn't change the module, the drop down wasn't responding." Cause, found in the stack pass: a module that is MAPPED to a track had its Engine dropdown hard-disabled (blBlockSyncHead set engsel.disabled = !!boundId, the keyboard-row pair mirrored it, and blBlockSetEngine refused bound blocks outright) — and the starter template ships with a mapped Omnisphere module, so the main module-changing dropdown was a dead control from the first load: on a phone a disabled select gives no picker and no feedback, every tap swallowed silently. Fixed at the cause: the Engine dropdown is never disabled again, and changing the engine on a mapped module now swaps the engine IN PLACE — voices killed, the track's synthMap takes the new engine with that engine's saved draft (or its default sound), the old engine's patch is kept as this block's draft for that engine, rack + Edit refresh, and the block's status line says what happened. Both Engine dropdowns (the block's own and the audition-keyboard pair, which routes through the same blBlockSetEngine) get the unlock. Same build, picker hardening for every module-choice dropdown: the Module selector (blKbSyncSelector), the per-block MIDI-track picker (blBlockFillPicker) and the knob window's module-channel selector (blV8KpSyncSel — which a 900 ms interval rebuilds while the window is open) no longer rebuild their option lists while that select has focus, so a refresh cycle can never close or reset a picker mid-pick; and on phone widths the module dropdowns (Engine / Preset / MIDI track / keyboard-row Module·Engine·Preset) stand at a full 44px tap height with touch-action:manipulation. Unmapped modules behave exactly as before. */ /* BUILD 0.17 (Keith, 2026-11-09): four directives in one update. (1) DOUBLE-TAP RESET — double-tapping (or double-clicking) anything adjustable on the MIXER or in the MODULES returns it to its default value: every rotary knob already reset on a desktop double-click, so the build adds true double-TAP detection for touch (a knob's pointer drag swallows the native dblclick on a phone) plus the same reset for the controls that never had one — the channel faders and the MASTER fader (default 80%) and the Hammond B3 drawbars in Modules (each bar back to the 888000000 default registration). (2) NO PLAYHEAD FOLLOW — while the playhead moves, NO view chases it: the Step Sequencer ⇄ Piano Roll playhead-follow is removed outright (the step lights and the roll's playhead line still draw and move; both views stay exactly where he left them so the steps hold still under his finger), the Piano Roll's own playhead scroll in its driver is gone, and the Edit timeline's Follow is off for good (S.tlFollow locked false; its button reads Off and explains instead of re-arming the chase). User scrolling and the sequencer⇄roll scroll lockstep are untouched. (3) BPM — the BPM slider (#bpmRange) is removed entirely (element and every handler reference), and the BPM number field moves UP into the transport button row with the play controls in every view — the same #bpmNum element and bpmSet handler, moved not copied; the Mobile pass no longer pulls it back out to its own row. (4) LOAD READOUT in Options — an honest panel of the app's OWN measured numbers, live while Options is open: decoded sounds count + the estimated memory those decoded AudioBuffers occupy (frames × channels × 4 bytes), live voices + channel chains right now, scheduler health (steps fired / fired late / silently skipped since page load, counted by wrapping the live scheduler + scheduleStep), the audio context's sample rate and base/output latency, and processor cores (hardwareConcurrency). iOS gives web pages NO system CPU % and NO total RAM figure, so the panel says exactly that and invents neither. */ /* BUILD 0.16 (Keith, 2026-11-09): the VU / STRIP-LINE repair in the MOBILE layout, from his "yellow line is broken at vu meter" note and the screenshot he circled on chan 1 — the selected strip's gold line stopped dead at the top of its VU meter and only picked up again below it. Cause, measured on the rendered page at phone width: a channel strip's fader row (58px fader input + 6px gap + 12px VU = 76px) was wider than the 76px strip's 64px content box, so the centred row overflowed 6px a side and the VU landed exactly on the strip's right edge, its opaque cover painting over the gold border for the VU's whole 104px height (Pad 1's VU sat flush on its strip's edge the same way). Fixed in Mobile only: the channel VU narrows 12 → 10px, the row's gap 6 → 2px, and the row borrows 3px of the strip's 5px side padding on each side, so the row measures exactly the 70px it can hold and the VU stands clear of the border with the line running unbroken beside it. The fader input itself — box, cap, slot, travel, values, gain mapping — is untouched, as are the MASTER strip (its row already fit), the desktop mixer and Mobile-off. */ /* BUILD 0.15 (Keith, 2026-11-09): the MASTER FADER + VU repair in the MOBILE layout, from his circled screenshot — the master fader and its VU sat stranded in the top of a tall, mostly empty MASTER strip with the "80%" readout hanging far below them. Cause: the channel strips set the board's height and every strip stretches to it, but the mobile pass had switched the master fader row's flex off while the desktop row's min-height:230px still applied, so fader + VU lived in the top 104px of a 230px row (readout pinned to that row's bottom edge) inside an even taller stretched strip. Fixed in Mobile only: the master's row flexes the full strip again (the desktop design), the fader and VU run its whole length beside each other, and a 20px band under the fader's travel holds the % readout level with the channel readouts. Same input element, same VU cover/peak loop, same values and gain mapping; the channel faders/VUs, the desktop mixer and Mobile-off are untouched. */ /* BUILD 0.14 (Keith, 2026-11-09): the EDITOR is Mini by default across all views — his first wording named the Mixer and he corrected it in the same breath ("No — I meant editor"), so the MIXER IS UNTOUCHED by this build. Until now only brand-new lanes were born Mini (the 2026-11-05 birth stamp on blAddChannelOfType); every other lane — the starter project's lanes, lanes in loaded / autosaved projects carrying no saved size, lanes arriving by any path that bypasses that one routine — fell back to Norm in blLaneSize. That fallback is now Mini (0), so any editor lane without an explicitly saved size renders Mini wherever the editor appears, and the Edit window's standing placeholder tracks stand Mini too (blSz0 on .blPhLane). A size he actually picked with a lane's Size button (Mini / Norm / Tall) still lives in S.laneSizes, still wins over the default, and the Size cycle is unchanged; no saved project data is rewritten — only the unstated default moved. */ /* BUILD 0.13 (Keith, 2026-11-09): in the MOBILE layout only, the mixer's three lead knobs (Gain · Pan · Pitch) stack on top of each other in a single column instead of sitting three-across, so each channel strip narrows from 132px to 76px — one knob wide — and more mixer channels fit in the phone's view before the mixer's sideways scroll. The stacked column makes each strip taller; the fader, value readout and Mute/Solo stay under it (Mute/Solo shrink to fit the narrow strip instead of holding the phone sheet's 44px minimum button width), and the group's "Gain · Pan · Pitch" header hides since every knob keeps its own label under its value. Same three knobs, same values, same BL_GP sync; the desktop mixer is unchanged and turning Mobile off restores the three-across row exactly. */ /* BUILD 0.12 (Keith, 2026-11-09): in the MOBILE layout only, the Piano Roll loses the whole control band under its grid that he crossed out on his phone — the "Velocity lane" help line ("Drag a bar to set that note's velocity (1–127)."), the keyboard control bar (both Oct buttons, the C4 – C7 range label, the Chord Lock pill, the STRUM row with its Off dropdown, and the CHANNEL "chan 1" sequencer-channel dropdown that sits beside Strum), and the Piano Roll's bottom keyboard strip (the piano keys with the C4–D6 note names). The Piano Roll grid itself, the velocity lane bars above that help line, and the Chord Generator + Progression Generator panels below all stay, on mobile and desktop alike. Everything hidden is display-only in the mobile theme: the controls, their values and Chord Lock / Strum / octave / channel state stay in the project and in the engine, and desktop (Mobile Off, or Auto on a wide screen) is exactly v0.11. SAME BUILD, Keith's follow-up directives (2026-11-09): (A) on mobile the BPM control and the Metronome move out of the title card up into the top transport (#blBarTransport), and the Metronome becomes an icon button (inline SVG) instead of the text pill — same button, same one-click state, moved not copied, restored whole on desktop; (B) on mobile the Options PROJECT and EDIT sections move to the very top of the Options view, above the PROJECT FOLDER — THIS COMPUTER panel; (C) on mobile the EXPORT — STEMS + MASTER panel sits directly under the EDIT section (right below the moved PROJECT/EDIT block) — and this placement ALSO applies on desktop, where the Export panel sits inside the Options panel immediately after the Edit group; (D) on mobile the APPEARANCE block (Theme / Emulation / Mobile layout pickers) sits directly under the Export panel. B and D are mobile-only and reverse exactly when Mobile turns off; all of A–D are moves of the existing nodes by the Mobile pass's arrange step, so every handler, value and saved state rides along. SAME BUILD, the mobile mixer repair (Keith's "Bug on mobile" screenshot, 2026-11-09): the slimline lead knob row (Gain · Pan · Pitch) overflowed its strip — the desktop two-column sizing gives every strip knobwrap a fixed 50% flex-basis, the lead knobs were each wrapped in a second knobwrap, and three-across in a nowrap row measured 150% of the 132px strip, so each strip's PITCH was pushed off its right edge onto the next strip's GAIN (the doubled GAIN he circled on Pad 1, its own PITCH off-screen). Fixed at the cause: the lead knobs are single knobwraps again (labels ride inside blKnob, BL_GP sync untouched), and in Mobile only the three wraps share the row as equal shrinkable thirds. Desktop mixer layout is unchanged. */ /* BUILD 0.11 (Keith, 2026-11-08): the MOBILE layout — its own category in Options → Appearance, beside Theme and Emulation ("beatlab.mobile.v1": Auto / On / Off; Auto = phone widths ≤820px). Not a theme (colours untouched) and not an emulation (no DAW furniture moves): while Mobile is on, the Drum Machine tab is gone, the MPK knob bank never opens, the fixed tab bar and the whole transport scroll with the page instead of pinning over the tab's content, and the mixer goes slimline — every channel strip keeps ONE row of basic knobs (the lead Gain · Pan · Pitch group), its fader, value readout and Mute/Solo, and the MASTER strip keeps just its fader and VU. Everything hidden stays in the project and in the engine; desktop with Mobile Off (or Auto on a wide screen) is exactly v0.10. */ /* BUILD 0.10 (Keith, 2026-11-08): the wiring update, shipped with the 0.9 content. A BLANK new project is now exactly one sequencer channel named "chan 1" — no sound in it — born wired to Drum Machine pad 1, the first Edit placeholder track and its mixer channel; the old "audio 1" + kick/snare/hihat + omnisphere default template is superseded ("audio 1" is a WAV channel and carries no MIDI / no sequencer presence). The Drum Machine starts with NO sounds loaded and NO modules are loaded by default: pads and modules are added one by one, and each addition runs the full chain (sequence channel → Edit channel → mixer channel) at load time, never on first touch. The Edit window stands 8 tracks tall from the start — blank placeholder tracks that real channels fall into in arrival order, growing one by one past 8 — and Edit order IS mixer order (one shared order). The Piano Roll always shows. ONE metronome, on the main (top) transport only, and its setting is captured by every playback context in the app. */ try{document.title="Beat Lab Web Beta "+BL_VERSION;}catch(e){} document.addEventListener("DOMContentLoaded",function(){ try{document.title="Beat Lab Web Beta "+BL_VERSION; var _blVerEl=document.getElementById("blVersion"); if(_blVerEl) _blVerEl.textContent=BL_VERSION;}catch(e){} });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -396,7 +396,6 @@ a{color:var(--teal)}
     <div class="tgroup bpmbox">
       <span class="tlabel">BPM</span>
       <input type="number" id="bpmNum" min="50" max="220" step="1" value="95" />
-      <input type="range" id="bpmRange" min="50" max="220" value="95" style="width:90px" />
     </div>
     <div class="tgroup">
       <span class="tlabel">Swing</span>
@@ -1352,8 +1351,8 @@ $("btnPlay").onclick=()=>setPlaying(!S.playing);
 $("btnStop").onclick=()=>{ setPlaying(false); uiStep=-1; };
 $("btnMetro").onclick=e=>e.target.classList.toggle("on");
 $("btnRecord").onclick=e=>{ S.recording=!S.recording; e.target.classList.toggle("warn-on", S.recording); setStatus(S.recording?"Recording armed — MIDI/keyboard hits land in the pattern while playing.":"Recording off."); };
-const bpmSet=v=>{ S.bpm=clamp(Math.round(v)||95,50,220); $("bpmNum").value=S.bpm; $("bpmRange").value=S.bpm; if(delayBus&&AC) delayBus.delayTime.value=(60/S.bpm)*S.channels[S.selected].fx.delDiv; syncStretchUI(); /* a fitted sample re-derives its stretch from the new BPM */ };
-$("bpmNum").onchange=e=>bpmSet(e.target.value); $("bpmRange").oninput=e=>bpmSet(e.target.value);
+const bpmSet=v=>{ S.bpm=clamp(Math.round(v)||95,50,220); $("bpmNum").value=S.bpm; if(delayBus&&AC) delayBus.delayTime.value=(60/S.bpm)*S.channels[S.selected].fx.delDiv; syncStretchUI(); /* a fitted sample re-derives its stretch from the new BPM */ };
+$("bpmNum").onchange=e=>bpmSet(e.target.value);
 $("swingRange").oninput=e=>{ S.swing=e.target.value/100; $("swingVal").textContent=e.target.value+"%"; };
 $("masterVol").oninput=e=>{ if(master) master.gain.value=e.target.value/100; };
 /* ---------------- Sequences: dynamic buttons, select, duplicate ---------------- */
@@ -3700,7 +3699,6 @@ function syncSnapBtn(){
 }
 if($("btnSnap")) $("btnSnap").onclick=()=>{ S.snap=!S.snap; syncSnapBtn(); updateLayoutInfo();
   setStatus(S.snap? "Snap on — dragged clips land on steps. Ms nudges in the Wave Editor still go off-grid." : "Snap off — wave clips drag freely, down to the millisecond. That’s the timing freedom waves give you over steps."); };
-$("bpmRange").addEventListener("input", ()=>renderLayout());
 $("bpmNum").addEventListener("change", ()=>renderLayout());
 window.addEventListener("resize", ()=>{ renderLayout(); drawWaveEditor(); });
 /* ---------------- Init ---------------- */
@@ -4538,7 +4536,7 @@ requestAnimationFrame(vuLoop);
    arrangement length is the longer of song chain and timeline.
    ============================================================ */
 S.atracks=[]; S.aclips=[]; S.tlZoom=1; S.tlCursor=0; S.selAclipId=null;
-S.edgeMode="trim"; S.tlFollow=true;
+S.edgeMode="trim"; S.tlFollow=false; /* v0.17 (Keith): no playhead follow — the Edit timeline never chases the playhead */
 let atrkSeq=0, linClipSeq=0;
 
 function getTrack(id){ return (S.atracks||[]).find(t=>t.id===id)||null; }
@@ -5000,7 +4998,7 @@ function syncEdgeBtn(){
     '<button class="pill" id="linEdgeMode" title="What dragging a clip’s edge does: Trim eats into the audio; Stretch repitches the clip in place — pitch rides with speed, MPC-style — and with Snap on the edge lands exactly on the grid">Clip edges: Trim</button>'+
     '<span class="tlabel">Timeline zoom</span><input type="range" id="linZoom" min="50" max="400" value="100" style="width:90px" />'+
     '<button class="btn sm" id="linFit">Fit whole song</button>'+
-    '<button class="pill on" id="linFollow">Follow playhead: On</button>'+
+    '<button class="pill" id="linFollow">Follow playhead: Off</button>'+
     '<span class="small" id="linCursorLabel"></span>'+
     '<button class="btn sm" id="linSplitPlay">✂ Split at playhead</button>'+
     '<button class="btn sm" id="linSplitCursor">✂ Split at cursor</button>';
@@ -5019,8 +5017,8 @@ function syncEdgeBtn(){
     const pz=$("ptZoomRange"); if(pz) pz.value=100;
     const pv=$("ptViewport"); if(pv) pv.scrollLeft=0; renderLayout();
     setStatus("Timeline fit: the whole "+layoutBars()+"-bar arrangement is on screen. Zoom in to work a long acapella bar by bar."); };
-  $("linFollow").onclick=e=>{ S.tlFollow=!S.tlFollow;
-    e.target.textContent="Follow playhead: "+(S.tlFollow?"On":"Off"); e.target.classList.toggle("on", S.tlFollow); };
+  $("linFollow").onclick=()=>{ S.tlFollow=false;
+    setStatus("Follow is off for good (Keith, v0.17) — while the playhead moves, no view chases it: the timeline stays where you left it, so the step or clip you aim at holds still under your finger. The playhead itself still draws and moves inside the visible area."); };
   $("linFile").onchange=async e=>{
     const files=e.target.files; if(!files || !files.length) return;
     ensureCtx();
@@ -9839,7 +9837,7 @@ function blLaneKeys(){
   S.laneOrder=cur;
   return cur;
 }
-function blLaneSize(key){ const v=S.laneSizes[key]; return (v===0||v===2)? v : 1; }
+function blLaneSize(key){ const v=S.laneSizes[key]; return (v===0||v===1||v===2)? v : 0; } /* BUILD 0.14: no saved size → Mini (0), the Editor's default — was Norm (1) */
 const BL_LANE_SIZE_NAMES=["collapsed","normal","enlarged"];
 
 /* ---------------- Duplicate a whole channel (MIDI Duplicate Track) ---------------- */
@@ -15184,6 +15182,14 @@ setStatus("Beat Lab ready — Click, ● Rec and Rec: ADD/OVERWRITE now live in 
   const posGroup=rd? rd.closest(".tgroup") : null;
   if(btnGroup) cluster.appendChild(btnGroup);
   if(posGroup){ posGroup.classList.add("blPosGroup"); cluster.appendChild(posGroup); }
+  /* v0.17 (Keith): the BPM slider is gone entirely, and the BPM
+     number field moves UP into the transport button row itself —
+     appended into the same .tgroup as the play controls, in every
+     view (it used to sit on its own row in the title card, and on
+     mobile on its own row under the position readout). Same
+     #bpmNum element, same bpmSet handler — moved, not copied. */
+  const bpmBoxT=document.querySelector(".transport .bpmbox");
+  if(bpmBoxT && btnGroup) btnGroup.appendChild(bpmBoxT);
   tabsBar.insertBefore(cluster, tabsBar.firstChild);
   tabsBar.appendChild(region);
   /* measured content offset — tracks the bar's actual height */
@@ -15223,6 +15229,11 @@ setStatus("Beat Lab ready — the transport (⏮ ■ ▶, play-selected, ↻ Loo
    per-lane Size cycle keeps working exactly as before, so any
    lane can be enlarged after it is created. The stamp rides
    S.laneSizes, which already persists per lane in the project.
+   BUILD 0.14 (2026-11-09) extends this from a birth stamp to the
+   standing default: blLaneSize's fallback for any lane with NO
+   saved size is now Mini, so unstamped lanes — starter, loaded
+   or otherwise — open Mini too; a lane with a saved size keeps
+   exactly that size.
    Duplicate Track is a copy, not a new track: it does NOT go
    through blAddChannelOfType, and the wrapper below passes the
    source lane's saved size through to the copy instead of
@@ -15882,6 +15893,13 @@ if(typeof blEnforceLaneNames==="function"){
      the other. Transport stopped: no auto-scroll at all. ----- */
   let lastFollowStep=-1;
   function followToStep(step, force){
+    /* v0.17 (Keith): NO playhead follow — during playback neither the
+       Step Sequencer nor the Piano Roll scrolls to chase the playing
+       step; both views stay exactly where he left them so the steps
+       hold still under his finger ("i cant hit the sequence because
+       it keeps moving"). The .now step lights keep drawing through
+       refreshStepLights itself; only this following scroll is gone. */
+    return;
     if(typeof S==="undefined" || !S.playing){ lastFollowStep=-1; return; }
     if(guardActive()){ pendingFollowStep=step; return; }
     if(!force && step===lastFollowStep) return;
@@ -16454,6 +16472,15 @@ if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>{ try{
   .kbctlrow .hlabel{flex:1 1 0;min-width:0;flex-direction:column;align-items:stretch;gap:2px;font-size:9px;letter-spacing:.4px}
   .kbctlrow .hlabel select{width:100%;min-width:0;max-width:none;font-size:11px;padding:5px 3px}
 }
+/* v0.18 · module dropdowns: no double-tap-zoom delay on the tap that
+   opens the picker, and full-height tap targets on phone widths for
+   the controls that change a module (Engine / Preset / MIDI track /
+   the keyboard row's Module · Engine · Preset) */
+#blViewSynth select{touch-action:manipulation}
+@media (max-width:820px){
+  #blViewSynth select.engsel, #blViewSynth select.presetsel, #blViewSynth select.chpicker,
+  #blSharedKbWrap select{min-height:44px}
+}
 </style>
 <script>
 "use strict";
@@ -16882,6 +16909,7 @@ function blBlockSyncPreset(block){
 }
 function blBlockFillPicker(block){
   const sel=block.picker; if(!sel) return;
+  if(document.activeElement===sel) return; /* v0.18: picker open — rebuilding its options now would close/reset it mid-pick */
   const keep=block.boundId || block.targetId || "";
   sel.innerHTML="";
   const o0=document.createElement("option"); o0.value=""; o0.textContent="— No track picked (Map creates one) —"; sel.appendChild(o0);
@@ -16904,7 +16932,7 @@ function blBlockSyncHead(block){
     else block.boundEl.textContent="Draft — dial a sound, then Map to Track (no track picked = one is created, named after the engine).";
   }
   /* every module carries its ✕ Remove at all times, bound or draft */
-  if(block.engSel){ block.engSel.disabled= !!block.boundId; block.engSel.value=block.engine; }
+  if(block.engSel){ block.engSel.disabled=false; block.engSel.value=block.engine; } /* v0.18: never disabled — a bound module swaps engine in place (blBlockSetEngine) */
   if(block.unmapBtn) block.unmapBtn.disabled= !block.boundId;
   if(block.editEl) block.editEl.textContent= ch? "Editing the mapped patch on “"+ch.name+"”." : "Working patch ("+BL_ENGINE_NAMES[block.engine]+") — not mapped yet.";
 }
@@ -16913,13 +16941,36 @@ function blStackSyncEmpty(){
   const e=$("blStackEmpty"); if(e) e.style.display= BL_STACK.length? "none" : "";
 }
 function blBlockSetEngine(block, e){
-  if(block.boundId) return; /* unmap first — a bound block keeps its engine */
+  /* v0.18: a BOUND block changes engine in place. The old code
+     refused outright AND the head sync disabled the dropdown, so on
+     a mapped module (the starter template ships one) the Engine
+     dropdown was a dead control — a disabled select shows no picker
+     and gives no feedback, so every tap looked swallowed. Now the
+     swap writes through to the mapped track: voices killed, the
+     track's synthMap takes the new engine with that engine's saved
+     draft (or its default sound), and the old engine's patch stays
+     as this block's draft for that engine. */
+  const wasBound=!!block.boundId;
   block.draftWork[block.engine]=block.inst.work;
   block.engine= BL_ENGINE_NAMES[e]? e : "mk";
   block.inst= blInstFor(block);
   if(block.draftWork[block.engine]) block.inst.work=block.draftWork[block.engine];
   block.inst.buildPanel(block.panelEl);
   blBlockFillPresets(block);
+  if(wasBound){
+    const ch=S.channels[block.boundId];
+    if(ch){
+      try{ blKillChannelVoices(block.boundId); }catch(err){}
+      ch.synthMap={ engine:block.engine, patch: blDeep(block.inst.work) };
+      block.inst.work=ch.synthMap.patch;
+      if(block.inst.syncPanel) block.inst.syncPanel();
+      blBlockSyncPreset(block);
+      try{ buildRack(); }catch(err){}
+      if(typeof ptRender==="function"){ try{ ptRender(); }catch(err){} }
+      blBlockStat(block, "Engine changed — “"+ch.name+"” now plays the "+BL_ENGINE_NAMES[block.engine]+" engine (“"+(block.inst.work.name||"Custom")+"”). Pick a preset above to dial it in; the old engine's patch is kept as this module's draft for that engine.");
+      try{ blStackRefresh(); }catch(err){}
+    }
+  }
   blBlockSyncHead(block);
   markDirty();
 }
@@ -16996,7 +17047,7 @@ function blNewBlock(engine, patch, boundId){
     '<div class="blface"><img class="blfaceimg" alt=""></div>'+
     '<div class="blockhead"><span class="blocktitle"></span><span class="blockch"></span><span class="blockpatch"></span><span class="blockbound"></span>'+
     '<button type="button" class="btn sm blockrm" title="Remove this module — removing a bound module unmaps it first; its track stays in the project">✕ Remove</button></div>'+
-    '<div class="engrow"><label class="hlabel">Engine: <select class="engsel" title="Engine for this module (unmap to change a bound module’s engine)"><option value="mk">microKORG</option><option value="omni">Omnisphere</option><option value="triton">Triton</option></select></label>'+
+    '<div class="engrow"><label class="hlabel">Engine: <select class="engsel" title="Engine for this module — changing a mapped module swaps its engine in place: its track keeps playing, with the new engine’s sound"><option value="mk">microKORG</option><option value="omni">Omnisphere</option><option value="triton">Triton</option></select></label>'+
     '<label class="hlabel">Preset: <select class="presetsel" title="Preset for this block’s engine — loading a preset never maps or unmaps a track"></select></label></div>'+
     '<div class="engpanel"></div>'+
     '<div class="mkbar"><label class="hlabel">MIDI track: <select class="chpicker"></select></label>'+
@@ -17115,7 +17166,7 @@ if(typeof renameChannel==="function"){
     '<div class="small" style="margin-top:6px">Adds another complete module below — dial a second sound and map it to another MIDI track. Modules never share patches, even on the same engine.</div>'+
     '<div id="blSharedKbWrap" style="margin-top:14px"><div class="mkbar kbctlrow"><span class="small kbctl-title" style="font-weight:700;letter-spacing:.06em">AUDITION KEYBOARD</span>'+
     '<label class="hlabel">Module: <select id="blKbModuleSel" title="Which module the shared audition keyboard plays"></select></label>'+
-    '<label class="hlabel">Engine: <select id="blKbEngSel" title="Engine of the module picked at left — same control as that module’s own Engine dropdown (unmap to change a bound module’s engine)"><option value="mk">microKORG</option><option value="omni">Omnisphere</option><option value="triton">Triton</option></select></label>'+
+    '<label class="hlabel">Engine: <select id="blKbEngSel" title="Engine of the module picked at left — same control as that module’s own Engine dropdown; changing a mapped module swaps its engine in place"><option value="mk">microKORG</option><option value="omni">Omnisphere</option><option value="triton">Triton</option></select></label>'+
     '<label class="hlabel">Preset: <select id="blKbPresetSel" title="Preset of the module picked at left — same control as that module’s own Preset dropdown; for Triton this is its Programs list"></select></label></div>'+
     '<div class="kbwrap"><div class="kb" id="blSharedKb"></div></div>'+
     '<div class="small" id="blKbNone" style="display:none;margin-top:6px">No modules — the keyboard has nothing to play. Add a module above and it plays that module.</div>'+
@@ -18037,7 +18088,7 @@ function blKbPairSync(){
     if(ps){ ps.innerHTML=""; const o=document.createElement("option"); o.value="-1"; o.textContent="No modules"; ps.appendChild(o); ps.disabled=true; }
     return;
   }
-  if(es){ es.disabled= !!block.boundId; es.value=block.engine; }
+  if(es){ es.disabled=false; es.value=block.engine; } /* v0.18: same unlock as the block's own Engine dropdown */
   if(ps){
     if(block.presetSel){ ps.innerHTML=block.presetSel.innerHTML; ps.value=block.presetSel.value; }
     ps.disabled=false;
@@ -18061,6 +18112,8 @@ blBlockSyncHead=function(block){ _blKbPairHeadPrev(block); try{ if(block && blKb
 function blKbSyncSelector(){
   const sel=$("blKbModuleSel"); if(!sel) return;
   const cur=blKbBlock(); BL_KB_SEL= cur? cur.id : null;
+  if(document.activeElement===sel){ /* v0.18: picker open — a rebuild here closes/resets it mid-pick; the marks + pair still sync */
+    blKbMarkControlled(); try{ blKbPairWire(); blKbPairSync(); }catch(e){} return; }
   sel.innerHTML="";
   const noneNote=$("blKbNone"); if(noneNote) noneNote.style.display= BL_STACK.length? "none" : "";
   sel.disabled= !BL_STACK.length;
@@ -22578,11 +22631,9 @@ if(typeof buildRack==="function"){
     ph.style.left=x+"px";
     if(gg.rowTops && gg.rowTops.length){ ph.style.top=gg.rowTops[0]+"px"; ph.style.height=(gg.rowTops[gg.rowTops.length-1]+gg.cellH-gg.rowTops[0])+"px"; }
     ph.style.display="block";
-    const wrap=$("rollWrap");
-    if(wrap && wrap.clientWidth>0){
-      const viewL=wrap.scrollLeft, viewR=viewL+wrap.clientWidth;
-      if(x<viewL+30 || x>viewR-30) wrap.scrollLeft=Math.max(0, x-wrap.clientWidth*0.35);
-    }
+    /* v0.17 (Keith): the Piano Roll does NOT scroll to follow its
+       playhead — the line above draws and moves within the visible
+       area only, and the view stays where he left it. */
   }
 
   function pbFrame(){
@@ -23524,6 +23575,7 @@ function blV8KpSyncSel(){
   const rR=$id("blKpRouteRoll"), rM=$id("blKpRouteMod");
   if(rR) rR.classList.toggle("on", KP.keysRoute!=="mod");
   if(rM) rM.classList.toggle("on", KP.keysRoute==="mod");
+  if(document.activeElement===sel) return; /* v0.18: this sync re-runs on a 900 ms interval while the window is open — rebuilding the options mid-pick closed the module-channel picker before a choice could land */
   sel.innerHTML="";
   if(KP.keysRoute==="mod"){
     const st=blV8Stack();
@@ -23931,7 +23983,7 @@ function blV10Placeholders(wrapEl){
   const target=Math.max(8, real+1); /* eight standing tracks; past eight, one more placeholder, one by one */
   for(let i=real;i<target;i++){
     const d=document.createElement("div");
-    d.className="ptLane blPhLane"; d.setAttribute("data-blph","1");
+    d.className="ptLane blPhLane blSz0"; d.setAttribute("data-blph","1"); /* BUILD 0.14: placeholders stand Mini too — the Editor's default size covers the empty tracks, not just the filled ones */
     d.innerHTML='<div class="ptHead"><span class="ptTrkNo">Track '+(i+1)+'</span>'+
       '<span class="ptName">Empty</span><span class="ptChLine">Placeholder track</span></div>'+
       '<div class="ptBody blPhBody"><span>Nothing here yet — load a sound on a drum pad or add a module, and its channel lands in the next placeholder, wired to the sequencer and the mixer.</span></div>';
@@ -24099,14 +24151,16 @@ setTimeout(()=>blV10Safe(()=>{
    3 · NO KNOB BANK. The MPK knob bank window and its opener
        button are gone, and the pass below refuses to open it
        (hardware CCs included) while Mobile is on.
-   4 · SLIMLINE MIXER, ONE ROW OF BASIC KNOBS. Each channel strip
-       keeps only its lead Gain · Pan · Pitch knob row (the
-       [data-g="gp"] group), a short fader + VU, its value readout
-       and Mute/Solo — EQ, comp, limit/heat, crusher, cuts, FX,
-       width, the colour picker and the Select button all hide
-       (their values stay in the project and keep sounding; they
-       are one Mobile-off away). The MASTER strip keeps just its
-       name, fader and VU.
+   4 · SLIMLINE MIXER, LEAD KNOBS STACKED. Each channel strip
+       keeps only its lead Gain · Pan · Pitch knobs (the
+       [data-g="gp"] group), stacked on top of each other in a
+       single column (Keith, 2026-11-09) so the strip is one knob
+       wide (76px) and more channels fit in the phone's view, plus
+       a short fader + VU, its value readout and Mute/Solo — EQ,
+       comp, limit/heat, crusher, cuts, FX, width, the colour
+       picker and the Select button all hide (their values stay in
+       the project and keep sounding; they are one Mobile-off
+       away). The MASTER strip keeps just its name, fader and VU.
    5 · PIANO ROLL CONTROL BAND GONE (2026-11-09). The band under
        the Piano Roll grid — the "Velocity lane" help line, the
        keyboard control bar (Oct buttons, range label, Chord Lock,
@@ -24144,29 +24198,83 @@ setTimeout(()=>blV10Safe(()=>{
 :root[data-mobile="on"] #blKp{display:none!important}
 :root[data-mobile="on"] #blKpBtn{display:none!important}
 
-/* --- 4 · slimline mixer: one basic knob row per channel --- */
+/* --- 4 · slimline mixer: the 3 lead knobs STACKED per channel (Keith, 2026-11-09) ---
+   Gain · Pan · Pitch stand in one vertical column instead of a
+   three-across row, so a channel strip only has to be one knob wide:
+   132px → 76px, and more channels fit in the phone's view before the
+   mixer's own sideways scroll. The strip trades height for width —
+   the stacked column runs taller; the fader, value readout and
+   Mute/Solo below it are unchanged. */
 :root[data-mobile="on"] #mixerStrips{gap:6px}
 :root[data-mobile="on"] #mixerStrips .bstrip{padding:7px 5px}
-:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip){width:132px!important}
+:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip){width:76px!important}
 :root[data-mobile="on"] #mixerStrips .bstrip .kgroup{display:none!important}
 :root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip) .kgroup:has(>.krow[data-g="gp"]){display:block!important;border-top:none;margin-top:2px;padding-top:2px}
-:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"]{flex-wrap:nowrap!important;justify-content:space-between}
-/* The lead row's three wraps share the strip equally and may shrink
-   (Keith, 2026-11-09, "Bug on mobile"): the desktop two-column rule
-   sizes every strip .knobwrap at flex:0 0 calc(50% - 3px), so three
-   lead knobs claimed 150% of a nowrap row and PITCH spilled off the
-   strip — onto the next strip's GAIN on Pad 1 in his screenshot. */
-:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"]>.knobwrap{flex:1 1 0!important;min-width:0}
-:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"] .knob{width:34px!important;height:34px!important}
+/* The group header ("Gain · Pan · Pitch") would wrap onto three lines
+   in a one-knob-wide strip; each knob keeps its own label under its
+   value, so nothing is lost by hiding the header in the stack. */
+:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip) .kgroup:has(>.krow[data-g="gp"]) .klabel{display:none!important}
+:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"]{flex-direction:column!important;flex-wrap:nowrap!important;align-items:center;justify-content:flex-start;gap:7px}
+/* One knob per line: each wrap takes the strip's full inner width and
+   centres its knob / value / label column. The desktop two-column
+   sizing (flex-basis 50%, never shrinks) is fully overridden, so a
+   wrap can never claim more than the strip — the 2026-11-09 overflow
+   (three-across measuring 150% of the strip, PITCH spilling onto the
+   next strip's GAIN) cannot come back in the stacked layout. */
+:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"]>.knobwrap{flex:none!important;width:100%;min-width:0}
+:root[data-mobile="on"] #mixerStrips .krow[data-g="gp"] .knob{width:40px!important;height:40px!important}
+/* Mute/Solo share the narrow strip: the phone sheet's 44px minimum
+   button width is a two-across floor of 91px — wider than this strip —
+   so in Mobile the pair shrink to fit side by side instead of
+   spilling past the strip's edge. Their 44px height stays. */
+:root[data-mobile="on"] #mixerStrips .bstrip .msbtns button{min-width:0}
 :root[data-mobile="on"] #mixerStrips .bstrip .colpick,
 :root[data-mobile="on"] #mixerStrips .bstrip .selbtn,
 :root[data-mobile="on"] #mixerStrips .bstrip .frail{display:none!important}
 :root[data-mobile="on"] #mixerStrips .bstrip input[type=range].vert{height:104px!important}
 :root[data-mobile="on"] #mixerStrips .bstrip .vu{height:104px!important}
+/* VU KEEPS OFF THE STRIP'S LINE (repair, 2026-11-09 — his "yellow
+   line is broken at vu meter", circled on chan 1: the selected
+   strip's gold line stopped at the VU's top and only picked up
+   again below it). Measured on the rendered page at phone width:
+   the fader row's parts — 58px fader input + 6px gap + 12px VU =
+   76px — were wider than the strip's 64px content box (76px strip
+   − 1px borders − 5px side padding), so the centred row overflowed
+   6px a side and the VU landed exactly on the strip's right edge,
+   its opaque cover painting over the gold border for the VU's
+   whole 104px height; Pad 1's VU sat flush on its edge the same
+   way. In Mobile only, the row now fits the strip: the VU narrows
+   12 → 10px, the gap 6 → 2px, and the row borrows 3px of the
+   strip's 5px side padding on each side (negative margins), for
+   exactly the 70px it can hold — the VU stands clear of the border
+   and the line runs unbroken beside it. The fader input itself
+   (box, cap, slot, travel, values) is untouched, as are the MASTER
+   strip — its 76px row already fits its 84px content box — the
+   desktop mixer and Mobile-off. */
+:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip) .faderRow{gap:2px;margin-left:-3px;margin-right:-3px}
+:root[data-mobile="on"] #mixerStrips .bstrip:not(.masterstrip) .vu{width:10px!important}
 :root[data-mobile="on"] #mixerStrips .masterstrip{width:96px!important}
 :root[data-mobile="on"] #mixerStrips .masterstrip .kgroup,
 :root[data-mobile="on"] #mixerStrips .masterstrip .small{display:none!important}
-:root[data-mobile="on"] #mixerStrips .masterstrip .faderRow{flex:none;height:auto;margin-top:8px}
+/* MASTER FADER + VU SPAN THE STRIP (repair, 2026-11-09 — his circled
+   screenshot: fader stranded at the strip's top, "80%" hanging far
+   below it, dead strip underneath). The channel strips set the
+   board's height (stacked knobs + fader + Mute/Solo) and every strip
+   stretches to it, but the master kept the short 104px channel
+   fader with its row's flex switched off — while the desktop row's
+   min-height:230px still applied — so fader + VU sat in the top
+   104px of a 230px row, the readout pinned to that row's bottom
+   edge, and the rest of the tall strip was empty. The fix is the
+   desktop design let through: the master's row flexes the full
+   strip again, fader + VU run its whole length beside each other
+   (the 104px channel caps below are overridden for the master
+   only), and a 20px band under the fader's travel holds the %
+   readout, level with the channel readouts. Same input, same VU,
+   same values — desktop and Mobile-off are untouched. */
+:root[data-mobile="on"] #mixerStrips .masterstrip .faderRow{flex:1 1 auto;min-height:0;margin-top:8px;padding-bottom:20px}
+:root[data-mobile="on"] #mixerStrips .masterstrip input[type=range].vert{height:100%!important}
+:root[data-mobile="on"] #mixerStrips .masterstrip .vu{height:100%!important}
+:root[data-mobile="on"] #mixerStrips .masterstrip .val{bottom:2px}
 
 /* --- 5 · Piano Roll: no control band under the grid (Keith, 2026-11-09) ---
    The whole band he crossed out on his phone goes, in Mobile only:
@@ -24257,7 +24365,7 @@ setTimeout(()=>blV10Safe(()=>{
     }
     if(!silent && typeof setStatus==="function")
       setStatus(on
-        ? "Mobile layout ON — no Drum Machine tab, no knob bank, the tab bar and the whole transport scroll with the page, and the mixer is slimline: one row of basic knobs (Gain · Pan · Pitch), fader and Mute/Solo per channel. Everything hidden keeps its value and keeps sounding."
+        ? "Mobile layout ON — no Drum Machine tab, no knob bank, the tab bar and the whole transport scroll with the page, and the mixer is slimline: the basic knobs (Gain · Pan · Pitch) stacked in one column, fader and Mute/Solo per channel, so more channels fit in view. Everything hidden keeps its value and keeps sounding."
         : "Mobile layout "+(mode==="off"? "OFF" : "on Auto")+" — the full desktop presentation: every tab, the knob bank, the pinned transport and the full mixer are back. Nothing about your project changed.");
   }
 
@@ -24275,7 +24383,7 @@ setTimeout(()=>blV10Safe(()=>{
       var lab=document.createElement("label"); lab.className="hlabel"; lab.style.cssText="display:flex;gap:8px;align-items:center;margin-top:8px";
       var lt=document.createElement("span"); lt.textContent="Mobile layout:"; lab.appendChild(lt);
       sel=document.createElement("select"); sel.id="blMobileSel";
-      sel.title="The phone presentation of Beat Lab — its own category, beside Theme (colours) and Emulation (desktop DAW layouts); it is neither. On: trimmed tabs (no Drum Machine), no MPK knob bank, the tab bar and transport scroll with the page, and a slimline mixer with one row of basic knobs per channel. Auto turns it on at phone widths only. Saved on this device, never in project files; sound, data and playback are untouched.";
+      sel.title="The phone presentation of Beat Lab — its own category, beside Theme (colours) and Emulation (desktop DAW layouts); it is neither. On: trimmed tabs (no Drum Machine), no MPK knob bank, the tab bar and transport scroll with the page, and a slimline mixer with its basic knobs stacked in one column per channel so more channels fit in view. Auto turns it on at phone widths only. Saved on this device, never in project files; sound, data and playback are untouched.";
       [["auto","Auto — on for phones"],["on","On"],["off","Off"]].forEach(function(pair){
         var o=document.createElement("option"); o.value=pair[0]; o.textContent=pair[1]; sel.appendChild(o);
       });
@@ -24283,7 +24391,7 @@ setTimeout(()=>blV10Safe(()=>{
       sel.onchange=function(){ mode=sel.value; try{ localStorage.setItem(KEY, mode); }catch(e){} apply(false); };
       lab.appendChild(sel); group.appendChild(lab);
       var note=document.createElement("div"); note.className="small"; note.style.marginTop="6px";
-      note.textContent="Mobile is a layout of its own — not a colour theme and not a DAW emulation. On a phone: no Drum Machine tab, no MPK knob bank, the tab bar and the whole transport scroll with the page instead of pinning over it, and the mixer goes slimline with one row of basic knobs (Gain · Pan · Pitch) per channel. Desktop stays exactly as it is.";
+      note.textContent="Mobile is a layout of its own — not a colour theme and not a DAW emulation. On a phone: no Drum Machine tab, no MPK knob bank, the tab bar and the whole transport scroll with the page instead of pinning over it, and the mixer goes slimline with its basic knobs (Gain · Pan · Pitch) stacked in one column per channel, so more channels fit on screen. Desktop stays exactly as it is.";
       group.appendChild(note);
     } else { sel=document.getElementById("blMobileSel"); }
   }catch(e){}
@@ -24373,7 +24481,7 @@ setTimeout(()=>blV10Safe(()=>{
     if(on){
       /* A · BPM + metronome icon up into the top transport */
       if(bar){
-        if(bpmBox && bpmBox.parentNode!==bar) bar.appendChild(bpmBox);
+        if(bpmBox && !bar.contains(bpmBox)) bar.appendChild(bpmBox); /* v0.17: BPM already rides inside the transport button row — never pull it out onto its own row */
         if(metro && metro.parentNode!==bar) bar.appendChild(metro);
       }
       if(metro){
@@ -24402,7 +24510,7 @@ setTimeout(()=>blV10Safe(()=>{
         metro.removeAttribute("aria-label");
         metro.textContent="Metronome";
       }
-      blMobRestore("bpm", bpmBox);
+      /* v0.17: BPM stays in the transport button row with Mobile off too — no restore to the title card. */
       blMobRestore("metro", metro);
       /* B + D · groups back to their recorded slots in the Options panel */
       blMobRestore("app", appG);
@@ -24427,7 +24535,198 @@ setTimeout(()=>blV10Safe(()=>{
 
   apply(true);
   if(effective() && typeof setStatus==="function")
-    setStatus("Beat Lab ready — Mobile layout is on: Edit · Mixer · Piano Roll · Modules · Sampler · Options (no Drum Machine, no knob bank), the tab bar and the whole transport scroll with the page, and the mixer is slimline with one row of basic knobs per channel. Switch it under Options → Appearance → Mobile layout.");
+    setStatus("Beat Lab ready — Mobile layout is on: Edit · Mixer · Piano Roll · Modules · Sampler · Options (no Drum Machine, no knob bank), the tab bar and the whole transport scroll with the page, and the mixer is slimline with its basic knobs stacked in one column per channel. Switch it under Options → Appearance → Mobile layout.");
+})();
+</script>
+<style>
+/* v0.17 · BPM rides inside the transport button row */
+#blBarTransport .bpmbox{gap:5px;margin-left:4px}
+#blBarTransport #bpmNum{width:58px}
+@media (max-width:820px){ #blBarTransport .tgroup{flex-wrap:wrap} #blBarTransport #bpmNum{width:54px} }
+/* v0.17 · Load panel (Options) */
+#blLoadPanel .blLoadGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px 18px;margin-top:8px}
+#blLoadPanel .blLoadRow b{display:block;font-size:10px;letter-spacing:1.2px;color:var(--faint);text-transform:uppercase;margin-bottom:2px;font-weight:700}
+#blLoadPanel .blLoadRow span{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--ink)}
+</style>
+<script>
+"use strict";
+/* ================================================================
+   BUILD 0.17 (Keith, 2026-11-09) — appended pass
+   1 · DOUBLE-TAP RESET, touch half. Every blKnob already resets to
+       its own def on a desktop double-click, but on a phone the
+       knob's pointer drag (preventDefault + pointer capture) can
+       swallow the native dblclick, so his double TAP did nothing.
+       A capture-phase tap tracker watches every .knob: a second
+       pointerdown on the same knob within 350 ms and ~16 px fires
+       the knob's own dblclick — its reset-to-default — exactly as
+       a mouse double-click does. Same tracker plus a native
+       dblclick listener covers the range controls that never had
+       a reset: the mixer channel faders and the MASTER fader
+       (default 80%, the value every channel is born with) and the
+       Modules view's Hammond B3 drawbars (each bar back to the
+       BL_B3_DEFAULTS registration, 888000000). Reset writes the
+       value and dispatches input + change, so the control's own
+       handlers move the real state (channel volume, master gain,
+       the B3 patch) — never a cosmetic snap.
+   2 · LOAD READOUT (Options). iOS gives web pages no system CPU %
+       and no total RAM figure, so this panel invents neither: it
+       shows Beat Lab's OWN measured numbers, refreshed twice a
+       second while Options is open — decoded sounds + the memory
+       those AudioBuffers occupy, live voices + channel chains,
+       scheduler health, the context's sample rate and latencies,
+       and the device's reported processor cores.
+   ================================================================ */
+(function blV17(){
+  /* ---------- 1 · double-tap reset ---------- */
+  function blDefForRange(el){
+    if(el.id==="mxFader") return "80"; /* MASTER fader default */
+    if(el.id && el.id.indexOf("b3Bar-")===0 && typeof BL_B3_DEFAULTS!=="undefined"){
+      var bi=+el.id.slice(6); if(BL_B3_DEFAULTS.bars[bi]!=null) return String(BL_B3_DEFAULTS.bars[bi]);
+    }
+    if(el.dataset && el.dataset.def!=null) return el.dataset.def;
+    if(el.closest && el.closest("#mixerStrips") && el.classList.contains("vert")) return "80"; /* channel faders are born at 80% */
+    return el.defaultValue;
+  }
+  function blResetRange(el){
+    if(!el || el.disabled) return;
+    var def=blDefForRange(el); if(def==null || def==="") return;
+    el.value=def;
+    el.dispatchEvent(new Event("input", { bubbles:true }));
+    el.dispatchEvent(new Event("change", { bubbles:true }));
+  }
+  function blScopedRange(t){
+    if(!t || !t.matches) return null;
+    return t.matches('#mixerStrips input[type="range"], #blViewSynth input[type="range"]')? t : null;
+  }
+  var blLastTap={ el:null, t:0, x:0, y:0 };
+  document.addEventListener("pointerdown", function(e){
+    var knob=(e.target && e.target.closest)? e.target.closest(".knob") : null;
+    var range=knob? null : blScopedRange(e.target);
+    var el=knob||range;
+    if(!el){ blLastTap.el=null; return; }
+    var now=performance.now();
+    var again=blLastTap.el===el && (now-blLastTap.t)<350 && Math.abs(e.clientX-blLastTap.x)<16 && Math.abs(e.clientY-blLastTap.y)<16;
+    blLastTap={ el:el, t:now, x:e.clientX, y:e.clientY };
+    if(!again) return;
+    blLastTap.el=null;
+    if(knob){ knob.dispatchEvent(new MouseEvent("dblclick", { bubbles:true, cancelable:true })); }
+    else { var r=range; setTimeout(function(){ blResetRange(r); }, 30); setTimeout(function(){ blResetRange(r); }, 140); }
+  }, true);
+  document.addEventListener("dblclick", function(e){
+    var r=blScopedRange(e.target); if(r) blResetRange(r);
+  }, true);
+
+  /* ---------- 2 · scheduler health counters ---------- */
+  window.BL_LOAD={ fired:0, late:0, skipped:0 };
+  try{
+    if(typeof scheduleStep==="function"){
+      var _blLdSs=scheduleStep;
+      scheduleStep=function(step, t){
+        try{
+          if(typeof S!=="undefined" && S.playing && typeof AC!=="undefined" && AC && isFinite(t) && Math.abs(t-AC.currentTime)<5){
+            window.BL_LOAD.fired++;
+            if(t<AC.currentTime-0.002) window.BL_LOAD.late++;
+          }
+        }catch(e){}
+        return _blLdSs.apply(this, arguments);
+      };
+    }
+    if(typeof scheduler==="function"){
+      var _blLdSc=scheduler;
+      scheduler=function(){
+        var before=null, f0=window.BL_LOAD.fired;
+        try{ before=nextStepTime; }catch(e){}
+        var r=_blLdSc.apply(this, arguments);
+        try{
+          if(before!=null && typeof stepDurSec==="function"){
+            var adv=Math.round((nextStepTime-before)/stepDurSec());
+            var firedDelta=window.BL_LOAD.fired-f0;
+            if(adv>firedDelta) window.BL_LOAD.skipped+=(adv-firedDelta);
+          }
+        }catch(e){}
+        return r;
+      };
+      /* an already-running interval still holds the old function —
+         restart it on the wrapped scheduler so counting starts now */
+      if(typeof S!=="undefined" && S.playing && typeof schedTimer!=="undefined" && schedTimer){
+        try{ clearInterval(schedTimer); schedTimer=setInterval(scheduler, 25); }catch(e){}
+      }
+    }
+  }catch(e){}
+
+  /* ---------- 3 · the Load panel in Options ---------- */
+  function blFmtBytes(b){
+    if(b>=1048576) return (b/1048576).toFixed(1)+" MB";
+    if(b>=1024) return Math.round(b/1024)+" KB";
+    return b+" B";
+  }
+  function blCollectBuffers(){
+    var set=new Set();
+    function add(b){ if(b && typeof b==="object" && typeof b.length==="number" && typeof b.numberOfChannels==="number") set.add(b); }
+    try{ if(typeof library!=="undefined") library.forEach(function(it){ add(it && it.buffer); }); }catch(e){}
+    try{ Object.keys(S.channels||{}).forEach(function(id){ add(S.channels[id] && S.channels[id].buffer); }); }catch(e){}
+    try{ (S.clips||[]).forEach(function(c){ add(c && c.buffer); }); (S.aclips||[]).forEach(function(c){ add(c && c.buffer); }); }catch(e){}
+    return set;
+  }
+  var blLoadEls=null;
+  function blBuildLoadPanel(){
+    var holder=document.getElementById("blViewOptions"); if(!holder) return;
+    if(document.getElementById("blLoadPanel")) return;
+    var sec=document.createElement("section"); sec.className="panel"; sec.id="blLoadPanel";
+    sec.innerHTML="<h2>Load — Beat Lab on this device</h2>"+
+      '<div class="small">Honest figures only: iOS does not give web pages a system CPU percentage or a total RAM number, so this panel invents neither. These are Beat Lab\u2019s own measured numbers \u2014 the load the app itself is putting on the phone \u2014 refreshed live while Options is open.</div>'+
+      '<div class="blLoadGrid">'+
+      '<div class="blLoadRow"><b>Decoded sounds</b><span id="blLoadSounds">\u2014</span></div>'+
+      '<div class="blLoadRow"><b>Decoded audio memory (estimate)</b><span id="blLoadMem">\u2014</span></div>'+
+      '<div class="blLoadRow"><b>Live right now</b><span id="blLoadVoices">\u2014</span></div>'+
+      '<div class="blLoadRow"><b>Scheduler health (since page load)</b><span id="blLoadSched">\u2014</span></div>'+
+      '<div class="blLoadRow"><b>Audio engine</b><span id="blLoadCtx">\u2014</span></div>'+
+      '<div class="blLoadRow"><b>Processor cores (as reported)</b><span id="blLoadCores">\u2014</span></div>'+
+      "</div>"+
+      '<div class="togglerow"><button class="btn sm" id="blLoadReset" type="button">Reset scheduler counters</button></div>'+
+      '<div class="small">Decoded audio is the app\u2019s real memory driver: every loaded sound is held as raw samples (frames \u00d7 channels \u00d7 4 bytes). Late steps fired after their moment; skipped steps were dropped silently after a stall instead of burst-firing bunched-up and late \u2014 both climb when the phone is choking.</div>';
+    var op=document.getElementById("blOptionsPanel");
+    if(op && op.parentNode===holder) holder.insertBefore(sec, op.nextSibling);
+    else holder.appendChild(sec);
+    blLoadEls={ sounds:document.getElementById("blLoadSounds"), mem:document.getElementById("blLoadMem"),
+      voices:document.getElementById("blLoadVoices"), sched:document.getElementById("blLoadSched"),
+      ctx:document.getElementById("blLoadCtx"), cores:document.getElementById("blLoadCores") };
+    var rb=document.getElementById("blLoadReset");
+    if(rb) rb.onclick=function(){ window.BL_LOAD.fired=0; window.BL_LOAD.late=0; window.BL_LOAD.skipped=0; blUpdateLoad(); };
+  }
+  function blUpdateLoad(){
+    var wrap=document.querySelector(".wrap");
+    if(!wrap || !wrap.classList.contains("blv-options")) return; /* live only while Options is open */
+    if(!blLoadEls) blBuildLoadPanel();
+    if(!blLoadEls) return;
+    try{
+      var bufs=blCollectBuffers(), bytes=0;
+      bufs.forEach(function(b){ bytes+=b.length*b.numberOfChannels*4; });
+      blLoadEls.sounds.textContent=bufs.size+" sound"+(bufs.size===1? "" : "s")+" decoded";
+      blLoadEls.mem.textContent="\u2248 "+blFmtBytes(bytes)+" of raw samples";
+    }catch(e){}
+    try{
+      var sv=(typeof BL_VOICES!=="undefined" && BL_VOICES)? BL_VOICES.size : 0;
+      var dv=0; try{ var B=window.blDM; if(B && B.voices) dv=B.voices.length; }catch(e){}
+      var chains=0; try{ if(typeof liveNodes!=="undefined" && liveNodes) chains=Object.keys(liveNodes).length; }catch(e){}
+      blLoadEls.voices.textContent=sv+" synth voice"+(sv===1? "" : "s")+" \u00b7 "+dv+" drum voice"+(dv===1? "" : "s")+" \u00b7 "+chains+" channel chain"+(chains===1? "" : "s");
+    }catch(e){}
+    try{
+      var L=window.BL_LOAD;
+      blLoadEls.sched.textContent=L.fired+" steps fired \u00b7 "+L.late+" late \u00b7 "+L.skipped+" skipped";
+    }catch(e){}
+    try{
+      if(typeof AC!=="undefined" && AC){
+        var parts=[AC.sampleRate+" Hz sample rate", "state: "+AC.state];
+        if(typeof AC.baseLatency==="number") parts.push("base latency "+(AC.baseLatency*1000).toFixed(1)+" ms");
+        if(typeof AC.outputLatency==="number" && AC.outputLatency>0) parts.push("output latency "+(AC.outputLatency*1000).toFixed(1)+" ms");
+        blLoadEls.ctx.textContent=parts.join(" \u00b7 ");
+      } else blLoadEls.ctx.textContent="Audio not started yet \u2014 press Play once and these fill in.";
+    }catch(e){}
+    try{ blLoadEls.cores.textContent=(navigator.hardwareConcurrency? navigator.hardwareConcurrency+" cores reported by the browser" : "Not reported by this browser"); }catch(e){}
+  }
+  blBuildLoadPanel();
+  setInterval(blUpdateLoad, 500);
 })();
 </script>
 </body>
