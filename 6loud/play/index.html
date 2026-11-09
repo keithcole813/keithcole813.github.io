@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.78</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.79</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.78 ==============================
+/* ============================== 6LOUD demo v0.79 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -298,442 +298,7 @@ function loadImg(name, src){ const i = new Image(); i.src = src; IMG[name] = i; 
 /* character animation: rendered 30 fps sequences. The manifest is measured
    from the renders: cell size, ground-line offset, and each frame's
    lowest-point gap, so a rolling body rests on the surface, never sinks. */
-const MANIFEST = {
- "front": {
-  "n": 19,
-  "w": 302,
-  "h": 436,
-  "offset": 11,
-  "gaps": [4, 12, 29, 22, 16, 11, 5, 4, 4, 7, 17, 33, 26, 20, 20, 10, 6, 5, 4]
- },
- "turn": {
-  "n": 18,
-  "w": 302,
-  "h": 436,
-  "offset": 11,
-  "gaps": [4, 12, 29, 22, 16, 11, 5, 4, 4, 7, 17, 33, 26, 19, 20, 10, 6, 5]
- },
- "run": {
-  "n": 19,
-  "w": 302,
-  "h": 436,
-  "offset": 11,
-  "gaps": [
-   4,
-   12,
-   29,
-   23,
-   16,
-   11,
-   5,
-   4,
-   4,
-   7,
-   17,
-   33,
-   26,
-   20,
-   21,
-   10,
-   6,
-   5,
-   4
-  ]
- },
- "basic": {
-  "n": 31,
-  "w": 303,
-  "h": 514,
-  "offset": 5,
-  "gaps": [
-   6,
-   6,
-   6,
-   6,
-   6,
-   8,
-   10,
-   13,
-   17,
-   20,
-   23,
-   26,
-   30,
-   33,
-   31,
-   28,
-   24,
-   20,
-   19,
-   18,
-   18,
-   17,
-   15,
-   13,
-   10,
-   8,
-   8,
-   6,
-   4,
-   4,
-   13
-  ]
- },
- "armsopen": {
-  "n": 31,
-  "w": 303,
-  "h": 514,
-  "offset": 5,
-  "gaps": [
-   8,
-   6,
-   4,
-   4,
-   13,
-   28,
-   47,
-   72,
-   104,
-   136,
-   163,
-   180,
-   190,
-   196,
-   197,
-   193,
-   182,
-   167,
-   149,
-   127,
-   105,
-   81,
-   57,
-   35,
-   16,
-   7,
-   9,
-   13,
-   17,
-   19,
-   20
-  ]
- },
- "runjump": {
-  "n": 49,
-  "w": 440,
-  "h": 525,
-  "offset": 60,
-  "gaps": [
-   68,
-   75,
-   85,
-   99,
-   115,
-   134,
-   155,
-   178,
-   204,
-   236,
-   242,
-   223,
-   204,
-   185,
-   166,
-   149,
-   130,
-   109,
-   88,
-   67,
-   50,
-   25,
-   6,
-   4,
-   26,
-   33,
-   23,
-   31,
-   51,
-   30,
-   29,
-   30,
-   37,
-   52,
-   62,
-   60,
-   60,
-   60,
-   62,
-   63,
-   65,
-   66,
-   66,
-   67,
-   68,
-   69,
-   71,
-   72,
-   72
-  ]
- },
- "diveroll": {
-  "n": 65,
-  "w": 427,
-  "h": 520,
-  "offset": 79,
-  "gaps": [
-   83,
-   86,
-   88,
-   91,
-   106,
-   121,
-   147,
-   169,
-   169,
-   168,
-   168,
-   170,
-   187,
-   233,
-   270,
-   258,
-   244,
-   220,
-   212,
-   224,
-   239,
-   255,
-   277,
-   259,
-   222,
-   180,
-   133,
-   97,
-   79,
-   77,
-   80,
-   83,
-   87,
-   92,
-   97,
-   84,
-   65,
-   51,
-   46,
-   46,
-   34,
-   16,
-   6,
-   4,
-   12,
-   23,
-   38,
-   58,
-   61,
-   59,
-   61,
-   65,
-   73,
-   77,
-   78,
-   79,
-   82,
-   84,
-   86,
-   87,
-   86,
-   85,
-   85,
-   84,
-   83
-  ]
- },
- "roll3": {
-  "n": 40,
-  "w": 519,
-  "h": 567,
-  "offset": 96,
-  "gaps": [
-   87,
-   87,
-   87,
-   100,
-   105,
-   94,
-   55,
-   21,
-   0,
-   4,
-   30,
-   61,
-   78,
-   82,
-   88,
-   104,
-   125,
-   118,
-   107,
-   100,
-   99,
-   101,
-   103,
-   102,
-   100,
-   100,
-   100,
-   99,
-   97,
-   95,
-   96,
-   96,
-   96,
-   96,
-   98,
-   98,
-   94,
-   93,
-   93,
-   93
-  ]
- },
- "roll4": {
-  "n": 79,
-  "w": 336,
-  "h": 381,
-  "offset": 12,
-  "gaps": [
-   14,
-   19,
-   21,
-   24,
-   32,
-   31,
-   34,
-   42,
-   55,
-   60,
-   65,
-   69,
-   73,
-   74,
-   73,
-   71,
-   71,
-   78,
-   97,
-   123,
-   127,
-   135,
-   132,
-   115,
-   103,
-   93,
-   88,
-   92,
-   99,
-   108,
-   105,
-   103,
-   102,
-   102,
-   99,
-   97,
-   96,
-   95,
-   94,
-   93,
-   90,
-   83,
-   78,
-   75,
-   71,
-   66,
-   61,
-   56,
-   52,
-   50,
-   49,
-   48,
-   48,
-   46,
-   40,
-   35,
-   32,
-   30,
-   27,
-   26,
-   25,
-   24,
-   24,
-   23,
-   22,
-   21,
-   21,
-   20,
-   19,
-   18,
-   17,
-   17,
-   16,
-   16,
-   16,
-   16,
-   15,
-   15,
-   15
-  ]
- },
- "flip": {
-  "n": 16,
-  "w": 440,
-  "h": 525,
-  "offset": 60,
-  "gaps": [
-   178,
-   204,
-   236,
-   242,
-   223,
-   204,
-   185,
-   166,
-   149,
-   130,
-   109,
-   88,
-   67,
-   50,
-   25,
-   6
-  ]
- },
- "diveflip": {
-  "n": 18,
-  "w": 427,
-  "h": 520,
-  "offset": 79,
-  "gaps": [
-   169,
-   168,
-   168,
-   170,
-   187,
-   233,
-   270,
-   258,
-   244,
-   220,
-   212,
-   224,
-   239,
-   255,
-   277,
-   259,
-   222,
-   180
-  ]
- }
-};
+const MANIFEST = {"run": {"n": 37, "w": 305, "h": 436, "offset": 11, "gaps": [4, 4, 12, 18, 29, 26, 22, 18, 16, 14, 11, 7, 5, 4, 4, 4, 4, 5, 7, 8, 17, 30, 33, 29, 26, 23, 20, 20, 20, 17, 10, 6, 6, 7, 5, 3, 4]}, "armsopen": {"n": 61, "w": 303, "h": 525, "offset": 5, "gaps": [7, 7, 6, 5, 4, 4, 4, 7, 13, 20, 28, 37, 47, 59, 72, 88, 104, 120, 136, 150, 162, 172, 179, 186, 190, 193, 195, 197, 196, 195, 193, 188, 182, 175, 167, 158, 149, 138, 127, 116, 104, 92, 81, 69, 57, 45, 35, 26, 16, 10, 7, 7, 9, 11, 13, 15, 17, 18, 19, 20, 20]}, "basic": {"n": 61, "w": 303, "h": 525, "offset": 5, "gaps": [5, 6, 6, 5, 6, 6, 5, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 20, 21, 23, 24, 26, 28, 30, 32, 33, 32, 31, 30, 28, 27, 24, 22, 20, 19, 19, 18, 18, 18, 17, 17, 17, 16, 15, 14, 12, 11, 10, 9, 8, 8, 7, 7, 6, 5, 4, 4, 4, 7, 13]}, "runjump": {"n": 97, "w": 550, "h": 526, "offset": 63, "gaps": [68, 71, 75, 80, 86, 92, 99, 107, 116, 125, 134, 144, 155, 166, 178, 191, 204, 219, 236, 253, 243, 233, 224, 214, 205, 195, 186, 176, 167, 158, 149, 140, 130, 120, 110, 99, 88, 78, 68, 58, 51, 43, 25, 14, 6, 3, 4, 12, 26, 38, 33, 26, 24, 26, 32, 40, 52, 44, 31, 31, 30, 30, 30, 32, 37, 47, 52, 62, 63, 62, 61, 60, 60, 61, 61, 61, 62, 63, 64, 65, 65, 66, 66, 67, 67, 67, 67, 68, 68, 69, 69, 70, 71, 72, 72, 73, 73]}, "flip": {"n": 31, "w": 550, "h": 526, "offset": 63, "gaps": [178, 191, 204, 219, 236, 253, 243, 233, 224, 214, 205, 195, 186, 176, 167, 158, 149, 140, 130, 120, 110, 99, 88, 78, 68, 58, 51, 43, 25, 14, 6]}, "diveroll": {"n": 129, "w": 429, "h": 567, "offset": 79, "gaps": [83, 84, 86, 88, 88, 88, 91, 98, 106, 113, 121, 133, 147, 167, 169, 169, 169, 168, 168, 167, 168, 169, 170, 175, 187, 207, 233, 259, 270, 263, 258, 253, 244, 230, 220, 214, 212, 215, 224, 235, 239, 245, 255, 266, 277, 266, 259, 244, 222, 202, 180, 156, 133, 113, 97, 87, 79, 75, 77, 79, 80, 82, 83, 85, 87, 90, 92, 94, 97, 94, 84, 74, 65, 57, 51, 48, 46, 46, 46, 46, 34, 24, 15, 9, 6, 4, 4, 6, 12, 17, 23, 30, 38, 48, 58, 63, 60, 59, 59, 59, 60, 62, 65, 69, 73, 77, 77, 77, 78, 78, 79, 81, 82, 83, 84, 85, 86, 86, 87, 86, 86, 85, 84, 84, 84, 84, 84, 84, 83]}, "diveflip": {"n": 35, "w": 429, "h": 567, "offset": 79, "gaps": [169, 168, 168, 167, 168, 169, 170, 175, 187, 207, 233, 259, 270, 263, 258, 253, 244, 230, 220, 214, 212, 215, 224, 235, 239, 245, 255, 266, 277, 266, 259, 244, 222, 202, 180]}, "roll3": {"n": 79, "w": 644, "h": 567, "offset": 96, "gaps": [87, 87, 86, 86, 87, 91, 100, 112, 105, 99, 94, 74, 55, 38, 21, 7, 0, 1, 4, 14, 30, 46, 61, 73, 78, 80, 82, 84, 88, 95, 103, 113, 125, 121, 118, 113, 107, 103, 100, 99, 99, 100, 101, 101, 103, 103, 102, 101, 100, 100, 100, 99, 99, 99, 99, 98, 97, 96, 95, 95, 96, 97, 96, 96, 96, 96, 96, 97, 98, 98, 98, 97, 94, 92, 92, 93, 92, 92, 93]}, "roll4": {"n": 157, "w": 362, "h": 436, "offset": 14, "gaps": [14, 16, 19, 21, 21, 21, 24, 30, 32, 30, 31, 32, 34, 38, 42, 49, 54, 58, 60, 63, 65, 67, 69, 71, 72, 73, 74, 74, 73, 72, 71, 71, 71, 73, 78, 85, 97, 114, 123, 124, 127, 131, 135, 140, 132, 123, 115, 108, 103, 98, 93, 90, 88, 89, 92, 95, 99, 104, 108, 107, 105, 104, 103, 102, 102, 102, 102, 101, 99, 98, 97, 96, 96, 95, 95, 94, 94, 93, 93, 92, 90, 86, 83, 80, 78, 76, 75, 73, 71, 68, 66, 63, 60, 58, 56, 54, 52, 50, 50, 49, 49, 48, 48, 48, 48, 48, 46, 43, 40, 38, 35, 33, 32, 31, 30, 28, 27, 26, 26, 25, 25, 24, 24, 24, 24, 23, 23, 23, 22, 22, 21, 21, 20, 20, 20, 19, 18, 18, 18, 17, 17, 17, 16, 16, 16, 16, 16, 16, 16, 15, 15, 15, 15, 15, 15, 15, 15]}, "front": {"n": 37, "w": 305, "h": 436, "offset": 11, "gaps": [4, 5, 12, 18, 29, 26, 23, 18, 16, 14, 11, 8, 6, 4, 4, 4, 4, 6, 8, 9, 17, 31, 33, 29, 26, 23, 20, 20, 21, 17, 10, 6, 6, 7, 5, 4, 5]}, "turn": {"n": 35, "w": 305, "h": 436, "offset": 11, "gaps": [4, 4, 12, 18, 29, 26, 22, 18, 16, 14, 11, 8, 5, 4, 4, 4, 4, 5, 7, 8, 17, 30, 33, 29, 26, 23, 19, 20, 20, 17, 10, 6, 6, 7, 4]}}
 const LASH_MANIFEST = {"run": {"n": 19, "w": 312, "h": 405, "offset": 13, "gaps": [16, 22, 34, 19, 11, 7, 5, 6, 9, 17, 28, 34, 25, 13, 14, 9, 4, 7, 13]}, "armsopen": {"n": 31, "w": 328, "h": 525, "offset": 10, "gaps": [8, 9, 10, 10, 18, 32, 48, 70, 100, 131, 158, 174, 185, 191, 193, 191, 182, 168, 149, 129, 106, 83, 60, 37, 18, 7, 8, 11, 13, 15, 16]}, "basic": {"n": 31, "w": 328, "h": 525, "offset": 10, "gaps": [6, 6, 7, 8, 10, 16, 16, 17, 19, 22, 26, 30, 32, 31, 27, 23, 18, 14, 13, 15, 15, 15, 13, 12, 10, 9, 8, 9, 10, 10, 18]}, "runjump": {"n": 49, "w": 505, "h": 571, "offset": 82, "gaps": [63, 73, 88, 104, 122, 142, 164, 189, 218, 252, 275, 255, 235, 213, 190, 165, 140, 115, 90, 67, 59, 49, 49, 53, 61, 59, 79, 81, 85, 39, 23, 10, 4, 10, 23, 38, 54, 72, 80, 80, 81, 82, 83, 82, 82, 82, 82, 83, 82]}, "flip": {"n": 16, "w": 505, "h": 571, "offset": 82, "gaps": [189, 218, 252, 275, 255, 235, 213, 190, 165, 140, 115, 90, 67, 59, 49, 49]}, "diveroll": {"n": 65, "w": 460, "h": 517, "offset": 71, "gaps": [82, 83, 79, 77, 91, 107, 135, 157, 157, 155, 152, 154, 177, 225, 260, 253, 248, 238, 213, 208, 226, 258, 289, 258, 215, 174, 128, 90, 74, 75, 76, 78, 82, 85, 88, 74, 65, 59, 58, 58, 54, 29, 12, 4, 7, 16, 31, 50, 40, 27, 18, 12, 13, 17, 30, 47, 65, 79, 78, 77, 77, 76, 75, 74, 74]}, "diveflip": {"n": 18, "w": 460, "h": 517, "offset": 71, "gaps": [157, 155, 152, 154, 177, 225, 260, 253, 248, 238, 213, 208, 226, 258, 289, 258, 215, 174]}, "roll3": {"n": 40, "w": 465, "h": 421, "offset": 14, "gaps": [18, 19, 20, 30, 57, 44, 26, 14, 7, 15, 6, 5, 12, 25, 38, 45, 49, 54, 46, 29, 21, 13, 4, 5, 7, 8, 9, 9, 9, 8, 9, 10, 11, 12, 14, 16, 14, 12, 12, 14]}, "roll4": {"n": 79, "w": 350, "h": 361, "offset": 9, "gaps": [8, 7, 5, 4, 6, 11, 19, 23, 21, 18, 14, 12, 12, 12, 12, 13, 16, 7, 8, 20, 33, 36, 36, 38, 36, 35, 40, 37, 34, 24, 18, 10, 6, 6, 10, 13, 15, 16, 19, 20, 22, 24, 24, 24, 25, 24, 22, 22, 24, 29, 35, 36, 34, 28, 18, 13, 11, 8, 7, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9]}, "front": {"n": 19, "w": 312, "h": 405, "offset": 13, "gaps": [16, 22, 34, 19, 11, 7, 5, 6, 9, 17, 28, 34, 25, 13, 14, 9, 4, 7, 13]}, "turn": {"n": 18, "w": 312, "h": 405, "offset": 13, "gaps": [16, 22, 34, 19, 11, 7, 6, 6, 9, 17, 28, 34, 25, 13, 14, 9, 4, 7]}};
 const YORO_MANIFEST = {"run": {"n": 19, "w": 300, "h": 413, "offset": 10, "gaps": [4, 10, 25, 25, 22, 15, 9, 8, 9, 10, 14, 34, 22, 23, 23, 9, 7, 6, 5]}, "armsopen": {"n": 31, "w": 316, "h": 525, "offset": 12, "gaps": [4, 5, 5, 8, 17, 32, 52, 74, 103, 132, 156, 170, 178, 182, 183, 181, 173, 160, 144, 125, 105, 83, 61, 38, 17, 6, 5, 8, 10, 12, 13]}, "basic": {"n": 31, "w": 316, "h": 525, "offset": 12, "gaps": [9, 9, 9, 10, 11, 14, 15, 17, 20, 23, 26, 31, 37, 40, 38, 35, 30, 23, 19, 18, 15, 13, 9, 7, 5, 4, 4, 5, 5, 8, 17]}, "runjump": {"n": 49, "w": 503, "h": 525, "offset": 71, "gaps": [70, 82, 97, 112, 127, 145, 165, 187, 213, 244, 283, 312, 292, 271, 251, 229, 206, 181, 155, 129, 101, 83, 66, 42, 18, 4, 15, 53, 86, 89, 100, 96, 88, 78, 75, 70, 67, 64, 62, 62, 62, 62, 62, 63, 64, 65, 67, 69, 70]}, "flip": {"n": 16, "w": 503, "h": 525, "offset": 71, "gaps": [187, 213, 244, 283, 312, 292, 271, 251, 229, 206, 181, 155, 129, 101, 83, 66]}, "diveroll": {"n": 65, "w": 456, "h": 513, "offset": 62, "gaps": [64, 66, 69, 78, 93, 110, 134, 151, 153, 153, 153, 160, 184, 231, 258, 250, 242, 243, 252, 275, 292, 292, 274, 251, 204, 163, 119, 82, 60, 59, 61, 62, 65, 69, 75, 82, 64, 49, 34, 17, 7, 4, 4, 5, 11, 41, 81, 83, 88, 89, 86, 76, 70, 61, 58, 54, 54, 56, 58, 59, 59, 60, 61, 61, 62]}, "diveflip": {"n": 18, "w": 456, "h": 513, "offset": 62, "gaps": [153, 153, 153, 160, 184, 231, 258, 250, 242, 243, 252, 275, 292, 292, 274, 251, 204, 163]}, "roll3": {"n": 40, "w": 427, "h": 421, "offset": 14, "gaps": [17, 17, 18, 30, 54, 53, 42, 27, 21, 27, 39, 54, 68, 79, 83, 72, 56, 46, 42, 26, 17, 15, 14, 14, 11, 9, 8, 6, 4, 4, 7, 8, 9, 11, 14, 16, 16, 16, 17, 20]}, "roll4": {"n": 79, "w": 319, "h": 362, "offset": 7, "gaps": [4, 4, 4, 5, 15, 13, 11, 9, 8, 8, 8, 10, 14, 18, 21, 23, 27, 41, 67, 92, 89, 88, 88, 88, 89, 84, 79, 68, 58, 50, 42, 34, 31, 30, 28, 27, 25, 24, 22, 21, 21, 22, 21, 21, 21, 21, 21, 21, 22, 23, 23, 23, 21, 14, 9, 7, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]}, "front": {"n": 19, "w": 300, "h": 413, "offset": 10, "gaps": [4, 10, 25, 25, 22, 15, 9, 8, 9, 10, 14, 34, 22, 23, 23, 9, 7, 6, 5]}, "turn": {"n": 18, "w": 300, "h": 413, "offset": 10, "gaps": [4, 10, 25, 25, 22, 15, 9, 8, 9, 10, 14, 34, 22, 23, 23, 9, 7, 6]}};
 /* ---------- asset loader: small batches, timeouts, retries ----------
@@ -903,7 +468,7 @@ const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
    line, body dangling under the end of the cloud. Hands sit ~300
    above his soles in the dangle cycle (bobbing ±25). */
 const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.37, GRIP_DX = 0.04;   /* grip fraction tracks the floor so his hands stay on the SAME point of the cloud image: 0.55 original, 0.19 at the deep floor (v0.69.2), 0.37 at the halfway raise (v0.70.2) — surf + GRIP_FRAC is invariant per cloud */
-const HANDS_DANGLE = { 3: 269, 4: 292, 5: 315, 6: 324, 7: 323 };   /* hand height per dangle frame, measured off the shipped art */
+const HANDS_DANGLE = { 3: 269, 4: 269, 5: 269, 6: 269, 7: 281, 8: 292, 9: 304, 10: 315, 11: 320, 12: 324, 13: 324, 14: 323 };   /* 60 fps (v0.79): his measured 30 fps hand heights interpolated onto the doubled frame indices */   /* hand height per dangle frame, measured off the shipped art */
 const LASH_DANGLE = { 3: 268, 4: 299, 5: 323, 6: 332, 7: 329 };   /* LaShmoove's dangle: 6lade's table scaled per-frame by his measured figure extent (v0.56) */
 const YORO_DANGLE = { 3: 295, 4: 307, 5: 317, 6: 323, 7: 335 };
 const IVEY_DANGLE = { 3: 323, 4: 323, 5: 323, 6: 323, 7: 338, 8: 352, 9: 365, 10: 378, 11: 390, 12: 402, 13: 413, 14: 423, 15: 433, 16: 443 };   /* Poison Ivey (v0.78): probe-measured on her baked arms-open (323/352/378/402/423/443 at source positions 3-8), interpolated onto her 60 fps indices */
@@ -917,7 +482,7 @@ const SAYORI_DANGLE = { 3: 304, 4: 304, 5: 304, 6: 304, 7: 317, 8: 330, 9: 343, 
 let selChar = 'blade';
 try { const c0 = localStorage.getItem('sixloud_char'); if (c0 === 'lash' || c0 === 'yoro' || c0 === 'ivey' || c0 === 'sayori') selChar = c0; } catch (e) {}
 const SKINS = {
-  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', ready: true },
+  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true },
   lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', ready: true },
   yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', ready: true },
   ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'POISON IVEY', rate: 2, dblFlip: true, ready: true },
@@ -1239,17 +804,17 @@ function ghostUpdate(dt) {
     GR.stT += dt * GR.scrub; GR.runT = (GR.runT || 0) + dt * GR.scrub;
     GR.pyS = sm.py;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
     G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(distC / 15.24)) / 500));
-    if (GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
+    if (GR.perfD >= 0 && GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
       const gCharged = GR.chgSm > 0.3 || GR.fireT > 0;
       if (gCharged) { playBoom(); const gp2 = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp2) { gp2.boost = 7; gp2.sinkV = (gp2.sinkV || 0) + 380; } }   /* HIS charged landings boom + sink his cloud too (Keith v0.33/0.33.2) — his feet in world x are perfD + courseBase + 580 (v0.52) */
       for (let k = 0; k < (gCharged ? 14 : 8); k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, (gCharged ? 12 : 10) + Math.random() * 6, 140);
     }
-    if (GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
+    if (GR.perfD >= 0 && GR.st !== 0 && GR.prevSt === 0) {   /* takeoff: he kicks off the cloud too (Keith v0.31 — landing had a burst, leaving had none) */
       for (let k = 0; k < 8; k++) spawnPuff(px + G.o - 16 + Math.random() * 28, GR.pyS + GSINK + 4, 10 + Math.random() * 6, 140);
     }
     if (GR.st === 0 && GR.perfD >= 0) { G.puffT -= dt; if (G.puffT <= 0) { G.puffT = 0.125; spawnPuff(px + G.o - 16 + Math.random() * 8, GR.pyS + GSINK + 6, 13 + Math.random() * 6, 150); } }   /* no fog before his run starts (v0.47) */
-    else { gTrailAcc -= dt; if (gTrailAcc <= 0) { gTrailAcc = 0.024; pushTrail(px + G.o, GR.pyS + GSINK - 92, (GR.fireT > 0 || GR.chgSm > 0.3) ? CHAR_FX[ghostChar()].trail : 'plain');   /* his air trail tints with HIS color while he burns (v0.56) */ } }   /* his jumps trail light too */
-    if (GR.st === 0 && (GR.fireT > 0 || GR.chgSm > 0.3)) { fTrailAcc -= dt; if (fTrailAcc <= 0) { fTrailAcc = 0.016; pushTrail(px + G.o - 46, GR.pyS + GSINK - 92 + (Math.random() * 44 - 22), CHAR_FX[ghostChar()].streak);   /* ground streaks in the ghost's own color (v0.56) */ } }   /* charged and running by: golden fire streaks stream behind him, like the icon (Keith v0.35) */
+    else if (GR.perfD >= 0) { gTrailAcc -= dt; if (gTrailAcc <= 0) { gTrailAcc = 0.024; pushTrail(px + G.o, GR.pyS + GSINK - 92, (GR.fireT > 0 || GR.chgSm > 0.3) ? CHAR_FX[ghostChar()].trail : 'plain');   /* his air trail tints with HIS color while he burns (v0.56) */ } }   /* his jumps trail light too */
+    if (GR.st === 0 && GR.perfD >= 0 && (GR.fireT > 0 || GR.chgSm > 0.3)) { fTrailAcc -= dt; if (fTrailAcc <= 0) { fTrailAcc = 0.016; pushTrail(px + G.o - 46, GR.pyS + GSINK - 92 + (Math.random() * 44 - 22), CHAR_FX[ghostChar()].streak);   /* ground streaks in the ghost's own color (v0.56) */ } }   /* charged and running by: golden fire streaks stream behind him, like the icon (Keith v0.35) */
     if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; his feet in world x, v0.52) */
     GR.prevSt = GR.st;
     if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
