@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.81</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.82</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.81 ==============================
+/* ============================== 6LOUD demo v0.82 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -211,6 +211,7 @@ function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "
   mScene = 'day'; titleMusicOn = true; playTrack();
 }
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
+let rawPlane = null, bufPlane = null, decPlane = null;
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
   boomT++;   /* the trigger fired (the harness counts these even with no audio stack) */
   if (!actx || !bufBoom || actx.state !== 'running') return;   /* same proven route as the music: WebAudio only when it's alive */
@@ -232,6 +233,7 @@ if (window.fetch) {
   fetch('assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
   fetch('assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
   fetch('assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
+  fetch('assets/plane-flyby.mp3').then(r => r.arrayBuffer()).then(b => { rawPlane = b; }).catch(() => {});   /* Keith's airplane clip (v0.82): the pass is heard after it is seen */
   fetch('assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
 }
 /* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
@@ -254,6 +256,7 @@ function kickDecode() {
   if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => { decD = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
   if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => { decB = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
   if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => { decBoom = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
+  if (!decPlane && rawPlane && actx.decodeAudioData) decPlane = actx.decodeAudioData(rawPlane.slice(0)).then(b => { bufPlane = b; }).catch(() => { decPlane = null; });
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack() {
@@ -371,10 +374,16 @@ const CLOUDS = {
   '01':{surf:0.251, asp:0.264}, '11':{surf:0.371, asp:0.276}, '14':{surf:0.228, asp:0.262},
   '16':{surf:0.312, asp:0.295}, '17':{surf:0.352, asp:0.274}, '24':{surf:0.301, asp:0.324},
   '02':{surf:0.352, asp:0.378}, '12':{surf:0.261, asp:0.538}, '18':{surf:0.288, asp:0.434},
+  'S05':{surf:0.358, asp:0.513}, 'S13':{surf:0.333, asp:0.378}, 'S14':{surf:0.325, asp:0.350},
+  'S15':{surf:0.419, asp:0.353}, 'S17':{surf:0.345, asp:0.302}, 'S19':{surf:0.353, asp:0.428},   /* the storm deck set (v0.82): Keith's storm sheet, component-cleaned, measured like the others */
   '23':{surf:0.293, asp:0.440} };   /* the floor's history: original surf -> v0.69.2 dropped it +0.36 (Keith's .55 pick on cloud-11) -> v0.70.2 RAISED it back halfway (+0.18) after his phone verdict on .55: "running waist deep." Half the sink-in, tips still met. */
 const LONGC = ['01','11','14','16','17','24'], ISLAND = ['02','12','18','23'];
 const WISPY = ['06','13','19','22'];
 Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n] = im; }, 'assets/cloud-' + n + '.webp', true));
+/* v0.82 items + sky dressing sprites (loaded lazy, never core) */
+const STORMC = ['S05', 'S13', 'S14', 'S15', 'S17', 'S19'];
+STORMC.forEach(n => queueImg(im => { IMG['storm' + n] = im; }, 'assets/storm-' + n.slice(1) + '.webp'));
+['coin', 'plane-under', 'plane-side', 'satellite', 'rocket', 'note1', 'note2'].forEach(n => queueImg(im => { IMG[n] = im; }, 'assets/' + n + '.webp'));
 /* decorative background pack — ChatGPT sunset clouds via Keith (2026-11-06):
    his sheet, cut + compressed by Amy; streamed in, never gates the start */
 const BGMID = ['01','08','09','10','11','13','14','16','17','18','19','22','23','24','26','27','28'];
@@ -457,6 +466,19 @@ let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
 let doubleArmed = false, doubleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps) */
+/* v0.82 ITEMS (Keith, 2026-11-09): notes bank feet, the lightning coin grants a timed charge, storm banks fork the course, planes cross, the sky dresses itself */
+let notes = [], noteFt = 0, notesGot = 0, noteCharge = false;   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
+let coin = null, nextCoinFt = 1000, coinT = 0;
+let stormAt = 800 * 15.24, stormSteps = 0;
+let plane = null, planeNextAt = 42, stumbleT = 0;
+let rocket = null, rocketNextAt = 55, rpuffs = [];
+const runFt = () => Math.floor(dist / 15.24) + noteFt;   /* what the player sees and posts: travel + banked note feet (Keith's default-yes) */
+const spdF = () => stumbleT > 0 ? 0.55 : 1;   /* the stumble: speed drops a step, and the slowdown HELPS (Keith) */
+function planeScale(pp) {   /* the LOOM (Keith): you see it coming for a while — a long slow growth in the distance — then it explodes: in and out really fast */
+  if (pp < 0.7) { const u = pp / 0.7; return 0.05 + 0.30 * u * u; }
+  if (pp < 0.88) { const u = (pp - 0.7) / 0.18; return 0.35 + 0.65 * (u * u * (3 - 2 * u)); }
+  return 1 + 0.12 * Math.min(1, (pp - 0.88) / 0.17);
+}
 let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0, hangTY = 0, noLand = false;   /* noLand: the ledge-slip plunge ONLY — that fall never lands (v0.71) */
 /* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
    rapid jump taps inside the window climb up (SAVE); otherwise he slips
@@ -604,7 +626,7 @@ function recSample() {
 }
 function recFinish() {
   lastReplay = (REC && REC.frames.length > 10)
-    ? JSON.stringify({ v: 1, char: selChar, total: Math.max(0, Math.floor((dist - courseDist) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47; distance origin corrected v0.52) */
+    ? JSON.stringify({ v: 1, storm: 1, char: selChar, total: Math.max(0, Math.floor((dist - courseDist) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47; distance origin corrected v0.52) */
 }
 let G = null, gTarget = 0;   /* the bokeh sea-runner set is GONE (Keith v0.34): no record to beat = no LaShmoove at all */
 let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
@@ -679,16 +701,17 @@ function grSample(d) {   /* the recorded run, read by DISTANCE: {py, st} at d un
   const span = (C[hi] - C[lo]) || 1, f = (d - C[lo]) / span;
   return { py: F[lo][1] + (F[hi][1] - F[lo][1]) * f, st: F[lo][2], chg: F[lo][3] || 0 };
 }
+function isStormReplay(rp) { try { return JSON.parse(rp).storm === 1; } catch (e) { return false; } }   /* v0.82: pre-storm recordings are history — the storm changed the course geometry, so the ghost only races storm-era runs (Keith) */
 function ghostSource() {
   /* a race that can be PERFORMED beats a bigger bare number: the best
      entry WITH a replay (global board first, then the local board).
      NO replay anywhere = NO LaShmoove (Keith v0.34 — the sea-runner
      fallback is deleted; a bare score is a number to beat, not a ghost) */
   const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
-  const gp = gb.find(e => e.replay);
+  const gp = gb.find(e => e.replay && isStormReplay(e.replay));
   if (gp) return { total: gp.dist_ft, replay: gp.replay };
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  const lp = lb.find(e => e.r);
+  const lp = lb.find(e => e.r && isStormReplay(e.r));
   if (lp) return { total: lp.s, replay: lp.r };
   return null;
 }
@@ -869,23 +892,50 @@ function spawnPuff(x, y, r, rise) {
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 
 /* ---------- world building ---------- */
-function addPlat(x, band, lenClass) {
+function addPlat(x, band, lenClass, storm) {
   const isIsle = lenClass === 'ISLE';
   const len = isIsle ? 330 : LEN[lenClass];
-  const img = isIsle ? rnd(ISLAND) : rnd(LONGC);
-  plats.push({ x, y: BAND_Y[band], len, img });
+  const img = storm ? rnd(STORMC) : isIsle ? rnd(ISLAND) : rnd(LONGC);
+  plats.push({ x, y: BAND_Y[band], len, img, storm: !!storm });
   if (REC) REC.plats.push([x - courseBase, BAND_Y[band], len, img]);   /* the recorder keeps the course — in course space (v0.47) */
   return x + len;
 }
 function buildSegment(seg) {
   let x = worldEnd;
+  const phasing = dist > stormAt - 2800 && dist < stormAt && stormSteps === 0;   /* the storm phases in ahead of the bank: singles mixed into the regular deck, thickening (Keith v0.82) */
+  const segPlats = [];
   seg.steps.forEach((st, i) => {
     if (i > 0) x += GAP[st[0]];
-    x = addPlat(x, st[2], st[1]);
+    const before = plats.length;
+    x = addPlat(x, st[2], st[1], phasing && Math.random() < 0.45);
+    segPlats.push(plats[before]);
   });
   worldEnd = x; exitBand = seg.steps[seg.steps.length - 1][2]; lastTier = seg.t;
+  /* note phrases (v0.82): a short floating line of notes over one of this segment's decks — never on the opener, never in the tiny-cloud window's spirit (runTime gate), never while the storm phases in */
+  if (runTime > 15 && !phasing && Math.random() < 0.5) {
+    const qs = segPlats.filter(q => q.len >= 430);
+    if (qs.length) {
+      const q = rnd(qs), n = 3 + Math.floor(Math.random() * 3);
+      for (let k = 0; k < n; k++) notes.push({ x: q.x + 70 + k * 95, y: q.y - 128 - Math.sin(k / Math.max(1, n - 1) * Math.PI) * 36, img: k % 2 ? 'note2' : 'note1', got: false });
+    }
+  }
+}
+function buildStormStep() {
+  /* THE FORK (Keith v0.82): a springy storm deck on the through line, and a clean climb deck one band up starting a little later — miss the climb and you are committed through the turbulence. The through deck runs UNDER the climb deck's start, so the choice can never strand you. */
+  const b = Math.max(1, Math.min(4, exitBand + rnd([-1, 0, 0, 1])));
+  const x = worldEnd + GAP.TAP;
+  const lenT = rnd([LEN.LONG, LEN.MED, LEN.LONG]);
+  const imgT = rnd(STORMC);
+  plats.push({ x, y: BAND_Y[b], len: lenT, img: imgT, storm: true });
+  if (REC) REC.plats.push([x - courseBase, BAND_Y[b], lenT, imgT]);
+  const cx = x + 150, cl = rnd([LEN.MED, LEN.LONG]), imgC = rnd(LONGC), cb = Math.min(5, b + 1);
+  plats.push({ x: cx, y: BAND_Y[cb], len: cl, img: imgC });
+  if (REC) REC.plats.push([cx - courseBase, BAND_Y[cb], cl, imgC]);
+  worldEnd = x + lenT; exitBand = b;
 }
 function nextSegment() {
+  if (stormSteps > 0) { stormSteps--; buildStormStep(); lastSeg = -2; return; }   /* inside a storm bank: the fork builder owns the course */
+  if (dist >= stormAt) { stormSteps = 5; stormAt = dist + (950 + Math.random() * 500) * 15.24; buildStormStep(); stormSteps--; lastSeg = -2; return; }   /* a bank arrives: five fork steps, then the course is the generator's again */
   /* chain on PHYSICAL bands: next segment's first platform may climb at
      most 2 bands (a charged leap) or drop any amount (a lower cloud saves
      you). The old e-code match could never leave the entry tier — most of
@@ -940,7 +990,7 @@ function resetWorld() {
     courseBase = champShift;
     const champ = (RACE.plats[0] && RACE.plats[0][0] === -300) ? RACE.plats.slice(1) : RACE.plats;   /* their start plat is the shared start above */
     for (const p of champ) {
-      plats.push({ x: p[0] + champShift, y: p[1], len: p[2], img: p[3] });
+      plats.push({ x: p[0] + champShift, y: p[1], len: p[2], img: p[3], storm: String(p[3]).charAt(0) === 'S' });
       if (REC) REC.plats.push(p);   /* course space: the recording keeps the original coordinates */
     }
     courseDist = courseBase + 780;   /* the distance-space twin, set once the world-x origin is final (v0.52) */
@@ -990,6 +1040,8 @@ function startRun() {
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
+  notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
+  stormAt = 800 * 15.24; stormSteps = 0; plane = null; planeNextAt = 42; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   ghostReset(!G);   /* first run (or after a catch): he sprints in from the left; if he was never caught, he's still out there ahead */
   playTrack(); kickDecode();
 }
@@ -1098,12 +1150,12 @@ function gameOver() {
   mScene = 'day'; playTrack();   /* the initials screen plays the 1st bg music (Keith v0.35) */
   recFinish();   /* this run's replay is ready to travel with its score (v0.24) */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
-  const myFt = Math.floor(dist / 15.24);   /* the record is FEET (Keith) */
+  const myFt = runFt();   /* the record is FEET (Keith) — travel + banked note feet (v0.82) */
   { const cbAll = charBests(); if (myFt > (cbAll[selChar] || 0)) { cbAll[selChar] = myFt; try { localStorage.setItem('sixloud_char_bests', JSON.stringify(cbAll)); } catch (e) {} } }   /* per-runner best, for the select screen's stat line (Keith v0.69.2) */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
   const qualifiesGlobal = gBoard ? (gBoard.length < 10 || myFt > gBoard[gBoard.length - 1].dist_ft) : false;
   const qualifies = qualifiesLocal || qualifiesGlobal;
-  $('overStats').textContent = Math.floor(dist / 15.24).toLocaleString('en-US') + ' FT';   /* feet only — no score shown anywhere (Keith v0.48) */
+  $('overStats').textContent = runFt().toLocaleString('en-US') + ' FT';   /* feet only — no score shown anywhere (Keith v0.48) */
   $('board').innerHTML = best.map((b, i) => boardRow(b.n, b.s, i, undefined, charOf(b.r))).join('') || 'NO SCORES YET';   /* the offline fallback wears the same rows (v0.54) */
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('over').style.display = 'flex';
@@ -1153,14 +1205,15 @@ function release() {
   }
   /* grounded, or a hair past the edge (coyote): the charge was earned running */
   if (!grounded && (hangPlat || airMove || time - lastGroundT > 0.09)) return;
-  const c = Math.min(1, pressT / CHARGE_FULL);
+  const noteFull = noteCharge; if (noteFull) noteCharge = false;   /* the 8th note's gift, spent on this jump (v0.82) */
+  const c = noteFull ? 1 : Math.min(1, pressT / CHARGE_FULL);   /* the coin never touches this: under its charge your jumps stay YOURS (Keith) */
   vy = -(1500 + 400 * c);            // tap hop .. full launch
   airGrav = 1 - 0.30 * c;            // a longer hold floats longer
   airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);
-  const full = pressT >= ROLL_ARM;
+  const full = pressT >= ROLL_ARM || noteFull;
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
-  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode;   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode || coinT > 0;   /* the coin's 10 seconds: every jump earns its double (Keith v0.82) */   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
   if (full) { score += 4; chargeFx(1.2); }   /* the held charge, let go: he leaves the ground lit (Keith v0.28) */
   flipped = false; flipMove = null; landMove = null; landT = 0;
   jumps++; score += 1;
@@ -1198,11 +1251,11 @@ function update(dt) {
   const frozen = !!(hangPlat || slipPlat);
   if (!frozen) runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
-  if (!frozen) dist += speed * dt;
+  if (!frozen) dist += speed * spdF() * dt;
   /* THE CROWN MOMENT (Keith, v0.13): the instant this run's feet pass
      the reigning high score, the battle loop crossfades in — and keeps
      going: through the wipeout, into every later run this session. */
-  if (!champMode && targetFt > 0 && Math.floor(dist / 15.24) > targetFt) {
+  if (!champMode && targetFt > 0 && runFt() > targetFt) {
     champMode = true; heatOn = true; mScene = 'battle'; xfade(true);   /* the crown takes the 2nd bg music directly (Keith v0.34) */
     crownFlash = 1; bannerT = 2.4; shake = Math.max(shake, 15);   /* flash + shake + banner (Keith v0.15) */
     if (airMove && !doubleUsed) doubleArmed = true;   /* the crown breaking mid-jump charges THAT jump too (Keith v0.50) — unless its double is already spent */
@@ -1237,7 +1290,7 @@ function update(dt) {
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
-  if (!frozen) px += speed * dt;   /* frozen on the ledge beat: he hangs on the lip, the lip hangs on the world */
+  if (!frozen) px += speed * spdF() * dt;   /* frozen on the ledge beat: he hangs on the lip, the lip hangs on the world */
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
@@ -1330,16 +1383,73 @@ function update(dt) {
     if (grounded === p) w = 1;
     if (hangPlat === p || slipPlat === p) w = Math.max(w, 0.55);
     if (p.ghostOn) { w = Math.max(w, 1); p.ghostOn = false; }
-    p.sinkV = (p.sinkV || 0) + ((w * SINK_MAX - (p.sink || 0)) * 118 - (p.sinkV || 0) * 8.4) * dt;   /* a little more bounce again (Keith v0.36; was 104/9.2 in v0.32, 90/11 in v0.29) */
+    p.sinkV = (p.sinkV || 0) + ((w * (p.storm ? 21 : SINK_MAX) - (p.sink || 0)) * (p.storm ? 168 : 118) - (p.sinkV || 0) * (p.storm ? 7.0 : 8.4))   /* storm decks sink deeper and spring back harder (Keith v0.82) */ * dt;   /* a little more bounce again (Keith v0.36; was 104/9.2 in v0.32, 90/11 in v0.29) */
     p.sink = (p.sink || 0) + (p.sinkV || 0) * dt;
-    if (p.sink < -5.4) { p.sink = -5.4; p.sinkV = 0; }   /* the rebound overshoot grows with the livelier spring */
-    if (p.sink > SINK_MAX + 4.5 + (p.boost || 0)) { p.sink = SINK_MAX + 4.5 + (p.boost || 0); p.sinkV = 0; }
+    if (p.sink < (p.storm ? -11 : -5.4)) { p.sink = (p.storm ? -11 : -5.4); p.sinkV = 0; }   /* the rebound overshoot grows with the livelier spring */
+    if (p.sink > (p.storm ? 21 : SINK_MAX) + 4.5 + (p.boost || 0)) { p.sink = (p.storm ? 21 : SINK_MAX) + 4.5 + (p.boost || 0); p.sinkV = 0; }
     if (p.boost) p.boost = Math.max(0, p.boost - dt * 9);   /* the charged dip allowance rings out in under a second */
     /* the hanging cloud TILTS a touch under his weight (Keith v0.36): it tips
        while he dangles (hang or slip), and untilts when he pulls up or falls off */
     const wantT = (hangPlat === p || slipPlat === p) ? -0.16 : 0;   /* FLIPPED + a lot more (Keith v0.38, from his video: the v0.36 tilt read the wrong way): his end bends DOWN ~9 degrees, the far end rises */
     p.tilt = (p.tilt || 0) + (wantT - (p.tilt || 0)) * Math.min(1, dt * 2.6);   /* the bend settles in across the hang — and his glued hands can track it (v0.38) */
   }
+  if (grounded && grounded.storm) shake = Math.max(shake, 3.4 + Math.sin(time * 29) * 1.1);   /* TURBULENCE: on the storm deck the camera shakes — that shake IS the hazard's tell (Keith v0.82) */
+  /* ===== ITEMS TICK (v0.82) ===== */
+  if (stumbleT > 0) stumbleT -= dt;
+  if (coinT > 0) coinT -= dt;
+  for (const n of notes) {
+    if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 140) {
+      n.got = true; noteFt += 25; notesGot++;
+      spawnPuff(n.x, n.y, 13, 150); pushTrail(n.x, n.y, CHAR_FX[selChar].streak);
+      if (notesGot % 8 === 0) { noteCharge = true; chargeFx(1.4); }   /* every 8th note: the next jump is a FULL charge */
+    }
+  }
+  if (notes.length > 40) notes = notes.filter(n => !n.got && n.x > px - 700);
+  if (!coin && Math.floor(dist / 15.24) >= nextCoinFt) {
+    const q = plats.find(q => q.x > px + 1000);
+    if (q) { coin = { x: q.x + q.len * 0.5, y: q.y - 150 }; nextCoinFt += 1000; }
+    else if (Math.floor(dist / 15.24) > nextCoinFt + 250) nextCoinFt += 1000;
+  }
+  if (coin) {
+    if (Math.abs(px - coin.x) < 78 && Math.abs((py - 120) - coin.y) < 165) { const cx2 = coin.x; coin = null; coinT = 10; chargeFx(0.9); for (let k = 0; k < 10; k++) spawnPuff(cx2, py - 120, 10, 140); }
+    else if (coin.x < px - 420) coin = null;
+  }
+  if (!plane && runTime > planeNextAt && stormSteps === 0) plane = { type: Math.random() < 0.5 ? 'high' : 'low', t: 0, dur: 7.6, snd: null, tail: 0, crossed: false };
+  if (plane) {
+    plane.t += dt;
+    const pp = plane.t / plane.dur;
+    if (pp >= 0.18 && !plane.snd && typeof bufPlane !== 'undefined' && bufPlane && actx && actx.state === 'running') {   /* SEE it first, HEAR it after (Keith): the sound lags the sight */
+      const gn = actx.createGain(); gn.gain.value = 0; gn.connect(actx.destination);
+      const src = actx.createBufferSource(); src.buffer = bufPlane; src.connect(gn); src.start();
+      plane.snd = { src, gn };
+    }
+    if (plane.snd) {
+      let g;
+      if (pp < 0.88) g = 0.9 * Math.pow(Math.max(0, (pp - 0.18) / 0.70), 1.6);
+      else if (pp <= 1) g = 0.9;
+      else { plane.tail += dt; g = 0.9 * Math.exp(-plane.tail / 1.5); }   /* loudest AT you, still heard after it passes (Keith) */
+      try { plane.snd.gn.gain.value = g; } catch (e) {}
+      if (plane.tail > 3.2) { try { plane.snd.src.stop(); } catch (e) {} plane.snd = null; }
+    } else if (pp > 1) plane.tail += dt;
+    if (plane.type === 'low' && !plane.crossed && pp >= 0.88) {
+      plane.crossed = true;
+      const below = plats.filter(q => px + 60 >= q.x && px - 40 <= q.x + q.len && q.y >= py - 40).sort((a, b) => a.y - b.y)[0];
+      if (below && py > below.y - 400 && !hangPlat && !slipPlat) {   /* you did not clear the tail: STUMBLE — charge emptied, speed steps down, run goes on */
+        stumbleT = 1.1; pressT = 0; rollArmed = false; flipArmed = false; shake = Math.min(12, shake + 6);
+        for (let k = 0; k < 8; k++) spawnPuff(px - 20 + k * 6, py - 30, 10, 120);
+      }
+    }
+    if (pp > 1 && plane.tail > 3.2) { plane = null; planeNextAt = runTime + 30 + Math.random() * 20; }
+  }
+  if (!rocket && runTime > rocketNextAt) rocket = { t: 0, dur: 9 };
+  if (rocket) {
+    rocket.t += dt;
+    const rp2 = rocket.t / rocket.dur, rh = (viewH / zoom) * 0.88;
+    const rx = (viewW / zoom) * 0.82 + Math.sin(rocket.t * 0.7) * 8, ry = rh * (1 - rp2) - 90 * rp2;
+    if (rocket.t < rocket.dur && Math.random() < 0.85) rpuffs.push({ x: rx + (Math.random() - 0.5) * 9, y: ry + 26, r: 5 + Math.random() * 5, life: 0.95, max: 0.95 });   /* the smoke trailer: a long line of the runner's own puffs (Keith) */
+    if (rocket.t >= rocket.dur) { rocket = null; rocketNextAt = runTime + 70 + Math.random() * 50; }
+  }
+  for (let i = rpuffs.length - 1; i >= 0; i--) { const q = rpuffs[i]; q.life -= dt; q.r += 15 * dt; q.y += 12 * dt; if (q.life <= 0) rpuffs.splice(i, 1); }
   if (grounded) walkT += dt;
   /* landing animation clock (bend or roll-out); a fresh press interrupts it */
   if (landMove) { landT += dt; if (landT >= landDur) landMove = null; }
@@ -1363,7 +1473,7 @@ function update(dt) {
   const wantY = py - viewH / zoom * 0.58;
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
-  $('dist').innerHTML = '<small>DISTANCE</small>' + Math.floor(dist / 15.24) + 'ft';
+  $('dist').innerHTML = '<small>DISTANCE</small>' + runFt() + 'ft';
   if (py - camY > viewH / zoom + 260) gameOver();
 }
 
@@ -1412,6 +1522,7 @@ function playerAnim() {
     return { move: 'armsopen', idx: 15 * R + Math.floor(airT * 18 * R) % (10 * R) };
   }
   /* grounded: a landing (bend or roll-out) plays before the run resumes */
+  if (stumbleT > 0) return { move: 'basic', idx: Math.min(11, Math.floor((1.1 - stumbleT) * 14)) };   /* the plane stagger (v0.82): a beat off-balance, then running again — the run NEVER stops */
   if (landMove) {
     const idx = Math.min(landTo * R, landFrom * R + Math.floor(landT * landRate * R));
     return { move: landMove, idx };
@@ -1669,7 +1780,7 @@ function draw() {
   }
   /* platforms */
   for (const p of plats) {
-    const img = IMG['cloud' + p.img], cd = CLOUDS[p.img];
+    const img = p.storm ? IMG['storm' + p.img] : IMG['cloud' + p.img], cd = CLOUDS[p.img];
     if (!img || !img.naturalWidth) continue;
     const sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;
     if (sx + p.len < -200 || sx > viewW / zoom + 200) continue;
@@ -1682,6 +1793,38 @@ function draw() {
       ctx.drawImage(img, sx - gx, sy - cd.surf * dh + 6 - gy, p.len, dh);
     } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
     ctx.restore();
+  }
+  /* ===== ITEMS (v0.82): notes, the coin, the charge aura, the plane's shadow ===== */
+  for (const n of notes) {
+    if (n.got) continue;
+    const img = IMG[n.img]; if (!img || !img.naturalWidth) continue;
+    const sx = n.x - camX, sy = n.y - camY + Math.sin(time * 2.2 + n.x * 0.013) * 6;
+    if (sx < -80 || sx > viewW / zoom + 80) continue;
+    const w = 56, h = w * img.naturalHeight / img.naturalWidth;
+    ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h);
+  }
+  if (coin) {
+    const img = IMG.coin, sx = coin.x - camX, sy = coin.y - camY + Math.sin(time * 2) * 5;
+    const rgb = (CHAR_FX[selChar].halo.match(/\d+/g) || [255, 210, 90]).slice(0, 3).join(',');
+    const gr = ctx.createRadialGradient(sx, sy, 4, sx, sy, 74 + Math.sin(time * 5) * 7);
+    gr.addColorStop(0, `rgba(${rgb},0.55)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = gr; ctx.fillRect(sx - 90, sy - 90, 180, 180);
+    if (img && img.naturalWidth) { const sq = 0.18 + 0.82 * Math.abs(Math.cos(time * 3.2)), w = 96 * sq; ctx.drawImage(img, sx - w / 2, sy - 48, w, 96); }   /* the coin SPINS (Keith) */
+  }
+  if (coinT > 0 && mode === 'run') {   /* wearing the charge: an aura in your color */
+    const rgb = (CHAR_FX[selChar].halo.match(/\d+/g) || [255, 210, 90]).slice(0, 3).join(',');
+    const sx = px - camX, sy = py - camY - 100, r = 128 + Math.sin(time * 6) * 8;
+    const gr = ctx.createRadialGradient(sx, sy, 8, sx, sy, r);
+    gr.addColorStop(0, `rgba(${rgb},${0.34 + 0.08 * Math.sin(time * 6)})`); gr.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = gr; ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
+  }
+  if (plane && plane.type === 'low') {   /* its shadow sweeps the clouds ahead of it */
+    const pp = plane.t / plane.dur, sc3 = planeScale(pp);
+    if (pp > 0.4) {
+      const sx = px - camX, sy = (grounded ? grounded.y + (grounded.sink || 0) : py) - camY + 16;
+      ctx.save(); ctx.globalAlpha = 0.26 * sc3; ctx.fillStyle = '#0a0620';
+      ctx.beginPath(); ctx.ellipse(sx, sy, 330 * sc3, 26 * sc3, 0, 0, 7); ctx.fill(); ctx.restore();
+    }
   }
   /* a low fog band softens everything the clouds sit in */
   const fogG = ctx.createLinearGradient(0, viewH / zoom * 0.55, 0, viewH / zoom);
@@ -1711,6 +1854,54 @@ function draw() {
     const grd = ctx.createLinearGradient(0, -42, 0, 42);
     grd.addColorStop(0, '#fff3b0'); grd.addColorStop(0.55, '#ffd94d'); grd.addColorStop(1, '#f39c2c');
     ctx.fillStyle = grd; ctx.fillText('NEW HIGH SCORE', 0, 0);
+    ctx.restore();
+  }
+  /* ===== SKY DRESSING + THE PLANE (v0.82, screen space) ===== */
+  const satImg = IMG.satellite;
+  if (satImg && satImg.naturalWidth) {   /* the satellite just sits way out there (Keith) */
+    const sx = W * 0.74 + Math.sin(time * 0.05) * 6, sy = H * 0.115 + Math.sin(time * 0.11) * 4, w = 108 * S;
+    ctx.drawImage(satImg, sx - w / 2, sy - w * satImg.naturalHeight / satImg.naturalWidth / 2, w, w * satImg.naturalHeight / satImg.naturalWidth);
+    const gt = time % 6.5;   /* now and then a panel catches a glint */
+    if (gt < 0.7) { const a = Math.sin(gt / 0.7 * Math.PI), gx = sx + w * 0.44, gy = sy - 2, r = 13 * S * a;
+      ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.shadowColor = '#cfe8ff'; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.moveTo(gx - r, gy); ctx.lineTo(gx + r, gy); ctx.moveTo(gx, gy - r); ctx.lineTo(gx, gy + r); ctx.stroke(); ctx.restore(); }
+  }
+  if (rpuffs.length || rocket) {   /* the rocket's smoke trailer: the runner's own puffs, in a long line under it (Keith) */
+    for (const q of rpuffs) { ctx.save(); ctx.globalAlpha = 0.5 * (q.life / q.max); const r = q.r * S * 2; ctx.drawImage(puffImg, q.x * S - r / 2, (q.y - camY * 0) * S - r / 2, r, r); ctx.restore(); }
+    if (rocket) {
+      const rp3 = rocket.t / rocket.dur, rh = viewH / zoom * 0.88;
+      const rx = (viewW / zoom * 0.82 + Math.sin(rocket.t * 0.7) * 8) * S, ry = (rh * (1 - rp3) - 90 * rp3) * S;
+      if (rocket.t < 1.4) { const gr = ctx.createRadialGradient(rx, H * 0.88, 2, rx, H * 0.88, 60 * S); gr.addColorStop(0, 'rgba(255,166,66,0.7)'); gr.addColorStop(1, 'rgba(255,166,66,0)'); ctx.fillStyle = gr; ctx.fillRect(rx - 70 * S, H * 0.88 - 70 * S, 140 * S, 140 * S); }
+      const rImg = IMG.rocket;
+      if (rImg && rImg.naturalWidth) { const w = 36 * S, h = w * rImg.naturalHeight / rImg.naturalWidth; ctx.drawImage(rImg, rx - w / 2, ry - h / 2, w, h); }
+    }
+  }
+  if (plane) {
+    const pp = plane.t / plane.dur, sc2 = planeScale(pp);
+    const imgP = IMG[plane.type === 'high' ? 'plane-under' : 'plane-side'];
+    if (imgP && imgP.naturalWidth) {
+      const fade = plane.tail > 0 ? Math.max(0, 1 - plane.tail / 3) : 1;
+      ctx.save(); ctx.globalAlpha = 0.98 * fade;
+      if (plane.type === 'high') {   /* the SCARE: its belly rides 720 above your deck — untouchable by construction, exits through the top (Keith) */
+        const wP = Math.min(W * 1.3, 1500 * S * zoom) * sc2, hP = wP * imgP.naturalHeight / imgP.naturalWidth;
+        let belly = ((grounded ? grounded.y + (grounded.sink || 0) : py) - 720 - camY) * S * zoom;
+        if (pp > 0.88) belly -= (pp - 0.88) / 0.17 * H * 0.45;
+        ctx.drawImage(imgP, W / 2 - wP / 2, belly - hP, wP, hP);
+      } else {   /* the LOW pass: fuselage down at the deck, the tail fin the thing you jump (Keith) */
+        const wP = Math.min(W * 1.18, 1270 * S * zoom) * sc2, hP = wP * imgP.naturalHeight / imgP.naturalWidth;
+        const deckY = ((grounded ? grounded.y + (grounded.sink || 0) : py) - camY) * S * zoom;
+        let ax = W / 2;
+        if (pp > 0.88) ax -= (pp - 0.88) / 0.17 * W * 0.85;   /* the whip-past: in and out really fast */
+        ctx.drawImage(imgP, ax - wP / 2, deckY + 8 - hP, wP, hP);
+      }
+      ctx.restore();
+    }
+  }
+  if (coinT > 0 && mode === 'run') {   /* the coin's 10 seconds, draining at the top */
+    const bw = Math.min(200, W * 0.4);
+    ctx.save();
+    ctx.fillStyle = 'rgba(10,6,32,0.66)'; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, H * 0.068, bw, 13, 7); ctx.fill();
+    ctx.fillStyle = '#ffd83d'; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 2, H * 0.068 + 2, (bw - 4) * Math.max(0, coinT / 10), 9, 5); ctx.fill();
     ctx.restore();
   }
 }
