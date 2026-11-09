@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.83</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.84</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.83 ==============================
+/* ============================== 6LOUD demo v0.84 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -954,7 +954,7 @@ function buildSegment(seg) {
     const qs = segPlats.filter(q => q.len >= 430);
     if (qs.length) {
       const q = rnd(qs), n = 3 + Math.floor(Math.random() * 3);
-      for (let k = 0; k < n; k++) notes.push({ x: q.x + 70 + k * 95, y: q.y - 128 - Math.sin(k / Math.max(1, n - 1) * Math.PI) * 36, img: k % 2 ? 'note2' : 'note1', got: false });
+      for (let k = 0; k < n; k++) notes.push({ x: q.x + 70 + k * 95, y: q.y - 240 - Math.sin(k / Math.max(1, n - 1) * Math.PI) * 50,   /* raised (Keith v0.84): jump height — a grounded run passes underneath */ img: k % 2 ? 'note2' : 'note1', got: false });
     }
   }
 }
@@ -1438,7 +1438,7 @@ function update(dt) {
   if (stumbleT > 0) stumbleT -= dt;
   if (coinT > 0) coinT -= dt;
   for (const n of notes) {
-    if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 140) {
+    if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 95) {   /* window tightened with the raise: only a jump collects (Keith v0.84) */
       n.got = true; noteFt += 25; notesGot++; playNote();
       spawnPuff(n.x, n.y, 13, 150); pushTrail(n.x, n.y, CHAR_FX[selChar].streak);
       if (notesGot % 8 === 0) { noteCharge = true; chargeFx(1.4); }   /* every 8th note: the next jump is a FULL charge */
