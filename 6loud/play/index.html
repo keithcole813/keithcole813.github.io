@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.90</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.90.1</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.90 ==============================
+/* ============================== 6LOUD demo v0.90.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1854,7 +1854,7 @@ function draw() {
   }
   /* platforms */
   for (const p of plats) {
-    const img = p.storm ? IMG['storm' + p.img] : IMG['cloud' + p.img], cd = CLOUDS[p.img];
+    const img = IMG['cloud' + p.img] || IMG['storm' + p.img], cd = CLOUDS[p.img];   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
     if (!img || !img.naturalWidth) continue;
     const sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;
     if (sx + p.len < -200 || sx > viewW / zoom + 200) continue;
