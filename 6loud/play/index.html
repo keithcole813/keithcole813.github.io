@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.88</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.89</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.88 ==============================
+/* ============================== 6LOUD demo v0.89 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -533,10 +533,15 @@ function tiltEase(dt) {
   tiltX += (dz(dx, 2, 22) - tiltX) * k;
   tiltY += (dz(dy, 2, 18) - tiltY) * k;
 }
-function planeScale(pp) {   /* the LOOM (Keith): you see it coming for a while — a long slow growth in the distance — then it explodes: in and out really fast */
-  if (pp < 0.7) { const u = pp / 0.7; return 0.05 + 0.30 * u * u; }
-  if (pp < 0.88) { const u = (pp - 0.7) / 0.18; return 0.35 + 0.65 * (u * u * (3 - 2 * u)); }
-  return 1 + 0.12 * Math.min(1, (pp - 0.88) / 0.17);
+function planeAx(pp) {   /* the plane's OWN path across the screen (Keith v0.89: 'the airplane is following us. It should not be following jumps or anything') — it sweeps in from the right, crosses the runner exactly at the pp 0.90 stumble moment, and whips out left. It is never pinned to him. */
+  let ax = W * (0.85 - 0.35 * Math.min(1, pp / 0.90));
+  if (pp > 0.90) ax -= (pp - 0.90) / 0.15 * W * 0.85;
+  return ax;
+}
+function planeScale(pp) {   /* the LOOM (Keith): you see it coming for a while — a long slow growth in the distance — then it explodes: in and out really fast. v0.89: the growth stretches (0.75 / 0.90) with the longer pass */
+  if (pp < 0.75) { const u = pp / 0.75; return 0.05 + 0.30 * u * u; }
+  if (pp < 0.90) { const u = (pp - 0.75) / 0.15; return 0.35 + 0.65 * (u * u * (3 - 2 * u)); }
+  return 1 + 0.12 * Math.min(1, (pp - 0.90) / 0.15);
 }
 let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0, hangTY = 0, noLand = false;   /* noLand: the ledge-slip plunge ONLY — that fall never lands (v0.71) */
 /* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
@@ -551,7 +556,7 @@ const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
 const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.37, GRIP_DX = 0.04;   /* grip fraction tracks the floor so his hands stay on the SAME point of the cloud image: 0.55 original, 0.19 at the deep floor (v0.69.2), 0.37 at the halfway raise (v0.70.2) — surf + GRIP_FRAC is invariant per cloud */
 const HANDS_DANGLE = { 3: 269, 4: 269, 5: 269, 6: 269, 7: 281, 8: 292, 9: 304, 10: 315, 11: 320, 12: 324, 13: 324, 14: 323 };   /* 60 fps (v0.79): his measured 30 fps hand heights interpolated onto the doubled frame indices */   /* hand height per dangle frame, measured off the shipped art */
 const LASH_DANGLE = { 3: 268, 4: 299, 5: 323, 6: 332, 7: 329 };   /* LaShmoove's dangle: 6lade's table scaled per-frame by his measured figure extent (v0.56) */
-const YORO_DANGLE = { 3: 295, 4: 299, 5: 302, 6: 306, 7: 309, 8: 312, 9: 315, 10: 318, 11: 320, 12: 322, 13: 324, 14: 328, 15: 331, 16: 335 };   /* 60fps keys: interpolated from her measured 30fps table at the swap (v0.80) */
+const YORO_DANGLE = { 3: 295, 4: 299, 5: 302, 6: 306, 7: 309, 8: 312, 9: 315, 10: 309, 11: 314, 12: 317, 13: 321, 14: 324, 15: 325, 16: 325 };   /* v0.89: hang/slip keys RE-MEASURED off her shipped frames on the v0.81 yardstick (hand height above the drawn feet line x PX2U, same +7 as the validated girls' tables) — the v0.80 interpolation hung her ~10 too low (Keith: 'hangs off too far while climbing') */
 const IVEY_DANGLE = { 3: 226, 4: 231, 5: 238, 6: 254, 7: 269, 8: 283, 9: 295, 10: 304, 11: 308, 12: 310, 13: 310, 14: 307, 15: 301, 16: 293 };   /* v0.81 RE-MEASURED off the shipped frames (hand height x PX2U - 10 grip allowance, the 6lade-validated method): the v0.78 probe table overstated her hands by ~75 units and she hung that far too low (Keith's video, 2026-11-09) */   /* Poison Ivey (v0.78): probe-measured on her baked arms-open (323/352/378/402/423/443 at source positions 3-8), interpolated onto her 60 fps indices */
 const SAYORI_DANGLE = { 3: 227, 4: 233, 5: 239, 6: 245, 7: 251, 8: 263, 9: 275, 10: 285, 11: 290, 12: 293, 13: 292, 14: 289, 15: 290, 16: 293 };   /* v0.81 RE-MEASURED, same fix as Ivey: her probe table was inflated the same way */   /* Sayori (v0.78): same method (304/330/356/380/401/420 at source positions 3-8) */   /* RE-DERIVED for the v0.72 arm repair (bigger cells, arms truly overhead): same measured method as v0.70 (per-frame factors idx3 .646, idx4 .657, idx5 .677, idx6 .702, idx7 .746 — method re-validated against her old set first, reproducing 391/402/404/403/392 vs the recorded 390/400/403/401/391); new armsopen extents 457/467/468/460/449 x the factors */
 /* character select (Keith v0.56): two runners, identical physics and
@@ -563,11 +568,11 @@ const SAYORI_DANGLE = { 3: 227, 4: 233, 5: 239, 6: 245, 7: 251, 8: 263, 9: 275, 
 let selChar = 'blade';
 try { const c0 = localStorage.getItem('sixloud_char'); if (c0 === 'lash' || c0 === 'yoro' || c0 === 'ivey' || c0 === 'sayori') selChar = c0; } catch (e) {}
 const SKINS = {
-  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true },
-  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', ready: true },
-  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', rate: 2, ready: true },
-  ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'POISON IVEY', rate: 2, dblFlip: true, ready: true },
-  sayori: { man: SAYORI_MANIFEST, anim: SAYORI_ANIM, dangle: SAYORI_DANGLE, name: 'SAYORI', rate: 2, dblFlip: true, ready: true }
+  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true, wingM: [-17, -240] },
+  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', ready: true, wingM: [-11, -224] },
+  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', rate: 2, ready: true, wingM: [-1, -232] },
+  ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'POISON IVEY', rate: 2, dblFlip: true, ready: true, wingM: [5, -228] },
+  sayori: { man: SAYORI_MANIFEST, anim: SAYORI_ANIM, dangle: SAYORI_DANGLE, name: 'SAYORI', rate: 2, dblFlip: true, ready: true, wingM: [2, -231] }   /* wingM (v0.89): the mount measured per body — one mount for every runner put the pair wrong on Yorokobi (Keith's photo); Sayori's is her kc2 fit verbatim, the rest are her yardstick on their own frames */
 };
 /* each runner burns in their OWN color (Keith: 6lade blue + LaShmoove fire, v0.56; Yorokobi PURPLE, v0.70).
    pstreak = the ground streaks a runner stamps AS THE PLAYER while lit — LaShmoove and Yorokobi carry theirs; 6lade has none. */
@@ -1247,7 +1252,7 @@ function release() {
   if (!grounded && airMove && !hangPlat && !slipPlat && wingT > 0 && pressT < 0.3) {
     /* THE FLAP (Keith v0.86): wearing the wings, a tap in the air is a wingbeat — a fresh lift,
        as often as you tap, for as long as the wings last. No flip, no roll, no double spent. */
-    vy = -1020; airGrav = 1; airT = 0; wingPhase = 9;   /* the visual flap restarts on your tap */
+    vy = -620; airGrav = 1; airT = 0; wingPhase = 9;   /* the visual flap restarts on your tap. v0.89 TAMED (Keith: 'rapidly tapping to barely keep flight'): -620 a tap (was -1020) — a flutter, not a launch */
     for (let k = 0; k < 8; k++) spawnPuff(px - 30 + k * 8, py + 16, 9 + Math.random() * 7, 130);
     return;
   }
@@ -1375,7 +1380,7 @@ function update(dt) {
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; noLand = true; }   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either */
   } else if (!grounded) {
-    vy += GRAV * airGrav * dt * (wingT > 0 ? 0.45 : 1); py += vy * dt; airT += dt;   /* wearing the wings you sink gently — tapping is what holds you up (Keith v0.86) */
+    vy += GRAV * airGrav * dt * (wingT > 0 ? 0.85 : 1); py += vy * dt; airT += dt;   /* wearing the wings you sink almost for real (v0.89: 0.85, was 0.45) — only rapid tapping holds you up (Keith) */
     /* the flip cue: an armed jump converts at the top of the arc */
     if (airMove === 'jump' && flipArmed && !flipped && airT >= 0.26 && vy >= -430) {
       flipped = true; flipMove = rnd(['flip', 'diveflip']); flipT = 0; airMove = flipMove;
@@ -1395,7 +1400,7 @@ function update(dt) {
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed && wingT <= 0) {   /* no landing roll while the wings are on (Keith v0.86) */
-            landMove = rnd(['roll3', 'roll4']);
+            landMove = selChar === 'ivey' ? 'roll3' : rnd(['roll3', 'roll4']);   /* POISON IVEY: roll4 REMOVED (Keith, 2026-11-09) — her sideways roll4 stays out until he fixes the scene himself; she lands roll3 every time */
             landFrom = landMove === 'roll3' ? 3 : 4; landTo = landMove === 'roll3' ? 36 : 56;
             landRate = 45; score += 2;
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
@@ -1473,7 +1478,7 @@ function update(dt) {
   }
   if (gwing && gwing.x < px - 460) gwing = null;
   if (gwing && Math.abs(px - gwing.x) < 80 && Math.abs((py - 110) - gwing.y) < 150) {
-    gwing = null; wingT = 15; wingMax = 15; wingKind = 'gold'; wingPhase = 0; chargeFx(0.9); playTrack();   /* GOLD WINGS ON: 15 seconds (Keith v0.88) */
+    gwing = null; wingT = 15; wingMax = 15; wingKind = 'gold'; wingPhase = 0; flipped = false; flipMove = null; if (airMove && airMove !== 'jump') airMove = 'jump'; chargeFx(0.9); playTrack();   /* GOLD WINGS ON: 15 seconds (Keith v0.88); a flip in progress ends HERE (v0.89) */
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
   }
   if (runTime >= noteNextT) {   /* THE NOTE DRIP (Keith v0.88): about 4 every 10 seconds — low (a hop), high (a full jump), in-between — anchored to the next deck ahead and NEVER below the clouds */
@@ -1483,7 +1488,7 @@ function update(dt) {
     noteLane++; noteNextT = runTime + 2.5 + (Math.random() * 0.8 - 0.4);
   }
   if (wing && Math.abs(px - wing.x) < 80 && Math.abs((py - 110) - wing.y) < 150) {
-    wing = null; wingT = 10; wingMax = 10; wingKind = 'std'; wingPhase = 0; chargeFx(0.9); playTrack();   /* WINGS ON: 10 seconds of flight, and the trippin loop starts (Keith v0.86) */
+    wing = null; wingT = 10; wingMax = 10; wingKind = 'std'; wingPhase = 0; flipped = false; flipMove = null; if (airMove && airMove !== 'jump') airMove = 'jump'; chargeFx(0.9); playTrack();   /* WINGS ON: 10 seconds of flight, and the trippin loop starts (Keith v0.86); a flip in progress ends HERE (v0.89) */
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
   }
   for (const n of notes) {
@@ -1506,7 +1511,7 @@ function update(dt) {
     if (Math.abs(px - coin.x) < 78 && Math.abs((py - 120) - coin.y) < 165) { const cx2 = coin.x; coin = null; coinT = 10; chargeFx(0.9); playCoin(); playTrack();   /* bg music 2 kicks in with the charge (Keith v0.85) */ for (let k = 0; k < 10; k++) spawnPuff(cx2, py - 120, 10, 140); }
     else if (coin.x < px - 420) coin = null;
   }
-  if (!plane && runTime > planeNextAt && stormSteps === 0) plane = { type: Math.random() < 0.5 ? 'high' : 'low', t: 0, dur: 7.6, snd: null, tail: 0, crossed: false };
+  if (!plane && runTime > planeNextAt && stormSteps === 0) plane = { type: Math.random() < 0.5 ? 'high' : 'low', t: 0, dur: 10, snd: null, tail: 0, crossed: false, deckY: (grounded ? grounded.y + (grounded.sink || 0) : py) };   /* v0.89: the pass stretches to 10 s (Keith: 'coming too fast'), and its FLIGHT LINE locks here — the deck height at spawn; it never follows his jumps after this (Keith) */
   if (plane) {
     plane.t += dt;
     const pp = plane.t / plane.dur;
@@ -1517,13 +1522,13 @@ function update(dt) {
     }
     if (plane.snd) {
       let g;
-      if (pp < 0.88) g = 0.9 * Math.pow(Math.max(0, (pp - 0.18) / 0.70), 1.6);
+      if (pp < 0.90) g = 0.9 * Math.pow(Math.max(0, (pp - 0.18) / 0.72), 1.6);
       else if (pp <= 1) g = 0.9;
       else { plane.tail += dt; g = 0.9 * Math.exp(-plane.tail / 1.5); }   /* loudest AT you, still heard after it passes (Keith) */
       try { plane.snd.gn.gain.value = g; } catch (e) {}
       if (plane.tail > 3.2) { try { plane.snd.src.stop(); } catch (e) {} plane.snd = null; }
     } else if (pp > 1) plane.tail += dt;
-    if (plane.type === 'low' && !plane.crossed && pp >= 0.88) {
+    if (plane.type === 'low' && !plane.crossed && pp >= 0.90) {
       plane.crossed = true;
       const below = plats.filter(q => px + 60 >= q.x && px - 40 <= q.x + q.len && q.y >= py - 40).sort((a, b) => a.y - b.y)[0];
       if (below && py > below.y - 400 && !hangPlat && !slipPlat) {   /* you did not clear the tail: STUMBLE — charge emptied, speed steps down, run goes on */
@@ -1597,9 +1602,9 @@ function playerAnim() {
   }
   if (!grounded) {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
+    if (wingT > 0) return { move: 'armsopen', idx: 9 * R + pingpong(Math.floor(airT * 30 * R), 6 * R) };   /* the flying pose (Keith v0.86): arms open, floating — she never flips or rolls in the wings. v0.89: this outranks a flip in progress — grabbing the wings mid-flip left her tumbling with the pair upright behind her (Keith's Yorokobi photo) */
     if (flipped && flipMove && flipT < PSKIN.man[flipMove].n / (30 * R))
       return { move: flipMove, idx: Math.min(PSKIN.man[flipMove].n - 1, Math.floor(flipT * 30 * R)) };
-    if (wingT > 0) return { move: 'armsopen', idx: 9 * R + pingpong(Math.floor(airT * 30 * R), 6 * R) };   /* the flying pose (Keith v0.86): arms open, floating — she never flips or rolls in the wings */
     if (airMove === 'runjumproll') {
       /* the motion's own airborne span, stretched over this jump's airtime */
       const f = Math.min(0.999, airT / Math.max(0.3, airTotal));
@@ -1637,7 +1642,7 @@ function ghostPick() {
   if (st === 1) return { mv: 'basic', idx: Math.min(GSKIN.man.basic.n - 1, Math.floor(t * 30 * R)) };
   if (st === 7) return { mv: 'runjump', idx: Math.min(GSKIN.man.runjump.n - 1, Math.floor(t * 30 * R)) };
   if (st === 2) { const mv = GR.pick ? 'diveflip' : 'flip'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 30 * R)) }; }
-  if (st === 3) { const mv = GR.pick ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 45 * R)) }; }
+  if (st === 3) { const mv = (GR.pick && GSKIN !== SKINS.ivey) ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 45 * R)) }; }   /* an Ivey GHOST never shows roll4 either (Keith's removal, 2026-11-09) */
   if (st === 4) return { mv: 'armsopen', idx: 15 * R + Math.floor(t * 18 * R) % (10 * R) };   /* v0.81: the game's own descent window (15R..25R, the reaching fall) — the old whole-set pingpong cycled the grip/peel frames mid-air and read as posing, not running */
   if (st === 5) return { mv: 'armsopen', idx: Math.min(GSKIN.man.armsopen.n - 1, Math.floor(t * 30 * R)) };
   if (st === 6) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10 * R), GSKIN.man.armsopen.n) };
@@ -1850,7 +1855,7 @@ function draw() {
       const wimg = IMG['wing' + (Math.floor(wingPhase) % WINGN.n)];
       const wshow = wingT > 3 || (time * (4 + (3 - wingT) * 2.5)) % 1 < 0.62;
       if (wimg && wimg.naturalWidth && wshow) {
-        const sx = px - camX + 2, sy = py - camY - 231;   /* the mount point, projected from Keith's scene: ~231 units above her feet, hips-centered */
+        const wm = PSKIN.wingM || [2, -231]; const sx = px - camX + wm[0], sy = py - camY + wm[1];   /* the mount point PER RUNNER (v0.89): each body's own shoulder line, calibrated on Sayori's scene fit */
         ctx.drawImage(wimg, sx - WINGN.ax * WINGN.w, sy - WINGN.ay * WINGN.h, WINGN.w, WINGN.h);
       }
     }
@@ -1928,17 +1933,20 @@ function draw() {
     const img = IMG.wingicon, sx = wing.x - camX, sy = wing.y - camY + Math.sin(time * 2) * 5;
     if (img && img.naturalWidth) { const h = 96, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }   /* the coin's size: 96 units */
   }
-  if (coinT > 0 && mode === 'run') {   /* wearing the charge: an aura in your color */
-    const rgb = (CHAR_FX[selChar].halo.match(/\d+/g) || [255, 210, 90]).slice(0, 3).join(',');
-    const sx = px - camX, sy = py - camY - 100, r = 128 + Math.sin(time * 6) * 8;
-    const gr = ctx.createRadialGradient(sx, sy, 8, sx, sy, r);
-    gr.addColorStop(0, `rgba(${rgb},${0.34 + 0.08 * Math.sin(time * 6)})`); gr.addColorStop(1, `rgba(${rgb},0)`);
-    ctx.fillStyle = gr; ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
+  if (coinT > 0 && mode === 'run') {   /* wearing the charge: the glow follows the BODY (Keith, v0.89) — her own frame stamped in her color with a soft shadow, the charge halo's trick. The old radial DISC read as a glowing green circle around her whenever she tucked into a roll; a silhouette can't do that. */
+    const pa2 = playerAnim();
+    ctx.save();
+    ctx.shadowColor = CHAR_FX[selChar].halo;
+    ctx.shadowBlur = 30 + 10 * Math.sin(time * 6);
+    ctx.globalAlpha = 0.9;
+    drawAnim(pa2.move, pa2.idx, px - camX, py - camY + FEET + (pa2.feetAdj || 0));
+    drawAnim(pa2.move, pa2.idx, px - camX, py - camY + FEET + (pa2.feetAdj || 0));   /* the second stamp deepens the halo */
+    ctx.restore();
   }
   if (plane && plane.type === 'low') {   /* its shadow sweeps the clouds ahead of it */
     const pp = plane.t / plane.dur, sc3 = planeScale(pp);
     if (pp > 0.4) {
-      const sx = px - camX, sy = (grounded ? grounded.y + (grounded.sink || 0) : py) - camY + 16;
+      const sx = planeAx(pp) / (S * zoom), sy = plane.deckY - camY + 16;   /* v0.89: the shadow rides under the PLANE on its locked line — it used to sit on the runner and track him */
       ctx.save(); ctx.globalAlpha = 0.26 * sc3; ctx.fillStyle = '#0a0620';
       ctx.beginPath(); ctx.ellipse(sx, sy, 330 * sc3, 26 * sc3, 0, 0, 7); ctx.fill(); ctx.restore();
     }
@@ -2001,15 +2009,13 @@ function draw() {
       ctx.save(); ctx.globalAlpha = 0.98 * fade;
       if (plane.type === 'high') {   /* the SCARE: its belly rides 720 above your deck — untouchable by construction, exits through the top (Keith) */
         const wP = Math.min(W * 1.3, 1500 * S * zoom) * sc2, hP = wP * imgP.naturalHeight / imgP.naturalWidth;
-        let belly = ((grounded ? grounded.y + (grounded.sink || 0) : py) - 720 - camY) * S * zoom;
-        if (pp > 0.88) belly -= (pp - 0.88) / 0.17 * H * 0.45;
-        ctx.drawImage(imgP, W / 2 - wP / 2, belly - hP, wP, hP);
+        let belly = (plane.deckY - camY) * S * zoom - Math.max(720 * S * zoom, H * 0.52);   /* v0.89 HIGHER (Keith: 'too low'): the belly rides at least 720 up, and on tall portrait screens at least half the screen above the deck — measured off the LOCKED flight line, not his live height */
+        if (pp > 0.90) belly -= (pp - 0.90) / 0.15 * H * 0.45;
+        ctx.drawImage(imgP, planeAx(pp) - wP / 2, belly - hP, wP, hP);
       } else {   /* the LOW pass: fuselage down at the deck, the tail fin the thing you jump (Keith) */
         const wP = Math.min(W * 1.18, 1270 * S * zoom) * sc2, hP = wP * imgP.naturalHeight / imgP.naturalWidth;
-        const deckY = ((grounded ? grounded.y + (grounded.sink || 0) : py) - camY) * S * zoom;
-        let ax = W / 2;
-        if (pp > 0.88) ax -= (pp - 0.88) / 0.17 * W * 0.85;   /* the whip-past: in and out really fast */
-        ctx.drawImage(imgP, ax - wP / 2, deckY + 8 - hP, wP, hP);
+        const deckY = (plane.deckY - camY) * S * zoom;   /* the LOCKED flight line (v0.89): jump all you want, it holds its altitude */
+        ctx.drawImage(imgP, planeAx(pp) - wP / 2, deckY + 8 - hP, wP, hP);
       }
       ctx.restore();
     }
