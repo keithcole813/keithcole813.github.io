@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.90.1</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.91</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.90.1 ==============================
+/* ============================== 6LOUD demo v0.91 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -214,6 +214,7 @@ let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, 
 let rawCoin = null, bufCoin = null, decCoin = null, gainCoin = null;
 let rawNote = null, bufNote = null, decNote = null, gainNote = null, noteSrc = null, noteStreak = 0, lastNoteT = -9;
 let rawW = null, bufW = null, decW = null, gainW = null, srcW = null;   /* the wings loop (Keith's trippin instrumental, v0.86) */
+let rawDk = null, bufDk = null, decDk = null, gainDk = null, srcDk = null, darkGateOn = null;   /* the dark-cloud water walk (Keith's pick, v0.91): sounds ONLY while your feet are on a dark cloud */
 function playNote() {   /* Keith's note pick (v0.83): each successive note in a run climbs in pitch; a new note CUTS the last — they never overlap */
   if (!actx || !bufNote || actx.state !== 'running') return;
   noteStreak = (time - lastNoteT < 2.5) ? Math.min(noteStreak + 1, 12) : 0;
@@ -252,6 +253,7 @@ if (window.fetch) {
   fetch('assets/coin-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawCoin = b; }).catch(() => {});   /* Keith's coin pick (v0.83): the Sci-Fi Power Up sweep */
   fetch('assets/note-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawNote = b; }).catch(() => {});   /* Keith's note pick (v0.83): the felt piano hit */
   fetch('assets/wings-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawW = b; }).catch(() => {});   /* Keith's wings pick (v0.86): the trippin loop, for while you have the wings */
+  fetch('assets/dark-walk.mp3').then(r => r.arrayBuffer()).then(b => { rawDk = b; }).catch(() => {});   /* Keith's dark-cloud pick (v0.91): the water walk, feet on a dark cloud only */
   fetch('assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
 }
 /* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
@@ -277,6 +279,7 @@ function kickDecode() {
   if (!decCoin && rawCoin && actx.decodeAudioData) decCoin = actx.decodeAudioData(rawCoin.slice(0)).then(b => { bufCoin = b; }).catch(() => { decCoin = null; });
   if (!decNote && rawNote && actx.decodeAudioData) decNote = actx.decodeAudioData(rawNote.slice(0)).then(b => { bufNote = b; }).catch(() => { decNote = null; });
   if (!decW && rawW && actx.decodeAudioData) decW = actx.decodeAudioData(rawW.slice(0)).then(b => { bufW = b; }).catch(() => { decW = null; });
+  if (!decDk && rawDk && actx.decodeAudioData) decDk = actx.decodeAudioData(rawDk.slice(0)).then(b => { bufDk = b; }).catch(() => { decDk = null; });
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack() {
@@ -296,6 +299,7 @@ function playTrack() {
       }
     }
     if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
+    if (bufDk && !srcDk) { gainDk = actx.createGain(); gainDk.gain.value = 0; gainDk.connect(actx.destination); srcDk = actx.createBufferSource(); srcDk.buffer = bufDk; srcDk.loop = true; srcDk.connect(gainDk); srcDk.start(); }   /* the water walk runs silent behind its gate (v0.91), like the steps chain */
     const t = actx.currentTime;
     gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(sc === 'day' ? musV() : 0, t, 0.18);
     if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(sc === 'battle' ? musV() : 0, t, 0.18); }
@@ -314,10 +318,15 @@ function playTrack() {
   }
 }
 function gateSteps() {   /* footsteps sound only while his feet are on a cloud — checked every frame, acts on change */
-  const on = mScene === 'steps' && mode === 'run' && !!grounded && !hangPlat && !slipPlat;
+  const on = mScene === 'steps' && mode === 'run' && !!grounded && !(grounded && grounded.dark) && !hangPlat && !slipPlat;   /* v0.91: on a DARK cloud the snow steps stop — the water walk (gateDark) is the footstep there */
   if (on === stepsGateOn) return; stepsGateOn = on;
   if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
   else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
+}
+function gateDark() {   /* Keith (v0.91): the water walk sounds 'when your feet are on a dark cloud only. not before or after. it doesnt continue' — a hard little gate on the dark chain, checked every frame next to gateSteps, fading at the steps' own snappy rate */
+  const on = mode === 'run' && !!grounded && !!grounded.dark && !hangPlat && !slipPlat;
+  if (on === darkGateOn) return; darkGateOn = on;
+  if (actx && gainDk && actx.state === 'running') gainDk.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
 }
 function xfade(toHeat) { playTrack(); }
 
@@ -507,6 +516,7 @@ loadImg('wingicongold', 'assets/wings-icon-gold.webp');   /* the GOLD pair (Keit
 loadImg('notegold', 'assets/note-gold.webp');   /* Keith's note (v0.88): the single gold note is THE note now */
 loadImg('plus25', 'assets/plus25.webp');   /* Keith's +25FT graphic (v0.88): what a note flashes when you grab it */
 let stormAt = 800 * 15.24, stormSteps = 0;
+let lastDarkX = -1e9;   /* v0.91: course x of the last dark cloud placed — they stay SPREAD OUT (Keith) */
 let stumbleT = 0;   /* the stagger timer: its only trigger was the plane, removed in v0.90 (Keith: 'take the plane out. its wrong') — the readers stay, it never fires */
 let rocket = null, rocketNextAt = 55, rpuffs = [];
 const runFt = () => Math.floor(dist / 15.24) + noteFt;   /* what the player sees and posts: travel + banked note feet (Keith's default-yes) */
@@ -946,9 +956,14 @@ const rnd = a => a[Math.floor(Math.random() * a.length)];
 function addPlat(x, band, lenClass, storm) {
   const isIsle = lenClass === 'ISLE';
   const len = isIsle ? 330 : LEN[lenClass];
-  const img = isIsle ? rnd(ISLAND) : rnd(LONGC);   /* storm decks wear regular clouds now (Keith v0.83: the dark clouds are out) */
-  plats.push({ x, y: BAND_Y[band], len, img, storm: !!storm });
-  if (REC) REC.plats.push([x - courseBase, BAND_Y[band], len, img, storm ? 1 : 0]);   /* the recorder keeps the course — in course space (v0.47); the 5th slot carries the storm flag (v0.83) */
+  let img = isIsle ? rnd(ISLAND) : rnd(LONGC);   /* storm decks wear regular clouds now (Keith v0.83: the dark clouds are out) */
+  let dark = false;
+  /* v0.91 THE DARK CLOUDS RETURN (Keith, 2026-11-10) — not as storm decks this time: SPREAD OUT singles
+     through the regular course that SINK under you (see the spring loop). Never on storm steps, never
+     early (past ~40 s and ~590 FT of course), never closer than 2800 units to the last one. */
+  if (!storm && runTime > 40 && x - courseBase > 9000 && x - lastDarkX > 2800 && Math.random() < 0.14) { dark = true; img = rnd(STORMC); lastDarkX = x; }
+  plats.push({ x, y: BAND_Y[band], len, img, storm: !!storm, dark });
+  if (REC) REC.plats.push([x - courseBase, BAND_Y[band], len, img, storm ? 1 : 0, dark ? 1 : 0]);   /* the recorder keeps the course — in course space (v0.47); the 5th slot carries the storm flag (v0.83), the 6th the dark flag (v0.91) */
   return x + len;
 }
 function buildSegment(seg) {
@@ -1035,7 +1050,7 @@ function resetWorld() {
     const champ = (RACE.plats[0] && RACE.plats[0][0] === -300) ? RACE.plats.slice(1) : RACE.plats;   /* their start plat is the shared start above */
     for (const p of champ) {
       const simg = String(p[3]);   /* v0.82-era runs recorded the DARK storm art by name — Keith removed the dark clouds, so a race never wears them: a storm deck from an old run draws as a regular cloud of its length class, storm springs and all (v0.87) */
-      plats.push({ x: p[0] + champShift, y: p[1], len: p[2], img: simg.charAt(0) === 'S' ? (p[2] > 700 ? '01' : p[2] > 450 ? '16' : '14') : p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' });   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs */
+      plats.push(p[5] === 1 ? { x: p[0] + champShift, y: p[1], len: p[2], img: p[3], dark: true } : { x: p[0] + champShift, y: p[1], len: p[2], img: simg.charAt(0) === 'S' ? (p[2] > 700 ? '01' : p[2] > 450 ? '16' : '14') : p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' });   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
       if (REC) REC.plats.push(p);   /* course space: the recording keeps the original coordinates */
     }
     courseDist = courseBase + 780;   /* the distance-space twin, set once the world-x origin is final (v0.52) */
@@ -1068,6 +1083,7 @@ const FEET = 16;            // his feet sit this deep in the cloud tops
 function startRun() {
   recStart();   /* record from the very first platform (v0.24) */
   prepRace();
+  lastDarkX = -1e9;
   resetWorld();
   px = -200; py = BAND_Y[2]; vy = 0; grounded = plats[0];   /* v0.69.2 (Keith): start on the LEFT side of the first cloud, a step in from its tip, so the whole cloud runs out ahead. px is cosmetic here — the recorder, the race clock and the ghost all run on dist, so stored runs (his and every future one) perform exactly as recorded; lab-verified before shipping. */
   speed = 620; dist = 0; score = 0; jumps = 0; runTime = 0;
@@ -1239,8 +1255,7 @@ function release() {
   if (!grounded && airMove && !hangPlat && !slipPlat && wingT > 0 && pressT < 0.3) {
     /* THE FLAP (Keith v0.86): wearing the wings, a tap in the air is a wingbeat — a fresh lift,
        as often as you tap, for as long as the wings last. No flip, no roll, no double spent. */
-    vy = -620; airGrav = 1; airT = 0; wingPhase = 9;   /* the visual flap restarts on your tap. v0.89 TAMED (Keith: 'rapidly tapping to barely keep flight'): -620 a tap (was -1020) — a flutter, not a launch */
-    for (let k = 0; k < 8; k++) spawnPuff(px - 30 + k * 8, py + 16, 9 + Math.random() * 7, 130);
+    vy = -620; airGrav = 1; airT = 0; wingPhase = 9;   /* the visual flap restarts on your tap. v0.89 TAMED (Keith: 'rapidly tapping to barely keep flight'): -620 a tap (was -1020) — a flutter, not a launch. v0.90.2: NO foot puffs on a flap (Keith: 'we dont need puffs from our feet when we are flying with the wings') — the wings carry you, your feet shed nothing up there */
     return;
   }
   if (!grounded && airMove && !hangPlat && !slipPlat && doubleArmed && pressT < 0.25) {
@@ -1377,6 +1392,7 @@ function update(dt) {
     if (flipped) flipT += dt;
     /* a fall CAN land on a cloud (Keith v0.71 — retires the v0.4 jump-only landing rule and its v0.43 staircase exception, now just the general case). The one fall that never lands is the ledge-slip plunge (noLand). */
     if (!noLand) for (const p of plats) {
+      if (p.gone) continue;   /* v0.91: a dark cloud that sank away catches no one */
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
@@ -1387,7 +1403,7 @@ function update(dt) {
         {
           if (airMove === 'runjumproll') { landMove = 'diveroll'; landFrom = 28; landTo = 62; landRate = 30; }
           else if (rollArmed && wingT <= 0) {   /* no landing roll while the wings are on (Keith v0.86) */
-            landMove = selChar === 'ivey' ? 'roll3' : rnd(['roll3', 'roll4']);   /* POISON IVEY: roll4 REMOVED (Keith, 2026-11-09) — her sideways roll4 stays out until he fixes the scene himself; she lands roll3 every time */
+            landMove = (selChar === 'ivey' || selChar === 'sayori') ? 'roll3' : rnd(['roll3', 'roll4']);   /* ROLL4 REMOVED for IVEY (Keith, 2026-11-09 — her sideways roll4 stays out until he fixes the scene himself) and for SAYORI (Keith, 2026-11-10: 'eliminate roll 4 in sayori its wrong also') — both land roll3 every time */
             landFrom = landMove === 'roll3' ? 3 : 4; landTo = landMove === 'roll3' ? 36 : 56;
             landRate = 45; score += 2;
           } else if (fallV > 1750) { landMove = 'armsopen'; landFrom = 25; landTo = 30; landRate = 30; }
@@ -1403,6 +1419,7 @@ function update(dt) {
     }
     /* ledge grab: only off a jump, falling short at the left edge */
     if (!grounded && airMove) for (const p of plats) {
+      if (p.gone) continue;   /* v0.91: no grabbing a cloud that already sank away */
       if (px + 70 < p.x || px - 40 > p.x + p.len) continue;
       const top = p.y;
       if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
@@ -1428,7 +1445,7 @@ function update(dt) {
          standing level with (the fall Keith kept filming). Only a flush
          neighbour (top within 14 of his feet) catches him; a real edge,
          a gap, or a step down still drops him as designed. */
-      const nxt = plats.find(q => q !== grounded && px + 68 >= q.x && px - 30 <= q.x + q.len && Math.abs((q.y + (q.sink || 0)) - py) <= 14);
+      const nxt = plats.find(q => q !== grounded && !q.gone && px + 68 >= q.x && px - 30 <= q.x + q.len && Math.abs((q.y + (q.sink || 0)) - py) <= 14);   /* !q.gone (v0.91): no seam transfer onto a sunken dark cloud */
       if (nxt) { grounded = nxt; py = nxt.y + (nxt.sink || 0); }
       else { grounded = null; vy = 60; airMove = null; airT = 0; landMove = null; airGrav = 1; }
     }
@@ -1439,10 +1456,25 @@ function update(dt) {
     if (grounded === p) w = 1;
     if (hangPlat === p || slipPlat === p) w = Math.max(w, 0.55);
     if (p.ghostOn) { w = Math.max(w, 1); p.ghostOn = false; }
+    if (p.dark) {
+      /* v0.91 THE DARK SINK (Keith, 2026-11-10): 'they sink when landed on. give the player like 1 second
+         before they drop. they sink heavier when walked on, then sink away.' No spring in a dark cloud:
+         stood on, it settles a breath (0.25 s), then sinks HEAVIER the longer you ride it — and at 1.0 s
+         of standing it sinks away for good and you drop (a plain fall: a lower cloud can still catch you).
+         Step off early and it keeps the depth it earned; it never springs back. */
+      if (p.gone) { p.sinkV = (p.sinkV || 0) + 2600 * dt; p.sink = (p.sink || 0) + p.sinkV * dt; }
+      else if (grounded === p) {
+        p.held = (p.held || 0) + dt;
+        if (p.held >= 1.0) { p.gone = true; p.sinkV = 160; grounded = null; vy = 150; airMove = null; airT = 0; landMove = null; airGrav = 1; }
+        else if (p.held <= 0.25) { p.sink = Math.min(6, (p.sink || 0) + 30 * dt); p.sinkV = 0; }
+        else { const t2 = (p.held - 0.25) / 0.75; p.sinkV = 16 + 300 * t2 * t2; p.sink = (p.sink || 0) + p.sinkV * dt; }
+      } else p.sinkV = 0;
+    } else {
     p.sinkV = (p.sinkV || 0) + ((w * (p.storm ? 21 : SINK_MAX) - (p.sink || 0)) * (p.storm ? 168 : 118) - (p.sinkV || 0) * (p.storm ? 7.0 : 8.4))   /* storm decks sink deeper and spring back harder (Keith v0.82) */ * dt;   /* a little more bounce again (Keith v0.36; was 104/9.2 in v0.32, 90/11 in v0.29) */
     p.sink = (p.sink || 0) + (p.sinkV || 0) * dt;
     if (p.sink < (p.storm ? -11 : -5.4)) { p.sink = (p.storm ? -11 : -5.4); p.sinkV = 0; }   /* the rebound overshoot grows with the livelier spring */
     if (p.sink > (p.storm ? 21 : SINK_MAX) + 4.5 + (p.boost || 0)) { p.sink = (p.storm ? 21 : SINK_MAX) + 4.5 + (p.boost || 0); p.sinkV = 0; }
+    }
     if (p.boost) p.boost = Math.max(0, p.boost - dt * 9);   /* the charged dip allowance rings out in under a second */
     /* the hanging cloud TILTS a touch under his weight (Keith v0.36): it tips
        while he dangles (hang or slip), and untilts when he pulls up or falls off */
@@ -1602,7 +1634,7 @@ function ghostPick() {
   if (st === 1) return { mv: 'basic', idx: Math.min(GSKIN.man.basic.n - 1, Math.floor(t * 30 * R)) };
   if (st === 7) return { mv: 'runjump', idx: Math.min(GSKIN.man.runjump.n - 1, Math.floor(t * 30 * R)) };
   if (st === 2) { const mv = GR.pick ? 'diveflip' : 'flip'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 30 * R)) }; }
-  if (st === 3) { const mv = (GR.pick && GSKIN !== SKINS.ivey) ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 45 * R)) }; }   /* an Ivey GHOST never shows roll4 either (Keith's removal, 2026-11-09) */
+  if (st === 3) { const mv = (GR.pick && GSKIN !== SKINS.ivey && GSKIN !== SKINS.sayori) ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 45 * R)) }; }   /* an Ivey or Sayori GHOST never shows roll4 either (Keith's removals, 2026-11-09 + 2026-11-10) */
   if (st === 4) return { mv: 'armsopen', idx: 15 * R + Math.floor(t * 18 * R) % (10 * R) };   /* v0.81: the game's own descent window (15R..25R, the reaching fall) — the old whole-set pingpong cycled the grip/peel frames mid-air and read as posing, not running */
   if (st === 5) return { mv: 'armsopen', idx: Math.min(GSKIN.man.armsopen.n - 1, Math.floor(t * 30 * R)) };
   if (st === 6) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10 * R), GSKIN.man.armsopen.n) };
@@ -1827,12 +1859,15 @@ function draw() {
         ctx.restore();
       }
     }
-    if (champMode || flareT > 0) {
+    const holdC = (mode === 'run' && grounded && held && !hangPlat && !slipPlat) ? Math.min(1, pressT / CHARGE_FULL) : 0;   /* v0.90.2 THE HOLD GLOW (Keith: 'when players hold down jump, we should glow charge before we jump to know we have reached charge since we dont have a charge meter'): the silhouette halo builds WITH the hold — faint at a tap, full strength at CHARGE_FULL, then PULSING so 'charged' reads at a glance. His own color, body-shaped, same glow rule as everywhere. */
+    if (champMode || flareT > 0 || holdC > 0) {
       /* the Shinobi Brawl blue charge (Keith v0.15): a pulsing electric
          halo pass under the clean sprite pass */
       ctx.save();
       ctx.shadowColor = CHAR_FX[selChar].halo;   /* the player's charge wears HIS color: fire for LaShmoove, blue for 6lade (v0.56) */
-      ctx.shadowBlur = 30 + 12 * Math.sin(time * 9);
+      if (champMode || flareT > 0) ctx.shadowBlur = 30 + 12 * Math.sin(time * 9);
+      else if (holdC >= 1) { ctx.shadowBlur = 30 + 12 * Math.sin(time * 9); ctx.globalAlpha = 1; }   /* fully held: the same pulse as a lit flare — you are charged, let go */
+      else { ctx.shadowBlur = 6 + 24 * holdC; ctx.globalAlpha = 0.3 + 0.7 * holdC; }   /* still building: the glow climbs with your thumb */
       drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET + (pa.feetAdj || 0));
       ctx.restore();
       for (const m of motes) {
@@ -1856,10 +1891,12 @@ function draw() {
   for (const p of plats) {
     const img = IMG['cloud' + p.img] || IMG['storm' + p.img], cd = CLOUDS[p.img];   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
     if (!img || !img.naturalWidth) continue;
+    if (p.dark && (p.sink || 0) > 640) continue;   /* v0.91: a dark cloud that sank away is gone from the sky too */
     const sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;
     if (sx + p.len < -200 || sx > viewW / zoom + 200) continue;
     const dh = p.len * cd.asp;
     ctx.save();
+    if (p.dark && (p.sink || 0) > 200) ctx.globalAlpha = Math.max(0, 1 - ((p.sink || 0) - 200) / 420);   /* v0.91: sinking away, it fades as it falls */
     ctx.shadowColor = `rgba(255,255,255,${0.85 - 0.35 * sky.star})`; ctx.shadowBlur = 24 - 10 * sky.star;   /* bloom tamed at night so the clouds keep their texture (v0.19) */
     if (Math.abs(p.tilt || 0) > 0.002) {   /* bent under the hanging man's weight — pivoting on the cloud's CENTER so his end dips (Keith v0.38) */
       const gx = p.x + p.len / 2 - camX, gy = p.y + (p.sink || 0) - camY;
@@ -2008,7 +2045,7 @@ function loop(ts) {
   if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; }
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
-  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps();
+  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
   audioBeat += dt;   /* THE AUDIO HEARTBEAT (v0.67, Keith: "after you die and come back the audio is muted even with it set to play"): every half second the live scene re-asserts its routing. Death, the initials keyboard, an app switch, a suspended context resuming a beat late — every one of those could strand the gains or the element on the wrong side of a boundary, and a boundary-only design stays stranded until the NEXT boundary. playTrack is idempotent, so re-asserting it twice a second costs nothing and no stuck state survives longer than half a second. */
   if (audioBeat > 0.5) { audioBeat = 0; if (mode !== 'title' || titleMusicOn) playTrack(); }
   draw();
