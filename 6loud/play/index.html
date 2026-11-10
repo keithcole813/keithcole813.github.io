@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.92</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.93</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.92 ==============================
+/* ============================== 6LOUD demo v0.93 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -505,7 +505,7 @@ let doubleArmed = false, doubleUsed = false;   /* Emma's double jump (v0.50): a 
 let notes = [], noteFt = 0, notesGot = 0, noteCharge = false;
 let noteNextT = 6, noteLane = 0;   /* the note drip (Keith v0.88): about 4 notes every 10 seconds, at low / high / in-between jump heights, never below the clouds */   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
 let coin = null, nextCoinFt = 1000, coinT = 0;
-let wing = null, nextWingFt = 1500, wingT = 0, wingPhase = 0;
+let wing = null, nextWingFt = 1500, wingT = 0, wingPhase = 0, flutterT = 0;   /* flutterT (v0.93): the tapped flutter's hold timer — while it runs, the wings hold a slow sink */
 let gwing = null, nextGWingFt = 4500, gwingGap = 4500, wingKind = null, wingMax = 10;   /* the GOLD wings (Keith v0.88): rarer, 15 seconds, Lashmoove-fire glow */
 let coinGap = 1000, wingGap = 1500;   /* the power-up spacing GROWS as the run does (Keith v0.86): at top speed a flat 1000 FT coin gap leaves almost no un-charged running — back-to-back blue doubles, his 5,367 FT run called it */
 let floaters = [];   /* the +25 FT popups at each note (Keith v0.86): the player sees what the note just paid */   /* WINGS (Keith v0.86): a timed power-up — tap jump to flap and fly */
@@ -987,7 +987,7 @@ function buildStormStep() {
   const imgT = rnd(LONGC);
   plats.push({ x, y: BAND_Y[b], len: lenT, img: imgT, storm: true });
   if (REC) REC.plats.push([x - courseBase, BAND_Y[b], lenT, imgT, 1]);
-  const cx = x + 150, cl = rnd([LEN.MED, LEN.LONG]), imgC = rnd(LONGC), cb = Math.min(5, b + 1);
+  const cx = x + Math.round(lenT * 0.6), cl = rnd([LEN.SHORT, LEN.MED]), imgC = rnd(LONGC), cb = Math.min(5, b + 1);   /* v0.93 (Keith: 'there are still clouds stacked on top of clouds'): the climb deck used to start 150 in and run LONG — up to 83% of it sat directly over the through deck, a stack with a choice painted on. It now starts 60% along the through deck and runs SHORT/MED, so the pair reads as a step up at the fork's end; the through line still runs beneath its start, so the choice can never strand you */
   plats.push({ x: cx, y: BAND_Y[cb], len: cl, img: imgC });
   if (REC) REC.plats.push([cx - courseBase, BAND_Y[cb], cl, imgC]);
   worldEnd = Math.max(x + lenT, cx + cl); exitBand = b;   /* the course frontier covers the climb deck too — the next segment used to start under its tail and stack clouds */
@@ -1102,7 +1102,7 @@ function startRun() {
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
-  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0;   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
+  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0;   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
   stormAt = 800 * 15.24; stormSteps = 0; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
@@ -1263,13 +1263,21 @@ function release() {
        that converts whatever he was doing into the plain jump. One per
        charged jump; a held press is not a tap and never fires it. */
     doubleArmed = false; doubleUsed = true;   /* spent — and never re-armed mid-jump: NO TRIPLE JUMPS (Keith v0.50) */
-    vy = -1500; airGrav = 1; airTotal = 2 * Math.abs(vy) / GRAV;
+    vy = -1500; airGrav = wingT > 0 ? 0.5 : 1; airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);   /* v0.93 (Keith): a WINGED double jump flies at the full 2x distance — the charge stretch applies to the double too */
     airMove = 'jump'; airT = 0;
     flipArmed = false; rollArmed = false; flipped = false; flipMove = null; landMove = null; landT = 0;
-    if (PSKIN.dblFlip) { flipped = true; flipMove = 'flip'; flipT = 0; }   /* the girls FLIP on their double jump (Keith v0.78) */
+    if (PSKIN.dblFlip && wingT <= 0) { flipped = true; flipMove = 'flip'; flipT = 0; }   /* the girls FLIP on their double jump (Keith v0.78) — but NEVER while winged (Keith v0.93: 'do not double jump using frames not approved for wings'): the flip frames were never wing-fitted, so a winged double rides the approved frames only — Superman on the rise, the arms-open flutter on the way down */
     jumps++; score += 1;
     for (let k = 0; k < 20; k++) spawnPuff(px - 46 + k * 5, py + 12, 11 + Math.random() * 9, 160);   /* a GOOD burst off the invisible cloud (Keith v0.51) — he really pushes off something */
     playBoom();   /* and it BOOMS like a charged landing (Keith v0.51) */
+    return;
+  }
+  /* v0.93 FLUTTER BY TAPPING (Keith, 2026-11-10): 'flutter down by tapping' — a mid-air TAP while
+     winged and sinking, on a tap that is NOT spending the double jump, beats the wings once: the
+     sink resets to a near-stop and the flutter hold in the gravity step keeps the descent slow for
+     a beat. After the double jump is spent, further taps land right back here — flutter resumes. */
+  if (!grounded && wingT > 0 && vy > 0 && !hangPlat && !slipPlat && !noLand && pressT < 0.25) {
+    vy = Math.min(vy, 40); flutterT = 0.38;
     return;
   }
   /* grounded, or a hair past the edge (coyote): the charge was earned running */
@@ -1278,11 +1286,12 @@ function release() {
   const c = noteFull ? 1 : Math.min(1, pressT / CHARGE_FULL);   /* the coin never touches this: under its charge your jumps stay YOURS (Keith) */
   vy = -(1500 + 400 * c);            // tap hop .. full launch
   airGrav = 1 - 0.30 * c;            // a longer hold floats longer
+  if (wingT > 0) airGrav /= (pressT >= ROLL_ARM || champMode || coinT > 0 || noteFull) ? 2 : 1.5;   /* v0.93 (Keith): with wings the jump goes FARTHER — 1.5x distance on a plain jump, 2x on a charged one — by floating the whole arc longer, not by jumping higher */
   airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);
   const full = pressT >= ROLL_ARM || noteFull;
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
-  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode || coinT > 0;
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode || coinT > 0; flutterT = 0;
   if (wingT > 0) { airMove = 'jump'; flipArmed = false; rollArmed = false; }   /* taking off with the wings: no flip, no roll — you FLY (Keith v0.86) */   /* the coin's 10 seconds: every jump earns its double (Keith v0.82) */   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
   if (full) { score += 4; chargeFx(1.2); }   /* the held charge, let go: he leaves the ground lit (Keith v0.28) */
   flipped = false; flipMove = null; landMove = null; landT = 0;
@@ -1381,7 +1390,7 @@ function update(dt) {
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; noLand = true; }   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either */
   } else if (!grounded) {
-    vy += GRAV * airGrav * dt * (wingT > 0 && vy > 0 ? 0.5 : 1); if (wingT > 0 && vy > 460) vy = 460; py += vy * dt; airT += dt;   /* v0.92 CHICKEN WINGS (Keith): rising is a normal jump, but FALLING with the wings is a FLUTTER — half gravity and the fall never passes 460, so a jump sails far past where it would have dropped. The v0.86-0.91 tap-flap physics (0.85 sink + tap lift) is retired. */
+    if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1); if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
     /* the flip cue: an armed jump converts at the top of the arc */
     if (airMove === 'jump' && flipArmed && !flipped && airT >= 0.26 && vy >= -430) {
       flipped = true; flipMove = rnd(['flip', 'diveflip']); flipT = 0; airMove = flipMove;
@@ -1395,7 +1404,7 @@ function update(dt) {
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
-        py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p;
+        py = top; const hard = vy > 2100; const fallV = vy; vy = 0; grounded = p; flutterT = 0;
         const chargedLand = champMode || flareT > 0;   /* a charged touchdown hits the cloud harder (Keith v0.33.2) */
         p.sinkV = (p.sinkV || 0) + Math.min(chargedLand ? 760 : 500, fallV * (chargedLand ? 0.32 : 0.20));   /* the landing thump dips it (a little more bounce, Keith v0.32) */
         if (chargedLand) p.boost = 7;   /* the dip is allowed deeper while the charge rings out */
@@ -1586,14 +1595,14 @@ function playerAnim() {
   if (hangPlat) { const idx = 5 * R + pingpong(Math.floor(time * 10), 2); return { move: 'armsopen', idx, feetAdj: (PSKIN.dangle[idx] || HANG_HANDS) - HANG_HANDS }; }   // ONLY frames 5-6: 3-4 are the open-hand REACH and 7 starts PEELING one hand off the grip — Keith caught it mid-hang in v0.33.2 play: 'he lets go and grabs back' (v0.33.3). feetAdj keeps the hands glued while the body sways.
   if (slipPlat) { if (PSKIN.man.climbfall) return { move: 'climbfall', idx: Math.min(PSKIN.man.climbfall.n - 1, Math.floor(slipT * 30)) };   // the real Climb Attempt and Fall plays ONE WAY, once
     return { move: 'armsopen', idx: 5 * R + Math.min(3 * R, Math.floor(slipT / SLIP_DUR * 4 * R)) }; }   /* fallback: ONE WAY from the grip into the peel (5,6 grip -> 7 peeling -> 8 folding). NEVER a restart at frame 0 and never a pingpong — the old slip restarted the whole arms-open motion and swept back UP through the grip frames: a visible let-go-and-grab before the fall (Keith's video, v0.38) */
-  if (!grounded && !airMove && vy > 260) {
+  if (!grounded && !airMove && (vy > 260 || flutterT > 0)) {
     const doomed = noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py && p.y - py < 640);
     if (doomed) { const m = PSKIN.man.fall2 ? 'fall2' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(time * 14 * R), PSKIN.man[m].n) }; }   // the fatal plunge (Fall 2)
     return { move: 'armsopen', idx: 15 * R + Math.floor(airT * 18 * R) % (10 * R) };   /* a fall with a cloud coming: the reaching descent, then he LANDS (Keith v0.71) */
   }
   if (!grounded) {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
-    if (wingT > 0 && vy > 260) return { move: 'armsopen', idx: 15 * R + Math.floor(airT * 18 * R) % (10 * R) };   /* v0.92 CHICKEN WINGS (Keith): falling with the wings is the FLUTTER — the arms-open descent frames, the same display as any fall, and the worn pair draws with its FALL fit there. The Superman below is for the rise. */
+    if (wingT > 0 && (vy > 260 || flutterT > 0)) return { move: 'armsopen', idx: 15 * R + Math.floor(airT * 18 * R) % (10 * R) };   /* v0.93: a tapped flutter holds this same descent display while its kick keeps vy under 260 */   /* v0.92 CHICKEN WINGS (Keith): falling with the wings is the FLUTTER — the arms-open descent frames, the same display as any fall, and the worn pair draws with its FALL fit there. The Superman below is for the rise. */
     if (wingT > 0) { const fc = PSKIN.flyC != null ? PSKIN.flyC : 17, fh = PSKIN.flyH || 5; return { move: 'diveroll', idx: fc + Math.round(Math.sin(wingPhase * Math.PI / 18) * fh) }; }   /* v0.90 THE SUPERMAN FLIGHT (Keith, 2026-11-10): 'i want them like they are superman poses... can we loop around here, back and forth, as the wings flap' — his pick was kit frame 474, the dive-roll's extended moment (game f017 on 6lade; each runner has their own at flyC). The pose sways +-flyH frames around it, one rock per flap cycle (wingPhase 36). Still outranks a flip in progress (v0.89). */
     if (flipped && flipMove && flipT < PSKIN.man[flipMove].n / (30 * R))
       return { move: flipMove, idx: Math.min(PSKIN.man[flipMove].n - 1, Math.floor(flipT * 30 * R)) };
@@ -1847,8 +1856,8 @@ function draw() {
       const wimg = IMG['wing' + (Math.floor(wingPhase) % WINGN.n)];
       const wshow = wingT > 3 || (time * (4 + (3 - wingT) * 2.5)) % 1 < 0.62;
       if (wimg && wimg.naturalWidth && wshow) {
-        const flying = !grounded && !hangPlat && !slipPlat && PSKIN.flyM && vy <= 260;   /* v0.90: the Superman pose carries its own wing fit (flyM/flyR). v0.92: only on the RISE — past vy 260 he is flutter-falling and the pair takes its fall fit */
-        const fallingW = !grounded && !hangPlat && !slipPlat && vy > 260;   /* v0.92: the flutter descent state — optional per-runner fallM/fallR, defaulting to the upright fit until Keith steers them */
+        const flying = !grounded && !hangPlat && !slipPlat && PSKIN.flyM && vy <= 260 && flutterT <= 0;   /* v0.93: mid-flutter is the FALL fit's moment, never Superman */   /* v0.90: the Superman pose carries its own wing fit (flyM/flyR). v0.92: only on the RISE — past vy 260 he is flutter-falling and the pair takes its fall fit */
+        const fallingW = !grounded && !hangPlat && !slipPlat && (vy > 260 || flutterT > 0);   /* v0.92: the flutter descent state — optional per-runner fallM/fallR, defaulting to the upright fit until Keith steers them */
         const wm = flying ? PSKIN.flyM : fallingW && PSKIN.fallM ? PSKIN.fallM : (PSKIN.wingM || [2, -231]); let sx = px - camX + wm[0] + 22.6; let sy = py - camY + wm[1] - 22.6; if (fallingW && (PSKIN.fallOff || PSKIN.fallOffD)) { const ov = PSKIN.fallOffD && PSKIN.fallOffD[pa.idx]; if (ov) { sx += ov[0]; sy += ov[1]; } else if (PSKIN.fallOff) { for (const z of PSKIN.fallOff) { if (pa.idx <= z[0]) { sx += z[1]; sy += z[2]; break; } } } }   /* fallOffD (Keith, 2026-11-10, 6lade): 'bring panel 3 down 1 and right 1' — frame 38 overrides its zone: net +3u right, -1u (up 1) from the base fit. */   /* v0.92 FALL STEER (Keith, 2026-11-10, 6lade): per-zone mount offsets keyed to the descent-window frame — panels 1-3 (idx<=38) up 2u right 2u, panels 4-5 (<=47) down 1u right 1u, panel 6 down 2u right 2u (1 unit = 16). */ let flyRot = PSKIN.flyR || 0; if (flying) { const fc = PSKIN.flyC != null ? PSKIN.flyC : 17, fh = PSKIN.flyH || 5, bi = fc + Math.round(Math.sin(wingPhase * Math.PI / 18) * fh), dg = PSKIN.man && PSKIN.man.diveroll && PSKIN.man.diveroll.gaps; if (dg && dg[bi] != null && dg[fc] != null) sy += (dg[bi] - dg[fc]) * PX2U; if (bi > fc && PSKIN.flyLate) sy += PSKIN.flyLate; if (bi === fc && PSKIN.flyCDrop) sy += PSKIN.flyCDrop; if (bi < fc && PSKIN.flyEDrop) sy += PSKIN.flyEDrop; if (bi < fc && PSKIN.flyEarly) flyRot += PSKIN.flyEarly; if (bi >= fc + fh - 1 && PSKIN.flyTail) flyRot += PSKIN.flyTail; if (bi >= fc + fh - 1 && PSKIN.flyTailD) sy += PSKIN.flyTailD[bi - (fc + fh - 1)] || 0; if (bi > fc && PSKIN.flyLateRot) flyRot += PSKIN.flyLateRot; if (bi === fc && PSKIN.flyCRot) flyRot += PSKIN.flyCRot; if (PSKIN.flyOffD && PSKIN.flyOffD[bi - fc]) sy += PSKIN.flyOffD[bi - fc]; if (bi === fc + fh && PSKIN.flyLastRot) flyRot += PSKIN.flyLastRot; }   /* flyLastRot (Keith, 2026-11-10): 'rotate 6 10 degrees' — the sway's very last frame alone turns his extra degrees. */   /* flyCRot + flyOffD (Keith, 2026-11-10, Ivey): 'rotate 3 10 degrees, bring 4 down half a unit' — a turn on the center frame alone, and a per-offset drop keyed by distance from center. */   /* flyLateRot (Keith, 2026-11-10, Ivey): 'rotate 4-6 20 degrees' — the whole late half turns his extra degrees. Her panels 1-2 drop 1u (flyEDrop), panels 5-6 RISE 1u (negative flyTailD). */   /* flyTailD (Keith, 2026-11-10): 'bring down the wings on frame 5 one unit, and frame 6 half unit' — per-position extra drops on the sway's last two frames (Yorokobi 20: +16, 21: +8). */   /* flyTail (Keith, 2026-11-10, Yorokobi): 'rotate the wings on frames 5 and 6 10 degrees' — the sway's last two positions (her 20-21) turn his extra degrees. */   /* flyEDrop (Keith, 2026-11-10, Yorokobi): 'bring the wings down 2 units on frames 1-3 and down 1 unit on the last 3' — early half drops 2u (flyEDrop + flyCDrop at center), late half 1u (flyLate). */   /* flyEarly (Keith, 2026-11-10): 'rotate -10 degrees on the first 2 frames' — the sway's early half turns the pair his extra degrees. */   /* flyCDrop (Keith, 2026-11-10): 'on the 3rd frame bring the wings down a unit' — frame 6 is his center frame; the pair drops his extra unit there too. His 6th frame (9) is eliminated — flyH 3 -> 2, window 4-8. */   /* flyLate (Keith, 2026-11-10, LaShmoove): 'get the wings to drop 1 unit on the last 3' — on the sway's late half (past the center frame) the pair drops his extra units so it stays seated as the body rolls away. */   /* v0.90 BODY TRACKING (Keith, 2026-11-10, on LaShmoove frames 4-9: 'the last 3 the body is farther away than the top 3'): a roll sprite TRANSLATES inside its cell as its gap changes (its top is feetY - (h - gap) * PX2U), so a fixed mount detaches on frames whose gap differs from the center frame's (LaShmoove: gap 91 at f4 -> 157 at f7 = a 42-unit drop). While Superman-flying the wings ride the SAME gap delta as the displayed body frame — glued to the back across the whole sway, every runner, from their own manifest. */   /* mount PER RUNNER (v0.89) + v0.90 THE SLIDE (Keith's unit steering): 1 unit = 16 game units (the runner stands 256 tall), direction by clock face; he slid 1 unit at 1:30 (45 deg up-right), +20 more (21 total, off the body), then 'go back 19 units' -> NET 2 units at 1:30 = +22.6 x, -22.6 y. */
         ctx.save(); ctx.translate(sx, sy);
         if (flying) ctx.rotate(flyRot * Math.PI / 180);   /* v0.90: the Superman fit's own turn (replaces the 45 + tuck below while she is stretched out) */
