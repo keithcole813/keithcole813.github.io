@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.87</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.88</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.87 ==============================
+/* ============================== 6LOUD demo v0.88 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -496,13 +496,19 @@ let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
 let doubleArmed = false, doubleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps) */
 /* v0.82 ITEMS (Keith, 2026-11-09): notes bank feet, the lightning coin grants a timed charge, storm banks fork the course, planes cross, the sky dresses itself */
-let notes = [], noteFt = 0, notesGot = 0, noteCharge = false;   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
+let notes = [], noteFt = 0, notesGot = 0, noteCharge = false;
+let noteNextT = 6, noteLane = 0;   /* the note drip (Keith v0.88): about 4 notes every 10 seconds, at low / high / in-between jump heights, never below the clouds */   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
 let coin = null, nextCoinFt = 1000, coinT = 0;
 let wing = null, nextWingFt = 1500, wingT = 0, wingPhase = 0;
+let gwing = null, nextGWingFt = 4500, gwingGap = 4500, wingKind = null, wingMax = 10;   /* the GOLD wings (Keith v0.88): rarer, 15 seconds, Lashmoove-fire glow */
 let coinGap = 1000, wingGap = 1500;   /* the power-up spacing GROWS as the run does (Keith v0.86): at top speed a flat 1000 FT coin gap leaves almost no un-charged running — back-to-back blue doubles, his 5,367 FT run called it */
 let floaters = [];   /* the +25 FT popups at each note (Keith v0.86): the player sees what the note just paid */   /* WINGS (Keith v0.86): a timed power-up — tap jump to flap and fly */
 const WINGN = { n: 36, w: 145.3, h: 223.7, ax: 0.4879, ay: 0.1731 };   /* the baked flap loop: cell + mount anchor, measured off Keith's kc2 bake (scene projections, not estimates) */
 for (let k = 0; k < WINGN.n; k++) loadImg('wing' + k, 'assets/wings/f' + String(k).padStart(3, '0') + '.webp');
+loadImg('wingicon', 'assets/wings-icon.webp');   /* Keith's pickup icon (v0.88): the cartoon wing pair he sent — the pickup is an ICON now, the worn wings stay his fitted 3D pair */
+loadImg('wingicongold', 'assets/wings-icon-gold.webp');   /* the GOLD pair (Keith v0.88): 15 seconds, glowing in Lashmoove's charge color */
+loadImg('notegold', 'assets/note-gold.webp');   /* Keith's note (v0.88): the single gold note is THE note now */
+loadImg('plus25', 'assets/plus25.webp');   /* Keith's +25FT graphic (v0.88): what a note flashes when you grab it */
 let stormAt = 800 * 15.24, stormSteps = 0;
 let plane = null, planeNextAt = 42, stumbleT = 0;
 let rocket = null, rocketNextAt = 55, rpuffs = [];
@@ -964,14 +970,7 @@ function buildSegment(seg) {
     segPlats.push(plats[before]);
   });
   worldEnd = x; exitBand = seg.steps[seg.steps.length - 1][2]; lastTier = seg.t;
-  /* note phrases (v0.82): a short floating line of notes over one of this segment's decks — never on the opener, never in the tiny-cloud window's spirit (runTime gate), never while the storm phases in */
-  if (runTime > 15 && !phasing && Math.random() < 0.5) {
-    const qs = segPlats.filter(q => q.len >= 430);
-    if (qs.length) {
-      const q = rnd(qs), n = 3 + Math.floor(Math.random() * 3);
-      for (let k = 0; k < n; k++) notes.push({ x: q.x + 70 + k * 95, y: q.y - 240 - Math.sin(k / Math.max(1, n - 1) * Math.PI) * 50,   /* raised (Keith v0.84): jump height — a grounded run passes underneath */ img: k % 2 ? 'note2' : 'note1', got: false });
-    }
-  }
+  /* note phrases are GONE (Keith v0.88): notes now drip from the items tick on his cadence — about 4 every 10 seconds, high, low and in between */
 }
 function buildStormStep() {
   /* THE FORK (Keith v0.82): a springy storm deck on the through line, and a clean climb deck one band up starting a little later — miss the climb and you are committed through the turbulence. The through deck runs UNDER the climb deck's start, so the choice can never strand you. */
@@ -1095,7 +1094,7 @@ function startRun() {
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
-  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; floaters = []; coinGap = 1000; wingGap = 1500;   /* wings + power-up spacing reset per run (v0.86) */
+  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0;   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
   stormAt = 800 * 15.24; stormSteps = 0; plane = null; planeNextAt = 42; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
@@ -1465,11 +1464,26 @@ function update(dt) {
   if (wingT > 0) { wingT -= dt; wingPhase += dt * 60; if (wingT <= 0) { wingT = 0; playTrack(); } }   /* the wings run out: the music falls back (v0.86) */
   if (!wing && Math.floor(dist / 15.24) >= nextWingFt) {
     const q = plats.find(q => q.x > px + 1000);
-    if (q) { wing = { x: q.x + q.len * 0.5, y: q.y - 52 }; nextWingFt += wingGap; wingGap = Math.round(wingGap * 1.35); if (nextCoinFt > nextWingFt && nextCoinFt - nextWingFt < 500) nextCoinFt = nextWingFt + 500; }   /* the wings lie on a deck; their gap grows 1500 -> 2025 -> 2735... with the same 500 FT separation from the coin (Keith v0.86) */
+    if (q) { wing = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextWingFt += wingGap; wingGap = Math.round(wingGap * 1.35); if (nextCoinFt > nextWingFt && nextCoinFt - nextWingFt < 500) nextCoinFt = nextWingFt + 500; }   /* the wing pickup floats at the COIN's height (Keith v0.88); their gap grows 1500 -> 2025 -> 2735... with the same 500 FT separation from the coin (Keith v0.86) */
   }
   if (wing && wing.x < px - 460) wing = null;
+  if (!gwing && Math.floor(dist / 15.24) >= nextGWingFt) {   /* the GOLD wings ride a slower milestone (Keith v0.88): first at 4,500 FT, then growing gaps like the rest */
+    const q = plats.find(q => q.x > px + 1000);
+    if (q) { gwing = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextGWingFt += gwingGap; gwingGap = Math.round(gwingGap * 1.35); if (nextCoinFt > nextGWingFt && nextCoinFt - nextGWingFt < 500) nextCoinFt = nextGWingFt + 500; if (nextWingFt > nextGWingFt && nextWingFt - nextGWingFt < 500) nextWingFt = nextGWingFt + 500; }
+  }
+  if (gwing && gwing.x < px - 460) gwing = null;
+  if (gwing && Math.abs(px - gwing.x) < 80 && Math.abs((py - 110) - gwing.y) < 150) {
+    gwing = null; wingT = 15; wingMax = 15; wingKind = 'gold'; wingPhase = 0; chargeFx(0.9); playTrack();   /* GOLD WINGS ON: 15 seconds (Keith v0.88) */
+    for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
+  }
+  if (runTime >= noteNextT) {   /* THE NOTE DRIP (Keith v0.88): about 4 every 10 seconds — low (a hop), high (a full jump), in-between — anchored to the next deck ahead and NEVER below the clouds */
+    const lanes = [130, 430, 250];
+    const q = plats.find(q => q.x + q.len > px + 1100);
+    notes.push({ x: px + 1100, y: (q ? q.y : py - 40) - lanes[noteLane % 3], img: 'notegold', got: false });
+    noteLane++; noteNextT = runTime + 2.5 + (Math.random() * 0.8 - 0.4);
+  }
   if (wing && Math.abs(px - wing.x) < 80 && Math.abs((py - 110) - wing.y) < 150) {
-    wing = null; wingT = 10; wingPhase = 0; chargeFx(0.9); playTrack();   /* WINGS ON: 10 seconds of flight, and the trippin loop starts (Keith v0.86) */
+    wing = null; wingT = 10; wingMax = 10; wingKind = 'std'; wingPhase = 0; chargeFx(0.9); playTrack();   /* WINGS ON: 10 seconds of flight, and the trippin loop starts (Keith v0.86) */
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
   }
   for (const n of notes) {
@@ -1898,20 +1912,21 @@ function draw() {
     ctx.fillStyle = gr; ctx.fillRect(sx - 90, sy - 90, 180, 180);
     if (img && img.naturalWidth) { const sq = 0.18 + 0.82 * Math.abs(Math.cos(time * 3.2)), w = 96 * sq; ctx.drawImage(img, sx - w / 2, sy - 48, w, 96); }   /* the coin SPINS (Keith) */
   }
-  for (const f of floaters) {   /* the +25 FT bonus flash (Keith v0.86): gold, rising, gone in under a second */
+  for (const f of floaters) {   /* the note flash (Keith v0.88): HIS +25FT graphic, rising, gone in under a second (the v0.86 text stays as the fallback) */
     const sx = f.x - camX, sy = f.y - camY - f.t * 48;
     ctx.save(); ctx.globalAlpha = Math.max(0, 1 - f.t / 0.9);
-    ctx.font = '30px "Luckiest Guy", sans-serif'; ctx.textAlign = 'center';
-    ctx.lineWidth = 6; ctx.strokeStyle = '#120c28'; ctx.strokeText('+25 FT', sx, sy);
-    ctx.fillStyle = '#ffd83d'; ctx.fillText('+25 FT', sx, sy);
+    const p25 = IMG.plus25;
+    if (p25 && p25.naturalWidth) { const w = 150, h = w * p25.naturalHeight / p25.naturalWidth; ctx.drawImage(p25, sx - w / 2, sy - h, w, h); }
+    else { ctx.font = '30px "Luckiest Guy", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = '#120c28'; ctx.strokeText('+25 FT', sx, sy); ctx.fillStyle = '#ffd83d'; ctx.fillText('+25 FT', sx, sy); }
     ctx.restore();
   }
-  if (wing) {   /* the wings, lying on their deck waiting (v0.86): the folded blade + a soft white glow */
-    const img = IMG.wing0, sx = wing.x - camX, sy = wing.y - camY + Math.sin(time * 2) * 3;
-    const gr = ctx.createRadialGradient(sx, sy - 20, 4, sx, sy - 20, 66 + Math.sin(time * 5) * 6);
-    gr.addColorStop(0, 'rgba(255,255,255,0.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = gr; ctx.fillRect(sx - 80, sy - 100, 160, 160);
-    if (img && img.naturalWidth) { const w = WINGN.w * 0.52, h = WINGN.h * 0.52; ctx.drawImage(img, sx - WINGN.ax * w, sy - h + 26, w, h); }
+  if (gwing) {   /* the GOLD wing pickup (Keith v0.88): his gold pair at the same height and size — no glow either (his push-time call; the fire glow lives in the design note, struck) */
+    const img = IMG.wingicongold, sx = gwing.x - camX, sy = gwing.y - camY + Math.sin(time * 2) * 5;
+    if (img && img.naturalWidth) { const h = 96, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }
+  }
+  if (wing) {   /* the wing pickup (Keith v0.88): HIS icon at the coin's height and size — NO glow (Keith struck the glow at push time) */
+    const img = IMG.wingicon, sx = wing.x - camX, sy = wing.y - camY + Math.sin(time * 2) * 5;
+    if (img && img.naturalWidth) { const h = 96, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }   /* the coin's size: 96 units */
   }
   if (coinT > 0 && mode === 'run') {   /* wearing the charge: an aura in your color */
     const rgb = (CHAR_FX[selChar].halo.match(/\d+/g) || [255, 210, 90]).slice(0, 3).join(',');
@@ -2005,7 +2020,7 @@ function draw() {
     if (wshow) {
       ctx.save();
       ctx.fillStyle = 'rgba(10,6,32,0.66)'; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2, by, bw, 13, 7); ctx.fill();
-      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 2, by + 2, (bw - 4) * Math.max(0, wingT / 10), 9, 5); ctx.fill();
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(W / 2 - bw / 2 + 2, by + 2, (bw - 4) * Math.max(0, wingT / wingMax), 9, 5); ctx.fill();
       ctx.restore();
     }
   }
