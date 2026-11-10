@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.89</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.90</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.89 ==============================
+/* ============================== 6LOUD demo v0.90 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -211,7 +211,6 @@ function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "
   mScene = 'day'; titleMusicOn = true; playTrack();
 }
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
-let rawPlane = null, bufPlane = null, decPlane = null;
 let rawCoin = null, bufCoin = null, decCoin = null, gainCoin = null;
 let rawNote = null, bufNote = null, decNote = null, gainNote = null, noteSrc = null, noteStreak = 0, lastNoteT = -9;
 let rawW = null, bufW = null, decW = null, gainW = null, srcW = null;   /* the wings loop (Keith's trippin instrumental, v0.86) */
@@ -250,7 +249,6 @@ if (window.fetch) {
   fetch('assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
   fetch('assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
   fetch('assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
-  fetch('assets/plane-flyby.mp3').then(r => r.arrayBuffer()).then(b => { rawPlane = b; }).catch(() => {});   /* Keith's airplane clip (v0.82): the pass is heard after it is seen */
   fetch('assets/coin-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawCoin = b; }).catch(() => {});   /* Keith's coin pick (v0.83): the Sci-Fi Power Up sweep */
   fetch('assets/note-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawNote = b; }).catch(() => {});   /* Keith's note pick (v0.83): the felt piano hit */
   fetch('assets/wings-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawW = b; }).catch(() => {});   /* Keith's wings pick (v0.86): the trippin loop, for while you have the wings */
@@ -276,7 +274,6 @@ function kickDecode() {
   if (!decD && rawD && actx.decodeAudioData) decD = actx.decodeAudioData(rawD.slice(0)).then(b => { bufD = b; }).catch(() => { decD = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
   if (!decB && rawB && actx.decodeAudioData) decB = actx.decodeAudioData(rawB.slice(0)).then(b => { bufB = b; }).catch(() => { decB = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
   if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => { decBoom = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
-  if (!decPlane && rawPlane && actx.decodeAudioData) decPlane = actx.decodeAudioData(rawPlane.slice(0)).then(b => { bufPlane = b; }).catch(() => { decPlane = null; });
   if (!decCoin && rawCoin && actx.decodeAudioData) decCoin = actx.decodeAudioData(rawCoin.slice(0)).then(b => { bufCoin = b; }).catch(() => { decCoin = null; });
   if (!decNote && rawNote && actx.decodeAudioData) decNote = actx.decodeAudioData(rawNote.slice(0)).then(b => { bufNote = b; }).catch(() => { decNote = null; });
   if (!decW && rawW && actx.decodeAudioData) decW = actx.decodeAudioData(rawW.slice(0)).then(b => { bufW = b; }).catch(() => { decW = null; });
@@ -412,7 +409,7 @@ Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n]
 /* v0.82 items + sky dressing sprites (loaded lazy, never core) */
 const STORMC = ['S05', 'S13', 'S14', 'S15', 'S17', 'S19'];
 STORMC.forEach(n => queueImg(im => { IMG['storm' + n] = im; }, 'assets/storm-' + n.slice(1) + '.webp'));
-['coin', 'plane-under', 'plane-side', 'satellite', 'rocket', 'note1', 'note2'].forEach(n => queueImg(im => { IMG[n] = im; }, 'assets/' + n + '.webp'));
+['coin', 'satellite', 'rocket', 'note1', 'note2'].forEach(n => queueImg(im => { IMG[n] = im; }, 'assets/' + n + '.webp'));
 /* decorative background pack — ChatGPT sunset clouds via Keith (2026-11-06):
    his sheet, cut + compressed by Amy; streamed in, never gates the start */
 const BGMID = ['01','08','09','10','11','13','14','16','17','18','19','22','23','24','26','27','28'];
@@ -510,7 +507,7 @@ loadImg('wingicongold', 'assets/wings-icon-gold.webp');   /* the GOLD pair (Keit
 loadImg('notegold', 'assets/note-gold.webp');   /* Keith's note (v0.88): the single gold note is THE note now */
 loadImg('plus25', 'assets/plus25.webp');   /* Keith's +25FT graphic (v0.88): what a note flashes when you grab it */
 let stormAt = 800 * 15.24, stormSteps = 0;
-let plane = null, planeNextAt = 42, stumbleT = 0;
+let stumbleT = 0;   /* the stagger timer: its only trigger was the plane, removed in v0.90 (Keith: 'take the plane out. its wrong') — the readers stay, it never fires */
 let rocket = null, rocketNextAt = 55, rpuffs = [];
 const runFt = () => Math.floor(dist / 15.24) + noteFt;   /* what the player sees and posts: travel + banked note feet (Keith's default-yes) */
 const spdF = () => stumbleT > 0 ? 0.55 : 1;   /* the stumble: speed drops a step, and the slowdown HELPS (Keith) */
@@ -532,16 +529,6 @@ function tiltEase(dt) {
   const k = Math.min(1, dt * 4);
   tiltX += (dz(dx, 2, 22) - tiltX) * k;
   tiltY += (dz(dy, 2, 18) - tiltY) * k;
-}
-function planeAx(pp) {   /* the plane's OWN path across the screen (Keith v0.89: 'the airplane is following us. It should not be following jumps or anything') — it sweeps in from the right, crosses the runner exactly at the pp 0.90 stumble moment, and whips out left. It is never pinned to him. */
-  let ax = W * (0.85 - 0.35 * Math.min(1, pp / 0.90));
-  if (pp > 0.90) ax -= (pp - 0.90) / 0.15 * W * 0.85;
-  return ax;
-}
-function planeScale(pp) {   /* the LOOM (Keith): you see it coming for a while — a long slow growth in the distance — then it explodes: in and out really fast. v0.89: the growth stretches (0.75 / 0.90) with the longer pass */
-  if (pp < 0.75) { const u = pp / 0.75; return 0.05 + 0.30 * u * u; }
-  if (pp < 0.90) { const u = (pp - 0.75) / 0.15; return 0.35 + 0.65 * (u * u * (3 - 2 * u)); }
-  return 1 + 0.12 * Math.min(1, (pp - 0.90) / 0.15);
 }
 let slipPlat = null, slipT = 0, struggleTaps = 0, hangTX = 0, hangTY = 0, noLand = false;   /* noLand: the ledge-slip plunge ONLY — that fall never lands (v0.71) */
 /* LEDGE: BOTH (Keith's try-both ruling, 2026-11-06) — a catch hangs; HANG_TAPS
@@ -568,11 +555,11 @@ const SAYORI_DANGLE = { 3: 227, 4: 233, 5: 239, 6: 245, 7: 251, 8: 263, 9: 275, 
 let selChar = 'blade';
 try { const c0 = localStorage.getItem('sixloud_char'); if (c0 === 'lash' || c0 === 'yoro' || c0 === 'ivey' || c0 === 'sayori') selChar = c0; } catch (e) {}
 const SKINS = {
-  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true, wingM: [-17, -240] },
-  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', ready: true, wingM: [-11, -224] },
-  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', rate: 2, ready: true, wingM: [-1, -232] },
-  ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'POISON IVEY', rate: 2, dblFlip: true, ready: true, wingM: [5, -228] },
-  sayori: { man: SAYORI_MANIFEST, anim: SAYORI_ANIM, dangle: SAYORI_DANGLE, name: 'SAYORI', rate: 2, dblFlip: true, ready: true, wingM: [2, -231] }   /* wingM (v0.89): the mount measured per body — one mount for every runner put the pair wrong on Yorokobi (Keith's photo); Sayori's is her kc2 fit verbatim, the rest are her yardstick on their own frames */
+  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true, wingM: [-17, -240], wingR: 26, flyC: 15, flyH: 2, flyM: [86, -150], flyR: 103 },
+  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', ready: true, wingM: [-11, -224], wingR: 22, flyC: 6, flyH: 2, flyM: [81, -176], flyR: 109, flyLate: 16, flyCDrop: 16, flyEarly: -10 },
+  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', rate: 2, ready: true, wingM: [-1, -232], wingR: 32, flyC: 17, flyH: 4, flyM: [79, -153], flyR: 109, flyLate: 16, flyCDrop: 32, flyEDrop: 32, flyTail: 10, flyTailD: [16, 8] },
+  ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'POISON IVEY', rate: 2, dblFlip: true, ready: true, wingM: [5, -228], wingR: 24, flyC: 17, flyH: 4, flyM: [59, -160], flyR: 91, flyEDrop: 16, flyLateRot: 20, flyLate: 16, flyCRot: 10, flyOffD: { 2: 8, 4: 16 }, flyCDrop: 16, flyLastRot: 10 },
+  sayori: { man: SAYORI_MANIFEST, anim: SAYORI_ANIM, dangle: SAYORI_DANGLE, name: 'SAYORI', rate: 2, dblFlip: true, ready: true, wingM: [2, -231], wingR: 25, flyC: 17, flyH: 4, flyM: [66, -146], flyR: 92, flyTail: 10, flyEarly: 10, flyEDrop: 32 }   /* wingM (v0.89): the mount measured per body — one mount for every runner put the pair wrong on Yorokobi (Keith's photo); Sayori's is her kc2 fit verbatim, the rest are her yardstick on their own frames */
 };
 /* each runner burns in their OWN color (Keith: 6lade blue + LaShmoove fire, v0.56; Yorokobi PURPLE, v0.70).
    pstreak = the ground streaks a runner stamps AS THE PLAYER while lit — LaShmoove and Yorokobi carry theirs; 6lade has none. */
@@ -1101,7 +1088,7 @@ function startRun() {
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
   wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0;   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
-  stormAt = 800 * 15.24; stormSteps = 0; plane = null; planeNextAt = 42; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
+  stormAt = 800 * 15.24; stormSteps = 0; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
   ghostReset(!G);   /* first run (or after a catch): he sprints in from the left; if he was never caught, he's still out there ahead */
   playTrack(); kickDecode();
@@ -1511,33 +1498,6 @@ function update(dt) {
     if (Math.abs(px - coin.x) < 78 && Math.abs((py - 120) - coin.y) < 165) { const cx2 = coin.x; coin = null; coinT = 10; chargeFx(0.9); playCoin(); playTrack();   /* bg music 2 kicks in with the charge (Keith v0.85) */ for (let k = 0; k < 10; k++) spawnPuff(cx2, py - 120, 10, 140); }
     else if (coin.x < px - 420) coin = null;
   }
-  if (!plane && runTime > planeNextAt && stormSteps === 0) plane = { type: Math.random() < 0.5 ? 'high' : 'low', t: 0, dur: 10, snd: null, tail: 0, crossed: false, deckY: (grounded ? grounded.y + (grounded.sink || 0) : py) };   /* v0.89: the pass stretches to 10 s (Keith: 'coming too fast'), and its FLIGHT LINE locks here — the deck height at spawn; it never follows his jumps after this (Keith) */
-  if (plane) {
-    plane.t += dt;
-    const pp = plane.t / plane.dur;
-    if (pp >= 0.18 && !plane.snd && typeof bufPlane !== 'undefined' && bufPlane && actx && actx.state === 'running') {   /* SEE it first, HEAR it after (Keith): the sound lags the sight */
-      const gn = actx.createGain(); gn.gain.value = 0; gn.connect(actx.destination);
-      const src = actx.createBufferSource(); src.buffer = bufPlane; src.connect(gn); src.start();
-      plane.snd = { src, gn };
-    }
-    if (plane.snd) {
-      let g;
-      if (pp < 0.90) g = 0.9 * Math.pow(Math.max(0, (pp - 0.18) / 0.72), 1.6);
-      else if (pp <= 1) g = 0.9;
-      else { plane.tail += dt; g = 0.9 * Math.exp(-plane.tail / 1.5); }   /* loudest AT you, still heard after it passes (Keith) */
-      try { plane.snd.gn.gain.value = g; } catch (e) {}
-      if (plane.tail > 3.2) { try { plane.snd.src.stop(); } catch (e) {} plane.snd = null; }
-    } else if (pp > 1) plane.tail += dt;
-    if (plane.type === 'low' && !plane.crossed && pp >= 0.90) {
-      plane.crossed = true;
-      const below = plats.filter(q => px + 60 >= q.x && px - 40 <= q.x + q.len && q.y >= py - 40).sort((a, b) => a.y - b.y)[0];
-      if (below && py > below.y - 400 && !hangPlat && !slipPlat) {   /* you did not clear the tail: STUMBLE — charge emptied, speed steps down, run goes on */
-        stumbleT = 1.1; pressT = 0; rollArmed = false; flipArmed = false; shake = Math.min(12, shake + 6);
-        for (let k = 0; k < 8; k++) spawnPuff(px - 20 + k * 6, py - 30, 10, 120);
-      }
-    }
-    if (pp > 1 && plane.tail > 3.2) { plane = null; planeNextAt = runTime + 30 + Math.random() * 20; }
-  }
   if (!rocket && runTime > rocketNextAt) rocket = { t: 0, dur: 9 };
   if (rocket) {
     rocket.t += dt;
@@ -1602,7 +1562,7 @@ function playerAnim() {
   }
   if (!grounded) {
     /* a spliced flip plays once, at true speed, wherever the cue caught it */
-    if (wingT > 0) return { move: 'armsopen', idx: 9 * R + pingpong(Math.floor(airT * 30 * R), 6 * R) };   /* the flying pose (Keith v0.86): arms open, floating — she never flips or rolls in the wings. v0.89: this outranks a flip in progress — grabbing the wings mid-flip left her tumbling with the pair upright behind her (Keith's Yorokobi photo) */
+    if (wingT > 0) { const fc = PSKIN.flyC != null ? PSKIN.flyC : 17, fh = PSKIN.flyH || 5; return { move: 'diveroll', idx: fc + Math.round(Math.sin(wingPhase * Math.PI / 18) * fh) }; }   /* v0.90 THE SUPERMAN FLIGHT (Keith, 2026-11-10): 'i want them like they are superman poses... can we loop around here, back and forth, as the wings flap' — his pick was kit frame 474, the dive-roll's extended moment (game f017 on 6lade; each runner has their own at flyC). The pose sways +-flyH frames around it, one rock per flap cycle (wingPhase 36). Still outranks a flip in progress (v0.89). */
     if (flipped && flipMove && flipT < PSKIN.man[flipMove].n / (30 * R))
       return { move: flipMove, idx: Math.min(PSKIN.man[flipMove].n - 1, Math.floor(flipT * 30 * R)) };
     if (airMove === 'runjumproll') {
@@ -1855,8 +1815,16 @@ function draw() {
       const wimg = IMG['wing' + (Math.floor(wingPhase) % WINGN.n)];
       const wshow = wingT > 3 || (time * (4 + (3 - wingT) * 2.5)) % 1 < 0.62;
       if (wimg && wimg.naturalWidth && wshow) {
-        const wm = PSKIN.wingM || [2, -231]; const sx = px - camX + wm[0], sy = py - camY + wm[1];   /* the mount point PER RUNNER (v0.89): each body's own shoulder line, calibrated on Sayori's scene fit */
-        ctx.drawImage(wimg, sx - WINGN.ax * WINGN.w, sy - WINGN.ay * WINGN.h, WINGN.w, WINGN.h);
+        const flying = !grounded && !hangPlat && !slipPlat && PSKIN.flyM;   /* v0.90: the Superman pose carries its own wing fit (flyM/flyR) */
+        const wm = flying ? PSKIN.flyM : (PSKIN.wingM || [2, -231]); const sx = px - camX + wm[0] + 22.6; let sy = py - camY + wm[1] - 22.6; let flyRot = PSKIN.flyR || 0; if (flying) { const fc = PSKIN.flyC != null ? PSKIN.flyC : 17, fh = PSKIN.flyH || 5, bi = fc + Math.round(Math.sin(wingPhase * Math.PI / 18) * fh), dg = PSKIN.man && PSKIN.man.diveroll && PSKIN.man.diveroll.gaps; if (dg && dg[bi] != null && dg[fc] != null) sy += (dg[bi] - dg[fc]) * PX2U; if (bi > fc && PSKIN.flyLate) sy += PSKIN.flyLate; if (bi === fc && PSKIN.flyCDrop) sy += PSKIN.flyCDrop; if (bi < fc && PSKIN.flyEDrop) sy += PSKIN.flyEDrop; if (bi < fc && PSKIN.flyEarly) flyRot += PSKIN.flyEarly; if (bi >= fc + fh - 1 && PSKIN.flyTail) flyRot += PSKIN.flyTail; if (bi >= fc + fh - 1 && PSKIN.flyTailD) sy += PSKIN.flyTailD[bi - (fc + fh - 1)] || 0; if (bi > fc && PSKIN.flyLateRot) flyRot += PSKIN.flyLateRot; if (bi === fc && PSKIN.flyCRot) flyRot += PSKIN.flyCRot; if (PSKIN.flyOffD && PSKIN.flyOffD[bi - fc]) sy += PSKIN.flyOffD[bi - fc]; if (bi === fc + fh && PSKIN.flyLastRot) flyRot += PSKIN.flyLastRot; }   /* flyLastRot (Keith, 2026-11-10): 'rotate 6 10 degrees' — the sway's very last frame alone turns his extra degrees. */   /* flyCRot + flyOffD (Keith, 2026-11-10, Ivey): 'rotate 3 10 degrees, bring 4 down half a unit' — a turn on the center frame alone, and a per-offset drop keyed by distance from center. */   /* flyLateRot (Keith, 2026-11-10, Ivey): 'rotate 4-6 20 degrees' — the whole late half turns his extra degrees. Her panels 1-2 drop 1u (flyEDrop), panels 5-6 RISE 1u (negative flyTailD). */   /* flyTailD (Keith, 2026-11-10): 'bring down the wings on frame 5 one unit, and frame 6 half unit' — per-position extra drops on the sway's last two frames (Yorokobi 20: +16, 21: +8). */   /* flyTail (Keith, 2026-11-10, Yorokobi): 'rotate the wings on frames 5 and 6 10 degrees' — the sway's last two positions (her 20-21) turn his extra degrees. */   /* flyEDrop (Keith, 2026-11-10, Yorokobi): 'bring the wings down 2 units on frames 1-3 and down 1 unit on the last 3' — early half drops 2u (flyEDrop + flyCDrop at center), late half 1u (flyLate). */   /* flyEarly (Keith, 2026-11-10): 'rotate -10 degrees on the first 2 frames' — the sway's early half turns the pair his extra degrees. */   /* flyCDrop (Keith, 2026-11-10): 'on the 3rd frame bring the wings down a unit' — frame 6 is his center frame; the pair drops his extra unit there too. His 6th frame (9) is eliminated — flyH 3 -> 2, window 4-8. */   /* flyLate (Keith, 2026-11-10, LaShmoove): 'get the wings to drop 1 unit on the last 3' — on the sway's late half (past the center frame) the pair drops his extra units so it stays seated as the body rolls away. */   /* v0.90 BODY TRACKING (Keith, 2026-11-10, on LaShmoove frames 4-9: 'the last 3 the body is farther away than the top 3'): a roll sprite TRANSLATES inside its cell as its gap changes (its top is feetY - (h - gap) * PX2U), so a fixed mount detaches on frames whose gap differs from the center frame's (LaShmoove: gap 91 at f4 -> 157 at f7 = a 42-unit drop). While Superman-flying the wings ride the SAME gap delta as the displayed body frame — glued to the back across the whole sway, every runner, from their own manifest. */   /* mount PER RUNNER (v0.89) + v0.90 THE SLIDE (Keith's unit steering): 1 unit = 16 game units (the runner stands 256 tall), direction by clock face; he slid 1 unit at 1:30 (45 deg up-right), +20 more (21 total, off the body), then 'go back 19 units' -> NET 2 units at 1:30 = +22.6 x, -22.6 y. */
+        ctx.save(); ctx.translate(sx, sy);
+        if (flying) ctx.rotate(flyRot * Math.PI / 180);   /* v0.90: the Superman fit's own turn (replaces the 45 + tuck below while she is stretched out) */
+        else ctx.rotate(Math.PI / 4);   /* v0.90 +45 CLOCKWISE (Keith: 'rotate clockwise 45 degrees'): applied first in the chain, so the finished pair turns 45 clockwise on screen on top of the mirror+180. Proof sheet mounts-sheet-v9 is this exact math. */
+        if (!flying && !grounded && !hangPlat && !slipPlat && PSKIN.wingR) ctx.rotate(PSKIN.wingR * Math.PI / 180);   /* v0.90: the pair TURNS with the body's tuck in flight (Keith: the wings on Yorokobi 'arent turned right... not like i made them in blender') — in Blender the pair is a 3D object sitting on the back, so it leans with her; the flat sprite must be turned by hand, per runner, by the angle her back actually leans (wingR, measured off the flight frames). Upright again on the ground. */
+        ctx.scale(1, -1);   /* v0.90 THE MIRROR (Keith: 'go back 180 and mirror'): the bake's frames hang the fan below the shoulder knuckle; mirroring about the mount puts the knuckle ON her back and the fan UP behind her head, the way his Blender fit stands. */
+        ctx.rotate(Math.PI);   /* v0.90 +180 (Keith: 'ok now 180 degrees'): the mirrored pair spun a half-turn at the mount — mirror-then-180 nets to the pair flipped sideways, fan trailing the other way. Proof sheet mounts-sheet-v8 is this exact math. */
+        ctx.drawImage(wimg, -WINGN.ax * WINGN.w, -WINGN.ay * WINGN.h, WINGN.w, WINGN.h);
+        ctx.restore();
       }
     }
     if (champMode || flareT > 0) {
@@ -1900,7 +1868,7 @@ function draw() {
     } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
     ctx.restore();
   }
-  /* ===== ITEMS (v0.82): notes, the coin, the charge aura, the plane's shadow ===== */
+  /* ===== ITEMS (v0.82): notes, the coin, the charge aura ===== */
   for (const n of notes) {
     if (n.got) continue;
     const img = IMG[n.img]; if (!img || !img.naturalWidth) continue;
@@ -1942,14 +1910,6 @@ function draw() {
     drawAnim(pa2.move, pa2.idx, px - camX, py - camY + FEET + (pa2.feetAdj || 0));
     drawAnim(pa2.move, pa2.idx, px - camX, py - camY + FEET + (pa2.feetAdj || 0));   /* the second stamp deepens the halo */
     ctx.restore();
-  }
-  if (plane && plane.type === 'low') {   /* its shadow sweeps the clouds ahead of it */
-    const pp = plane.t / plane.dur, sc3 = planeScale(pp);
-    if (pp > 0.4) {
-      const sx = planeAx(pp) / (S * zoom), sy = plane.deckY - camY + 16;   /* v0.89: the shadow rides under the PLANE on its locked line — it used to sit on the runner and track him */
-      ctx.save(); ctx.globalAlpha = 0.26 * sc3; ctx.fillStyle = '#0a0620';
-      ctx.beginPath(); ctx.ellipse(sx, sy, 330 * sc3, 26 * sc3, 0, 0, 7); ctx.fill(); ctx.restore();
-    }
   }
   /* a low fog band softens everything the clouds sit in */
   const fogG = ctx.createLinearGradient(0, viewH / zoom * 0.55, 0, viewH / zoom);
@@ -1999,25 +1959,6 @@ function draw() {
       if (rocket.t < 1.4) { const gr = ctx.createRadialGradient(rx, H * 0.88, 2, rx, H * 0.88, 60 * S); gr.addColorStop(0, 'rgba(255,166,66,0.7)'); gr.addColorStop(1, 'rgba(255,166,66,0)'); ctx.fillStyle = gr; ctx.fillRect(rx - 70 * S, H * 0.88 - 70 * S, 140 * S, 140 * S); }
       const rImg = IMG.rocket;
       if (rImg && rImg.naturalWidth) { const w = 36 * S, h = w * rImg.naturalHeight / rImg.naturalWidth; ctx.drawImage(rImg, rx - w / 2, ry - h / 2, w, h); }
-    }
-  }
-  if (plane) {
-    const pp = plane.t / plane.dur, sc2 = planeScale(pp);
-    const imgP = IMG[plane.type === 'high' ? 'plane-under' : 'plane-side'];
-    if (imgP && imgP.naturalWidth) {
-      const fade = plane.tail > 0 ? Math.max(0, 1 - plane.tail / 3) : 1;
-      ctx.save(); ctx.globalAlpha = 0.98 * fade;
-      if (plane.type === 'high') {   /* the SCARE: its belly rides 720 above your deck — untouchable by construction, exits through the top (Keith) */
-        const wP = Math.min(W * 1.3, 1500 * S * zoom) * sc2, hP = wP * imgP.naturalHeight / imgP.naturalWidth;
-        let belly = (plane.deckY - camY) * S * zoom - Math.max(720 * S * zoom, H * 0.52);   /* v0.89 HIGHER (Keith: 'too low'): the belly rides at least 720 up, and on tall portrait screens at least half the screen above the deck — measured off the LOCKED flight line, not his live height */
-        if (pp > 0.90) belly -= (pp - 0.90) / 0.15 * H * 0.45;
-        ctx.drawImage(imgP, planeAx(pp) - wP / 2, belly - hP, wP, hP);
-      } else {   /* the LOW pass: fuselage down at the deck, the tail fin the thing you jump (Keith) */
-        const wP = Math.min(W * 1.18, 1270 * S * zoom) * sc2, hP = wP * imgP.naturalHeight / imgP.naturalWidth;
-        const deckY = (plane.deckY - camY) * S * zoom;   /* the LOCKED flight line (v0.89): jump all you want, it holds its altitude */
-        ctx.drawImage(imgP, planeAx(pp) - wP / 2, deckY + 8 - hP, wP, hP);
-      }
-      ctx.restore();
     }
   }
   if (wingT > 0 && mode === 'run') {   /* the wings' 10 seconds (v0.86): a white bar under the coin's when both run */
