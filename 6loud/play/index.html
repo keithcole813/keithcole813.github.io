@@ -149,7 +149,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.84</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.85</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -163,7 +163,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.84 ==============================
+/* ============================== 6LOUD demo v0.85 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -280,7 +280,8 @@ function kickDecode() {
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack() {
-  const want = mScene === 'steps' ? 'assets/steps.mp3' : mScene === 'battle' ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
+  const sc = coinT > 0 ? 'battle' : mScene;   /* charged up with the coin = bg music 2 for the whole 10 seconds (Keith v0.85) */
+  const want = sc === 'steps' ? 'assets/steps.mp3' : sc === 'battle' ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
       gainD = actx.createGain(); gainD.connect(actx.destination);
@@ -292,9 +293,9 @@ function playTrack() {
     }
     if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
     const t = actx.currentTime;
-    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(mScene === 'day' ? musV() : 0, t, 0.18);
-    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(mScene === 'battle' ? musV() : 0, t, 0.18); }
-    if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(mScene === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
+    gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(sc === 'day' ? musV() : 0, t, 0.18);
+    if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(sc === 'battle' ? musV() : 0, t, 0.18); }
+    if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(sc === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
       if (!(music.src || '').includes('assets/steps.mp3')) { music.src = 'assets/steps.mp3'; music.currentTime = 0; }
       if (stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
@@ -499,6 +500,7 @@ const spdF = () => stumbleT > 0 ? 0.55 : 1;   /* the stumble: speed drops a step
    smallest amount, so a landing can never lie. iOS asks permission once, from the START tap. */
 let tiltHome = null, tiltBeta = 0, tiltGamma = 0, tiltX = 0, tiltY = 0, tiltAsked = false;
 addEventListener('deviceorientation', e => { if (e && e.beta !== null && e.beta !== undefined && e.gamma !== null && e.gamma !== undefined) { tiltBeta = e.beta; tiltGamma = e.gamma; } });
+addEventListener('pointerdown', () => { askTilt(); }, true);   /* the FIRST touch anywhere — loading screen, title, arrows — carries the tilt ask (Keith v0.85), so the iOS sheet never lands mid-run; the same touch is the gesture that starts the music */
 function askTilt() {
   if (tiltAsked) return; tiltAsked = true;
   try { const D = window.DeviceOrientationEvent; if (D && typeof D.requestPermission === 'function') { const p = D.requestPermission(); if (p && p.catch) p.catch(() => {}); } } catch (err) {}
@@ -1436,7 +1438,7 @@ function update(dt) {
   if (grounded && grounded.storm) shake = Math.max(shake, 3.4 + Math.sin(time * 29) * 1.1);   /* TURBULENCE: on the storm deck the camera shakes — that shake IS the hazard's tell (Keith v0.82) */
   /* ===== ITEMS TICK (v0.82) ===== */
   if (stumbleT > 0) stumbleT -= dt;
-  if (coinT > 0) coinT -= dt;
+  if (coinT > 0) { coinT -= dt; if (coinT <= 0) { coinT = 0; playTrack(); } }   /* the charge ends: the music falls back to the scene (v0.85) */
   for (const n of notes) {
     if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 95) {   /* window tightened with the raise: only a jump collects (Keith v0.84) */
       n.got = true; noteFt += 25; notesGot++; playNote();
@@ -1451,7 +1453,7 @@ function update(dt) {
     else if (Math.floor(dist / 15.24) > nextCoinFt + 250) nextCoinFt += 1000;
   }
   if (coin) {
-    if (Math.abs(px - coin.x) < 78 && Math.abs((py - 120) - coin.y) < 165) { const cx2 = coin.x; coin = null; coinT = 10; chargeFx(0.9); playCoin(); for (let k = 0; k < 10; k++) spawnPuff(cx2, py - 120, 10, 140); }
+    if (Math.abs(px - coin.x) < 78 && Math.abs((py - 120) - coin.y) < 165) { const cx2 = coin.x; coin = null; coinT = 10; chargeFx(0.9); playCoin(); playTrack();   /* bg music 2 kicks in with the charge (Keith v0.85) */ for (let k = 0; k < 10; k++) spawnPuff(cx2, py - 120, 10, 140); }
     else if (coin.x < px - 420) coin = null;
   }
   if (!plane && runTime > planeNextAt && stormSteps === 0) plane = { type: Math.random() < 0.5 ? 'high' : 'low', t: 0, dur: 7.6, snd: null, tail: 0, crossed: false };
@@ -1966,7 +1968,7 @@ function loop(ts) {
   update(dt);
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
-  const db = mode === 'run' && !grounded && !hangPlat && !slipPlat && doubleArmed && !doubleUsed;   /* DOUBLE JUMP!! helper: on screen exactly while a mid-air tap would fire the double (Keith v0.70.1) */
+  const db = mode === 'run' && (coinT > 0 || (!grounded && !hangPlat && !slipPlat && doubleArmed && !doubleUsed));   /* DOUBLE JUMP!! helper: while a mid-air tap would fire the double (Keith v0.70.1) — and flashing for the whole coin charge (Keith v0.85) */
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('selectStack').style.display = cu ? 'flex' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
