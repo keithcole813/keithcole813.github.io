@@ -165,7 +165,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 3</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 4</div></div>
   <div id="dbg"></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
@@ -183,7 +183,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 3 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 4 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, and the debug overlay. Posting is hard-off and storage
@@ -1467,6 +1467,7 @@ function backToTitle() {   /* MAIN MENU on the wipeout screen: back to the title
 }
 function gameOver() {
   mode = 'over'; dead = true;
+  $('pullup').style.display = 'none'; $('dbl').style.display = 'none';   /* DEV FORK: the run helpers (PULL UP!! / AIR JUMP) retire with the run — they were lingering over the results screen */
   mScene = 'day'; playTrack();   /* the initials screen plays the 1st bg music (Keith v0.35) */
   recFinish();   /* this run's replay is ready to travel with its score (v0.24) */
   const best = JSON.parse(localStorage.getItem('sixlouddev_scores_ft') || '[]');   /* feet records (v0.8.3) */
@@ -2414,14 +2415,22 @@ function dbgTick(ts) {
   if (G && P.gState !== undefined && G.state !== P.gState && G.state === 'fall') dbgLog('GHOST DOWN');
   P.mode = mode; P.wingOn = wingOn; P.magOn = magOn; P.hangOn = hangOn; P.stormAt = stormAt; P.gState = G ? G.state : null;
   if (ts - dbgLastText < 120) return; dbgLastText = ts;
+  const ghostTxt = 'GHOST ' + (RACE ? ghostChar() + ' ' + (GR && GR.style ? GR.style : '') + ' gap ' + (G ? Math.round(G.o) : '-') + ' perf ' + (GR && GR.perfD != null ? Math.round(GR.perfD / 15.24) : '-') : 'none') + ' · STORM in ' + Math.max(0, Math.round((stormAt - dist) / 15.24)) + ' FT';
+  if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
+    const el = $('dbg');
+    el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
+    el.textContent = 'FORK4 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    return;
+  }
+  const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK3 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK4 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
     'WING ' + (wingOn ? String(wingKind).toUpperCase() + ' ' + wingT.toFixed(1) + '/' + wingMax + 's' : '-') + ' · FLUT ' + flutterT.toFixed(2) + ' · HANG ' + (hangPlat ? 'YES' : '-'),
     'MAG ' + (magOn ? magT.toFixed(1) + 's' : '-') + ' · COIN ' + (coinT > 0 ? coinT.toFixed(1) + 's' : '-') + ' · NOTES ' + notesGot + (noteCharge ? ' · FULLCHG' : ''),
-    'GHOST ' + (RACE ? ghostChar() + ' ' + (GR && GR.style ? GR.style : '') + ' gap ' + (G ? Math.round(G.o) : '-') + ' perf ' + (GR && GR.perfD != null ? Math.round(GR.perfD / 15.24) : '-') : 'none') + ' · STORM in ' + Math.max(0, Math.round((stormAt - dist) / 15.24)) + ' FT'
+    ghostTxt
   ];
   if (DBG_EV.length) lines.push('- EVENTS -', ...DBG_EV.slice(-4));
   $('dbg').textContent = lines.join('\n');
