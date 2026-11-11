@@ -31,7 +31,8 @@
     text-shadow:0 2px 0 #c25e10, 0 0 16px rgba(255,180,0,.35); }
   #dist small { display:block; font-size:11px; font-weight:800; letter-spacing:3px; color:#fff; opacity:.95; text-shadow:0 1px 0 rgba(0,0,0,.5); }
   #center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:24vh; text-align:center; pointer-events:none; }
-  #dbl { position:absolute; left:50%; top:15%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; letter-spacing:1.5px; color:#00F5FF; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); display:none; pointer-events:none; animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; z-index:7; white-space:nowrap; }   /* the DOUBLE JUMP!! helper (Keith v0.70.1) — same helper language as PULL UP!!, its own slot above it; the two never show at once (air vs hang) */
+  #dbl { position:absolute; left:50%; top:15%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; letter-spacing:1.5px; color:#00F5FF; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); display:none; pointer-events:none; animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; z-index:7; white-space:nowrap; }   /* the charge helper (Keith v0.70.1) — v0.94: Keith's AIR JUMP READY! graphic replaces the text */
+  #dbl img { width:min(340px, 64vw); display:block; } — same helper language as PULL UP!!, its own slot above it; the two never show at once (air vs hang) */
   #pullup { position:absolute; left:50%; top:24%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; letter-spacing:1.5px; color:#00F5FF; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); display:none; pointer-events:none; animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; z-index:7; white-space:nowrap; }
   @keyframes puPop { 0% { transform:translateX(-50%) scale(.8); } 60% { transform:translateX(-50%) scale(1.1); } 100% { transform:translateX(-50%) scale(1); } }   /* the alert pops in with a bounce (Gemini spec, v0.55); the flash is Keith's, kept */
   @keyframes puBlink { 0% { opacity:1; } 50% { opacity:.3; } 100% { opacity:1; } }   /* softened floor (v0.55) — the hard on/off blink was part of the cheap read */
@@ -141,7 +142,7 @@
     <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
   <div id="pullup">PULL UP!!</div>
-  <div id="dbl">DOUBLE JUMP!!</div>
+  <div id="dbl"><img src="assets/airjump.webp" alt="AIR JUMP READY!"></div>
   <div id="center">
     <div id="tap"></div>
   </div>
@@ -149,11 +150,12 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.93</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.94</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
+    <img id="newRecord" src="assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
     <div id="board"></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
     <button class="btn" id="again">TRY AGAIN</button>
@@ -163,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.93 ==============================
+/* ============================== 6LOUD demo v0.94 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -213,7 +215,9 @@ function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 let rawCoin = null, bufCoin = null, decCoin = null, gainCoin = null;
 let rawNote = null, bufNote = null, decNote = null, gainNote = null, noteSrc = null, noteStreak = 0, lastNoteT = -9;
+let rawSpark = null, bufSpark = null, decSpark = null, gainSpark = null;   /* the electric spark (Keith v0.94, his YouTube pick WcxRBGpynTk) */
 let rawW = null, bufW = null, decW = null, gainW = null, srcW = null;   /* the wings loop (Keith's trippin instrumental, v0.86) */
+let rawMg = null, bufMg = null, decMg = null, gainMg = null, srcMg = null;   /* the magnet loop (Keith's pick, v0.94): 'Best Intentions' — LaShmoove, 161.8 BPM, 6 bars, A minor */
 let rawDk = null, bufDk = null, decDk = null, gainDk = null, srcDk = null, darkGateOn = null;   /* the dark-cloud water walk (Keith's pick, v0.91): sounds ONLY while your feet are on a dark cloud */
 function playNote() {   /* Keith's note pick (v0.83): each successive note in a run climbs in pitch; a new note CUTS the last — they never overlap */
   if (!actx || !bufNote || actx.state !== 'running') return;
@@ -228,6 +232,11 @@ function playCoin() {   /* the power-up sweep the moment the coin lands (Keith's
   if (!actx || !bufCoin || actx.state !== 'running') return;
   if (!gainCoin) { gainCoin = actx.createGain(); gainCoin.gain.value = 0.8; gainCoin.connect(actx.destination); }
   const src = actx.createBufferSource(); src.buffer = bufCoin; src.connect(gainCoin); src.start();
+}
+function playSpark() {   /* Keith's electric spark (v0.94): fires the moment a MAGNETIZED player jumps — takeoff or double — the current bites as he leaves the ground */
+  if (!actx || !bufSpark || actx.state !== 'running') return;
+  if (!gainSpark) { gainSpark = actx.createGain(); gainSpark.gain.value = 0.85; gainSpark.connect(actx.destination); }
+  const src = actx.createBufferSource(); src.buffer = bufSpark; src.connect(gainSpark); src.start();
 }
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
   boomT++;   /* the trigger fired (the harness counts these even with no audio stack) */
@@ -252,7 +261,9 @@ if (window.fetch) {
   fetch('assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
   fetch('assets/coin-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawCoin = b; }).catch(() => {});   /* Keith's coin pick (v0.83): the Sci-Fi Power Up sweep */
   fetch('assets/note-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawNote = b; }).catch(() => {});   /* Keith's note pick (v0.83): the felt piano hit */
+  fetch('assets/spark.mp3').then(r => r.arrayBuffer()).then(b => { rawSpark = b; }).catch(() => {});   /* Keith's spark pick (v0.94): the magnetized jump zap */
   fetch('assets/wings-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawW = b; }).catch(() => {});   /* Keith's wings pick (v0.86): the trippin loop, for while you have the wings */
+  fetch('assets/magnet-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawMg = b; }).catch(() => {});   /* Keith's magnet pick (v0.94): 'Best Intentions', for while you are magnetized */
   fetch('assets/dark-walk.mp3').then(r => r.arrayBuffer()).then(b => { rawDk = b; }).catch(() => {});   /* Keith's dark-cloud pick (v0.91): the water walk, feet on a dark cloud only */
   fetch('assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
 }
@@ -278,13 +289,15 @@ function kickDecode() {
   if (!decBoom && rawBoom && actx.decodeAudioData) decBoom = actx.decodeAudioData(rawBoom.slice(0)).then(b => { bufBoom = b; }).catch(() => { decBoom = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
   if (!decCoin && rawCoin && actx.decodeAudioData) decCoin = actx.decodeAudioData(rawCoin.slice(0)).then(b => { bufCoin = b; }).catch(() => { decCoin = null; });
   if (!decNote && rawNote && actx.decodeAudioData) decNote = actx.decodeAudioData(rawNote.slice(0)).then(b => { bufNote = b; }).catch(() => { decNote = null; });
+  if (!decSpark && rawSpark && actx.decodeAudioData) decSpark = actx.decodeAudioData(rawSpark.slice(0)).then(b => { bufSpark = b; }).catch(() => { decSpark = null; });
   if (!decW && rawW && actx.decodeAudioData) decW = actx.decodeAudioData(rawW.slice(0)).then(b => { bufW = b; }).catch(() => { decW = null; });
+  if (!decMg && rawMg && actx.decodeAudioData) decMg = actx.decodeAudioData(rawMg.slice(0)).then(b => { bufMg = b; }).catch(() => { decMg = null; });
   if (!decDk && rawDk && actx.decodeAudioData) decDk = actx.decodeAudioData(rawDk.slice(0)).then(b => { bufDk = b; }).catch(() => { decDk = null; });
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack() {
-  const sc = wingT > 0 ? 'wings' : coinT > 0 ? 'battle' : mScene;   /* the wings' loop outranks all (Keith v0.86); charged up with the coin = bg music 2 (Keith v0.85) */
-  const want = sc === 'steps' ? 'assets/steps.mp3' : sc === 'battle' ? 'assets/battle1000.mp3' : 'assets/daylight.mp3';
+  const sc = wingT > 0 ? 'wings' : magT > 0 ? 'magnet' : coinT > 0 ? 'battle' : mScene;   /* the wings' loop outranks all (Keith v0.86); next is the MAGNET's loop while its 7 seconds run (Keith v0.94); charged up with the coin = bg music 2 (Keith v0.85) */
+  const want = sc === 'steps' ? 'assets/steps.mp3' : sc === 'battle' ? 'assets/battle1000.mp3' : sc === 'magnet' ? 'assets/magnet-loop.mp3' : 'assets/daylight.mp3';
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
       gainD = actx.createGain(); gainD.connect(actx.destination);
@@ -300,11 +313,13 @@ function playTrack() {
     }
     if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
     if (bufDk && !srcDk) { gainDk = actx.createGain(); gainDk.gain.value = 0; gainDk.connect(actx.destination); srcDk = actx.createBufferSource(); srcDk.buffer = bufDk; srcDk.loop = true; srcDk.connect(gainDk); srcDk.start(); }   /* the water walk runs silent behind its gate (v0.91), like the steps chain */
+    if (bufMg && !srcMg) { gainMg = actx.createGain(); gainMg.gain.value = 0; gainMg.connect(actx.destination); srcMg = actx.createBufferSource(); srcMg.buffer = bufMg; srcMg.loop = true; srcMg.connect(gainMg); srcMg.start(); }   /* the magnet loop runs silent behind its scene too (v0.94) */
     const t = actx.currentTime;
     gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(sc === 'day' ? musV() : 0, t, 0.18);
     if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(sc === 'battle' ? musV() : 0, t, 0.18); }
     if (gainS) { gainS.gain.cancelScheduledValues(t); gainS.gain.setTargetAtTime(sc === 'steps' && stepsGateOn ? stpV() : 0, t, 0.3); }
-    if (gainW) { gainW.gain.cancelScheduledValues(t); gainW.gain.setTargetAtTime(sc === 'wings' ? musV() : 0, t, 0.18); }   /* the trippin loop fades in with the wings, out when they end (v0.86) */   /* the steps fade in as the intro bg fades out (Keith v0.35) */
+    if (gainW) { gainW.gain.cancelScheduledValues(t); gainW.gain.setTargetAtTime(sc === 'wings' ? musV() : 0, t, 0.18); }
+    if (gainMg) { gainMg.gain.cancelScheduledValues(t); gainMg.gain.setTargetAtTime(sc === 'magnet' ? musV() : 0, t, 0.18); }   /* 'Best Intentions' fades in with the magnet, out when it lets go (v0.94) */   /* the trippin loop fades in with the wings, out when they end (v0.86) */   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
       if (!(music.src || '').includes('assets/steps.mp3')) { music.src = 'assets/steps.mp3'; music.currentTime = 0; }
       if (stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
@@ -507,13 +522,20 @@ let noteNextT = 6, noteLane = 0;   /* the note drip (Keith v0.88): about 4 notes
 let coin = null, nextCoinFt = 1000, coinT = 0;
 let wing = null, nextWingFt = 1500, wingT = 0, wingPhase = 0, flutterT = 0;   /* flutterT (v0.93): the tapped flutter's hold timer — while it runs, the wings hold a slow sink */
 let gwing = null, nextGWingFt = 4500, gwingGap = 4500, wingKind = null, wingMax = 10;   /* the GOLD wings (Keith v0.88): rarer, 15 seconds, Lashmoove-fire glow */
+let bwing = null, nextBWingFt = 3000, bwingGap = 3000;   /* the BLUE wings (Keith v0.94): his lightning pair — the middle tier, 12 seconds: more than the white pair's 10, less than the gold pair's 15 */
+let magnet = null, nextMagFt = 2000, magGap = 2000, magT = 0, magFlashT = 0;   /* THE MAGNET (Keith v0.94): a hazard pickup — touch it and gravity runs 1.6x for 7 seconds; jumping while magnetized sparks + strobes (magFlashT) */
 let coinGap = 1000, wingGap = 1500;   /* the power-up spacing GROWS as the run does (Keith v0.86): at top speed a flat 1000 FT coin gap leaves almost no un-charged running — back-to-back blue doubles, his 5,367 FT run called it */
 let floaters = [];   /* the +25 FT popups at each note (Keith v0.86): the player sees what the note just paid */   /* WINGS (Keith v0.86): a timed power-up — tap jump to flap and fly */
 const WINGN = { n: 36, w: 145.3, h: 223.7, ax: 0.4879, ay: 0.1731 };   /* the baked flap loop: cell + mount anchor, measured off Keith's kc2 bake (scene projections, not estimates) */
 for (let k = 0; k < WINGN.n; k++) loadImg('wing' + k, 'assets/wings/f' + String(k).padStart(3, '0') + '.webp');
 loadImg('wingicon', 'assets/wings-icon.webp');   /* Keith's pickup icon (v0.88): the cartoon wing pair he sent — the pickup is an ICON now, the worn wings stay his fitted 3D pair */
 loadImg('wingicongold', 'assets/wings-icon-gold.webp');   /* the GOLD pair (Keith v0.88): 15 seconds, glowing in Lashmoove's charge color */
-loadImg('notegold', 'assets/note-gold.webp');   /* Keith's note (v0.88): the single gold note is THE note now */
+loadImg('wingiconblue', 'assets/wings-icon-blue.webp');   /* the BLUE pair (Keith v0.94): his lightning wings, the 12-second middle tier */
+loadImg('magnet', 'assets/magnet.webp');   /* THE MAGNET (Keith v0.94): the hazard's icon */
+loadImg('notegreen', 'assets/note-green.webp');   /* Keith's notes (v0.94): GREEN and PURPLE notes give the feet bonus — the drip alternates them */
+loadImg('notepurple', 'assets/note-purple.webp');
+loadImg('x2', 'assets/x2.webp');   /* Keith's multiplier badges (v0.94): 2X rides the purple note's floater, 3X the green's */
+loadImg('x3', 'assets/x3.webp');
 loadImg('plus25', 'assets/plus25.webp');   /* Keith's +25FT graphic (v0.88): what a note flashes when you grab it */
 let stormAt = 800 * 15.24, stormSteps = 0;
 let lastDarkX = -1e9;   /* v0.91: course x of the last dark cloud placed — they stay SPREAD OUT (Keith) */
@@ -1048,14 +1070,38 @@ function resetWorld() {
     const champShift = worldEnd - 580;   /* their first content cloud sat at course x 580 */
     courseBase = champShift;
     const champ = (RACE.plats[0] && RACE.plats[0][0] === -300) ? RACE.plats.slice(1) : RACE.plats;   /* their start plat is the shared start above */
+    const placed = [];
     for (const p of champ) {
       const simg = String(p[3]);   /* v0.82-era runs recorded the DARK storm art by name — Keith removed the dark clouds, so a race never wears them: a storm deck from an old run draws as a regular cloud of its length class, storm springs and all (v0.87) */
-      plats.push(p[5] === 1 ? { x: p[0] + champShift, y: p[1], len: p[2], img: p[3], dark: true } : { x: p[0] + champShift, y: p[1], len: p[2], img: simg.charAt(0) === 'S' ? (p[2] > 700 ? '01' : p[2] > 450 ? '16' : '14') : p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' });   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
+      const np = p[5] === 1 ? { x: p[0] + champShift, y: p[1], len: p[2], img: p[3], dark: true } : { x: p[0] + champShift, y: p[1], len: p[2], img: simg.charAt(0) === 'S' ? (p[2] > 700 ? '01' : p[2] > 450 ? '16' : '14') : p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' };   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
+      plats.push(np); placed.push(np);
       if (REC) REC.plats.push(p);   /* course space: the recording keeps the original coordinates */
+    }
+    /* v0.93.1 THE BAKED-STACK REPAIR (Keith, 2026-11-10: 'still have clouds on top of clouds' —
+       while racing a ghost, before anything that looks like a storm): recordings carry the fork
+       geometry of the build they were made on, and race replays re-save the champion's course, so
+       one old course propagates down the whole board. Pre-v0.93 forks (the climb deck starting 150
+       in and running LONG, up to 83% over the through deck) and pre-v0.92 same-band tail overlaps
+       are baked into those plats forever — the generator fix can't reach them. So at load, the
+       placed course is repaired with TAIL TRIMS ONLY (no plat moves, no start shifts, the stored
+       recording untouched): a same-band overlap trims the earlier cloud's tail to the later one's
+       start, and a climb deck one band up trims to the v0.93 seam (its end at 60% of the through
+       deck under it). Verified by racescan over the live board's top 10: 104 heavy overlaps -> the
+       fork seams alone, at the new generator's own measure. */
+    for (let i = 0; i < placed.length; i++) for (let j = i + 1; j < placed.length; j++) {
+      const a = placed[i], b = placed[j];
+      if (b.x >= a.x + a.len) break;
+      const dy = Math.abs(a.y - b.y);
+      if (dy === 0) a.len = Math.max(120, b.x - a.x);
+      else if (dy === 170) {
+        const lo = a.y > b.y ? a : b, hi = a.y > b.y ? b : a;   /* lo = the lower cloud (larger y), hi = the climb deck above it */
+        const cap = lo.x + Math.round(lo.len * 0.6);
+        if (hi.x + hi.len > cap) hi.len = Math.max(185, cap - hi.x);
+      }
     }
     courseDist = courseBase + 780;   /* the distance-space twin, set once the world-x origin is final (v0.52) */
     const last = RACE.plats[RACE.plats.length - 1];
-    worldEnd = last[0] + champShift + last[2];
+    worldEnd = placed.reduce((m, p) => Math.max(m, p.x + p.len), last[0] + champShift + last[2]);   /* v0.93.1: the frontier covers every placed tail, trimmed or not — an old recording's last-listed plat was not always its rightmost */
     let bd = 1e9; BAND_Y.forEach((y, i) => { const d = Math.abs(y - last[1]); if (d < bd) { bd = d; exitBand = i; } });
     return;
   }
@@ -1102,7 +1148,7 @@ function startRun() {
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
-  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0;   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
+  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0;   /* blue wings + magnet reset per run (v0.94) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
   stormAt = 800 * 15.24; stormSteps = 0; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
@@ -1215,7 +1261,7 @@ function gameOver() {
   recFinish();   /* this run's replay is ready to travel with its score (v0.24) */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
   const myFt = runFt();   /* the record is FEET (Keith) — travel + banked note feet (v0.82) */
-  { const cbAll = charBests(); if (myFt > (cbAll[selChar] || 0)) { cbAll[selChar] = myFt; try { localStorage.setItem('sixloud_char_bests', JSON.stringify(cbAll)); } catch (e) {} } }   /* per-runner best, for the select screen's stat line (Keith v0.69.2) */
+  { const cbAll = charBests(); const prevBest = cbAll[selChar] || 0; if (myFt > prevBest) { cbAll[selChar] = myFt; try { localStorage.setItem('sixloud_char_bests', JSON.stringify(cbAll)); } catch (e) {} } $('newRecord').style.display = (prevBest > 0 && myFt > prevBest) ? 'block' : 'none'; }   /* per-runner best (Keith v0.69.2) — v0.94: Keith's NEW RECORD! badge shows when an EXISTING best falls; a runner's first-ever run doesn't count */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
   const qualifiesGlobal = gBoard ? (gBoard.length < 10 || myFt > gBoard[gBoard.length - 1].dist_ft) : false;
   const qualifies = qualifiesLocal || qualifiesGlobal;
@@ -1265,6 +1311,7 @@ function release() {
     doubleArmed = false; doubleUsed = true;   /* spent — and never re-armed mid-jump: NO TRIPLE JUMPS (Keith v0.50) */
     vy = -1500; airGrav = wingT > 0 ? 0.5 : 1; airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);   /* v0.93 (Keith): a WINGED double jump flies at the full 2x distance — the charge stretch applies to the double too */
     airMove = 'jump'; airT = 0;
+    if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized DOUBLE jump sparks and strobes too */
     flipArmed = false; rollArmed = false; flipped = false; flipMove = null; landMove = null; landT = 0;
     if (PSKIN.dblFlip && wingT <= 0) { flipped = true; flipMove = 'flip'; flipT = 0; }   /* the girls FLIP on their double jump (Keith v0.78) — but NEVER while winged (Keith v0.93: 'do not double jump using frames not approved for wings'): the flip frames were never wing-fitted, so a winged double rides the approved frames only — Superman on the rise, the arms-open flutter on the way down */
     jumps++; score += 1;
@@ -1291,7 +1338,7 @@ function release() {
   const full = pressT >= ROLL_ARM || noteFull;
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
-  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode || coinT > 0; flutterT = 0;
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode || coinT > 0; flutterT = 0; if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized takeoff SPARKS and the sprite strobes */
   if (wingT > 0) { airMove = 'jump'; flipArmed = false; rollArmed = false; }   /* taking off with the wings: no flip, no roll — you FLY (Keith v0.86) */   /* the coin's 10 seconds: every jump earns its double (Keith v0.82) */   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
   if (full) { score += 4; chargeFx(1.2); }   /* the held charge, let go: he leaves the ground lit (Keith v0.28) */
   flipped = false; flipMove = null; landMove = null; landT = 0;
@@ -1390,7 +1437,7 @@ function update(dt) {
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
     if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; noLand = true; }   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either */
   } else if (!grounded) {
-    if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1); if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
+    if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1) * (magT > 0 ? 1.6 : 1);   /* v0.94: the MAGNET multiplies whatever gravity the moment already has by 1.6 while its 7 seconds run */ if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
     /* the flip cue: an armed jump converts at the top of the arc */
     if (airMove === 'jump' && flipArmed && !flipped && airT >= 0.26 && vy >= -430) {
       flipped = true; flipMove = rnd(['flip', 'diveflip']); flipT = 0; airMove = flipMove;
@@ -1494,6 +1541,8 @@ function update(dt) {
   if (stumbleT > 0) stumbleT -= dt;
   if (coinT > 0) { coinT -= dt; if (coinT <= 0) { coinT = 0; playTrack(); } }   /* the charge ends: the music falls back to the scene (v0.85) */
   if (wingT > 0) { wingT -= dt; wingPhase += dt * 60; if (wingT <= 0) { wingT = 0; playTrack(); } }   /* the wings run out: the music falls back (v0.86) */
+  if (magT > 0) { magT = Math.max(0, magT - dt); if (magT <= 0) playTrack(); }   /* the magnet's 7 seconds tick down — and the music falls back when it lets go (v0.94) */
+  if (magFlashT > 0) magFlashT = Math.max(0, magFlashT - dt);
   if (!wing && Math.floor(dist / 15.24) >= nextWingFt) {
     const q = plats.find(q => q.x > px + 1000);
     if (q) { wing = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextWingFt += wingGap; wingGap = Math.round(wingGap * 1.35); if (nextCoinFt > nextWingFt && nextCoinFt - nextWingFt < 500) nextCoinFt = nextWingFt + 500; }   /* the wing pickup floats at the COIN's height (Keith v0.88); their gap grows 1500 -> 2025 -> 2735... with the same 500 FT separation from the coin (Keith v0.86) */
@@ -1504,14 +1553,32 @@ function update(dt) {
     if (q) { gwing = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextGWingFt += gwingGap; gwingGap = Math.round(gwingGap * 1.35); if (nextCoinFt > nextGWingFt && nextCoinFt - nextGWingFt < 500) nextCoinFt = nextGWingFt + 500; if (nextWingFt > nextGWingFt && nextWingFt - nextGWingFt < 500) nextWingFt = nextGWingFt + 500; }
   }
   if (gwing && gwing.x < px - 460) gwing = null;
+  if (!bwing && Math.floor(dist / 15.24) >= nextBWingFt) {   /* the BLUE wings (Keith v0.94): first at 3,000 FT — between the white pair (1,500) and the gold (4,500) — gaps growing the same way, same 500 FT separation from its neighbours */
+    const q = plats.find(q => q.x > px + 1000);
+    if (q) { bwing = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextBWingFt += bwingGap; bwingGap = Math.round(bwingGap * 1.35); if (nextCoinFt > nextBWingFt && nextCoinFt - nextBWingFt < 500) nextCoinFt = nextBWingFt + 500; if (nextWingFt > nextBWingFt && nextWingFt - nextBWingFt < 500) nextWingFt = nextBWingFt + 500; if (nextGWingFt > nextBWingFt && nextGWingFt - nextBWingFt < 500) nextGWingFt = nextBWingFt + 500; if (nextMagFt > nextBWingFt && nextMagFt - nextBWingFt < 500) nextMagFt = nextBWingFt + 500; }
+  }
+  if (bwing && bwing.x < px - 460) bwing = null;
+  if (!magnet && Math.floor(dist / 15.24) >= nextMagFt) {   /* THE MAGNET (Keith v0.94): first at 2,000 FT, gaps growing, same separation — it floats at the pickups' height, so running its column or jumping into it sets it off */
+    const q = plats.find(q => q.x > px + 1000);
+    if (q) { magnet = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextMagFt += magGap; magGap = Math.round(magGap * 1.35); if (nextCoinFt > nextMagFt && nextCoinFt - nextMagFt < 500) nextCoinFt = nextMagFt + 500; if (nextWingFt > nextMagFt && nextWingFt - nextMagFt < 500) nextWingFt = nextMagFt + 500; if (nextBWingFt > nextMagFt && nextBWingFt - nextMagFt < 500) nextBWingFt = nextMagFt + 500; if (nextGWingFt > nextMagFt && nextGWingFt - nextMagFt < 500) nextGWingFt = nextMagFt + 500; }
+  }
+  if (magnet && magnet.x < px - 460) magnet = null;
   if (gwing && Math.abs(px - gwing.x) < 80 && Math.abs((py - 110) - gwing.y) < 150) {
     gwing = null; wingT = 15; wingMax = 15; wingKind = 'gold'; wingPhase = 0; flipped = false; flipMove = null; if (airMove && airMove !== 'jump') airMove = 'jump'; chargeFx(0.9); playTrack();   /* GOLD WINGS ON: 15 seconds (Keith v0.88); a flip in progress ends HERE (v0.89) */
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
   }
+  if (bwing && Math.abs(px - bwing.x) < 80 && Math.abs((py - 110) - bwing.y) < 150) {
+    bwing = null; wingT = 12; wingMax = 12; wingKind = 'blue'; wingPhase = 0; flipped = false; flipMove = null; if (airMove && airMove !== 'jump') airMove = 'jump'; chargeFx(0.9); playTrack();   /* BLUE WINGS ON: 12 seconds (Keith v0.94) — more than white, less than gold */
+    for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
+  }
+  if (magnet && Math.abs(px - magnet.x) < 80 && Math.abs((py - 110) - magnet.y) < 150) {
+    magnet = null; magT = 7; wingT = 0; wingKind = null; wingPhase = 0; flutterT = 0; coinT = 0; noteCharge = false; doubleArmed = false; playBoom(); playTrack();   /* MAGNETIZED (Keith v0.94): gravity runs 1.6x for 7 seconds — AND YOU LOSE YOUR WINGS AND YOUR CHARGE (Keith): the pair, the coin's charge, the 8th-note charge and the armed air jump all die the moment it grabs you; the boom sells the weight, and his beat takes over the music */
+    for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 60);
+  }
   if (runTime >= noteNextT) {   /* THE NOTE DRIP (Keith v0.88): about 4 every 10 seconds — low (a hop), high (a full jump), in-between — anchored to the next deck ahead and NEVER below the clouds */
     const lanes = [130, 430, 250];
     const q = plats.find(q => q.x + q.len > px + 1100);
-    notes.push({ x: px + 1100, y: (q ? q.y : py - 40) - lanes[noteLane % 3], img: 'notegold', got: false });
+    notes.push({ x: px + 1100, y: (q ? q.y : py - 40) - lanes[noteLane % 3], img: noteLane % 2 ? 'notepurple' : 'notegreen', got: false });   /* v0.94 (Keith): GREEN and PURPLE notes give the feet bonus — the drip alternates them; the economy is unchanged (+25 FT each, every 8th arms the full charge) and the gold note retires */
     noteLane++; noteNextT = runTime + 2.5 + (Math.random() * 0.8 - 0.4);
   }
   if (wing && Math.abs(px - wing.x) < 80 && Math.abs((py - 110) - wing.y) < 150) {
@@ -1520,8 +1587,10 @@ function update(dt) {
   }
   for (const n of notes) {
     if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 95) {   /* window tightened with the raise: only a jump collects (Keith v0.84) */
-      n.got = true; noteFt += 25; notesGot++; playNote();
-      floaters.push({ x: n.x, y: n.y - 34, t: 0 });   /* flash the +25 FT right where it was collected (Keith) */
+      const tier = n.img === 'notegreen' ? 3 : n.img === 'notepurple' ? 2 : 1;   /* v0.94 (Keith): PURPLE pays 2x — 50 FT and the note sound twice; GREEN pays 3x — 75 FT and the note sound three times; the strikes climb because each one climbs the pitch ladder */
+      n.got = true; noteFt += 25 * tier; notesGot++; playNote();
+      for (let e = 1; e < tier; e++) setTimeout(() => { if (mode === 'run') playNote(); }, e * 110);   /* the extra strikes in succession, each a ladder step higher (and cutting the prior tail, per the standing note rule) */
+      floaters.push({ x: n.x, y: n.y - 34, t: 0, mult: tier });   /* flash the +25 FT right where it was collected (Keith) — with its 2X/3X badge beside it on the paying tiers */
       spawnPuff(n.x, n.y, 13, 150); pushTrail(n.x, n.y, CHAR_FX[selChar].streak);
       if (notesGot % 8 === 0) { noteCharge = true; chargeFx(1.4); }   /* every 8th note: the next jump is a FULL charge */
     }
@@ -1886,7 +1955,8 @@ function draw() {
         ctx.drawImage(puffFor(selChar), m.x - camX - m.r, m.y - camY - m.r, m.r * 2, m.r * 2); ctx.restore();
       }
     }
-    drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET + (pa.feetAdj || 0));
+    if (magFlashT > 0) { ctx.save(); ctx.globalAlpha = Math.floor(time * 24) % 2 === 0 ? 0.15 : 1; drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET + (pa.feetAdj || 0)); ctx.restore(); }   /* v0.94 MAGNET FLASH (Keith): jumping while magnetized strobes the sprite at 24 Hz for a beat — the current fighting the magnet */
+    else drawAnim(pa.move, pa.idx, px - camX, py - camY + FEET + (pa.feetAdj || 0));
   }
   /* foot fog puffs (world-anchored, trailing behind him) */
   for (const q of puffs) {
@@ -1936,9 +2006,9 @@ function draw() {
   for (const f of floaters) {   /* the note flash (Keith v0.88): HIS +25FT graphic, rising, gone in under a second (the v0.86 text stays as the fallback) */
     const sx = f.x - camX, sy = f.y - camY - f.t * 48;
     ctx.save(); ctx.globalAlpha = Math.max(0, 1 - f.t / 0.9);
-    const p25 = IMG.plus25;
-    if (p25 && p25.naturalWidth) { const w = 150, h = w * p25.naturalHeight / p25.naturalWidth; ctx.drawImage(p25, sx - w / 2, sy - h, w, h); }
-    else { ctx.font = '30px "Luckiest Guy", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = '#120c28'; ctx.strokeText('+25 FT', sx, sy); ctx.fillStyle = '#ffd83d'; ctx.fillText('+25 FT', sx, sy); }
+    const p25 = IMG.plus25, mult = f.mult > 1 ? IMG['x' + f.mult] : null;
+    if (p25 && p25.naturalWidth) { const w = 150, h = w * p25.naturalHeight / p25.naturalWidth; ctx.drawImage(p25, mult ? sx - 118 : sx - w / 2, sy - h, w, h); if (mult && mult.naturalWidth) { const mw = 78, mh = mw * mult.naturalHeight / mult.naturalWidth; ctx.drawImage(mult, sx + 42, sy - h / 2 - mh / 2 - 4, mw, mh); } }   /* v0.94: on a paying tier the +25 FT wears its 2X/3X badge at its right shoulder */
+    else { ctx.font = '30px "Luckiest Guy", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = '#120c28'; const t25 = '+' + 25 * (f.mult || 1) + ' FT'; ctx.strokeText(t25, sx, sy); ctx.fillStyle = '#ffd83d'; ctx.fillText(t25, sx, sy); }
     ctx.restore();
   }
   if (gwing) {   /* the GOLD wing pickup (Keith v0.88): his gold pair at the same height and size — no glow either (his push-time call; the fire glow lives in the design note, struck) */
@@ -1948,6 +2018,18 @@ function draw() {
   if (wing) {   /* the wing pickup (Keith v0.88): HIS icon at the coin's height and size — NO glow (Keith struck the glow at push time) */
     const img = IMG.wingicon, sx = wing.x - camX, sy = wing.y - camY + Math.sin(time * 2) * 5;
     if (img && img.naturalWidth) { const h = 96, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }   /* the coin's size: 96 units */
+  }
+  if (bwing) {   /* the BLUE wing pickup (Keith v0.94): his lightning pair, same height and size as its sisters */
+    const img = IMG.wingiconblue, sx = bwing.x - camX, sy = bwing.y - camY + Math.sin(time * 2) * 5;
+    if (img && img.naturalWidth) { const h = 96, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }
+  }
+  if (magnet) {   /* THE MAGNET pickup (Keith v0.94): his horseshoe at the pickups' height, a touch smaller — it reads as the odd one out on purpose */
+    const img = IMG.magnet, sx = magnet.x - camX, sy = magnet.y - camY + Math.sin(time * 2) * 5;
+    if (img && img.naturalWidth) { const h = 84, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }
+  }
+  if (magT > 0 && mode === 'run') {   /* MAGNETIZED: the horseshoe rides over his head while the heavy gravity runs, blinking out in the last second like the wings do */
+    const img = IMG.magnet;
+    if (img && img.naturalWidth && (magT > 1 || Math.floor(time * 6) % 2 === 0)) { const w = 46, h = w * img.naturalHeight / img.naturalWidth; ctx.drawImage(img, px - camX - w / 2, py - camY - 306 + Math.sin(time * 6) * 4 - h / 2, w, h); }
   }
   if (coinT > 0 && mode === 'run') {   /* wearing the charge: the glow follows the BODY (Keith, v0.89) — her own frame stamped in her color with a soft shadow, the charge halo's trick. The old radial DISC read as a glowing green circle around her whenever she tucked into a roll; a silhouette can't do that. */
     const pa2 = playerAnim();
