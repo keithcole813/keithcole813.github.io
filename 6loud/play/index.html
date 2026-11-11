@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.1</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99 ==============================
+/* ============================== 6LOUD demo v0.99.1 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1087,7 +1087,7 @@ function buildStormEvent() {
   const E = BAND_Y[exitBand];
   const COLS = [   /* [rain, middle, high] heights from the entry level, column by column */
     [510, 0, -250], [1020, 0, -510], [720, 0, -760], [420, 0, -1020],
-    [170, 0, -720], [-80, 0, -420], [null, 0, -170]
+    [170, null, -720], [-80, null, -420], [null, null, -170]   /* v0.99.1 (Keith: 'I had 3 clouds right over the top of each other'): the middle line ends at column 4 — on the return leg the rain line's own decks ARE the normal-level clouds (170, then -80, weaving up through the high line's -170 exit), so no middle deck doubles up under them at 170 and 80 */
   ];
   let x = worldEnd + GAP.HOLD;
   for (const [lo, mid, hi] of COLS) {
@@ -1558,7 +1558,16 @@ function update(dt) {
       px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* same rigid ride through the slip */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
-    if (slipT >= SLIP_DUR) { slipPlat = null; vy = 140; noLand = true; }   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either */
+    if (slipT >= SLIP_DUR) {   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either. v0.99.1 THE DANGLE CATCH (Keith, at the storm fork: 'I was hanging on a cloud that was over 2 clouds and went right through them'): his body hangs ~284 under the lip, so a deck his dangle already overlaps is one he is effectively hanging THROUGH — the plunge may not pass it. He lands on the highest deck his hang overlapped; decks below his feet keep the v0.71 rule untouched */
+      let catchP = null;
+      for (const p of plats) { if (p.gone || p === slipPlat) continue;
+        if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
+        const top = p.y + (p.sink || 0);
+        if (top > slipPlat.y && top < py && (!catchP || top < catchP.y + (catchP.sink || 0))) catchP = p; }
+      if (catchP) { const top = catchP.y + (catchP.sink || 0); py = top; vy = 0; grounded = catchP; slipPlat = null; catchP.sinkV = (catchP.sinkV || 0) + 300;
+        landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; landDur = (landTo - landFrom + 1) / landRate; landT = 0; }
+      else { slipPlat = null; vy = 140; noLand = true; }
+    }
   } else if (!grounded) {
     if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1) * (magT > 0 ? 1.6 : 1);   /* v0.94: the MAGNET multiplies whatever gravity the moment already has by 1.6 while its 7 seconds run */ if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
     /* the flip cue: an armed jump converts at the top of the arc */
