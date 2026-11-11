@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>6LOUD — demo</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<link rel="apple-touch-icon" href="../play/assets/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -138,11 +138,11 @@
   }
   /* the display face (Keith's leaderboard mock, 2026-11-07): Luckiest Guy, self-hosted —
      helper text, the board, and every headline share it now */
-  @font-face { font-family:'Luckiest Guy'; font-style:normal; font-weight:400; font-display:swap; src:url(../assets/fonts/luckiest-guy-latin-ext.woff2) format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-  @font-face { font-family:'Luckiest Guy'; font-style:normal; font-weight:400; font-display:swap; src:url(../assets/fonts/luckiest-guy-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family:'Luckiest Guy'; font-style:normal; font-weight:400; font-display:swap; src:url(../play/assets/fonts/luckiest-guy-latin-ext.woff2) format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family:'Luckiest Guy'; font-style:normal; font-weight:400; font-display:swap; src:url(../play/assets/fonts/luckiest-guy-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
   /* Fredoka — the HELPER text face (Gemini consult relayed by Keith, 2026-11-07): rounded and heavy like the clouds, kept separate from the HUD gold so an alert never reads as a counter */
-  @font-face { font-family:'Fredoka'; font-style:normal; font-weight:600; font-display:swap; src:url(../assets/fonts/fredoka-600.woff2) format('woff2'); }
-  @font-face { font-family:'Fredoka'; font-style:normal; font-weight:700; font-display:swap; src:url(../assets/fonts/fredoka-700.woff2) format('woff2'); }
+  @font-face { font-family:'Fredoka'; font-style:normal; font-weight:600; font-display:swap; src:url(../play/assets/fonts/fredoka-600.woff2) format('woff2'); }
+  @font-face { font-family:'Fredoka'; font-style:normal; font-weight:700; font-display:swap; src:url(../play/assets/fonts/fredoka-700.woff2) format('woff2'); }
   #loadbar { position:absolute; left:50%; bottom:11%; transform:translateX(-50%); width:min(78vw,520px);
              text-align:center; pointer-events:none; transition:opacity .45s ease; z-index:5; }
   #loadpct { font-weight:900; letter-spacing:2px; color:#ffe9a8; font-size:19px; margin-bottom:8px;
@@ -157,7 +157,7 @@
     <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
   <div id="pullup">PULL UP!!</div>
-  <div id="dbl"><img src="../assets/airjump.webp" alt="AIR JUMP READY!"></div>
+  <div id="dbl"><img src="../play/assets/airjump.webp" alt="AIR JUMP READY!"></div>
   <div id="center">
     <div id="tap"></div>
   </div>
@@ -165,13 +165,13 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 2</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 3</div></div>
   <div id="dbg"></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
-    <img id="newRecord" src="../assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
+    <img id="newRecord" src="../play/assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
     <div id="board"></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
     <div id="pubRow"><button class="btn pubBtn" id="pubBtn">PUBLISH TO WORLD</button><button class="btn pubBtn" id="skipBtn">SKIP</button><span id="pubDone" class="pubDone" style="display:none"></span></div>
@@ -180,10 +180,10 @@
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
 </div>
-<audio id="music" src="../assets/daylight.mp3" loop preload="auto"></audio>
+<audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 2 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 3 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, and the debug overlay. Posting is hard-off and storage
@@ -286,17 +286,17 @@ function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud 
    and the context is created + decoded INSIDE the start tap, where iOS
    lets it run immediately. */
 if (window.fetch) {
-  fetch('../assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
-  fetch('../assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
-  fetch('../assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
-  fetch('../assets/coin-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawCoin = b; }).catch(() => {});   /* Keith's coin pick (v0.83): the Sci-Fi Power Up sweep */
-  fetch('../assets/note-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawNote = b; }).catch(() => {});   /* Keith's note pick (v0.83): the felt piano hit */
-  fetch('../assets/spark.mp3').then(r => r.arrayBuffer()).then(b => { rawSpark = b; }).catch(() => {});   /* Keith's spark pick (v0.94): the magnetized jump zap */
-  fetch('../assets/thunder.mp3').then(r => r.arrayBuffer()).then(b => { rawTh = b; }).catch(() => {});   /* Keith's thunder (v0.95): the storm bank's arrival crack */
-  fetch('../assets/wings-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawW = b; }).catch(() => {});   /* Keith's wings pick (v0.86): the trippin loop, for while you have the wings */
-  fetch('../assets/magnet-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawMg = b; }).catch(() => {});   /* Keith's magnet pick (v0.94): 'Best Intentions', for while you are magnetized */
-  fetch('../assets/dark-walk.mp3').then(r => r.arrayBuffer()).then(b => { rawDk = b; }).catch(() => {});   /* Keith's dark-cloud pick (v0.91): the water walk, feet on a dark cloud only */
-  fetch('../assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
+  fetch('../play/assets/daylight.mp3').then(r => r.arrayBuffer()).then(b => { rawD = b; }).catch(() => {});
+  fetch('../play/assets/battle1000.mp3').then(r => r.arrayBuffer()).then(b => { rawB = b; }).catch(() => {});
+  fetch('../play/assets/boom.mp3').then(r => r.arrayBuffer()).then(b => { rawBoom = b; }).catch(() => {});
+  fetch('../play/assets/coin-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawCoin = b; }).catch(() => {});   /* Keith's coin pick (v0.83): the Sci-Fi Power Up sweep */
+  fetch('../play/assets/note-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawNote = b; }).catch(() => {});   /* Keith's note pick (v0.83): the felt piano hit */
+  fetch('../play/assets/spark.mp3').then(r => r.arrayBuffer()).then(b => { rawSpark = b; }).catch(() => {});   /* Keith's spark pick (v0.94): the magnetized jump zap */
+  fetch('../play/assets/thunder.mp3').then(r => r.arrayBuffer()).then(b => { rawTh = b; }).catch(() => {});   /* Keith's thunder (v0.95): the storm bank's arrival crack */
+  fetch('../play/assets/wings-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawW = b; }).catch(() => {});   /* Keith's wings pick (v0.86): the trippin loop, for while you have the wings */
+  fetch('../play/assets/magnet-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawMg = b; }).catch(() => {});   /* Keith's magnet pick (v0.94): 'Best Intentions', for while you are magnetized */
+  fetch('../play/assets/dark-walk.mp3').then(r => r.arrayBuffer()).then(b => { rawDk = b; }).catch(() => {});   /* Keith's dark-cloud pick (v0.91): the water walk, feet on a dark cloud only */
+  fetch('../play/assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
 }
 /* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
    still doesn't play until I die"). v0.13.4's flaw: it trusted the
@@ -329,7 +329,7 @@ function kickDecode() {
 }
 function playTrack() {
   const sc = wingT > 0 ? 'wings' : magT > 0 ? 'magnet' : coinT > 0 ? 'battle' : mScene;   /* the wings' loop outranks all (Keith v0.86); next is the MAGNET's loop while its 7 seconds run (Keith v0.94); charged up with the coin = bg music 2 (Keith v0.85) */
-  const want = sc === 'steps' ? '../assets/steps.mp3' : sc === 'battle' ? '../assets/battle1000.mp3' : sc === 'magnet' ? '../assets/magnet-loop.mp3' : '../assets/daylight.mp3';
+  const want = sc === 'steps' ? '../play/assets/steps.mp3' : sc === 'battle' ? '../play/assets/battle1000.mp3' : sc === 'magnet' ? '../play/assets/magnet-loop.mp3' : '../play/assets/daylight.mp3';
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
       gainD = actx.createGain(); gainD.connect(actx.destination);
@@ -353,7 +353,7 @@ function playTrack() {
     if (gainW) { gainW.gain.cancelScheduledValues(t); gainW.gain.setTargetAtTime(sc === 'wings' ? musV() : 0, t, 0.18); }
     if (gainMg) { gainMg.gain.cancelScheduledValues(t); gainMg.gain.setTargetAtTime(sc === 'magnet' ? musV() : 0, t, 0.18); }   /* 'Best Intentions' fades in with the magnet, out when it lets go (v0.94) */   /* the trippin loop fades in with the wings, out when they end (v0.86) */   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
-      if (!(music.src || '').includes('../assets/steps.mp3')) { music.src = '../assets/steps.mp3'; music.currentTime = 0; }
+      if (!(music.src || '').includes('../play/assets/steps.mp3')) { music.src = '../play/assets/steps.mp3'; music.currentTime = 0; }
       if (stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
     } else music.pause();
   } else {
@@ -414,7 +414,7 @@ function pumpQ() {
 for (const mv of Object.keys(MANIFEST)) {
   ANIM[mv] = new Array(MANIFEST[mv].n);
   for (let i = 0; i < MANIFEST[mv].n; i++)
-    queueImg(im => { ANIM[mv][i] = im; }, '../assets/anim/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
+    queueImg(im => { ANIM[mv][i] = im; }, '../play/assets/anim/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* LaShmoove's player set (v0.56): his approved pool, loaded as a second
    skin through the same queue — his core moves gate the start too, so
@@ -423,7 +423,7 @@ const LASH_ANIM = {};
 for (const mv of Object.keys(LASH_MANIFEST)) {
   LASH_ANIM[mv] = new Array(LASH_MANIFEST[mv].n);
   for (let i = 0; i < LASH_MANIFEST[mv].n; i++)
-    queueImg(im => { LASH_ANIM[mv][i] = im; }, '../assets/lash/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
+    queueImg(im => { LASH_ANIM[mv][i] = im; }, '../play/assets/lash/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* Yorokobi's player set (v0.70) — same queue, same core gate. She never
    ghosts (Keith: when she runs, LaShmoove is the ghost), so she needs
@@ -432,7 +432,7 @@ const YORO_ANIM = {};
 for (const mv of Object.keys(YORO_MANIFEST)) {
   YORO_ANIM[mv] = new Array(YORO_MANIFEST[mv].n);
   for (let i = 0; i < YORO_MANIFEST[mv].n; i++)
-    queueImg(im => { YORO_ANIM[mv][i] = im; }, '../assets/yoro/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
+    queueImg(im => { YORO_ANIM[mv][i] = im; }, '../play/assets/yoro/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* Poison Ivey's player set (v0.78): her approved 60 fps pool, through the
    same queue and core gate. The sisters ghost for each other (Keith). */
@@ -441,7 +441,7 @@ const IVEY_ANIM = {};
 for (const mv of Object.keys(IVEY_MANIFEST)) {
   IVEY_ANIM[mv] = new Array(IVEY_MANIFEST[mv].n);
   for (let i = 0; i < IVEY_MANIFEST[mv].n; i++)
-    queueImg(im => { IVEY_ANIM[mv][i] = im; }, '../assets/ivey/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
+    queueImg(im => { IVEY_ANIM[mv][i] = im; }, '../play/assets/ivey/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* Sayori's player set (v0.78): her approved 60 fps pool (rebuilt rolls). */
 const SAYORI_MANIFEST = {"run": {"n": 37, "w": 309, "h": 415, "offset": 14, "gaps": [4, 4, 13, 26, 28, 26, 27, 27, 24, 21, 17, 14, 8, 7, 8, 9, 8, 8, 7, 6, 14, 31, 38, 32, 27, 25, 26, 27, 25, 17, 10, 6, 8, 9, 6, 5, 5]}, "armsopen": {"n": 61, "w": 283, "h": 477, "offset": 9, "gaps": [4, 4, 4, 4, 4, 4, 6, 10, 17, 24, 32, 40, 50, 61, 73, 87, 102, 118, 132, 146, 158, 167, 174, 180, 185, 189, 192, 195, 196, 197, 196, 192, 187, 180, 173, 164, 154, 143, 132, 121, 109, 97, 85, 74, 62, 49, 39, 30, 20, 13, 9, 8, 9, 11, 12, 14, 15, 16, 17, 18, 18]}, "basic": {"n": 61, "w": 283, "h": 477, "offset": 9, "gaps": [8, 9, 9, 9, 9, 10, 10, 10, 10, 11, 12, 13, 15, 16, 17, 19, 20, 22, 23, 25, 26, 28, 30, 33, 35, 37, 38, 37, 35, 34, 32, 29, 27, 24, 21, 19, 18, 18, 17, 16, 15, 14, 13, 12, 10, 9, 8, 6, 6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 6, 10, 17]}, "runjump": {"n": 97, "w": 440, "h": 479, "offset": 13, "gaps": [22, 29, 36, 44, 51, 57, 64, 71, 77, 84, 91, 99, 108, 118, 129, 141, 154, 168, 184, 202, 215, 208, 200, 192, 184, 175, 166, 157, 147, 137, 127, 117, 105, 93, 81, 70, 59, 51, 42, 35, 29, 20, 13, 10, 10, 13, 18, 26, 31, 25, 21, 20, 21, 23, 26, 29, 33, 38, 43, 38, 30, 24, 19, 15, 13, 12, 13, 16, 19, 23, 28, 29, 27, 25, 23, 21, 19, 18, 17, 15, 14, 13, 12, 11, 11, 10, 10, 10, 10, 10, 10, 11, 11, 11, 12, 12, 13]}, "flip": {"n": 31, "w": 440, "h": 479, "offset": 13, "gaps": [129, 141, 154, 168, 184, 202, 215, 208, 200, 192, 184, 175, 166, 157, 147, 137, 127, 117, 105, 93, 81, 70, 59, 51, 42, 35, 29, 20, 13, 10, 10]}, "diveroll": {"n": 129, "w": 433, "h": 436, "offset": 4, "gaps": [10, 10, 11, 13, 16, 20, 26, 33, 40, 47, 55, 66, 77, 93, 99, 99, 100, 101, 100, 100, 101, 105, 110, 119, 134, 154, 179, 206, 204, 199, 195, 193, 191, 191, 194, 200, 205, 214, 227, 236, 240, 240, 237, 237, 229, 219, 210, 196, 172, 150, 129, 104, 81, 60, 41, 25, 11, 7, 10, 10, 11, 13, 14, 15, 16, 16, 17, 19, 19, 20, 20, 21, 20, 20, 21, 22, 23, 23, 23, 23, 24, 25, 24, 23, 23, 23, 25, 27, 31, 34, 32, 32, 33, 34, 32, 30, 27, 23, 20, 17, 15, 13, 12, 12, 12, 12, 13, 14, 17, 17, 16, 15, 15, 16, 17, 17, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 11, 11, 10]}, "diveflip": {"n": 35, "w": 433, "h": 436, "offset": 4, "gaps": [100, 101, 100, 100, 101, 105, 110, 119, 134, 154, 179, 206, 204, 199, 195, 193, 191, 191, 194, 200, 205, 214, 227, 236, 240, 240, 237, 237, 229, 219, 210, 196, 172, 150, 129]}, "roll3": {"n": 79, "w": 422, "h": 407, "offset": 15, "gaps": [5, 5, 5, 6, 8, 12, 21, 34, 49, 44, 40, 38, 35, 32, 27, 23, 23, 26, 32, 39, 48, 58, 64, 70, 74, 78, 82, 85, 87, 84, 76, 68, 60, 49, 42, 36, 31, 27, 25, 25, 25, 26, 27, 28, 24, 22, 23, 23, 22, 22, 21, 20, 19, 18, 17, 16, 15, 15, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 16, 16, 14, 12, 11, 10, 11, 12, 12, 13, 13]}, "roll4": {"n": 157, "w": 315, "h": 352, "offset": 16, "gaps": [9, 8, 7, 6, 6, 5, 4, 5, 8, 11, 10, 9, 9, 9, 10, 10, 11, 13, 15, 16, 18, 21, 23, 27, 30, 34, 36, 37, 38, 38, 39, 40, 41, 44, 48, 55, 65, 78, 98, 116, 122, 125, 125, 124, 124, 124, 124, 124, 123, 122, 119, 112, 105, 99, 90, 80, 73, 68, 64, 59, 55, 51, 47, 44, 42, 41, 41, 41, 43, 28, 20, 15, 12, 13, 13, 13, 13, 12, 12, 11, 10, 9, 9, 9, 10, 10, 10, 11, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 14, 15, 15, 15, 15, 15, 15, 16, 16, 17, 17, 17, 16, 15, 15, 15, 15, 15, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]}, "front": {"n": 37, "w": 309, "h": 415, "offset": 14, "gaps": [4, 4, 13, 26, 28, 26, 27, 27, 24, 20, 17, 14, 8, 7, 8, 9, 8, 7, 7, 6, 14, 31, 38, 32, 27, 25, 26, 27, 25, 17, 10, 6, 8, 9, 6, 5, 4]}, "turn": {"n": 35, "w": 309, "h": 415, "offset": 14, "gaps": [4, 4, 13, 26, 28, 26, 27, 27, 24, 20, 17, 14, 8, 7, 8, 9, 8, 7, 7, 6, 14, 31, 38, 32, 27, 25, 26, 27, 25, 17, 10, 7, 8, 9, 4]}};
@@ -449,7 +449,7 @@ const SAYORI_ANIM = {};
 for (const mv of Object.keys(SAYORI_MANIFEST)) {
   SAYORI_ANIM[mv] = new Array(SAYORI_MANIFEST[mv].n);
   for (let i = 0; i < SAYORI_MANIFEST[mv].n; i++)
-    queueImg(im => { SAYORI_ANIM[mv][i] = im; }, '../assets/sayori/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
+    queueImg(im => { SAYORI_ANIM[mv][i] = im; }, '../play/assets/sayori/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
 /* cloud platform art: measured surface line (fraction of drawn height) + aspect */
 const CLOUDS = {
@@ -461,18 +461,18 @@ const CLOUDS = {
   '23':{surf:0.293, asp:0.440} };   /* the floor's history: original surf -> v0.69.2 dropped it +0.36 (Keith's .55 pick on cloud-11) -> v0.70.2 RAISED it back halfway (+0.18) after his phone verdict on .55: "running waist deep." Half the sink-in, tips still met. */
 const LONGC = ['01','11','14','16','17','24'], ISLAND = ['02','12','18','23'];
 const WISPY = ['06','13','19','22'];
-Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n] = im; }, '../assets/cloud-' + n + '.webp', true));
+Object.keys(CLOUDS).concat(WISPY).forEach(n => queueImg(im => { IMG['cloud' + n] = im; }, '../play/assets/cloud-' + n + '.webp', true));
 /* v0.82 items + sky dressing sprites (loaded lazy, never core) */
 const STORMC = ['S05', 'S13', 'S14', 'S15', 'S17', 'S19'];
-STORMC.forEach(n => queueImg(im => { IMG['storm' + n] = im; }, '../assets/storm-' + n.slice(1) + '.webp'));
-['coin', 'satellite', 'rocket', 'note1', 'note2'].forEach(n => queueImg(im => { IMG[n] = im; }, '../assets/' + n + '.webp'));
+STORMC.forEach(n => queueImg(im => { IMG['storm' + n] = im; }, '../play/assets/storm-' + n.slice(1) + '.webp'));
+['coin', 'satellite', 'rocket', 'note1', 'note2'].forEach(n => queueImg(im => { IMG[n] = im; }, '../play/assets/' + n + '.webp'));
 /* decorative background pack — ChatGPT sunset clouds via Keith (2026-11-06):
    his sheet, cut + compressed by Amy; streamed in, never gates the start */
 const BGMID = ['01','08','09','10','11','13','14','16','17','18','19','22','23','24','26','27','28'];
 const BGFAR = ['02','03','04','05','06','07','12','15','20','21','25'];
 const BGIMG = {};
-BGMID.forEach(n => queueImg(im => { BGIMG['m' + n] = im; }, '../assets/bg/bgm-' + n + '.webp', false));
-BGFAR.forEach(n => queueImg(im => { BGIMG['f' + n] = im; }, '../assets/bg/bgd-' + n + '.webp', false));
+BGMID.forEach(n => queueImg(im => { BGIMG['m' + n] = im; }, '../play/assets/bg/bgm-' + n + '.webp', false));
+BGFAR.forEach(n => queueImg(im => { BGIMG['f' + n] = im; }, '../play/assets/bg/bgd-' + n + '.webp', false));
 pumpQ();
 
 /* ---------- world constants (measured) ---------- */
@@ -559,16 +559,16 @@ let magnet = null, nextMagFt = 2000, magGap = 2000, magT = 0, magFlashT = 0;   /
 let coinGap = 1000, wingGap = 1500;   /* the power-up spacing GROWS as the run does (Keith v0.86): at top speed a flat 1000 FT coin gap leaves almost no un-charged running — back-to-back blue doubles, his 5,367 FT run called it */
 let floaters = [];   /* the +25 FT popups at each note (Keith v0.86): the player sees what the note just paid */   /* WINGS (Keith v0.86): a timed power-up — tap jump to flap and fly */
 const WINGN = { n: 36, w: 145.3, h: 223.7, ax: 0.4879, ay: 0.1731 };   /* the baked flap loop: cell + mount anchor, measured off Keith's kc2 bake (scene projections, not estimates) */
-for (let k = 0; k < WINGN.n; k++) loadImg('wing' + k, '../assets/wings/f' + String(k).padStart(3, '0') + '.webp');
-loadImg('wingicon', '../assets/wings-icon.webp');   /* Keith's pickup icon (v0.88): the cartoon wing pair he sent — the pickup is an ICON now, the worn wings stay his fitted 3D pair */
-loadImg('wingicongold', '../assets/wings-icon-gold.webp');   /* the GOLD pair (Keith v0.88): 15 seconds, glowing in Lashmoove's charge color */
-loadImg('wingiconblue', '../assets/wings-icon-blue.webp');   /* the BLUE pair (Keith v0.94): his lightning wings, the 12-second middle tier */
-loadImg('magnet', '../assets/magnet.webp');   /* THE MAGNET (Keith v0.94): the hazard's icon */
-loadImg('notegreen', '../assets/note-green.webp');   /* Keith's notes (v0.94): GREEN and PURPLE notes give the feet bonus — the drip alternates them */
-loadImg('notepurple', '../assets/note-purple.webp');
-loadImg('x2', '../assets/x2.webp');   /* Keith's multiplier badges (v0.94): 2X rides the purple note's floater, 3X the green's */
-loadImg('x3', '../assets/x3.webp');
-loadImg('plus25', '../assets/plus25.webp');   /* Keith's +25FT graphic (v0.88): what a note flashes when you grab it */
+for (let k = 0; k < WINGN.n; k++) loadImg('wing' + k, '../play/assets/wings/f' + String(k).padStart(3, '0') + '.webp');
+loadImg('wingicon', '../play/assets/wings-icon.webp');   /* Keith's pickup icon (v0.88): the cartoon wing pair he sent — the pickup is an ICON now, the worn wings stay his fitted 3D pair */
+loadImg('wingicongold', '../play/assets/wings-icon-gold.webp');   /* the GOLD pair (Keith v0.88): 15 seconds, glowing in Lashmoove's charge color */
+loadImg('wingiconblue', '../play/assets/wings-icon-blue.webp');   /* the BLUE pair (Keith v0.94): his lightning wings, the 12-second middle tier */
+loadImg('magnet', '../play/assets/magnet.webp');   /* THE MAGNET (Keith v0.94): the hazard's icon */
+loadImg('notegreen', '../play/assets/note-green.webp');   /* Keith's notes (v0.94): GREEN and PURPLE notes give the feet bonus — the drip alternates them */
+loadImg('notepurple', '../play/assets/note-purple.webp');
+loadImg('x2', '../play/assets/x2.webp');   /* Keith's multiplier badges (v0.94): 2X rides the purple note's floater, 3X the green's */
+loadImg('x3', '../play/assets/x3.webp');
+loadImg('plus25', '../play/assets/plus25.webp');   /* Keith's +25FT graphic (v0.88): what a note flashes when you grab it */
 let stormAt = 800 * 15.24, stormSteps = 0;
 let lastDarkX = -1e9;   /* v0.91: course x of the last dark cloud placed — they stay SPREAD OUT (Keith) */
 let stumbleT = 0;   /* the stagger timer: its only trigger was the plane, removed in v0.90 (Keith: 'take the plane out. its wrong') — the readers stay, it never fires */
@@ -638,7 +638,7 @@ let PSKIN = SKINS[selChar];
 const GHOST_FOR = { blade: 'lash', lash: 'blade', yoro: 'lash', ivey: 'sayori', sayori: 'ivey' };   /* the sisters ghost for EACH OTHER (Keith v0.78); Yorokobi never ghosts — LaShmoove runs for her */
 const ghostChar = () => GHOST_FOR[selChar] || 'lash';
 const ORDER = ['blade', 'lash', 'yoro', 'ivey', 'sayori'];   /* the carousel/strip order; a card appears only for a skin that exists */
-const PHOTOS = { blade: '../assets/select-6lade.jpg', lash: '../assets/select-lashmoove.jpg', yoro: '../assets/select-yorokobi.jpg', ivey: '../assets/select-poisonivey.jpg', sayori: '../assets/select-sayori.jpg' };   /* the SHINOBI BRAWL select portraits (Keith v0.69.2) */
+const PHOTOS = { blade: '../play/assets/select-6lade.jpg', lash: '../play/assets/select-lashmoove.jpg', yoro: '../play/assets/select-yorokobi.jpg', ivey: '../play/assets/select-poisonivey.jpg', sayori: '../play/assets/select-sayori.jpg' };   /* the SHINOBI BRAWL select portraits (Keith v0.69.2) */
 function charBests() { try { return JSON.parse(localStorage.getItem('sixlouddev_char_bests') || '{}'); } catch (e) { return {}; } }
 function bestLine(c) { const b = charBests()[c] || 0; return b > 0 ? 'LOCAL BEST · ' + b.toLocaleString('en-US') + ' FT' : 'LOCAL BEST · —'; }
 function applyChar() { PSKIN = SKINS[selChar]; const cn = $('charName'); if (cn) cn.textContent = PSKIN.name;
@@ -754,8 +754,8 @@ const CAST_ORDER = ['blade', 'lash', 'yoro', 'ivey', 'sayori'];
 /* the NEAR set (v0.25): LaShmoove at nearly full size with a breath of
    softness — same clouds as 6lade, slightly off his plane (Keith). */
 /* ghost skins (v0.56): the runner you did NOT pick performs the replay,
-   in the same off-plane treatment — LaShmoove's set (../assets/ghostlive)
-   or 6lade's (../assets/ghost6, baked to the same recipe). */
+   in the same off-plane treatment — LaShmoove's set (../play/assets/ghostlive)
+   or 6lade's (../play/assets/ghost6, baked to the same recipe). */
 /* ghost skins (v0.78): Keith's ruling (2026-11-08) — the ghost wears the
    character's OWN clean player frames: no treated bake, no shrink, same
    plane, same size. The old ghostlive/ghost6 sets are retired. */
@@ -2415,7 +2415,7 @@ function dbgTick(ts) {
   P.mode = mode; P.wingOn = wingOn; P.magOn = magOn; P.hangOn = hangOn; P.stormAt = stormAt; P.gState = G ? G.state : null;
   if (ts - dbgLastText < 120) return; dbgLastText = ts;
   const lines = [
-    'FORK2 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK3 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
