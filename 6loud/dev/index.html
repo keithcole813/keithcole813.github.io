@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#160a2e">
 <style>
   html, body { margin:0; padding:0; height:100%; background:#17102e; overflow:hidden; }
-  #c { display:block; width:100vw; height:100vh; touch-action:none; -webkit-user-select:none; user-select:none; }
+  #c { display:block; width:100vw; height:calc(100vh - 56px); height:calc(100dvh - 56px); touch-action:none;   /* DEV FORK 7: the canvas gives up the banner band */ -webkit-user-select:none; user-select:none; }
   #ui { position:fixed; inset:0; pointer-events:none; font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif; color:#fff; }
   #hud { position:absolute; top:calc(10px + env(safe-area-inset-top)); left:14px; right:14px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; }
   .hudbox { background:rgba(20,10,40,.38); border:2px solid rgba(255,255,255,.35); border-radius:12px; padding:6px 12px; }
@@ -98,6 +98,20 @@
   .bpHint { text-align:center; font-size:11px; font-weight:800; letter-spacing:2px; color:rgba(255,217,77,.75); padding-top:8px; }
   #board { cursor:pointer; }
   #dbg { position:absolute; top:calc(64px + env(safe-area-inset-top)); left:10px; z-index:25; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; line-height:1.5; color:#aef2a6; background:rgba(0,0,0,.48); padding:6px 8px; border-radius:8px; white-space:pre; pointer-events:none; }
+  #adBanner { position:fixed; left:0; right:0; bottom:0; height:56px; z-index:30; display:flex; align-items:center; justify-content:center; background:#0d0921; border-top:2px solid #6b4dff; color:#8f86b8; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:11px; letter-spacing:2px; }
+  #reviveRow { display:none; margin-top:14px; text-align:center; }
+  #reviveBtn { background:linear-gradient(#ffe259,#ffa751); color:#3a1503; }
+  #reviveNote { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; color:#ffd94d; letter-spacing:1px; margin-top:6px; min-height:15px; }
+  #adSim { position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; background:rgba(5,3,14,.88); }
+  .adSimIn { position:relative; width:min(430px,92vw); background:linear-gradient(180deg,#241a4d,#120b2c); border:2px solid #ffd23f; border-radius:18px; padding:26px 20px 20px; text-align:center; box-shadow:0 18px 50px rgba(0,0,0,.65); }
+  .adSimTag { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; color:#ffd23f; letter-spacing:2px; font-size:15px; }
+  .adSimBody { font-family:'Fredoka','Trebuchet MS',sans-serif; color:#f5efdc; font-size:16px; margin:14px 0 4px; }
+  #adSimCount { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; color:#00f5ff; font-size:34px; }
+  .adSimBar { height:8px; background:rgba(255,255,255,.14); border-radius:99px; margin:14px 0 8px; overflow:hidden; }
+  #adSimFill { height:100%; width:0%; background:linear-gradient(90deg,#ffd23f,#ff9d3c); }
+  #adSimClose { position:absolute; top:8px; right:10px; background:rgba(255,255,255,.12); color:#f5efdc; border:2px solid rgba(255,255,255,.5); border-radius:999px; padding:5px 12px; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:12px; cursor:pointer; }
+  #adSimClose:disabled { opacity:.35; cursor:default; }
+  .adSimHint { font-family:'Fredoka','Trebuchet MS',sans-serif; color:#b9aee0; font-size:12px; margin-top:8px; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -157,6 +171,7 @@
              text-shadow:0 2px 10px rgba(0,0,0,.55); }
   @keyframes pulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.07); opacity:.85; } }
 </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456" data-adbreak-test="on" crossorigin="anonymous"></script>
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -173,8 +188,10 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 6</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 7</div></div>
   <div id="dbg"></div>
+  <div id="adBanner"><span>AD · TEST BANNER — OUTSIDE THE PLAY ZONE</span></div>
+  <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -187,17 +204,19 @@
     <button class="btn" id="again">TRY AGAIN</button>
     <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
     <div id="pubNote"></div>
+    <div id="reviveRow"><button class="btn" id="reviveBtn">WATCH AD TO REVIVE</button><div id="reviveNote"></div></div>
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 6 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 7 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
-   billboard page, and the debug overlay. Posting is hard-off and storage
-   keys are fork-local. NOT the live game.
+   billboard page, the debug overlay, and the Option 1 ads test (rewarded
+   revive, capped interstitial, banner band, Google test setup + sim).
+   Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -338,6 +357,7 @@ function kickDecode() {
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab return); the heartbeat calls without it */
+  if (window.__adHold) return;   /* DEV FORK 7: an ad is on screen — the soundtrack stays held until it closes */
   const sc = wingT > 0 ? 'wings' : magT > 0 ? 'magnet' : coinT > 0 ? 'battle' : mScene;   /* the wings' loop outranks all (Keith v0.86); next is the MAGNET's loop while its 7 seconds run (Keith v0.94); charged up with the coin = bg music 2 (Keith v0.85) */
   const want = sc === 'steps' ? '../play/assets/steps.mp3' : sc === 'battle' ? '../play/assets/battle1000.mp3' : sc === 'magnet' ? '../play/assets/magnet-loop.mp3' : '../play/assets/daylight.mp3';
   const trackKey = sc + '|' + stepsGateOn + '|' + darkGateOn + '|' + (srcD ? 1 : 0);   /* DEV FORK: the routing last applied */
@@ -1346,6 +1366,7 @@ const FEET = 16;            // his feet sit this deep in the cloud tops
 
 function startRun() {
   recStart();   /* record from the very first platform (v0.24) */
+  window.__reviveUsed = false; window.__adGuardT = 0;   /* DEV FORK 7: a fresh run re-arms the one ad revive */
   prepRace();
   lastDarkX = -1e9;
   resetWorld();
@@ -1494,6 +1515,8 @@ function gameOver() {
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('pubRow').style.display = qualifiesGlobal ? 'flex' : 'none'; pubState = 'none'; $('pubBtn').style.display = ''; $('skipBtn').style.display = ''; $('pubDone').style.display = 'none';   /* DEV FORK: a fresh publish choice on every qualifying wipeout */
   nbMove($('nameRow'), qualifiesGlobal); $('nbCard').style.display = qualifiesGlobal ? 'flex' : 'none'; if (qualifiesGlobal) { let rkN = 1; for (const e of gBoard) if (e && e.geo === 2 && (e.dist_ft || 0) > myFt) rkN++; $('nbRank').textContent = 'RANK #' + rkN + ' GLOBAL'; } $('pubNote').textContent = ''; $('pubNote').className = '';   /* DEV FORK: Option A (Keith 2026-11-11) — the NEW BEST card pops for a world-board run and the initials row moves into it; a local-only run keeps the inline row where it lives */
+  AD.runsSince++; AD.save();   /* DEV FORK 7: another finished run toward the interstitial cap */
+  $('reviveRow').style.display = window.__reviveUsed ? 'none' : 'block'; $('reviveNote').textContent = '';   /* DEV FORK 7: one ad revive offered per run */
   $('over').style.display = 'flex';
   if (qualifies) { $('ini').value = (function () { try { return localStorage.getItem('sixlouddev_initials') || ''; } catch (e) { return ''; } })(); setTimeout(() => $('ini').focus(), 60); }   /* v0.99.7 (Keith): the initials box REMEMBERS the local player and PREFILLS their initials — a returning player's name is already in the box; a first-timer's box starts empty, and empty still saves nowhere */
   renderBoard();   /* global board swaps in when it has loaded */
@@ -1910,7 +1933,7 @@ function update(dt) {
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
   $('dist').innerHTML = '<small>DISTANCE</small>' + runFt() + 'ft';
-  if (py - camY > viewH / zoom + 260) gameOver();
+  if (window.__adGuardT > 0) { window.__adGuardT = Math.max(0, window.__adGuardT - (typeof dt === 'number' ? dt : 0.016)); if (vy > 90) vy = 90; } else if (py - camY > viewH / zoom + 260) gameOver();   /* DEV FORK 7: inside the 1.5 s revive float guard he sinks gently and cannot fall-die */
 }
 
 /* ---------- draw ---------- */
@@ -2401,7 +2424,7 @@ function draw() {
 /* ---------- frame loop / sizing ---------- */
 function resize() {
   const dpr = Math.min(2, devicePixelRatio || 1);
-  W = innerWidth; H = innerHeight;
+  W = innerWidth; H = Math.max(320, innerHeight - 56);   /* DEV FORK 7: the bottom 56 px belong to the banner band — outside the playable zone */
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   S = Math.min(W, H) / 1150;   // full mockup ratio (Keith 2026-11-06): short side = 1150 units, long side opens up
@@ -2433,13 +2456,13 @@ function dbgTick(ts) {
   const ghostTxt = 'GHOST ' + (RACE ? ghostChar() + ' ' + (GR && GR.style ? GR.style : '') + ' gap ' + (G ? Math.round(G.o) : '-') + ' perf ' + (GR && GR.perfD != null ? Math.round(GR.perfD / 15.24) : '-') : 'none') + ' · STORM in ' + Math.max(0, Math.round((stormAt - dist) / 15.24)) + ' FT';
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
-    el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK6 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.style.top = 'auto'; el.style.bottom = 'calc(60px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';   /* FORK 7: the strip docks ABOVE the 56px banner band */
+    el.textContent = 'FORK7 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK6 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK7 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2457,6 +2480,111 @@ function dbgTick(ts) {
 let nbHome = null;
 function nbMove(node, toCard) { try { if (!node) return; if (toCard) { const b = $('nbIn'); if (b && b.appendChild) b.appendChild(node); } else if (nbHome && nbHome.p && nbHome.p.insertBefore) nbHome.p.insertBefore(node, nbHome.n); } catch (e) {} }
 (function () { const nr = $('nameRow'); if (nr && nr.parentNode) nbHome = { p: nr.parentNode, n: nr.nextSibling }; nbMove($('pubRow'), true); })();
+
+/* DEV FORK 7 — OPTION 1 ADS TEST (Keith, 2026-11-11): in-game ad
+   monetization, tested fork-only with the Google TEST setup so nothing
+   can draw an invalid-traffic flag. The rules, per his spec:
+   - ZERO ads during active gameplay (the canvas stays 100% clear);
+   - a REWARDED video on the WIPEOUT screen only, behind an explicit tap
+     on WATCH AD TO REVIVE — one revive per run, granted only when the
+     ad is watched to the end, respawning him on a safe cloud near where
+     he fell with a 1.5 s float guard (sink capped, no fall death);
+   - an INTERSTITIAL between runs, only behind the TRY AGAIN / MAIN MENU
+     tap (never on the wipeout itself), capped at once per 3 runs AND
+     at most once per 2 minutes;
+   - a BANNER in a fixed 56 px band BELOW the canvas (resize() gives up
+     those 56 px, so the playable zone never sits under it);
+   - the game audio is HELD for the length of any ad (playTrack stands
+     down) and re-asserted when it closes.
+   Provider order: Google H5 Games Ads (adBreak) when the library has
+   really loaded, else the built-in SIMULATED ad — so the whole flow is
+   testable anywhere, and every step lands in the debug event log. */
+window.adsbygoogle = window.adsbygoogle || [];
+if (typeof window.adBreak !== 'function') window.adBreak = function (o) { window.adsbygoogle.push(o); };
+if (typeof window.adConfig !== 'function') window.adConfig = function (o) { window.adsbygoogle.push(o); };
+const AD = {
+  runsSince: 0, lastAt: 0, busy: false,
+  CAP_RUNS: 3, CAP_MS: 120000,
+  log(s) { console.log('[6LOUD AD]', s); try { dbgLog('AD ' + s); } catch (e) {} },
+  save() { try { localStorage.setItem('sixlouddev_ads', JSON.stringify({ runs: AD.runsSince, last: AD.lastAt })); } catch (e) {} },
+  due() { return AD.runsSince >= AD.CAP_RUNS && (Date.now() - AD.lastAt) >= AD.CAP_MS; },
+  holdAudio() { window.__adHold = true; try { if (actx && actx.state === 'running') actx.suspend(); } catch (e) {} try { if (music && !music.paused) music.pause(); } catch (e) {} AD.log('audio held'); },
+  freeAudio() { window.__adHold = false; try { if (actx && actx.state === 'suspended') actx.resume(); } catch (e) {} try { playTrack(true); } catch (e) {} AD.log('audio free'); },
+  h5(kind, done) {   /* true = handed to Google; done(null) = no fill, fall back to the SIM */
+    if (!(window.adsbygoogle && window.adsbygoogle.loaded && typeof window.adBreak === 'function')) return false;
+    let called = false, finished = false;
+    const finish = v => { if (!finished) { finished = true; done(v); } };
+    try {
+      window.adBreak({ type: kind === 'rewarded' ? 'reward' : 'next', name: kind === 'rewarded' ? 'revive' : 'between-runs',
+        beforeAd: () => { called = true; AD.log('google ad showing'); },
+        adViewed: () => { AD.log('google ad viewed'); },
+        adDismissed: () => { AD.log('google ad dismissed'); },
+        adBreakDone: info => { const st = info && info.breakStatus; AD.log('google done: ' + st); if (!called) finish(null); else finish(kind === 'rewarded' ? st === 'viewed' : st !== 'error'); } });
+    } catch (e) { return false; }
+    setTimeout(() => { if (!called) finish(null); }, 2500);
+    return true;
+  },
+  sim(kind, done) {
+    const box = $('adSim'), close = $('adSimClose');
+    $('adSimKind').textContent = kind === 'rewarded' ? 'REWARDED VIDEO' : 'INTERSTITIAL';
+    $('adSimHint').textContent = kind === 'rewarded' ? 'Watch to the end — the revive lands when it finishes.' : 'Between-runs break. Cap: once per ' + AD.CAP_RUNS + ' runs, at most once per ' + (AD.CAP_MS / 60000) + ' min.';
+    box.style.display = 'flex';
+    const total = kind === 'rewarded' ? 5 : 3; let left = total, ended = false;
+    const end = ok => { if (ended) return; ended = true; clearInterval(iv); box.style.display = 'none'; close.onclick = null; done(ok); };
+    close.disabled = true; close.textContent = '✕'; $('adSimCount').textContent = Math.ceil(left) + 's'; $('adSimFill').style.width = '0%';
+    const iv = setInterval(() => {
+      left = Math.max(0, left - 0.1);
+      $('adSimCount').textContent = left > 0 ? Math.ceil(left) + 's' : 'DONE';
+      $('adSimFill').style.width = ((total - left) / total * 100) + '%';
+      if (kind === 'rewarded' && left > 0 && left <= total - 1 && !close.onclick) { close.disabled = false; close.onclick = () => end(false); }   /* he may bail after 1 s — but a bailed ad pays no revive */
+      if (left <= 0) { clearInterval(iv); close.disabled = false; close.textContent = kind === 'rewarded' ? 'CLAIM REVIVE ✕' : 'CLOSE ✕'; close.onclick = () => end(true); }
+    }, 100);
+    window.__adTestFinish = () => end(true);   /* forkcheck hook */
+    AD.log('simulated ' + kind + ' showing');
+  },
+  show(kind, done) {
+    if (AD.busy) return; AD.busy = true; AD.holdAudio(); AD.log(kind + ' requested');
+    const finish = ok => { AD.busy = false; AD.freeAudio(); AD.log(kind + ' closed' + (ok ? ' (completed)' : ' (not completed)')); done(ok); };
+    if (!AD.h5(kind, v => { if (v === null) AD.sim(kind, finish); else finish(v); })) AD.sim(kind, finish);
+  },
+  revive() {
+    let cand = null;
+    for (const p of plats) { if (p.x + p.len > px - 40 && p.x < px + 900 && (!cand || p.x < cand.x)) cand = p; }
+    if (!cand) cand = plats[plats.length - 1];
+    if (!cand) return false;
+    px = Math.max(cand.x + 70, Math.min(px, cand.x + cand.len - 130));
+    py = cand.y; vy = 0; grounded = cand;
+    airMove = null; hangPlat = null; slipPlat = null; held = false; pressT = 0;
+    flipped = false; flipMove = null; landMove = null; landT = 0; doubleArmed = false;
+    dead = false; mode = 'run'; window.__adGuardT = 1.5;
+    $('over').style.display = 'none';
+    mScene = 'steps'; playTrack(true);
+    AD.log('REVIVE granted — back on a cloud at ' + Math.round(runFt()) + ' FT, 1.5 s float guard');
+    return true;
+  }
+};
+window.__AD = AD;
+try { const s = JSON.parse(localStorage.getItem('sixlouddev_ads') || '{}'); AD.runsSince = s.runs || 0; AD.lastAt = s.last || 0; } catch (e) {}
+try { window.adConfig({ preloadAdBreaks: 'on' }); } catch (e) {}
+$('reviveBtn').onclick = () => {
+  if (AD.busy || window.__reviveUsed) return;
+  AD.show('rewarded', ok => {
+    if (ok) { window.__reviveUsed = true; if (!AD.revive()) $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; }
+    else $('reviveNote').textContent = 'AD NOT FINISHED — NO REVIVE';
+  });
+};
+/* the between-runs interstitial rides the two exits: a capture-phase
+   listener takes the tap BEFORE the button's own handler, holds it
+   while the ad plays, then re-fires the click so the normal save +
+   exit flow runs untouched */
+if (document.addEventListener) document.addEventListener('click', e => {
+  if (window.__adBypass || AD.busy) return;
+  const id = e.target && e.target.id;
+  if ((id === 'again' || id === 'titleBtn') && typeof mode !== 'undefined' && mode === 'over' && AD.due()) {
+    e.preventDefault(); e.stopPropagation();
+    AD.show('interstitial', () => { AD.runsSince = 0; AD.lastAt = Date.now(); AD.save(); window.__adBypass = true; try { e.target.click(); } catch (err) {} window.__adBypass = false; });
+  }
+}, true);
 
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
