@@ -81,6 +81,15 @@
   #skipBtn { background:rgba(255,255,255,.10); color:#f5efdc; border:2px solid rgba(255,255,255,.55); box-shadow:none; }
   .pubDone { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:16px; letter-spacing:1px; color:#ffd94d; }
   .pubDone.dim { color:rgba(245,239,220,.6); }
+  #boardPage { position:absolute; inset:0; display:none; flex-direction:column; background:rgba(12,6,28,.97); z-index:40; }
+  .bpHead { display:flex; align-items:center; gap:12px; padding:calc(12px + env(safe-area-inset-top)) 14px 8px; }
+  #bpBack { pointer-events:auto; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:15px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:7px 16px; cursor:pointer; }
+  .bpTitle { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; color:#ffdd67; font-size:19px; letter-spacing:3px; }
+  #bpCount { color:rgba(245,239,220,.65); font-size:12px; font-weight:700; letter-spacing:1px; padding:0 16px 6px; }
+  #bpList { flex:1; overflow-y:auto; width:min(92vw,430px); margin:0 auto; padding:2px 4px 22px; box-sizing:border-box; }
+  .bpHint { text-align:center; font-size:11px; font-weight:800; letter-spacing:2px; color:rgba(255,217,77,.75); padding-top:8px; }
+  #board { cursor:pointer; }
+  #dbg { position:absolute; top:calc(64px + env(safe-area-inset-top)); left:10px; z-index:25; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; line-height:1.5; color:#aef2a6; background:rgba(0,0,0,.48); padding:6px 8px; border-radius:8px; white-space:pre; pointer-events:none; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -156,7 +165,8 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 1</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 2</div></div>
+  <div id="dbg"></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -168,14 +178,16 @@
     <button class="btn" id="again">TRY AGAIN</button>
     <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
   </div>
+  <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
 </div>
 <audio id="music" src="../assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 1 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 2 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
-   the fit-in-all-views pass, and the stronger 3D depth ladder. Posting is
-   hard-off and storage keys are fork-local. NOT the live game.
+   the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
+   billboard page, and the debug overlay. Posting is hard-off and storage
+   keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1431,7 +1443,7 @@ function renderBoard() {
   while (entries.length < 10) entries.push({ n: '—', s: 0, z: 1 });   /* the board always shows 10 rows: real scores, then ZERO rows — never dummy scores (Keith v0.48) */
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
     (onlineNow ? '<div class="onlineLine"><span class="odot"></span>' + onlineNow + ' PLAYING NOW</div>' : '') +
-    entries.map((e, i) => boardRow(e.n, e.s, i, e.z, e.ch)).join('') +
+    entries.map((e, i) => boardRow(e.n, e.s, i, e.z, e.ch)).join('') + '<div class="bpHint">TAP FOR THE FULL BOARD ›</div>' +
     (local.length ? '<div class="yb"><div class="ybCap">YOUR BEST</div><div class="ybLine"><span class="ybMain">' +
       (b => b.n + ' — ' + Number(b.s).toLocaleString('en-US') + ' FT')(local[0]) + '</span>' +
       (gRanks[local[0].s] !== undefined ? '<span class="ybRank"> • #' + gRanks[local[0].s] + ' IN THE WORLD</span>' : '') +
@@ -1440,6 +1452,10 @@ function renderBoard() {
 /* Footsteps audio REMOVED for good (Keith 2026-11-06): his isolation
    tests pinned the chop on the steps audio itself — every no-steps build
    ran smooth, every steps build chopped. Music only. */
+function bpRow(b, i) { if (i < 3) return boardRow(b.initials, b.dist_ft, i, 0, charOf(b.replay)); const feet = Number(b.dist_ft).toLocaleString('en-US') + ' FT'; const ch = charOf(b.replay); return '<div class="rowPill"><span class="pill">' + (i + 1) + '</span><span class="rLine">' + b.initials + (ch ? '<span class="rChar">' + ch + '</span>' : '') + ' — ' + feet + '</span></div>'; }   /* DEV FORK: rows past the medal places on the full board */
+function openBoardPage() { if (!gBoard || !gBoard.length) return; $('bpList').innerHTML = gBoard.map((b, i) => bpRow(b, i)).join(''); $('bpCount').textContent = gBoard.length + ' RUNS ON THE BOARD — SAME MAP, NO RESET'; $('boardPage').style.display = 'flex'; }   /* DEV FORK (Keith): the SCROLLING BILLBOARD — every run the current board holds, one scrollable page; nothing was reset: the map has not changed since the v0.99.5 reset, so every geo-2 mark stands */
+$('board').onclick = () => openBoardPage();
+$('bpBack').onclick = () => { $('boardPage').style.display = 'none'; };
 function backToTitle() {   /* MAIN MENU on the wipeout screen: back to the title and its character select without restarting the app (Keith v0.62, named plainly v0.64) */
   const s = pendingSave; pendingSave = null; if (s) s();   /* quitting to the menu saves a qualifying score too */
   mode = 'title';
@@ -2379,8 +2395,40 @@ addEventListener('resize', resize);
 let lastTs = 0;
 let puShown = false, dbShown = false, charUiShown = null, hudShown = true, sbShown = false;   /* charUiShown starts NULL (v0.73.2): the sentinel makes the first frame APPLY the select cluster's state — hidden while loading (its elements are visible by CSS default), shown at 'done'. (v0.73.1's true->false fix cured the never-appearing strip; the null sentinel is what lets the cluster also start hidden.) */
 let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
+/* DEV FORK DEBUG OVERLAY (Keith, 2026-11-11): a live state readout pinned to
+   the corner so a playtest SCREENSHOT carries the numbers with it — mode, fps,
+   viewport, distance/score, vertical speed + air state, wings / magnet /
+   charge, the ghost gap, the storm distance, and a rolling event log whose
+   transitions are detected by polling (no hooks in the game's logic). */
+const DBG_EV = [];
+let dbgLastText = 0, dbgFrames = 0, dbgFpsT = 0, dbgFps = 0; const dbgPrev = {};
+function dbgLog(s) { DBG_EV.push(s); if (DBG_EV.length > 6) DBG_EV.shift(); }
+function dbgTick(ts) {
+  dbgFrames++; if (ts - dbgFpsT >= 500) { dbgFps = Math.round(dbgFrames * 1000 / Math.max(1, ts - dbgFpsT)); dbgFrames = 0; dbgFpsT = ts; }
+  const P = dbgPrev, wingOn = wingT > 0, magOn = magT > 0, hangOn = !!hangPlat;
+  if (P.mode !== undefined && P.mode !== mode) { if (mode === 'over') dbgLog('DEATH ' + Math.round(runFt()) + ' FT'); if (mode === 'run') dbgLog('RUN START ' + selChar); }
+  if (P.wingOn !== undefined && wingOn !== P.wingOn) dbgLog(wingOn ? 'WING ' + String(wingKind).toUpperCase() + ' ON' : 'WING OFF');
+  if (P.magOn !== undefined && magOn !== P.magOn) dbgLog(magOn ? 'MAGNET ON' : 'MAGNET OFF');
+  if (P.hangOn !== undefined && hangOn !== P.hangOn) dbgLog(hangOn ? 'HANG' : 'HANG OFF');
+  if (P.stormAt !== undefined && stormAt !== P.stormAt && mode === 'run') dbgLog('STORM BANK');
+  if (G && P.gState !== undefined && G.state !== P.gState && G.state === 'fall') dbgLog('GHOST DOWN');
+  P.mode = mode; P.wingOn = wingOn; P.magOn = magOn; P.hangOn = hangOn; P.stormAt = stormAt; P.gState = G ? G.state : null;
+  if (ts - dbgLastText < 120) return; dbgLastText = ts;
+  const lines = [
+    'FORK2 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
+    'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
+    'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
+    'WING ' + (wingOn ? String(wingKind).toUpperCase() + ' ' + wingT.toFixed(1) + '/' + wingMax + 's' : '-') + ' · FLUT ' + flutterT.toFixed(2) + ' · HANG ' + (hangPlat ? 'YES' : '-'),
+    'MAG ' + (magOn ? magT.toFixed(1) + 's' : '-') + ' · COIN ' + (coinT > 0 ? coinT.toFixed(1) + 's' : '-') + ' · NOTES ' + notesGot + (noteCharge ? ' · FULLCHG' : ''),
+    'GHOST ' + (RACE ? ghostChar() + ' ' + (GR && GR.style ? GR.style : '') + ' gap ' + (G ? Math.round(G.o) : '-') + ' perf ' + (GR && GR.perfD != null ? Math.round(GR.perfD / 15.24) : '-') : 'none') + ' · STORM in ' + Math.max(0, Math.round((stormAt - dist) / 15.24)) + ' FT'
+  ];
+  if (DBG_EV.length) lines.push('- EVENTS -', ...DBG_EV.slice(-4));
+  $('dbg').textContent = lines.join('\n');
+}
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
+  dbgTick(ts);   /* DEV FORK: the debug overlay rides the frame loop */
   tiltEase(dt);   /* the depth eases toward the phone's pose every frame, every mode (v0.83) */
   if (mode === 'title') titleFlow(dt);
   update(dt);
@@ -2407,6 +2455,7 @@ resize();
    on the wipeout screen; the front stays clean. */
 fetchBoard();
 if (new URLSearchParams(location.search).has('over')) { $('over').style.display = 'flex'; $('nameRow').style.display = 'flex'; $('pubRow').style.display = 'flex'; }   /* DEV FORK layout hook: ?over=1 pins the WIPEOUT panel open so it can be checked at any window size / rotation */
+if (new URLSearchParams(location.search).has('board')) setTimeout(openBoardPage, 2000);   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
 requestAnimationFrame(loop);
 </script>
 </body>
