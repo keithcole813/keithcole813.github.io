@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.94</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.95</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.94 ==============================
+/* ============================== 6LOUD demo v0.95 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -216,6 +216,7 @@ let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, 
 let rawCoin = null, bufCoin = null, decCoin = null, gainCoin = null;
 let rawNote = null, bufNote = null, decNote = null, gainNote = null, noteSrc = null, noteStreak = 0, lastNoteT = -9;
 let rawSpark = null, bufSpark = null, decSpark = null, gainSpark = null;   /* the electric spark (Keith v0.94, his YouTube pick WcxRBGpynTk) */
+let rawTh = null, bufTh = null, decTh = null, gainTh = null, rainHeard = false;   /* the thunder (Keith's upload, v0.95): cracks ONCE when a group of rain (dark) clouds shows up on screen; the latch re-arms when none are on screen */
 let rawW = null, bufW = null, decW = null, gainW = null, srcW = null;   /* the wings loop (Keith's trippin instrumental, v0.86) */
 let rawMg = null, bufMg = null, decMg = null, gainMg = null, srcMg = null;   /* the magnet loop (Keith's pick, v0.94): 'Best Intentions' — LaShmoove, 161.8 BPM, 6 bars, A minor */
 let rawDk = null, bufDk = null, decDk = null, gainDk = null, srcDk = null, darkGateOn = null;   /* the dark-cloud water walk (Keith's pick, v0.91): sounds ONLY while your feet are on a dark cloud */
@@ -237,6 +238,11 @@ function playSpark() {   /* Keith's electric spark (v0.94): fires the moment a M
   if (!actx || !bufSpark || actx.state !== 'running') return;
   if (!gainSpark) { gainSpark = actx.createGain(); gainSpark.gain.value = 0.85; gainSpark.connect(actx.destination); }
   const src = actx.createBufferSource(); src.buffer = bufSpark; src.connect(gainSpark); src.start();
+}
+function playThunder() {   /* Keith's thunder (v0.95): one crack as the storm bank arrives — the forks are coming */
+  if (!actx || !bufTh || actx.state !== 'running') return;
+  if (!gainTh) { gainTh = actx.createGain(); gainTh.gain.value = 0.9; gainTh.connect(actx.destination); }
+  const src = actx.createBufferSource(); src.buffer = bufTh; src.connect(gainTh); src.start();
 }
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
   boomT++;   /* the trigger fired (the harness counts these even with no audio stack) */
@@ -262,6 +268,7 @@ if (window.fetch) {
   fetch('assets/coin-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawCoin = b; }).catch(() => {});   /* Keith's coin pick (v0.83): the Sci-Fi Power Up sweep */
   fetch('assets/note-grab.mp3').then(r => r.arrayBuffer()).then(b => { rawNote = b; }).catch(() => {});   /* Keith's note pick (v0.83): the felt piano hit */
   fetch('assets/spark.mp3').then(r => r.arrayBuffer()).then(b => { rawSpark = b; }).catch(() => {});   /* Keith's spark pick (v0.94): the magnetized jump zap */
+  fetch('assets/thunder.mp3').then(r => r.arrayBuffer()).then(b => { rawTh = b; }).catch(() => {});   /* Keith's thunder (v0.95): the storm bank's arrival crack */
   fetch('assets/wings-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawW = b; }).catch(() => {});   /* Keith's wings pick (v0.86): the trippin loop, for while you have the wings */
   fetch('assets/magnet-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawMg = b; }).catch(() => {});   /* Keith's magnet pick (v0.94): 'Best Intentions', for while you are magnetized */
   fetch('assets/dark-walk.mp3').then(r => r.arrayBuffer()).then(b => { rawDk = b; }).catch(() => {});   /* Keith's dark-cloud pick (v0.91): the water walk, feet on a dark cloud only */
@@ -290,6 +297,7 @@ function kickDecode() {
   if (!decCoin && rawCoin && actx.decodeAudioData) decCoin = actx.decodeAudioData(rawCoin.slice(0)).then(b => { bufCoin = b; }).catch(() => { decCoin = null; });
   if (!decNote && rawNote && actx.decodeAudioData) decNote = actx.decodeAudioData(rawNote.slice(0)).then(b => { bufNote = b; }).catch(() => { decNote = null; });
   if (!decSpark && rawSpark && actx.decodeAudioData) decSpark = actx.decodeAudioData(rawSpark.slice(0)).then(b => { bufSpark = b; }).catch(() => { decSpark = null; });
+  if (!decTh && rawTh && actx.decodeAudioData) decTh = actx.decodeAudioData(rawTh.slice(0)).then(b => { bufTh = b; }).catch(() => { decTh = null; });
   if (!decW && rawW && actx.decodeAudioData) decW = actx.decodeAudioData(rawW.slice(0)).then(b => { bufW = b; }).catch(() => { decW = null; });
   if (!decMg && rawMg && actx.decodeAudioData) decMg = actx.decodeAudioData(rawMg.slice(0)).then(b => { bufMg = b; }).catch(() => { decMg = null; });
   if (!decDk && rawDk && actx.decodeAudioData) decDk = actx.decodeAudioData(rawDk.slice(0)).then(b => { bufDk = b; }).catch(() => { decDk = null; });
@@ -1007,16 +1015,17 @@ function buildStormStep() {
   const x = worldEnd + GAP.TAP;
   const lenT = rnd([LEN.LONG, LEN.MED, LEN.LONG]);
   const imgT = rnd(LONGC);
-  plats.push({ x, y: BAND_Y[b], len: lenT, img: imgT, storm: true });
-  if (REC) REC.plats.push([x - courseBase, BAND_Y[b], lenT, imgT, 1]);
+  const tb = b - 1;   /* v0.95 FORK SPREAD (Keith, from his 1,722 FT screenshot: 'make the bottom ones lower and the top ones higher'): the through deck drops a band and the climb keeps its band, so the pair stands TWO bands (340) apart instead of one (170) — real air between the decks, and the climb becomes a charged jump up from the through line */
+  plats.push({ x, y: BAND_Y[tb], len: lenT, img: imgT, storm: true });
+  if (REC) REC.plats.push([x - courseBase, BAND_Y[tb], lenT, imgT, 1]);
   const cx = x + Math.round(lenT * 0.6), cl = rnd([LEN.SHORT, LEN.MED]), imgC = rnd(LONGC), cb = Math.min(5, b + 1);   /* v0.93 (Keith: 'there are still clouds stacked on top of clouds'): the climb deck used to start 150 in and run LONG — up to 83% of it sat directly over the through deck, a stack with a choice painted on. It now starts 60% along the through deck and runs SHORT/MED, so the pair reads as a step up at the fork's end; the through line still runs beneath its start, so the choice can never strand you */
   plats.push({ x: cx, y: BAND_Y[cb], len: cl, img: imgC });
   if (REC) REC.plats.push([cx - courseBase, BAND_Y[cb], cl, imgC]);
-  worldEnd = Math.max(x + lenT, cx + cl); exitBand = b;   /* the course frontier covers the climb deck too — the next segment used to start under its tail and stack clouds */
+  worldEnd = Math.max(x + lenT, cx + cl); exitBand = tb;   /* the course frontier covers the climb deck too — the next segment used to start under its tail and stack clouds; the course continues from the THROUGH band (v0.95: tb) */
 }
 function nextSegment() {
   if (stormSteps > 0) { stormSteps--; buildStormStep(); lastSeg = -2; return; }   /* inside a storm bank: the fork builder owns the course */
-  if (dist >= stormAt) { stormSteps = 5; stormAt = dist + (950 + Math.random() * 500) * 15.24; buildStormStep(); stormSteps--; lastSeg = -2; return; }   /* a bank arrives: five fork steps, then the course is the generator's again */
+  if (dist >= stormAt) { stormSteps = 5; stormAt = dist + (950 + Math.random() * 500) * 15.24; buildStormStep(); stormSteps--; lastSeg = -2; return; }   /* a bank arrives: five fork steps, then the course is the generator's again */   /* a bank arrives: five fork steps, then the course is the generator's again */
   /* chain on PHYSICAL bands: next segment's first platform may climb at
      most 2 bands (a charged leap) or drop any amount (a lower cloud saves
      you). The old e-code match could never leave the entry tier — most of
@@ -1093,7 +1102,7 @@ function resetWorld() {
       if (b.x >= a.x + a.len) break;
       const dy = Math.abs(a.y - b.y);
       if (dy === 0) a.len = Math.max(120, b.x - a.x);
-      else if (dy === 170) {
+      else if (dy === 170 || dy === 340) {   /* 170 = a pre-v0.95 fork, 340 = the v0.95 spread — the climb tail gets the same trim */
         const lo = a.y > b.y ? a : b, hi = a.y > b.y ? b : a;   /* lo = the lower cloud (larger y), hi = the climb deck above it */
         const cap = lo.x + Math.round(lo.len * 0.6);
         if (hi.x + hi.len > cap) hi.len = Math.max(185, cap - hi.x);
@@ -1148,7 +1157,7 @@ function startRun() {
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
-  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0;   /* blue wings + magnet reset per run (v0.94) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
+  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0; rainHeard = false;   /* blue wings + magnet + thunder latch reset per run (v0.94/v0.95) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
   stormAt = 800 * 15.24; stormSteps = 0; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
@@ -1970,7 +1979,7 @@ function draw() {
   }
   /* platforms */
   for (const p of plats) {
-    const img = IMG['cloud' + p.img] || IMG['storm' + p.img], cd = CLOUDS[p.img];   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
+    const _ci = IMG['cloud' + p.img], img = (_ci && _ci.naturalWidth) ? _ci : IMG['storm' + p.img], cd = CLOUDS[p.img];   /* v0.95 FIX (Keith never saw a dark cloud): queueImg stores the Image object BEFORE it loads, so a name with NO file (the S-names have no cloud-S*.webp — their art lives in storm-*.webp) leaves a BROKEN but truthy object at the cloud key, shadowing the loaded storm image — and the naturalWidth guard below then skipped the draw: every dark cloud was solid but invisible (the sink and the water walk with it). A cloud key now only wins when it actually has pixels. */   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
     if (!img || !img.naturalWidth) continue;
     if (p.dark && (p.sink || 0) > 640) continue;   /* v0.91: a dark cloud that sank away is gone from the sky too */
     const sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;
@@ -2139,6 +2148,7 @@ function loop(ts) {
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
   ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
+  { let rainOn = false; for (const p of plats) { if (p.dark && !p.gone && (p.sink || 0) <= 640 && p.x + p.len > camX && p.x < camX + viewW / zoom) { rainOn = true; break; } } if (rainOn && !rainHeard) { playThunder(); rainHeard = true; } else if (!rainOn) rainHeard = false; }   /* v0.95 (Keith): 'when rain clouds show up on screen play this once for the group' — one crack when the dark clouds arrive in view, never per cloud, and the next group cracks again */
   audioBeat += dt;   /* THE AUDIO HEARTBEAT (v0.67, Keith: "after you die and come back the audio is muted even with it set to play"): every half second the live scene re-asserts its routing. Death, the initials keyboard, an app switch, a suspended context resuming a beat late — every one of those could strand the gains or the element on the wrong side of a boundary, and a boundary-only design stays stranded until the NEXT boundary. playTrack is idempotent, so re-asserting it twice a second costs nothing and no stuck state survives longer than half a second. */
   if (audioBeat > 0.5) { audioBeat = 0; if (mode !== 'title' || titleMusicOn) playTrack(); }
   draw();
