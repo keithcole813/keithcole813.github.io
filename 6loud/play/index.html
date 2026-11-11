@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.1</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.2</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.1 ==============================
+/* ============================== 6LOUD demo v0.99.2 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1461,7 +1461,7 @@ function release() {
   const full = pressT >= ROLL_ARM || noteFull;
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
-  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; tripleUsed = false; doubleArmed = full || champMode || coinT > 0; flutterT = 0; if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized takeoff SPARKS and the sprite strobes */
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; tripleUsed = false; doubleArmed = full || champMode || coinT > 0 || wingT > 0; flutterT = 0;   /* v0.99.2 (Keith, 2026-11-10: 'it felt like it left after using it once — touching the ground should have replenished the triple jump ability as long as i have wings'): a takeoff WITH wings arms the double itself, so the double->triple chain rides every winged jump and every landing refreshes it (both flags reset right here). A MID-AIR grab deliberately does NOT arm the current fall — the v0.97 gate stands, his landing taps still flutter; the chain starts with the next takeoff */ if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized takeoff SPARKS and the sprite strobes */
   if (wingT > 0) { airMove = 'jump'; flipArmed = false; rollArmed = false; }   /* taking off with the wings: no flip, no roll — you FLY (Keith v0.86) */   /* the coin's 10 seconds: every jump earns its double (Keith v0.82) */   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
   if (full) { score += 4; chargeFx(1.2); }   /* the held charge, let go: he leaves the ground lit (Keith v0.28) */
   flipped = false; flipMove = null; landMove = null; landT = 0;
@@ -1609,7 +1609,7 @@ function update(dt) {
       if (p.gone) continue;   /* v0.91: no grabbing a cloud that already sank away */
       if (px + 70 < p.x || px - 40 > p.x + p.len) continue;
       const top = p.y;
-      if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
+      if (vy > (wingT > 0 ? 90 : 260) && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {   /* v0.99.2 (Keith: 'I should be able to hang while i have wings'): the grab demanded a fast fall (vy > 260), but a winged descent is a controlled one — fluttering down at ~150 he fell THROUGH the window slow and past it before speed built (probe-verified: no hang, fell at vy 1193). Winged, he can catch a lip at descent speed (90); the landing check still runs first, so a descent that can land still lands */
         hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
         { const g = gripDrawn(p); hangTX = g.x - HANG_DX; hangTY = g.y + HANG_HANDS - FEET; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1; tripleUsed = false;
