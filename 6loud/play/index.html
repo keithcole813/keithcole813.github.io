@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.6</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.6 ==============================
+/* ============================== 6LOUD demo v0.99.7 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -207,6 +207,7 @@ const MUSIC_VOL = 0.35;   /* bg music level, both tracks — pulled down from 0.
 const musV = () => MUSIC_VOL;   /* audio is simply ON (Keith v0.69: the sound controls are REMOVED — "the user just uses their phone"). There is no mute state anywhere anymore: the v0.53 toggle and its whole bug family (dead button, stuck silence, silent-after-death) are deleted, and these levels are constants the heartbeat can only ever re-assert as audible. */
 const stpV = () => STEPS_VOL;
 let pendingSave = null;   /* set by gameOver: saves a qualifying score before EITHER exit from the board screen (v0.64) */
+let pendingCharBest = 0;   /* v0.99.7: a qualifying run's per-runner best, held un-stamped until initials are entered (no initials, no save anywhere) */
 let titleMusicOn = false;
 function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "Put bg1 at character selection screen since we have one now"). Browsers gate sound behind a gesture, so this is poked from the title's taps; the load-complete attempt is harmless where autoplay is blocked. */
   if (mode !== 'title') return;
@@ -1443,27 +1444,31 @@ function gameOver() {
   recFinish();   /* this run's replay is ready to travel with its score (v0.24) */
   const best = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');   /* feet records (v0.8.3) */
   const myFt = runFt();   /* the record is FEET (Keith) — travel + banked note feet (v0.82) */
-  { const cbAll = charBests(); const prevBest = cbAll[selChar] || 0; if (myFt > prevBest) { cbAll[selChar] = myFt; try { localStorage.setItem('sixloud_char_bests', JSON.stringify(cbAll)); } catch (e) {} } $('newRecord').style.display = (prevBest > 0 && myFt > prevBest) ? 'block' : 'none'; }   /* per-runner best (Keith v0.69.2) — v0.94: Keith's NEW RECORD! badge shows when an EXISTING best falls; a runner's first-ever run doesn't count */
   const qualifiesLocal = best.length < 5 || myFt > best[best.length - 1].s;
   const qualifiesGlobal = gBoard ? (gBoard.length < 10 || myFt > gBoard[gBoard.length - 1].dist_ft) : false;
   const qualifies = qualifiesLocal || qualifiesGlobal;
+  { const cbAll = charBests(); const prevBest = cbAll[selChar] || 0; pendingCharBest = 0; if (myFt > prevBest) { if (qualifies) { pendingCharBest = myFt; } else { cbAll[selChar] = myFt; try { localStorage.setItem('sixloud_char_bests', JSON.stringify(cbAll)); } catch (e) {} } } $('newRecord').style.display = (prevBest > 0 && myFt > prevBest) ? 'block' : 'none'; }   /* per-runner best (Keith v0.69.2) — v0.94: Keith's NEW RECORD! badge shows when an EXISTING best falls; a runner's first-ever run doesn't count. v0.99.7: a QUALIFYING run's best is held in pendingCharBest and only stamped when initials are entered; non-qualifying runs stamp as before (the initials row never shows for them) */
   $('overStats').textContent = runFt().toLocaleString('en-US') + ' FT';   /* feet only — no score shown anywhere (Keith v0.48) */
   $('board').innerHTML = best.map((b, i) => boardRow(b.n, b.s, i, undefined, charOf(b.r))).join('') || 'NO SCORES YET';   /* the offline fallback wears the same rows (v0.54) */
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('over').style.display = 'flex';
-  if (qualifies) { $('ini').value = ''; setTimeout(() => $('ini').focus(), 60); }
+  if (qualifies) { $('ini').value = (function () { try { return localStorage.getItem('sixloud_initials') || ''; } catch (e) { return ''; } })(); setTimeout(() => $('ini').focus(), 60); }   /* v0.99.7 (Keith): the initials box REMEMBERS the local player and PREFILLS their initials — a returning player's name is already in the box; a first-timer's box starts empty, and empty still saves nowhere */
   renderBoard();   /* global board swaps in when it has loaded */
   fetchBoard();      /* and a fresh pull re-renders it when it lands */
   kickRanks();       /* world ranks for the local scores (Keith v0.43) */
   pendingSave = () => {   /* both exits save a qualifying score first (Keith v0.64) — TRY AGAIN and MAIN MENU alike */
     if (qualifies) {
-      const n = ($('ini').value || 'ACE').toUpperCase().slice(0, 3).padEnd(3, '·');
+      const raw = $('ini').value.toUpperCase().replace(/\s+/g, '');
+      if (!raw) return;   /* v0.99.7 (Keith): NO INITIALS, NO SAVE — a blank name saves NOWHERE: no local board entry, no world post, no per-runner best stamp, and the old 'ACE' default is gone */
+      const n = raw.slice(0, 3).padEnd(3, '·');
+      try { localStorage.setItem('sixloud_initials', raw.slice(0, 3)); } catch (e) {}   /* v0.99.7: remember this player's initials on this device, so the box can prefill them next time */
       if (qualifiesLocal) {
         best.push({ n, s: myFt, r: lastReplay || undefined }); best.sort((a, b) => b.s - a.s);
         localStorage.setItem('sixloud_scores_ft', JSON.stringify(best.slice(0, 5)));
       }
-      if (qualifiesGlobal) postScore(n.replace(/·+$/, '') || 'ACE', score, myFt, jumps, lastReplay);
+      if (qualifiesGlobal) postScore(n.replace(/·+$/, ''), score, myFt, jumps, lastReplay);
     }
+    if (pendingCharBest) { const cbAll = charBests(); if (pendingCharBest > (cbAll[selChar] || 0)) { cbAll[selChar] = pendingCharBest; try { localStorage.setItem('sixloud_char_bests', JSON.stringify(cbAll)); } catch (e) {} } pendingCharBest = 0; }
   };
   $('again').onclick = () => { const s = pendingSave; pendingSave = null; if (s) s(); startRun(); };
 }
