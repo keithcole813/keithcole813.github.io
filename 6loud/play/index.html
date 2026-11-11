@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.95</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.96</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.95 ==============================
+/* ============================== 6LOUD demo v0.96 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -523,7 +523,7 @@ let px = 0, py = 0, vy = 0;    // player feet position (world), y down-positive
 let grounded = null;           // platform stood on
 let speed = 620, dist = 0, score = 0, jumps = 0;
 let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, landT = 0, hangT = 0, hangPlat = null;
-let doubleArmed = false, doubleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps) */
+let doubleArmed = false, doubleUsed = false, tripleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps). The WINGS alone carve the exception (Keith v0.96): tripleUsed tracks the one extra air jump a worn pair grants */
 /* v0.82 ITEMS (Keith, 2026-11-09): notes bank feet, the lightning coin grants a timed charge, storm banks fork the course, planes cross, the sky dresses itself */
 let notes = [], noteFt = 0, notesGot = 0, noteCharge = false;
 let noteNextT = 6, noteLane = 0;   /* the note drip (Keith v0.88): about 4 notes every 10 seconds, at low / high / in-between jump heights, never below the clouds */   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
@@ -1106,6 +1106,17 @@ function resetWorld() {
         const lo = a.y > b.y ? a : b, hi = a.y > b.y ? b : a;   /* lo = the lower cloud (larger y), hi = the climb deck above it */
         const cap = lo.x + Math.round(lo.len * 0.6);
         if (hi.x + hi.len > cap) hi.len = Math.max(185, cap - hi.x);
+        /* v0.96 ART TRIM (Keith: 'spread the stacked clouds farther apart' — his 4,221 FT race still showed a white deck sitting on a pink one): the seam cap alone leaves pairs whose ARTWORK interpenetrates (tall art on a 170 step reaches past the band line both ways). If the two art boxes still overlap, trim the climb's tail until the art separates — a shorter deck draws shorter art. Length-only, same 185 floor, so the ghost's recorded run still lands. Measured on the live board: the top course's 8 remaining art stacks -> 1 (a start-overlap no tail trim can reach). */
+        const cdH = CLOUDS[hi.img], cdL = CLOUDS[lo.img];
+        if (cdH && cdL) {
+          const dhH = hi.len * cdH.asp, dhL = lo.len * cdL.asp;
+          const xOv = hi.x < lo.x + lo.len && lo.x < hi.x + hi.len;
+          const yOv = hi.y - cdH.surf * dhH < lo.y + (1 - cdL.surf) * dhL && lo.y - cdL.surf * dhL < hi.y + (1 - cdH.surf) * dhH;
+          if (xOv && yOv) {
+            const lArt = Math.floor((lo.y - cdL.surf * dhL - hi.y) / ((1 - cdH.surf) * cdH.asp));
+            if (lArt < hi.len) hi.len = Math.max(185, lArt);
+          }
+        }
       }
     }
     courseDist = courseBase + 780;   /* the distance-space twin, set once the world-x origin is final (v0.52) */
@@ -1155,7 +1166,7 @@ function startRun() {
      No local record yet = nothing to break. */
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   targetFt = lb.length ? lb[0].s : 0;
-  crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false;
+  crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false; tripleUsed = false;
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
   wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0; rainHeard = false;   /* blue wings + magnet + thunder latch reset per run (v0.94/v0.95) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
@@ -1317,7 +1328,7 @@ function release() {
        he jumps off the air like it's a cloud: a fresh tap-strength hop
        that converts whatever he was doing into the plain jump. One per
        charged jump; a held press is not a tap and never fires it. */
-    doubleArmed = false; doubleUsed = true;   /* spent — and never re-armed mid-jump: NO TRIPLE JUMPS (Keith v0.50) */
+    doubleArmed = false; doubleUsed = true;   /* spent — and never re-armed mid-jump: NO TRIPLE JUMPS (Keith v0.50) — unless the wings are on (v0.96, next branch) */
     vy = -1500; airGrav = wingT > 0 ? 0.5 : 1; airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);   /* v0.93 (Keith): a WINGED double jump flies at the full 2x distance — the charge stretch applies to the double too */
     airMove = 'jump'; airT = 0;
     if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized DOUBLE jump sparks and strobes too */
@@ -1326,6 +1337,21 @@ function release() {
     jumps++; score += 1;
     for (let k = 0; k < 20; k++) spawnPuff(px - 46 + k * 5, py + 12, 11 + Math.random() * 9, 160);   /* a GOOD burst off the invisible cloud (Keith v0.51) — he really pushes off something */
     playBoom();   /* and it BOOMS like a charged landing (Keith v0.51) */
+    return;
+  }
+  if (!grounded && airMove && !hangPlat && !slipPlat && wingT > 0 && !tripleUsed && pressT < 0.25) {
+    /* THE WINGED TRIPLE (Keith, 2026-11-10: 'what if you got triple jump when you have wings?'): the
+       v0.50 ban stands for the base game — but a worn pair grants ONE more air jump behind the double.
+       Same hop as the double, same 2x winged stretch. An uncharged winged jump reaches this branch
+       directly (the double was never armed), so the pair always buys exactly one extra jump; flutter
+       taps wait behind it, the same order as behind the double. */
+    tripleUsed = true;
+    vy = -1500; airGrav = 0.5; airTotal = 2 * Math.abs(vy) / (GRAV * airGrav);
+    airMove = 'jump'; airT = 0;
+    flipArmed = false; rollArmed = false; flipped = false; flipMove = null; landMove = null; landT = 0;
+    jumps++; score += 1;
+    for (let k = 0; k < 20; k++) spawnPuff(px - 46 + k * 5, py + 12, 11 + Math.random() * 9, 160);   /* the same push-off burst as the double */
+    playBoom();
     return;
   }
   /* v0.93 FLUTTER BY TAPPING (Keith, 2026-11-10): 'flutter down by tapping' — a mid-air TAP while
@@ -1347,7 +1373,7 @@ function release() {
   const full = pressT >= ROLL_ARM || noteFull;
   flipArmed = !full && pressT >= FLIP_ARM;   // mid charge: flip + dodge-roll landing
   rollArmed = flipArmed;
-  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; doubleArmed = full || champMode || coinT > 0; flutterT = 0; if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized takeoff SPARKS and the sprite strobes */
+  grounded = null; airMove = full ? 'runjumproll' : 'jump'; airT = 0; doubleUsed = false; tripleUsed = false; doubleArmed = full || champMode || coinT > 0; flutterT = 0; if (magT > 0) { playSpark(); magFlashT = 0.45; }   /* v0.94 (Keith): a magnetized takeoff SPARKS and the sprite strobes */
   if (wingT > 0) { airMove = 'jump'; flipArmed = false; rollArmed = false; }   /* taking off with the wings: no flip, no roll — you FLY (Keith v0.86) */   /* the coin's 10 seconds: every jump earns its double (Keith v0.82) */   /* the charged jump earns the double — and on a high-score run he's charged the whole time, so every jump earns one (Keith v0.50) */
   if (full) { score += 4; chargeFx(1.2); }   /* the held charge, let go: he leaves the ground lit (Keith v0.28) */
   flipped = false; flipMove = null; landMove = null; landT = 0;
@@ -1476,7 +1502,7 @@ function update(dt) {
           if (chargedLand) { for (let k = 0; k < 18; k++) spawnPuff(px - 40 + k * 5, py + 12, 13 + Math.random() * 10, 150); playBoom(); }   /* charged landing: a bigger burst + the cinematic boom (Keith v0.33/0.33.2) */
           else for (let k = 0; k < 11; k++) spawnPuff(px - 32 + k * 7, py + 12, 11 + Math.random() * 9, 150);   // landing burst (a little more puff, Keith v0.32)
         }
-        airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
+        airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1; tripleUsed = false;
         if (hard) { shake = Math.min(14, shake + 9); }
         break;
       }
@@ -1489,7 +1515,7 @@ function update(dt) {
       if (vy > 260 && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {
         hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
         { const g = gripDrawn(p); hangTX = g.x - HANG_DX; hangTY = g.y + HANG_HANDS - FEET; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
-        airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1;
+        airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1; tripleUsed = false;
         break;
       }
     }
@@ -1977,6 +2003,16 @@ function draw() {
     ctx.drawImage(puffImg, q.x - camX - q.r, q.y - camY - q.r, q.r * 2, q.r * 2);
     ctx.restore();
   }
+  if (rpuffs.length || rocket) {   /* v0.96 (Keith): the rocket flies BEHIND the clouds — drawn before the platforms, so a deck in its path covers it */   /* the rocket's smoke trailer: the runner's own puffs, in a long line under it (Keith) */
+    for (const q of rpuffs) { ctx.save(); ctx.globalAlpha = 0.5 * (q.life / q.max); const r = q.r * S * 2; ctx.drawImage(puffImg, q.x * S - r / 2, (q.y - camY * 0) * S - r / 2, r, r); ctx.restore(); }
+    if (rocket) {
+      const rp3 = rocket.t / rocket.dur, rh = viewH / zoom * 0.88;
+      const rx = (viewW / zoom * 0.82 + Math.sin(rocket.t * 0.7) * 8) * S, ry = (rh * (1 - rp3) - 90 * rp3) * S;
+      if (rocket.t < 1.4) { const gr = ctx.createRadialGradient(rx, H * 0.88, 2, rx, H * 0.88, 60 * S); gr.addColorStop(0, 'rgba(255,166,66,0.7)'); gr.addColorStop(1, 'rgba(255,166,66,0)'); ctx.fillStyle = gr; ctx.fillRect(rx - 70 * S, H * 0.88 - 70 * S, 140 * S, 140 * S); }
+      const rImg = IMG.rocket;
+      if (rImg && rImg.naturalWidth) { const w = 36 * S, h = w * rImg.naturalHeight / rImg.naturalWidth; ctx.drawImage(rImg, rx - w / 2, ry - h / 2, w, h); }
+    }
+  }
   /* platforms */
   for (const p of plats) {
     const _ci = IMG['cloud' + p.img], img = (_ci && _ci.naturalWidth) ? _ci : IMG['storm' + p.img], cd = CLOUDS[p.img];   /* v0.95 FIX (Keith never saw a dark cloud): queueImg stores the Image object BEFORE it loads, so a name with NO file (the S-names have no cloud-S*.webp — their art lives in storm-*.webp) leaves a BROKEN but truthy object at the cloud key, shadowing the loaded storm image — and the naturalWidth guard below then skipped the draw: every dark cloud was solid but invisible (the sink and the water walk with it). A cloud key now only wins when it actually has pixels. */   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
@@ -2090,16 +2126,6 @@ function draw() {
       ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.shadowColor = '#cfe8ff'; ctx.shadowBlur = 8;
       ctx.beginPath(); ctx.moveTo(gx - r, gy); ctx.lineTo(gx + r, gy); ctx.moveTo(gx, gy - r); ctx.lineTo(gx, gy + r); ctx.stroke(); ctx.restore(); }
   }
-  if (rpuffs.length || rocket) {   /* the rocket's smoke trailer: the runner's own puffs, in a long line under it (Keith) */
-    for (const q of rpuffs) { ctx.save(); ctx.globalAlpha = 0.5 * (q.life / q.max); const r = q.r * S * 2; ctx.drawImage(puffImg, q.x * S - r / 2, (q.y - camY * 0) * S - r / 2, r, r); ctx.restore(); }
-    if (rocket) {
-      const rp3 = rocket.t / rocket.dur, rh = viewH / zoom * 0.88;
-      const rx = (viewW / zoom * 0.82 + Math.sin(rocket.t * 0.7) * 8) * S, ry = (rh * (1 - rp3) - 90 * rp3) * S;
-      if (rocket.t < 1.4) { const gr = ctx.createRadialGradient(rx, H * 0.88, 2, rx, H * 0.88, 60 * S); gr.addColorStop(0, 'rgba(255,166,66,0.7)'); gr.addColorStop(1, 'rgba(255,166,66,0)'); ctx.fillStyle = gr; ctx.fillRect(rx - 70 * S, H * 0.88 - 70 * S, 140 * S, 140 * S); }
-      const rImg = IMG.rocket;
-      if (rImg && rImg.naturalWidth) { const w = 36 * S, h = w * rImg.naturalHeight / rImg.naturalWidth; ctx.drawImage(rImg, rx - w / 2, ry - h / 2, w, h); }
-    }
-  }
   if (wingT > 0 && mode === 'run') {   /* the wings' 10 seconds (v0.86): a white bar under the coin's when both run */
     const bw = Math.min(200, W * 0.4), by = H * 0.068 + (coinT > 0 ? 19 : 0);
     const wshow = wingT > 3 || (time * (4 + (3 - wingT) * 2.5)) % 1 < 0.62;
@@ -2139,7 +2165,7 @@ function loop(ts) {
   update(dt);
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
-  const db = mode === 'run' && (coinT > 0 || (!grounded && !hangPlat && !slipPlat && doubleArmed && !doubleUsed));   /* DOUBLE JUMP!! helper: while a mid-air tap would fire the double (Keith v0.70.1) — and flashing for the whole coin charge (Keith v0.85) */
+  const db = mode === 'run' && (coinT > 0 || (!grounded && !hangPlat && !slipPlat && ((doubleArmed && !doubleUsed) || (wingT > 0 && !tripleUsed))));   /* AIR JUMP READY helper: while a mid-air tap would fire the double (Keith v0.70.1) — flashing for the whole coin charge (Keith v0.85) — and, v0.96, while the wings' triple still waits */
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('selectStack').style.display = cu ? 'flex' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
