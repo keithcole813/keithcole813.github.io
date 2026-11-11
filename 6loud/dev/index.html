@@ -77,6 +77,14 @@
          background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:12px 30px; box-shadow:0 5px 0 #b3541e, 0 10px 22px rgba(0,0,0,.35); }
   .btn:active { transform:translateY(3px); box-shadow:0 2px 0 #b3541e; }
   #pubRow { display:none; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; }
+  #nbCard { position:absolute; left:0; right:0; top:15%; bottom:0; display:none; align-items:flex-start; justify-content:center; padding-top:4%; background:rgba(8,5,20,.45); z-index:6; }
+  .nbIn { width:min(430px, 92vw); background:linear-gradient(180deg, #2a1e57, #171036); border:2px solid #6b4dff; border-radius:18px; padding:18px 16px 6px; box-shadow:0 18px 50px rgba(0,0,0,.6), 0 0 24px rgba(107,77,255,.35); text-align:center; animation:nbPop .25s ease-out; }
+  @keyframes nbPop { 0% { transform:scale(.92); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+  .nbTitle { font:400 30px 'Fredoka','Trebuchet MS',sans-serif; color:#FFD23F; letter-spacing:1px; }
+  .nbRank { font:700 15px 'Fredoka','Trebuchet MS',sans-serif; color:#00F5FF; letter-spacing:2px; margin:3px 0 8px; }
+  .nbHint { font:400 12px 'Fredoka','Trebuchet MS',sans-serif; color:#b9aee0; margin:4px 0 10px; }
+  #pubNote { text-align:center; font:700 14px 'Fredoka','Trebuchet MS',sans-serif; color:#FFD23F; letter-spacing:1px; margin-top:10px; min-height:18px; }
+  #pubNote.dim { color:#b9aee0; }
   .pubBtn { font-size:16px; padding:9px 18px; }
   #skipBtn { background:rgba(255,255,255,.10); color:#f5efdc; border:2px solid rgba(255,255,255,.55); box-shadow:none; }
   .pubDone { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:16px; letter-spacing:1px; color:#ffd94d; }
@@ -165,7 +173,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 5</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 6</div></div>
   <div id="dbg"></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
@@ -173,17 +181,19 @@
     <div id="overStats"></div>
     <img id="newRecord" src="../play/assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
     <div id="board"></div>
+    <div id="nbCard"><div class="nbIn" id="nbIn"><div class="nbTitle">★ NEW BEST! ★</div><div class="nbRank" id="nbRank">RANK #– GLOBAL</div><div class="nbHint">Blank initials = this run isn't saved anywhere.</div></div></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
     <div id="pubRow"><button class="btn pubBtn" id="pubBtn">PUBLISH TO WORLD</button><button class="btn pubBtn" id="skipBtn">SKIP</button><span id="pubDone" class="pubDone" style="display:none"></span></div>
     <button class="btn" id="again">TRY AGAIN</button>
     <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
+    <div id="pubNote"></div>
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 5 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 6 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, and the debug overlay. Posting is hard-off and storage
@@ -1483,6 +1493,7 @@ function gameOver() {
   $('board').innerHTML = best.map((b, i) => boardRow(b.n, b.s, i, undefined, charOf(b.r))).join('') || 'NO SCORES YET';   /* the offline fallback wears the same rows (v0.54) */
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('pubRow').style.display = qualifiesGlobal ? 'flex' : 'none'; pubState = 'none'; $('pubBtn').style.display = ''; $('skipBtn').style.display = ''; $('pubDone').style.display = 'none';   /* DEV FORK: a fresh publish choice on every qualifying wipeout */
+  nbMove($('nameRow'), qualifiesGlobal); $('nbCard').style.display = qualifiesGlobal ? 'flex' : 'none'; if (qualifiesGlobal) { let rkN = 1; for (const e of gBoard) if (e && e.geo === 2 && (e.dist_ft || 0) > myFt) rkN++; $('nbRank').textContent = 'RANK #' + rkN + ' GLOBAL'; } $('pubNote').textContent = ''; $('pubNote').className = '';   /* DEV FORK: Option A (Keith 2026-11-11) — the NEW BEST card pops for a world-board run and the initials row moves into it; a local-only run keeps the inline row where it lives */
   $('over').style.display = 'flex';
   if (qualifies) { $('ini').value = (function () { try { return localStorage.getItem('sixlouddev_initials') || ''; } catch (e) { return ''; } })(); setTimeout(() => $('ini').focus(), 60); }   /* v0.99.7 (Keith): the initials box REMEMBERS the local player and PREFILLS their initials — a returning player's name is already in the box; a first-timer's box starts empty, and empty still saves nowhere */
   renderBoard();   /* global board swaps in when it has loaded */
@@ -1509,8 +1520,9 @@ function gameOver() {
     doLocalSave();
     postScore(raw.slice(0, 3), score, myFt, jumps, lastReplay);   /* DEV FORK: postScore is hard-off inside the fork, so this tap exercises the flow without touching the real board; in production this is the world post */
     pubState = 'posted'; setPubUI('posted', 'POSTED TO THE WORLD BOARD ✓');
+    $('nbCard').style.display = 'none'; $('pubNote').textContent = 'POSTED TO THE WORLD BOARD ✓'; $('pubNote').className = '';   /* DEV FORK: the card clears and the verdict stays under the buttons */
   };
-  $('skipBtn').onclick = () => { pubState = 'skipped'; setPubUI('skip', 'KEPT ON THIS DEVICE ONLY'); };
+  $('skipBtn').onclick = () => { pubState = 'skipped'; setPubUI('skip', 'KEPT ON THIS DEVICE ONLY'); $('nbCard').style.display = 'none'; $('pubNote').textContent = 'KEPT ON THIS DEVICE ONLY'; $('pubNote').className = 'dim'; };   /* DEV FORK: same clear-out on SKIP (the local save itself still lands on exit, as before) */
   pendingSave = () => { doLocalSave(); };   /* DEV FORK: both exits save LOCALLY only (Keith v0.64 shape kept) — the world post happens solely through the PUBLISH button */
   $('again').onclick = () => { const s = pendingSave; pendingSave = null; if (s) s(); startRun(); };
 }
@@ -2422,12 +2434,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK5 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK6 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK5 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK6 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2439,6 +2451,13 @@ function dbgTick(ts) {
   if (DBG_EV.length) lines.push('- EVENTS -', ...DBG_EV.slice(-4));
   $('dbg').textContent = lines.join('\n');
 }
+/* DEV FORK — THE NEW BEST CARD plumbing: the publish row lives in the card
+   permanently (it only ever shows for world-board runs); the initials row
+   moves in per-qualifier from gameOver and back out for local-only runs */
+let nbHome = null;
+function nbMove(node, toCard) { try { if (!node) return; if (toCard) { const b = $('nbIn'); if (b && b.appendChild) b.appendChild(node); } else if (nbHome && nbHome.p && nbHome.p.insertBefore) nbHome.p.insertBefore(node, nbHome.n); } catch (e) {} }
+(function () { const nr = $('nameRow'); if (nr && nr.parentNode) nbHome = { p: nr.parentNode, n: nr.nextSibling }; nbMove($('pubRow'), true); })();
+
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   dbgTick(ts);   /* DEV FORK: the debug overlay rides the frame loop */
