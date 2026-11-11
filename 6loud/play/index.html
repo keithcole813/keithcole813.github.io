@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.4</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.5</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.4 ==============================
+/* ============================== 6LOUD demo v0.99.5 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -717,10 +717,16 @@ function recSample() {
 }
 function recFinish() {
   lastReplay = (REC && REC.frames.length > 10)
-    ? JSON.stringify({ v: 1, storm: 1, geo: 2, char: selChar, total: Math.max(0, Math.floor((dist - courseDist) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47; distance origin corrected v0.52) */
+    ? JSON.stringify({ v: 1, storm: 1, geo: 2, gv: 995, char: selChar, total: Math.max(0, Math.floor((dist - courseDist) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47; distance origin corrected v0.52). v0.99.5: the gv stamp is the global-winner era — the world ghost is picked only from runs made on this build onward (Keith) */
 }
 let G = null, gTarget = 0;   /* the bokeh sea-runner set is GONE (Keith v0.34): no record to beat = no LaShmoove at all */
 let GR = null;   /* the active replay LaShmoove is performing (v0.24) */
+let RACE2 = null;   /* the second record (v0.99.5): the GLOBAL WINNER's run — his course is spliced in behind the local champion's, and his ghost enters when the local ghost falls */
+let RACE2_OFF = 0;   /* where RACE2's course begins, in course space (set by resetWorld when it splices) */
+let GCHAR2 = 'yoro';   /* who performs the global record: never the player's runner, never the local ghost (Keith v0.99.5) */
+let raceStage = 1;   /* which ghost is out: 1 = the local best, 2 = the global winner */
+let race1Global = false;   /* the first (only) ghost is performing the GLOBAL record — he races in full; the trail rule belongs to the LOCAL ghost */
+const CAST_ORDER = ['blade', 'lash', 'yoro', 'ivey', 'sayori'];
 /* the NEAR set (v0.25): LaShmoove at nearly full size with a breath of
    softness — same clouds as 6lade, slightly off his plane (Keith). */
 /* ghost skins (v0.56): the runner you did NOT pick performs the replay,
@@ -763,17 +769,26 @@ function alignReplay(rp) {
   return { v: 1, total, plats: rp.plats, frames };
 }
 function prepRace() {
-  RACE = null;
-  GSKIN = GSKINS[ghostChar()];   /* the runner you didn't pick performs the record (v0.56) */
-  const src = ghostSource();
+  RACE = null; RACE2 = null; RACE2_OFF = 0; raceStage = 1; race1Global = false;
+  GSKIN = GSKINS[ghostChar()];   /* the runner you didn't pick performs the local record (v0.56) */
   const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  gTarget = Math.max(gb.length ? gb[0].dist_ft : 0, lb.length ? lb[0].s : 0, src ? src.total : 0);
-  if (!src || !src.replay) return;
-  try {
-    const rp = JSON.parse(src.replay);
-    if (rp && rp.geo === 2 && rp.frames && rp.frames.length > 10 && rp.plats && rp.plats.length) { RACE = alignReplay(rp); gTarget = RACE.total || src.total; }   /* geo-2 courses are born at the current standard — no re-spacing (its 170s are the Storm Run's own contour, not old forks) */
-  } catch (e) { /* a bad replay never breaks the race */ }
+  gTarget = Math.max(gb.length ? gb[0].dist_ft : 0, lb.length ? lb[0].s : 0);
+  /* v0.99.5 TWO GHOSTS (Keith, 2026-11-11): first YOUR LOCAL BEST runs against you — he never
+     passes, he trails you waiting for your mistake, and he falls the moment you pass your best.
+     Then the GLOBAL WINNER enters behind you, a third character — never yours, never the local
+     ghost — and races you for real over his own course, spliced in behind the local one. His
+     pool is v0.99.5-era posts ONLY (the gv 995 stamp): the winner is a run made on this build
+     or later. A lone record runs alone (a lone global record races in full from the start);
+     no record anywhere = no ghost (Keith v0.34). */
+  let loc = null, glo = null;
+  for (const e of lb) if (e.r && isRaceReplay(e.r) && (!loc || e.s > loc.total)) loc = { total: e.s, replay: e.r };
+  for (const e of gb) { if (!e.replay) continue; let o = null; try { o = JSON.parse(e.replay); } catch (err) { } if (o && o.gv === 995 && o.storm === 1 && o.geo === 2 && (!glo || e.dist_ft > glo.total)) glo = { total: e.dist_ft, replay: e.replay }; }
+  const parse = c => { if (!c) return null; try { const rp = JSON.parse(c.replay); if (rp && rp.geo === 2 && rp.frames && rp.frames.length > 10 && rp.plats && rp.plats.length) return alignReplay(rp); } catch (e) { } return null; };   /* geo-2 courses are born at the current standard — no re-spacing (its 170s are the Storm Run's own contour, not old forks) */
+  RACE = parse(loc); RACE2 = parse(glo);
+  if (!RACE && RACE2) { RACE = RACE2; RACE2 = null; race1Global = true; }
+  GCHAR2 = CAST_ORDER.find(c => c !== selChar && c !== ghostChar()) || 'yoro';
+  if (RACE) gTarget = RACE.total;
 }
 /* v0.97 FORK RE-SPACING (Keith, 2026-11-10, on his 1,720 FT race screenshot: 'these clouds are
    still too close together'): solo forks have stood 340 apart since v0.95, but a stored course
@@ -826,6 +841,7 @@ function respaceForks(rp) {
   return moved.size ? { v: 1, total: rp.total, plats, frames } : rp;
 }
 function grSpeedAt(d) {   /* the pace HE was traveling at distance d of his run (units/sec, from the recording's own deltas) */
+  d -= (GR.base || 0);   /* v0.99.5: the winner's clock starts at his own course's origin, RACE2_OFF into the run */
   const C = GR.cum, S = GR.spd;
   if (d <= 0) return S[0];
   if (d >= C[C.length - 1]) return S[S.length - 1];
@@ -834,6 +850,7 @@ function grSpeedAt(d) {   /* the pace HE was traveling at distance d of his run 
   return S[lo];
 }
 function grSample(d) {   /* the recorded run, read by DISTANCE: {py, st} at d units */
+  d -= (GR.base || 0);   /* v0.99.5: sample in HIS course's own space (the winner's sits RACE2_OFF in) */
   const F = GR.frames, C = GR.cum;
   if (d <= 0) return { py: F[0][1], st: F[0][2], chg: F[0][3] || 0, wng: F[0][4] || 0 };
   if (d >= C[C.length - 1]) { const l = F[F.length - 1]; return { py: l[1], st: l[2], chg: l[3] || 0, wng: l[4] || 0 }; }
@@ -844,29 +861,22 @@ function grSample(d) {   /* the recorded run, read by DISTANCE: {py, st} at d un
 }
 function isStormReplay(rp) { try { return JSON.parse(rp).storm === 1; } catch (e) { return false; } }   /* v0.82: pre-storm recordings are history — the storm changed the course geometry, so the ghost only races storm-era runs (Keith) */
 function isRaceReplay(rp) { try { const o = JSON.parse(rp); return o.storm === 1 && o.geo === 2; } catch (e) { return false; } }   /* v0.99 THE GHOST RESET (Keith): the Storm Run rearranged the clouds, so the ghost is reset — pre-geo-2 recordings no longer perform. Their scores stay on the board as numbers to beat; the ghost returns with the next big score saved on the new geometry */
-function ghostSource() {
-  /* a race that can be PERFORMED beats a bigger bare number: the best
-     entry WITH a replay (global board first, then the local board).
-     NO replay anywhere = NO LaShmoove (Keith v0.34 — the sea-runner
-     fallback is deleted; a bare score is a number to beat, not a ghost) */
-  const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
-  const gp = gb.find(e => e.replay && isRaceReplay(e.replay));
-  if (gp) return { total: gp.dist_ft, replay: gp.replay };
-  const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
-  const lp = lb.find(e => e.r && isRaceReplay(e.r));
-  if (lp) return { total: lp.s, replay: lp.r };
-  return null;
-}
-function ghostReset(entering) {
+function ghostReset(entering) { activateGhost(1, entering); }   /* the first ghost out is the local best (v0.99.5) */
+function activateGhost(stage, entering) {
   GR = null;
-  if (!RACE) { G = null; return; }   /* no record to beat: no LaShmoove (Keith v0.34) */
+  const rp = stage === 2 ? RACE2 : RACE;
+  if (!rp) { G = null; return; }   /* no record to beat: no ghost (Keith v0.34) */
+  raceStage = stage;
+  GSKIN = GSKINS[stage === 2 ? GCHAR2 : ghostChar()];   /* the global winner is a THIRD character — never yours, never the local ghost (Keith v0.99.5) */
   {   /* perform the recording, read by distance */
     const cum = []; let acc = 0;
-    for (const f of RACE.frames) { acc += f[0]; cum.push(acc); }
-    GR = { frames: RACE.frames, cum, spd: RACE.frames.map((f, i) => (i < RACE.frames.length - 1 ? RACE.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: RACE.frames[0][1], wng: 0, perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0, leadMusic: false };
+    for (const f of rp.frames) { acc += f[0]; cum.push(acc); }
+    GR = { frames: rp.frames, cum, spd: rp.frames.map((f, i) => (i < rp.frames.length - 1 ? rp.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: rp.frames[0][1], wng: 0, perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0, leadMusic: false,
+           base: stage === 2 ? RACE2_OFF : 0, totalFt: rp.total, totalU: rp.total * 15.24, style: stage === 2 || race1Global ? 'race' : 'trail' };   /* v0.99.5: the LOCAL ghost trails (never passes; falls when you pass your best) — the GLOBAL winner races in full */
   }
+  const oS = Math.max(0.25, Math.min(1, rp.total * 15.24 / 12000));
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: 'race',
-        animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), o: -650 * Math.max(0.25, Math.min(1, gTarget * 15.24 / 12000)), dG: 0 };
+        animT: Math.random() * 10, fade: 1, puffs: [], puffT: 0, fallY: 0, fallVy: 0, fallX: 0, catchT: 0, prevO: 0, oArc: -650 * oS, o: -650 * oS, dG: 0 };
 }
 function ghostFall() {
   if (!G || G.state === 'fall') return;
@@ -887,7 +897,7 @@ function ghostUpdate(dt) {
   if (G.state === 'fall') {   /* his fall finishes even if 6lade wipes out during it */
     G.fallVy += 3400 * dt; G.fallY += G.fallVy * dt;
     G.fade = Math.max(0, G.fade - dt * 0.45);
-    if (G.fade <= 0) G = null;
+    if (G.fade <= 0) { G = null; if (raceStage === 1 && RACE2 && mode === 'run') activateGhost(2, true); }   /* v0.99.5: the local ghost is down — NOW the global winner comes in behind you */
     return;
   }
   if (mode !== 'run') return;   /* title/over: 6lade is down — LaShmoove just continues (Keith) */
@@ -897,12 +907,30 @@ function ghostUpdate(dt) {
        he slows and drifts back left — and falls at his death distance.
        His offset from 6lade follows the race arc; his feet follow the
        recording read at his own distance, on the very same clouds. */
-    const totalU = gTarget * 15.24;
+    const totalU = GR.totalU;   /* THIS ghost's record (v0.99.5: each ghost falls at his own total) */
     const distC = dist - courseDist;   /* the race clock runs in course space (v0.47; distance origin v0.52): the staircase and seam in front change nothing about his run */
-    const p = Math.max(0, Math.min(1.12, distC / totalU));
+    const p = Math.max(0, Math.min(1.12, (distC - GR.base) / totalU));   /* progress along HIS course (the winner's starts RACE2_OFF in) */
     const oS = Math.max(0.25, Math.min(1, totalU / 12000));   /* short records run a tighter race — the lead can't swallow the course */
     if (GR.perfD === null || GR.perfD === undefined) GR.perfD = distC + G.oArc;
-    if (hangPlat || slipPlat) {
+    if (GR.style === 'trail') {
+      /* v0.99.5 THE LOCAL GHOST (Keith): he NEVER passes. He runs toward his own
+         recorded pace, but his performance is capped a breath behind yours — he
+         trails you, waiting for your mistake. Ledge beats are the same: he gains
+         only up to your tail and waits there. And he falls when you pass your
+         best: the cap holds his perfD under his total until YOUR distance passes
+         it, so the fall lands on the same stride as the crown. */
+      const capO = -60 * oS, trailO = -170 * oS;
+      if (hangPlat || slipPlat) {
+        GR.perfD += grSpeedAt(GR.perfD) * dt;
+        if (GR.perfD > distC + capO) GR.perfD = distC + capO;
+        G.oArc = GR.perfD - distC;
+      } else {
+        const oRate = 640 + 200 * oS;
+        G.oArc += Math.max(-oRate * dt, Math.min(oRate * dt, trailO - G.oArc));
+        if (G.oArc > capO) G.oArc = capO;
+        GR.perfD = distC + G.oArc;
+      }
+    } else if (hangPlat || slipPlat) {
       /* Keith (v0.27.1): LaShmoove KEEPS RUNNING through the ledge beat.
          But his clock is HIS OWN recorded pace (v0.30.2, Keith: "he should
          know where the clouds are even without the camera") — the old
@@ -969,7 +997,7 @@ function ghostUpdate(dt) {
     GR.chgSm = Math.min(1, Math.max(0, (GR.chgSm || 0) + (((GR.fireT > 0 || GR.st === 7) ? 1 : 0) - (GR.chgSm || 0)) * Math.min(1, dt * 10)));   /* burns on the pass burst and through his held jumps (code 7) */
     GR.stT += dt * GR.scrub; GR.runT = (GR.runT || 0) + dt * GR.scrub;
     GR.pyS = sm.py; GR.wng = sm.wng || 0;   /* the sampler already interpolates between his recorded samples — his feet sit ON the trace, never trailing it (v0.30.2) */
-    G.catchT = Math.max(0, Math.min(1, 1 - (gTarget - Math.floor(distC / 15.24)) / 500));
+    G.catchT = Math.max(0, Math.min(1, 1 - (GR.totalFt - Math.floor((distC - GR.base) / 15.24)) / 500));   /* proximity to THIS ghost's mark (v0.99.5) */
     if (GR.perfD >= 0 && GR.st === 0 && GR.prevSt !== 0 && GR.prevSt !== undefined) {   /* touchdown: a cluster at his feet (Keith: puffs under his feet) */
       const gCharged = GR.chgSm > 0.3 || GR.fireT > 0;
       if (gCharged) { playBoom(); const gp2 = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp2) { gp2.boost = 7; gp2.sinkV = (gp2.sinkV || 0) + 380; } }   /* HIS charged landings boom + sink his cloud too (Keith v0.33/0.33.2) — his feet in world x are perfD + courseBase + 580 (v0.52) */
@@ -983,7 +1011,7 @@ function ghostUpdate(dt) {
     if (GR.st === 0 && GR.perfD >= 0 && (GR.fireT > 0 || GR.chgSm > 0.3)) { fTrailAcc -= dt; if (fTrailAcc <= 0) { fTrailAcc = 0.016; pushTrail(px + G.o - 46, GR.pyS + GSINK - 92 + (Math.random() * 44 - 22), CHAR_FX[ghostChar()].streak);   /* ground streaks in the ghost's own color (v0.56) */ } }   /* charged and running by: golden fire streaks stream behind him, like the icon (Keith v0.35) */
     if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; his feet in world x, v0.52) */
     GR.prevSt = GR.st;
-    if (GR.perfD >= totalU) ghostFall();   /* he reaches the end of his high score — and falls */
+    if (GR.perfD >= GR.base + totalU) ghostFall();   /* he reaches the end of his high score — and falls */
     return;
   }
 }
@@ -1151,6 +1179,62 @@ function nextSegment() {
   if (!o) o = pool.length ? rnd(pool) : { s: SEGMENTS[0], i: 0 };
   lastSeg = o.i; buildSegment(o.s);
 }
+/* place ONE recorded course into the world at world-x shift (v0.99.5: shared by both race
+   sections — the local champion's and the global winner's). Tail-trim repairs only; the
+   stored recording is never touched. recOff is where this course sits in the CURRENT run's
+   recording space (0 for the first course — its own coordinates; RACE2_OFF for the second). */
+function placeCourse(rp, shift, recOff) {
+  const champ = (rp.plats[0] && rp.plats[0][0] === -300) ? rp.plats.slice(1) : rp.plats;   /* their start plat is the shared start above */
+  /* v0.97 THE GHOST'S FLOOR (Keith: 'the ghost is running on air'): how far along each deck his
+     recorded run actually STANDS — the repair below may never trim past it. Computed from the
+     aligned frames: a frame counts for a deck when his feet are over it and his height matches it. */
+  const usedEnd = new Array(champ.length).fill(0);
+  { let cum = 0; for (const f of rp.frames) { cum += f[0]; if (f[2] !== 0 && f[2] !== 3) continue; const fx = cum + 580;
+    for (let k = champ.length - 1; k >= 0; k--) { const q = champ[k]; if (fx >= q[0] - 20 && fx <= q[0] + q[2] + 20 && Math.abs(f[1] - q[1]) <= 30) { if (fx > usedEnd[k]) usedEnd[k] = fx; break; } } } }
+  const placed = [];
+  for (const p of champ) {
+    const simg = String(p[3]);   /* v0.97 (Keith: 'still no storm clouds' in races): the v0.87 whitewash is REVERSED — it dated from the era when the dark storm art was removed from the game entirely; since v0.91 the storm decks wear their storm art in solo runs, and a race now keeps the recorded art too, so a storm deck looks like one on both sides of the game */
+    const np = p[5] === 1 ? { x: p[0] + shift, y: p[1], len: p[2], img: p[3], dark: true } : { x: p[0] + shift, y: p[1], len: p[2], img: p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' };   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
+    plats.push(np); placed.push(np);
+    if (REC) REC.plats.push(recOff ? [p[0] + recOff, p[1], p[2], p[3], p[4], p[5]] : p);   /* course space: the recording keeps the original coordinates (the second course rides at its offset) */
+  }
+  /* v0.93.1 THE BAKED-STACK REPAIR (Keith, 2026-11-10: 'still have clouds on top of clouds' —
+     while racing a ghost, before anything that looks like a storm): recordings carry the fork
+     geometry of the build they were made on, and race replays re-save the champion's course, so
+     one old course propagates down the whole board. Pre-v0.93 forks (the climb deck starting 150
+     in and running LONG, up to 83% over the through deck) and pre-v0.92 same-band tail overlaps
+     are baked into those plats forever — the generator fix can't reach them. So at load, the
+     placed course is repaired with TAIL TRIMS ONLY (no plat moves, no start shifts, the stored
+     recording untouched): a same-band overlap trims the earlier cloud's tail to the later one's
+     start, and a climb deck one band up trims to the v0.93 seam (its end at 60% of the through
+     deck under it). Verified by racescan over the live board's top 10: 104 heavy overlaps -> the
+     fork seams alone, at the new generator's own measure. */
+  const floorOf = k => usedEnd[k] ? Math.min(champ[k][2], (usedEnd[k] - champ[k][0]) + 8) : 0;   /* capped at the recorded length: protection never GROWS a deck */   /* the shortest a deck may end up while still holding his recorded run (placed and champ share x offsets) */
+  for (let i = 0; i < placed.length; i++) for (let j = i + 1; j < placed.length; j++) {
+    const a = placed[i], b = placed[j];
+    if (b.x >= a.x + a.len) break;
+    const dy = Math.abs(a.y - b.y);
+    if (dy === 0) a.len = Math.max(120, floorOf(i), b.x - a.x);
+    else if (dy === 170 || dy === 340) {   /* 170 = a pre-v0.95 fork, 340 = the v0.95 spread — the climb tail gets the same trim */
+      const lo = a.y > b.y ? a : b, hi = a.y > b.y ? b : a;   /* lo = the lower cloud (larger y), hi = the climb deck above it */
+      const cap = lo.x + Math.round(lo.len * 0.6);
+      if (hi.x + hi.len > cap) hi.len = Math.max(185, floorOf(placed.indexOf(hi)), cap - hi.x);
+      /* v0.96 ART TRIM (Keith: 'spread the stacked clouds farther apart' — his 4,221 FT race still showed a white deck sitting on a pink one): the seam cap alone leaves pairs whose ARTWORK interpenetrates (tall art on a 170 step reaches past the band line both ways). If the two art boxes still overlap, trim the climb's tail until the art separates — a shorter deck draws shorter art. Length-only, same 185 floor, so the ghost's recorded run still lands. Measured on the live board: the top course's 8 remaining art stacks -> 1 (a start-overlap no tail trim can reach). */
+      const cdH = CLOUDS[hi.img], cdL = CLOUDS[lo.img];
+      if (cdH && cdL) {
+        const dhH = hi.len * cdH.asp, dhL = lo.len * cdL.asp;
+        const xOv = hi.x < lo.x + lo.len && lo.x < hi.x + hi.len;
+        const yOv = hi.y - cdH.surf * dhH < lo.y + (1 - cdL.surf) * dhL && lo.y - cdL.surf * dhL < hi.y + (1 - cdH.surf) * dhH;
+        if (xOv && yOv) {
+          const lArt = Math.floor((lo.y - cdL.surf * dhL - hi.y) / ((1 - cdH.surf) * cdH.asp));
+          if (lArt < hi.len) hi.len = Math.max(185, floorOf(placed.indexOf(hi)), lArt);
+        }
+      }
+    }
+  }
+  return placed;
+}
+
 function resetWorld() {
   plats = []; worldEnd = 0; exitBand = 2; lastSeg = -1; lastTier = 1; courseBase = 0;
   addPlat(-300, 2, 'LONG'); worldEnd = -300 + LEN.LONG;
@@ -1179,7 +1263,7 @@ function resetWorld() {
     worldEnd = sx; openerEnd = sx;
   }
   courseBase = STAIR_SPAN; courseDist = courseBase + 780;   /* distance-space twin (v0.52; the race branch re-sets both) */
-  if (RACE) {   /* the champion's course, bridged in by Low Road (v0.47) */
+  if (RACE) {   /* the champions' courses, bridged in by Low Road (v0.47; TWO courses since v0.99.5) */
     /* every recording opens with Flat Cruise at the start band, so the
        seam in is always the same shape: Low Road walks the player from
        the staircase's bottom back up to the start band with easy jumps,
@@ -1191,58 +1275,20 @@ function resetWorld() {
     REC = keepREC;
     const champShift = worldEnd - 580;   /* their first content cloud sat at course x 580 */
     courseBase = champShift;
-    const champ = (RACE.plats[0] && RACE.plats[0][0] === -300) ? RACE.plats.slice(1) : RACE.plats;   /* their start plat is the shared start above */
-    /* v0.97 THE GHOST'S FLOOR (Keith: 'the ghost is running on air'): how far along each deck his
-       recorded run actually STANDS — the repair below may never trim past it. Computed from the
-       aligned frames: a frame counts for a deck when his feet are over it and his height matches it. */
-    const usedEnd = new Array(champ.length).fill(0);
-    { let cum = 0; for (const f of RACE.frames) { cum += f[0]; if (f[2] !== 0 && f[2] !== 3) continue; const fx = cum + 580;
-      for (let k = champ.length - 1; k >= 0; k--) { const q = champ[k]; if (fx >= q[0] - 20 && fx <= q[0] + q[2] + 20 && Math.abs(f[1] - q[1]) <= 30) { if (fx > usedEnd[k]) usedEnd[k] = fx; break; } } } }
-    const placed = [];
-    for (const p of champ) {
-      const simg = String(p[3]);   /* v0.97 (Keith: 'still no storm clouds' in races): the v0.87 whitewash is REVERSED — it dated from the era when the dark storm art was removed from the game entirely; since v0.91 the storm decks wear their storm art in solo runs, and a race now keeps the recorded art too, so a storm deck looks like one on both sides of the game */
-      const np = p[5] === 1 ? { x: p[0] + champShift, y: p[1], len: p[2], img: p[3], dark: true } : { x: p[0] + champShift, y: p[1], len: p[2], img: p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' };   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
-      plats.push(np); placed.push(np);
-      if (REC) REC.plats.push(p);   /* course space: the recording keeps the original coordinates */
-    }
-    /* v0.93.1 THE BAKED-STACK REPAIR (Keith, 2026-11-10: 'still have clouds on top of clouds' —
-       while racing a ghost, before anything that looks like a storm): recordings carry the fork
-       geometry of the build they were made on, and race replays re-save the champion's course, so
-       one old course propagates down the whole board. Pre-v0.93 forks (the climb deck starting 150
-       in and running LONG, up to 83% over the through deck) and pre-v0.92 same-band tail overlaps
-       are baked into those plats forever — the generator fix can't reach them. So at load, the
-       placed course is repaired with TAIL TRIMS ONLY (no plat moves, no start shifts, the stored
-       recording untouched): a same-band overlap trims the earlier cloud's tail to the later one's
-       start, and a climb deck one band up trims to the v0.93 seam (its end at 60% of the through
-       deck under it). Verified by racescan over the live board's top 10: 104 heavy overlaps -> the
-       fork seams alone, at the new generator's own measure. */
-    const floorOf = k => usedEnd[k] ? Math.min(champ[k][2], (usedEnd[k] - champ[k][0]) + 8) : 0;   /* capped at the recorded length: protection never GROWS a deck */   /* the shortest a deck may end up while still holding his recorded run (placed and champ share x offsets) */
-    for (let i = 0; i < placed.length; i++) for (let j = i + 1; j < placed.length; j++) {
-      const a = placed[i], b = placed[j];
-      if (b.x >= a.x + a.len) break;
-      const dy = Math.abs(a.y - b.y);
-      if (dy === 0) a.len = Math.max(120, floorOf(i), b.x - a.x);
-      else if (dy === 170 || dy === 340) {   /* 170 = a pre-v0.95 fork, 340 = the v0.95 spread — the climb tail gets the same trim */
-        const lo = a.y > b.y ? a : b, hi = a.y > b.y ? b : a;   /* lo = the lower cloud (larger y), hi = the climb deck above it */
-        const cap = lo.x + Math.round(lo.len * 0.6);
-        if (hi.x + hi.len > cap) hi.len = Math.max(185, floorOf(placed.indexOf(hi)), cap - hi.x);
-        /* v0.96 ART TRIM (Keith: 'spread the stacked clouds farther apart' — his 4,221 FT race still showed a white deck sitting on a pink one): the seam cap alone leaves pairs whose ARTWORK interpenetrates (tall art on a 170 step reaches past the band line both ways). If the two art boxes still overlap, trim the climb's tail until the art separates — a shorter deck draws shorter art. Length-only, same 185 floor, so the ghost's recorded run still lands. Measured on the live board: the top course's 8 remaining art stacks -> 1 (a start-overlap no tail trim can reach). */
-        const cdH = CLOUDS[hi.img], cdL = CLOUDS[lo.img];
-        if (cdH && cdL) {
-          const dhH = hi.len * cdH.asp, dhL = lo.len * cdL.asp;
-          const xOv = hi.x < lo.x + lo.len && lo.x < hi.x + hi.len;
-          const yOv = hi.y - cdH.surf * dhH < lo.y + (1 - cdL.surf) * dhL && lo.y - cdL.surf * dhL < hi.y + (1 - cdH.surf) * dhH;
-          if (xOv && yOv) {
-            const lArt = Math.floor((lo.y - cdL.surf * dhL - hi.y) / ((1 - cdH.surf) * cdH.asp));
-            if (lArt < hi.len) hi.len = Math.max(185, floorOf(placed.indexOf(hi)), lArt);
-          }
-        }
-      }
+    let placed = placeCourse(RACE, champShift, 0);
+    let last = RACE.plats[RACE.plats.length - 1];
+    worldEnd = Math.max(worldEnd, placed.reduce((m, p) => Math.max(m, p.x + p.len), last[0] + champShift + last[2]));   /* v0.93.1: the frontier covers every placed tail, trimmed or not — an old recording's last-listed plat was not always its rightmost */
+    let bd = 1e9; BAND_Y.forEach((y, i) => { const d = Math.abs(y - last[1]); if (d < bd) { bd = d; exitBand = i; } });
+    if (RACE2) {   /* v0.99.5: the GLOBAL WINNER's course rides in behind the local champion's. A second Low Road bridges the seam — REC stays LIVE across this one: the bridge is real ground, and the run being recorded right now must carry it or its own replay would gap where the bridge was */
+      buildSegment(SEGMENTS.find(sg => sg.n === 'Low Road'));
+      const shift2 = worldEnd - 580;
+      RACE2_OFF = shift2 - champShift;   /* the winner's origin in course space — his ghost's clock, samples and finish all shift by this */
+      placed = placeCourse(RACE2, shift2, RACE2_OFF);
+      last = RACE2.plats[RACE2.plats.length - 1];
+      worldEnd = Math.max(worldEnd, placed.reduce((m, p) => Math.max(m, p.x + p.len), last[0] + shift2 + last[2]));
+      bd = 1e9; BAND_Y.forEach((y, i) => { const d = Math.abs(y - last[1]); if (d < bd) { bd = d; exitBand = i; } });
     }
     courseDist = courseBase + 780;   /* the distance-space twin, set once the world-x origin is final (v0.52) */
-    const last = RACE.plats[RACE.plats.length - 1];
-    worldEnd = placed.reduce((m, p) => Math.max(m, p.x + p.len), last[0] + champShift + last[2]);   /* v0.93.1: the frontier covers every placed tail, trimmed or not — an old recording's last-listed plat was not always its rightmost */
-    let bd = 1e9; BAND_Y.forEach((y, i) => { const d = Math.abs(y - last[1]); if (d < bd) { bd = d; exitBand = i; } });
     return;
   }
   exitBand = 0;
@@ -1303,11 +1349,11 @@ let gRanks = {};   /* dist_ft -> world rank, for the local board (Keith v0.43) *
 let rankSig = '';   /* null = not loaded / unreachable; the local board renders meanwhile */
 async function fetchBoard() {
   try {
-    let r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=10',
+    let r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=100',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
     if (!r.ok) r = await fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft&order=dist_ft.desc&limit=10',
       { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });   /* replay column not there yet — board still works */
-    if (r.ok) { gBoard = await r.json(); kickRanks(); if (mode === 'over') renderBoard(); fetchOnline(); }
+    if (r.ok) { const rows = await r.json(); gBoard = rows.filter(e => { if (!e.replay) return false; if (typeof e.replay !== 'string') e.replay = JSON.stringify(e.replay); try { return JSON.parse(e.replay).geo === 2; } catch (err) { return false; } }); kickRanks(); if (mode === 'over') renderBoard(); fetchOnline(); }   /* v0.99.5 THE BOARD RESET (Keith): only current-geometry (geo-2) posts count — every legacy/test-era mark is inert (not displayed, not a ghost, not the target). The rows still exist in the database (the game key cannot delete them; the dashboard can) — they just no longer count. The wider fetch (100) lets the global-winner search reach below the top 10. */
   } catch (e) { /* offline — local board stands */ }
 }
 async function fetchOnline() {
@@ -1319,6 +1365,7 @@ async function fetchOnline() {
   } catch (e) { /* offline — the line just doesn't show */ }
 }
 async function postScore(n, sc, d, j, replay) {
+  if (typeof process !== 'undefined') return;   /* v0.99.5: automated test rigs run under Node — they never post to the real board (the test-era ACE pollution lock) */
   try {
     const body = { initials: n, score: sc, dist_ft: d, jumps: j };
     if (replay) body.replay = replay;   /* the run itself travels with the score (Keith, v0.24) */
@@ -1373,7 +1420,7 @@ function renderBoard() {
   $('board').classList.add('global');
   let local = [];
   try { local = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]'); } catch (e) { }
-  const entries = gBoard.map(b => ({ n: b.initials, s: b.dist_ft, ch: charOf(b.replay) }));
+  const entries = gBoard.slice(0, 10).map(b => ({ n: b.initials, s: b.dist_ft, ch: charOf(b.replay) }));
   while (entries.length < 10) entries.push({ n: '—', s: 0, z: 1 });   /* the board always shows 10 rows: real scores, then ZERO rows — never dummy scores (Keith v0.48) */
   $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
     (onlineNow ? '<div class="onlineLine"><span class="odot"></span>' + onlineNow + ' PLAYING NOW</div>' : '') +
