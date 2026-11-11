@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.5</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.6</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.5 ==============================
+/* ============================== 6LOUD demo v0.99.6 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -725,7 +725,7 @@ let RACE2 = null;   /* the second record (v0.99.5): the GLOBAL WINNER's run — 
 let RACE2_OFF = 0;   /* where RACE2's course begins, in course space (set by resetWorld when it splices) */
 let GCHAR2 = 'yoro';   /* who performs the global record: never the player's runner, never the local ghost (Keith v0.99.5) */
 let raceStage = 1;   /* which ghost is out: 1 = the local best, 2 = the global winner */
-let race1Global = false;   /* the first (only) ghost is performing the GLOBAL record — he races in full; the trail rule belongs to the LOCAL ghost */
+let race1Global = false;   /* the first (only) ghost is performing the GLOBAL record — he races in full; the honest-pace rule belongs to the LOCAL ghost */
 const CAST_ORDER = ['blade', 'lash', 'yoro', 'ivey', 'sayori'];
 /* the NEAR set (v0.25): LaShmoove at nearly full size with a breath of
    softness — same clouds as 6lade, slightly off his plane (Keith). */
@@ -774,13 +774,14 @@ function prepRace() {
   const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
   const lb = JSON.parse(localStorage.getItem('sixloud_scores_ft') || '[]');
   gTarget = Math.max(gb.length ? gb[0].dist_ft : 0, lb.length ? lb[0].s : 0);
-  /* v0.99.5 TWO GHOSTS (Keith, 2026-11-11): first YOUR LOCAL BEST runs against you — he never
-     passes, he trails you waiting for your mistake, and he falls the moment you pass your best.
-     Then the GLOBAL WINNER enters behind you, a third character — never yours, never the local
-     ghost — and races you for real over his own course, spliced in behind the local one. His
-     pool is v0.99.5-era posts ONLY (the gv 995 stamp): the winner is a run made on this build
-     or later. A lone record runs alone (a lone global record races in full from the start);
-     no record anywhere = no ghost (Keith v0.34). */
+  /* v0.99.5 TWO GHOSTS (Keith, 2026-11-11): first YOUR LOCAL BEST runs against you — no staged
+     surge, no burst (v0.99.6, Keith's refinement): he runs his recorded pace honestly, so he
+     only ever passes you when your own mistake earns it — a long hang, a slip, a slow line —
+     and he falls the moment you pass your best. Then the GLOBAL WINNER enters behind you,
+     a third character — never yours, never the local ghost — and races you for real over his
+     own course, spliced in behind the local one. His pool is v0.99.5-era posts ONLY (the
+     gv 995 stamp): the winner is a run made on this build or later. A lone record runs
+     alone (a lone global record races in full from the start); no record = no ghost (v0.34). */
   let loc = null, glo = null;
   for (const e of lb) if (e.r && isRaceReplay(e.r) && (!loc || e.s > loc.total)) loc = { total: e.s, replay: e.r };
   for (const e of gb) { if (!e.replay) continue; let o = null; try { o = JSON.parse(e.replay); } catch (err) { } if (o && o.gv === 995 && o.storm === 1 && o.geo === 2 && (!glo || e.dist_ft > glo.total)) glo = { total: e.dist_ft, replay: e.replay }; }
@@ -872,7 +873,7 @@ function activateGhost(stage, entering) {
     const cum = []; let acc = 0;
     for (const f of rp.frames) { acc += f[0]; cum.push(acc); }
     GR = { frames: rp.frames, cum, spd: rp.frames.map((f, i) => (i < rp.frames.length - 1 ? rp.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: rp.frames[0][1], wng: 0, perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0, leadMusic: false,
-           base: stage === 2 ? RACE2_OFF : 0, totalFt: rp.total, totalU: rp.total * 15.24, style: stage === 2 || race1Global ? 'race' : 'trail' };   /* v0.99.5: the LOCAL ghost trails (never passes; falls when you pass your best) — the GLOBAL winner races in full */
+           base: stage === 2 ? RACE2_OFF : 0, totalFt: rp.total, totalU: rp.total * 15.24, style: stage === 2 || race1Global ? 'race' : 'pace' };   /* v0.99.5/6: the LOCAL ghost runs his honest recorded pace (no staged pass — but a misstep gets overtaken); the GLOBAL winner races in full */
   }
   const oS = Math.max(0.25, Math.min(1, rp.total * 15.24 / 12000));
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: 'race',
@@ -911,25 +912,18 @@ function ghostUpdate(dt) {
     const distC = dist - courseDist;   /* the race clock runs in course space (v0.47; distance origin v0.52): the staircase and seam in front change nothing about his run */
     const p = Math.max(0, Math.min(1.12, (distC - GR.base) / totalU));   /* progress along HIS course (the winner's starts RACE2_OFF in) */
     const oS = Math.max(0.25, Math.min(1, totalU / 12000));   /* short records run a tighter race — the lead can't swallow the course */
-    if (GR.perfD === null || GR.perfD === undefined) GR.perfD = distC + G.oArc;
-    if (GR.style === 'trail') {
-      /* v0.99.5 THE LOCAL GHOST (Keith): he NEVER passes. He runs toward his own
-         recorded pace, but his performance is capped a breath behind yours — he
-         trails you, waiting for your mistake. Ledge beats are the same: he gains
-         only up to your tail and waits there. And he falls when you pass your
-         best: the cap holds his perfD under his total until YOUR distance passes
-         it, so the fall lands on the same stride as the crown. */
-      const capO = -60 * oS, trailO = -170 * oS;
-      if (hangPlat || slipPlat) {
-        GR.perfD += grSpeedAt(GR.perfD) * dt;
-        if (GR.perfD > distC + capO) GR.perfD = distC + capO;
-        G.oArc = GR.perfD - distC;
-      } else {
-        const oRate = 640 + 200 * oS;
-        G.oArc += Math.max(-oRate * dt, Math.min(oRate * dt, trailO - G.oArc));
-        if (G.oArc > capO) G.oArc = capO;
-        GR.perfD = distC + G.oArc;
-      }
+    if (GR.perfD === null || GR.perfD === undefined) GR.perfD = GR.style === 'pace' ? 0 : distC + G.oArc;   /* the pace ghost starts on his own start line, with the course (v0.99.6) */
+    if (GR.style === 'pace') {
+      /* v0.99.6 THE LOCAL GHOST, Keith's refinement (2026-11-11, on playing the v0.99.5
+         trail cap): no UNNATURAL pass — no surge, no staging, no teleport — but his
+         recorded pace is HONEST. He advances at grSpeedAt always (the ledge rule every
+         ghost already had), starting when the course starts, so the gap between you is
+         nothing but the difference between your run and your best run: hang long, slip,
+         take the slow line, and your own best runs THROUGH you — wings and all, exactly
+         as recorded. He falls when his pace reaches his total OR your distance passes
+         it, whichever comes first. */
+      if (distC >= 260) GR.perfD += grSpeedAt(GR.perfD) * dt;   /* THE STAGGERED START (Keith: "he is too close", 2026-11-11): his clock starts a body length into the course, so at matched pace he trails a full body behind instead of riding inside the player's silhouette — and a misstep still closes the gap honestly, at his pace */
+      G.oArc = GR.perfD - distC;
     } else if (hangPlat || slipPlat) {
       /* Keith (v0.27.1): LaShmoove KEEPS RUNNING through the ledge beat.
          But his clock is HIS OWN recorded pace (v0.30.2, Keith: "he should
@@ -1012,6 +1006,7 @@ function ghostUpdate(dt) {
     if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; his feet in world x, v0.52) */
     GR.prevSt = GR.st;
     if (GR.perfD >= GR.base + totalU) ghostFall();   /* he reaches the end of his high score — and falls */
+    if (GR.style === 'pace' && distC >= totalU) ghostFall();   /* v0.99.6: or YOU pass your best first — he falls on your stride, not his */
     return;
   }
 }
@@ -1926,12 +1921,12 @@ function ghostPick() {
   if (G.state === 'fall') return { mv: 'armsopen', idx: pingpong(Math.floor(G.animT * 10 * (GSKIN.rate || 1)), GSKIN.man.armsopen.n) };
   const st = GR.st, t = GR.stT, R = GSKIN.rate || 1;   /* a 60 fps ghost plays at her own rate (v0.78) */   /* every pick below is guarded where it's used: GSKIN.anim loads per-move, a missing set simply doesn't draw that beat */
   if (GR.wng && (st === 3 || st === 7)) { const sk = SKINS[ghostChar()], fc = sk.flyC != null ? sk.flyC : 17, fh = sk.flyH || 5; return { mv: 'diveroll', idx: fc + Math.round(Math.sin(G.animT * 60 * Math.PI / 18) * fh) }; }   /* v0.98: a winged stretch flies the Superman sway, the pose his own run wore (the pair itself is drawn in the ghost's draw pass) */
-  if (st === 1) return { mv: 'basic', idx: Math.min(GSKIN.man.basic.n - 1, Math.floor(t * 30 * R)) };
-  if (st === 7) return { mv: 'runjump', idx: Math.min(GSKIN.man.runjump.n - 1, Math.floor(t * 30 * R)) };
-  if (st === 2) { const mv = GR.pick ? 'diveflip' : 'flip'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 30 * R)) }; }
-  if (st === 3) { const mv = GR.pick ? 'roll4' : 'roll3'; return { mv, idx: Math.min(GSKIN.man[mv].n - 1, Math.floor(t * 45 * R)) }; }   /* ghost roll4 restored for both girls with their fixed cuts (Keith, 2026-11-10) */
+  if (st === 1) return { mv: 'basic', idx: Math.floor(t * 30 * R) % GSKIN.man.basic.n };   /* v0.99.6: LOOP, never clamp — a recorded state that outlasts its move used to park him on the move's last frame for 11+ seconds on real recordings (Keith's frozen ghost, caught on video 2026-11-11; measured on the live build: diveflip held 12.3 s, roll4 11.3 s, runjump 11.2 s) */
+  if (st === 7) return { mv: 'runjump', idx: Math.floor(t * 30 * R) % GSKIN.man.runjump.n };
+  if (st === 2) { const mv = GR.pick ? 'diveflip' : 'flip'; return { mv, idx: Math.floor(t * 30 * R) % GSKIN.man[mv].n }; }
+  if (st === 3) { const mv = GR.pick ? 'roll4' : 'roll3'; return { mv, idx: Math.floor(t * 45 * R) % GSKIN.man[mv].n }; }   /* ghost roll4 restored for both girls with their fixed cuts (Keith, 2026-11-10) */
   if (st === 4) return { mv: 'armsopen', idx: 15 * R + Math.floor(t * 18 * R) % (10 * R) };   /* v0.81: the game's own descent window (15R..25R, the reaching fall) — the old whole-set pingpong cycled the grip/peel frames mid-air and read as posing, not running */
-  if (st === 5) return { mv: 'armsopen', idx: Math.min(GSKIN.man.armsopen.n - 1, Math.floor(t * 30 * R)) };
+  if (st === 5) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10 * R), GSKIN.man.armsopen.n) };   /* v0.99.6: a long recorded hang cycles the grip like a struggle (as the plunge pick already did) — the one-shot clamp froze him mid-air on the last frame */
   if (st === 6) return { mv: 'armsopen', idx: pingpong(Math.floor(t * 10 * R), GSKIN.man.armsopen.n) };
   return { mv: 'run', idx: Math.floor((GR.runT || 0) * 30 * R) % GSKIN.man.run.n };   /* the race run cycle rides the scrub clock (v0.33.2) */
 }
