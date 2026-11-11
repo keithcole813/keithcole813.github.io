@@ -188,7 +188,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 7</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 8</div></div>
   <div id="dbg"></div>
   <div id="adBanner"><span>AD · TEST BANNER — OUTSIDE THE PLAY ZONE</span></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
@@ -211,11 +211,13 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 7 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 8 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
-   billboard page, the debug overlay, and the Option 1 ads test (rewarded
-   revive, capped interstitial, banner band, Google test setup + sim).
+   billboard page, the debug overlay, the Option 1 ads test (rewarded
+   revive, capped interstitial, banner band, Google test setup + sim),
+   and the FORK 8 element-path restart fix (filename compares in the
+   audio routing — the fork path prefix broke the substring checks).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -361,7 +363,7 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
   const sc = wingT > 0 ? 'wings' : magT > 0 ? 'magnet' : coinT > 0 ? 'battle' : mScene;   /* the wings' loop outranks all (Keith v0.86); next is the MAGNET's loop while its 7 seconds run (Keith v0.94); charged up with the coin = bg music 2 (Keith v0.85) */
   const want = sc === 'steps' ? '../play/assets/steps.mp3' : sc === 'battle' ? '../play/assets/battle1000.mp3' : sc === 'magnet' ? '../play/assets/magnet-loop.mp3' : '../play/assets/daylight.mp3';
   const trackKey = sc + '|' + stepsGateOn + '|' + darkGateOn + '|' + (srcD ? 1 : 0);   /* DEV FORK: the routing last applied */
-  if (!force && playTrack._key === trackKey && ((srcD && gainD) || (music && !music.paused && (music.src || '').includes(want)))) return;   /* DEV FORK: nothing changed and the path is alive — re-asserting here was chopping the music every heartbeat */
+  if (!force && playTrack._key === trackKey && ((srcD && gainD) || (music && !music.paused && (music.src || '').split('/').pop() === want.split('/').pop()))) return;   /* DEV FORK: nothing changed and the path is alive — re-asserting here was chopping the music every heartbeat. FORK 8: the aliveness check compares FILE NAMES — the browser resolves music.src to an absolute URL, so the fork's '../play/' want-string never substring-matched it, the latch never held on the element path, and the element branch below then restarted the track every heartbeat (Keith's FORK 7 recording: gaps every ~0.51 s) */
   playTrack._key = trackKey;
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
@@ -386,13 +388,13 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
     if (gainW) { gainW.gain.cancelScheduledValues(t); gainW.gain.setTargetAtTime(sc === 'wings' ? musV() : 0, t, 0.18); }
     if (gainMg) { gainMg.gain.cancelScheduledValues(t); gainMg.gain.setTargetAtTime(sc === 'magnet' ? musV() : 0, t, 0.18); }   /* 'Best Intentions' fades in with the magnet, out when it lets go (v0.94) */   /* the trippin loop fades in with the wings, out when they end (v0.86) */   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
-      if (!(music.src || '').includes('../play/assets/steps.mp3')) { music.src = '../play/assets/steps.mp3'; music.currentTime = 0; }
+      if ((music.src || '').split('/').pop() !== 'steps.mp3') { music.src = '../play/assets/steps.mp3'; music.currentTime = 0; }   /* DEV FORK 8: filename compare */
       if (stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
     } else music.pause();
   } else {
     /* do NOT zero the WebAudio gains here (the v0.62 stuck-silence fix): if the context is merely suspended, those gains are inaudible anyway — and wiping them left the game silent-but-unmuted after the context resumed, because nothing re-applies gains until a scene boundary. The gains keep their last scene values and the routes hand off cleanly. */
     music.volume = mScene === 'steps' ? stpV() : musV();
-    if (!(music.src || '').includes(want)) { music.src = want; music.currentTime = 0; }
+    if ((music.src || '').split('/').pop() !== want.split('/').pop()) { music.src = want; music.currentTime = 0; }   /* DEV FORK 8: filename compare — see the latch note above */
     if (mScene === 'steps' && stepsGateOn === false) music.pause();
     else { const p = music.play(); if (p && p.catch) p.catch(() => {}); }
   }
@@ -2457,12 +2459,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(60px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';   /* FORK 7: the strip docks ABOVE the 56px banner band */
-    el.textContent = 'FORK7 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK8 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK7 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK8 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
