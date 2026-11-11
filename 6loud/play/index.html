@@ -150,7 +150,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.2</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.3</div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
     <h1>WIPEOUT</h1>
@@ -165,7 +165,7 @@
 <audio id="music" src="assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.2 ==============================
+/* ============================== 6LOUD demo v0.99.3 ==============================
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
    swords on, no squeeze, no outdated sprites). Control (Keith 2026-11-06):
@@ -1102,6 +1102,29 @@ function buildStormEvent() {
   }
   worldEnd = x - 380;   /* the frontier is the last column's end; exitBand is untouched — the event leaves on the level it entered (the middle line's promise) */
 }
+function pickupDeck(ahead = 1000) {
+  /* LAYOUT PASS v0.99.3 (ChatGPT's pass on Keith's brief — hybrid generation + progressive
+     difficulty — with Amy's two adjustments, approved by Keith 2026-11-10): pickups belong to
+     a real, reachable cloud in the route, not simply the first cloud whose left edge is ahead.
+     Prefer a deck near the target distance and near the runner's current height.
+     ADJUSTMENT 1 (pop-in): the window starts 1050 ahead, not ChatGPT's 650 — the camera's
+     right edge sits ~820 past the runner at zoom 1, so a 650 deck could materialize ON screen.
+     ADJUSTMENT 2 (the rain line hosts): storm decks are eligible under a 700-point score
+     penalty instead of excluded outright — deep on the rain line (the middle line 500+ away
+     vertically) the storm deck under him IS the route and may host; when a comparable clean
+     deck exists, the penalty keeps the reward on the readable line. */
+  const targetX = px + ahead;
+  const inWindow = p => !p.gone && !p.dark && p.x >= px + 1050 && p.x <= px + 2450;
+  const candidates = plats.filter(p => inWindow(p) &&
+    p.x + p.len >= targetX - 250 && Math.abs(p.y - py) <= 510);
+  const pool = candidates.length ? candidates : plats.filter(inWindow);
+  if (!pool.length) return null;
+  return pool.reduce((best, p) => {
+    const score = Math.abs((p.x + p.len * 0.5) - targetX) + Math.abs(p.y - py) * 0.65 + (p.storm ? 700 : 0);
+    const bestScore = Math.abs((best.x + best.len * 0.5) - targetX) + Math.abs(best.y - py) * 0.65 + (best.storm ? 700 : 0);
+    return score < bestScore ? p : best;
+  });
+}
 function nextSegment() {
   if (dist >= stormAt) { stormAt = dist + (950 + Math.random() * 500) * 15.24; buildStormEvent(); lastSeg = -2; return; }   /* a storm arrives: the whole STORM RUN contour is built at once (v0.99), then the course is the generator's again. The old five-step fork bank (buildStormStep/stormSteps) is retired */
   /* chain on PHYSICAL bands: next segment's first platform may climb at
@@ -1113,7 +1136,19 @@ function nextSegment() {
     (runTime < 18 ? o.s.t === 1 : runTime < 45 ? o.s.t <= 2 : true) &&
     (runTime >= 45 || !o.s.steps.some(st => st[1] === 'SHORT' || st[1] === 'ISLE' || st[1] === 'NEEDLE')) &&   /* big jumps to tiny clouds are advanced — pushed farther down the run (Keith v0.47) */
     !(lastTier === 3 && o.s.t === 3));
-  const o = rnd(pool.length ? pool : [{ s: SEGMENTS[0], i: 0 }]);
+  /* HYBRID COURSE PICKER (the layout pass, Keith's brief): keep the authored segment shapes
+     (stairs, dips, bridges, valleys and peaks), but weight the draw by run age. Early runs
+     favour tier 1; the middle introduces tier 2; later runs favour tier 3 while retaining
+     occasional easier breathers. The physical-band safety filters above remain in force. */
+  const tierWeight = runTime < 18 ? { 1: 1, 2: 0, 3: 0 }
+    : runTime < 45 ? { 1: 3.2, 2: 1.4, 3: 0 }
+    : runTime < 90 ? { 1: 1.8, 2: 3.2, 3: 1.2 }
+    : { 1: 1, 2: 2.5, 3: 3.5 };
+  const weighted = pool.map(o => ({ ...o, weight: tierWeight[o.s.t] || 0 }));
+  const totalWeight = weighted.reduce((sum, o) => sum + o.weight, 0);
+  let roll = Math.random() * totalWeight;
+  let o = weighted.find(o => (roll -= o.weight) <= 0);
+  if (!o) o = pool.length ? rnd(pool) : { s: SEGMENTS[0], i: 0 };
   lastSeg = o.i; buildSegment(o.s);
 }
 function resetWorld() {
@@ -1676,22 +1711,22 @@ function update(dt) {
   if (magT > 0) { magT = Math.max(0, magT - dt); if (magT <= 0) playTrack(); }   /* the magnet's 7 seconds tick down — and the music falls back when it lets go (v0.94) */
   if (magFlashT > 0) magFlashT = Math.max(0, magFlashT - dt);
   if (!wing && Math.floor(dist / 15.24) >= nextWingFt) {
-    const q = plats.find(q => q.x > px + 1000);
+    const q = pickupDeck(1000);
     if (q) { wing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextWingFt += wingGap; wingGap = Math.round(wingGap * 1.35); if (nextCoinFt > nextWingFt && nextCoinFt - nextWingFt < 500) nextCoinFt = nextWingFt + 500; }   /* the wing pickup floats at the COIN's height (Keith v0.88); their gap grows 1500 -> 2025 -> 2735... with the same 500 FT separation from the coin (Keith v0.86) */
   }
   if (wing && wing.x < px - 460) wing = null;
   if (!gwing && Math.floor(dist / 15.24) >= nextGWingFt) {   /* the GOLD wings ride a slower milestone (Keith v0.88): first at 4,500 FT, then growing gaps like the rest */
-    const q = plats.find(q => q.x > px + 1000);
+    const q = pickupDeck(1000);
     if (q) { gwing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextGWingFt += gwingGap; gwingGap = Math.round(gwingGap * 1.35); if (nextCoinFt > nextGWingFt && nextCoinFt - nextGWingFt < 500) nextCoinFt = nextGWingFt + 500; if (nextWingFt > nextGWingFt && nextWingFt - nextGWingFt < 500) nextWingFt = nextGWingFt + 500; }
   }
   if (gwing && gwing.x < px - 460) gwing = null;
   if (!bwing && Math.floor(dist / 15.24) >= nextBWingFt) {   /* the BLUE wings (Keith v0.94): first at 3,000 FT — between the white pair (1,500) and the gold (4,500) — gaps growing the same way, same 500 FT separation from its neighbours */
-    const q = plats.find(q => q.x > px + 1000);
+    const q = pickupDeck(1000);
     if (q) { bwing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextBWingFt += bwingGap; bwingGap = Math.round(bwingGap * 1.35); if (nextCoinFt > nextBWingFt && nextCoinFt - nextBWingFt < 500) nextCoinFt = nextBWingFt + 500; if (nextWingFt > nextBWingFt && nextWingFt - nextBWingFt < 500) nextWingFt = nextBWingFt + 500; if (nextGWingFt > nextBWingFt && nextGWingFt - nextBWingFt < 500) nextGWingFt = nextBWingFt + 500; if (nextMagFt > nextBWingFt && nextMagFt - nextBWingFt < 500) nextMagFt = nextBWingFt + 500; }
   }
   if (bwing && bwing.x < px - 460) bwing = null;
   if (!magnet && Math.floor(dist / 15.24) >= nextMagFt) {   /* THE MAGNET (Keith v0.94): first at 2,000 FT, gaps growing, same separation — it floats at the pickups' height, so running its column or jumping into it sets it off */
-    const q = plats.find(q => q.x > px + 1000);
+    const q = pickupDeck(1000);
     if (q) { magnet = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextMagFt += magGap; magGap = Math.round(magGap * 1.35); if (nextCoinFt > nextMagFt && nextCoinFt - nextMagFt < 500) nextCoinFt = nextMagFt + 500; if (nextWingFt > nextMagFt && nextWingFt - nextMagFt < 500) nextWingFt = nextMagFt + 500; if (nextBWingFt > nextMagFt && nextBWingFt - nextMagFt < 500) nextBWingFt = nextMagFt + 500; if (nextGWingFt > nextMagFt && nextGWingFt - nextMagFt < 500) nextGWingFt = nextMagFt + 500; }
   }
   if (magnet && magnet.x < px - 460) magnet = null;
@@ -1708,10 +1743,12 @@ function update(dt) {
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 60);
   }
   if (runTime >= noteNextT) {   /* THE NOTE DRIP (Keith v0.88): about 4 every 10 seconds — low (a hop), high (a full jump), in-between — anchored to the next deck ahead and NEVER below the clouds */
-    const lanes = [130, 430, 250];
-    const q = plats.find(q => q.x + q.len > px + 1100);
-    notes.push({ x: px + 1100, y: (q ? q.y : py - 40) - lanes[noteLane % 3], img: noteLane % 2 ? 'notepurple' : 'notegreen', got: false });   /* v0.94 (Keith): GREEN and PURPLE notes give the feet bonus — the drip alternates them; the economy is unchanged (+25 FT each, every 8th arms the full charge) and the gold note retires */
-    noteLane++; noteNextT = runTime + 2.5 + (Math.random() * 0.8 - 0.4);
+    const lanes = [130, 330, 220];   /* v0.99.3 (the layout pass): low hop, full jump, medium hop — measured from the selected route deck */
+    const q = pickupDeck(1100);
+    if (q) {
+      notes.push({ x: q.x + q.len * 0.5, y: q.y - lanes[noteLane % 3], img: noteLane % 2 ? 'notepurple' : 'notegreen', got: false });   /* the note sits over an actual route deck, not at a fixed x that can drift off the cloud path. v0.94 economy unchanged: GREEN and PURPLE alternate, +25 FT each (x tiers), every 8th arms the full charge */
+      noteLane++; noteNextT = runTime + 2.5 + (Math.random() * 0.8 - 0.4);
+    } else noteNextT = runTime + 0.5;   /* no route deck in the window: wait briefly instead of dropping a note into empty sky */
   }
   if (wing && Math.abs(px - wing.x) < 80 && Math.abs((py - 110) - wing.y) < 150) {
     wing = null; wingT = 10; wingMax = 10; wingKind = 'std'; wingPhase = 0; flipped = false; flipMove = null; if (airMove && airMove !== 'jump') airMove = 'jump'; chargeFx(0.9); playTrack();   /* WINGS ON: 10 seconds of flight, and the trippin loop starts (Keith v0.86); a flip in progress ends HERE (v0.89) */
@@ -1731,7 +1768,7 @@ function update(dt) {
   for (const f of floaters) f.t += dt;
   if (floaters.length) floaters = floaters.filter(f => f.t < 0.9);
   if (!coin && Math.floor(dist / 15.24) >= nextCoinFt) {
-    const q = plats.find(q => q.x > px + 1000);
+    const q = pickupDeck(1000);
     if (q) { coin = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextCoinFt += coinGap; coinGap = Math.round(coinGap * 1.35); if (nextWingFt > nextCoinFt && nextWingFt - nextCoinFt < 500) nextWingFt = nextCoinFt + 500; }   /* raised (Keith v0.83); the gap grows 1000 -> 1350 -> 1820... and a wings milestone never sits within 500 FT of a coin (Keith v0.86) */
     else if (Math.floor(dist / 15.24) > nextCoinFt + 250) nextCoinFt += 1000;
   }
@@ -1768,7 +1805,7 @@ function update(dt) {
   zoom += (targetZoom - zoom) * Math.min(1, dt * 2.2);
   if (ledgeBeat) shake = Math.max(shake, 1.8);   /* handy-cam tremble: the close-up is alive, never a locked frame */
   camX = px - (viewW / zoom) * PLAYER_XF;
-  const wantY = py - viewH / zoom * 0.58;
+  const wantY = py - viewH / zoom * 0.58 + (vy < -600 ? vy * 0.15 : 0);   /* v0.99.3 CAMERA LOOKAHEAD TRIAL (Gemini's suggestion, Keith approved the trial): on a fast rise (vy < -600 — the Storm Run's 1020 climbs) the target leads the runner by 15% of his rise speed, so the frame shows where he is going instead of easing after him. The 0.15 is the knob if it feels swimmy */
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
   $('dist').innerHTML = '<small>DISTANCE</small>' + runFt() + 'ft';
