@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#160a2e">
 <style>
   html, body { margin:0; padding:0; height:100%; background:#17102e; overflow:hidden; }
-  #c { display:block; width:100vw; height:calc(100vh - 56px); height:calc(100dvh - 56px); touch-action:none;   /* DEV FORK 7: the canvas gives up the banner band */ -webkit-user-select:none; user-select:none; }
+  #c { display:block; width:100vw; height:100vh; touch-action:none; -webkit-user-select:none; user-select:none; }
   #ui { position:fixed; inset:0; pointer-events:none; font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif; color:#fff; }
   #hud { position:absolute; top:calc(10px + env(safe-area-inset-top)); left:14px; right:14px; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; }
   .hudbox { background:rgba(20,10,40,.38); border:2px solid rgba(255,255,255,.35); border-radius:12px; padding:6px 12px; }
@@ -98,7 +98,6 @@
   .bpHint { text-align:center; font-size:11px; font-weight:800; letter-spacing:2px; color:rgba(255,217,77,.75); padding-top:8px; }
   #board { cursor:pointer; }
   #dbg { position:absolute; top:calc(64px + env(safe-area-inset-top)); left:10px; z-index:25; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; line-height:1.5; color:#aef2a6; background:rgba(0,0,0,.48); padding:6px 8px; border-radius:8px; white-space:pre; pointer-events:none; }
-  #adBanner { position:fixed; left:0; right:0; bottom:0; height:56px; z-index:30; display:flex; align-items:center; justify-content:center; background:#0d0921; border-top:2px solid #6b4dff; color:#8f86b8; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:11px; letter-spacing:2px; }
   #reviveRow { display:none; margin-top:14px; text-align:center; }
   #reviveBtn { background:linear-gradient(#ffe259,#ffa751); color:#3a1503; }
   #reviveNote { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; color:#ffd94d; letter-spacing:1px; margin-top:6px; min-height:15px; }
@@ -188,9 +187,8 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 8</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 9</div></div>
   <div id="dbg"></div>
-  <div id="adBanner"><span>AD · TEST BANNER — OUTSIDE THE PLAY ZONE</span></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
@@ -211,13 +209,14 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 8 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 9 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
-   revive, capped interstitial, banner band, Google test setup + sim),
-   and the FORK 8 element-path restart fix (filename compares in the
-   audio routing — the fork path prefix broke the substring checks).
+   revive + capped interstitial, Google test setup + sim; the bottom
+   banner band was REMOVED in FORK 9 at Keith's ruling — it clipped
+   the WIPEOUT buttons and would get hit while playing), and the FORK 8
+   element-path restart fix (filename compares in the audio routing).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2426,7 +2425,7 @@ function draw() {
 /* ---------- frame loop / sizing ---------- */
 function resize() {
   const dpr = Math.min(2, devicePixelRatio || 1);
-  W = innerWidth; H = Math.max(320, innerHeight - 56);   /* DEV FORK 7: the bottom 56 px belong to the banner band — outside the playable zone */
+  W = innerWidth; H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   S = Math.min(W, H) / 1150;   // full mockup ratio (Keith 2026-11-06): short side = 1150 units, long side opens up
@@ -2458,13 +2457,13 @@ function dbgTick(ts) {
   const ghostTxt = 'GHOST ' + (RACE ? ghostChar() + ' ' + (GR && GR.style ? GR.style : '') + ' gap ' + (G ? Math.round(G.o) : '-') + ' perf ' + (GR && GR.perfD != null ? Math.round(GR.perfD / 15.24) : '-') : 'none') + ' · STORM in ' + Math.max(0, Math.round((stormAt - dist) / 15.24)) + ' FT';
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
-    el.style.top = 'auto'; el.style.bottom = 'calc(60px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';   /* FORK 7: the strip docks ABOVE the 56px banner band */
-    el.textContent = 'FORK8 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
+    el.textContent = 'FORK9 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK8 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK9 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2494,8 +2493,8 @@ function nbMove(node, toCard) { try { if (!node) return; if (toCard) { const b =
    - an INTERSTITIAL between runs, only behind the TRY AGAIN / MAIN MENU
      tap (never on the wipeout itself), capped at once per 3 runs AND
      at most once per 2 minutes;
-   - a BANNER in a fixed 56 px band BELOW the canvas (resize() gives up
-     those 56 px, so the playable zone never sits under it);
+   - NO banner (FORK 9, Keith: the bottom band clipped the WIPEOUT
+     screen's buttons and 'will get hit while playing');
    - the game audio is HELD for the length of any ad (playTrack stands
      down) and re-asserted when it closes.
    Provider order: Google H5 Games Ads (adBreak) when the library has
