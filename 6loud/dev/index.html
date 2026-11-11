@@ -165,7 +165,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 4</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 5</div></div>
   <div id="dbg"></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
@@ -183,7 +183,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 4 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 5 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, and the debug overlay. Posting is hard-off and storage
@@ -234,7 +234,7 @@ let pubState = 'none';   /* DEV FORK (Keith, 2026-11-11): the world post is a CH
 let titleMusicOn = false;
 function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "Put bg1 at character selection screen since we have one now"). Browsers gate sound behind a gesture, so this is poked from the title's taps; the load-complete attempt is harmless where autoplay is blocked. */
   if (mode !== 'title') return;
-  mScene = 'day'; titleMusicOn = true; playTrack();
+  mScene = 'day'; titleMusicOn = true; playTrack(true);
 }
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 let rawCoin = null, bufCoin = null, decCoin = null, gainCoin = null;
@@ -327,9 +327,12 @@ function kickDecode() {
   if (!decDk && rawDk && actx.decodeAudioData) decDk = actx.decodeAudioData(rawDk.slice(0)).then(b => { bufDk = b; }).catch(() => { decDk = null; });
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
-function playTrack() {
+function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab return); the heartbeat calls without it */
   const sc = wingT > 0 ? 'wings' : magT > 0 ? 'magnet' : coinT > 0 ? 'battle' : mScene;   /* the wings' loop outranks all (Keith v0.86); next is the MAGNET's loop while its 7 seconds run (Keith v0.94); charged up with the coin = bg music 2 (Keith v0.85) */
   const want = sc === 'steps' ? '../play/assets/steps.mp3' : sc === 'battle' ? '../play/assets/battle1000.mp3' : sc === 'magnet' ? '../play/assets/magnet-loop.mp3' : '../play/assets/daylight.mp3';
+  const trackKey = sc + '|' + stepsGateOn + '|' + darkGateOn + '|' + (srcD ? 1 : 0);   /* DEV FORK: the routing last applied */
+  if (!force && playTrack._key === trackKey && ((srcD && gainD) || (music && !music.paused && (music.src || '').includes(want)))) return;   /* DEV FORK: nothing changed and the path is alive — re-asserting here was chopping the music every heartbeat */
+  playTrack._key = trackKey;
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
       gainD = actx.createGain(); gainD.connect(actx.destination);
@@ -1596,7 +1599,7 @@ addEventListener('keyup', e => { if (e.code === 'Space') release(); });
 cv.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
 $('titleBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('titleBtn').addEventListener('click', e => { e.stopPropagation(); backToTitle(); });
-addEventListener('visibilitychange', () => { if (!document.hidden) { kickDecode(); if (mode !== 'title' || titleMusicOn) playTrack(); } });   /* coming back to the tab/app re-kicks the audio at once (v0.67) — the heartbeat covers the rest */
+addEventListener('visibilitychange', () => { if (!document.hidden) { kickDecode(); if (mode !== 'title' || titleMusicOn) playTrack(true); } });   /* coming back to the tab/app re-kicks the audio at once (v0.67) — the heartbeat covers the rest */
 addEventListener('pointerdown', () => { if (mode === 'title') { kickDecode(); titleMusic(); } }, true);   /* the select music starts on the FIRST tap ANYWHERE (v0.68, Keith: "I should be hearing something on this screen but I don't") — no browser will sound a note before a gesture, and the first tap may land on a dead patch of sky rather than a wired control; capture phase, so it fires ahead of every button's own handler */
 $('charL').addEventListener('pointerdown', e => { e.stopPropagation(); });   /* swapping runners never starts the run (v0.56) */
 $('charL').addEventListener('click', e => { e.stopPropagation(); cycleChar(-1); });
@@ -2419,17 +2422,18 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK4 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK5 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK4 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK5 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
     'WING ' + (wingOn ? String(wingKind).toUpperCase() + ' ' + wingT.toFixed(1) + '/' + wingMax + 's' : '-') + ' · FLUT ' + flutterT.toFixed(2) + ' · HANG ' + (hangPlat ? 'YES' : '-'),
     'MAG ' + (magOn ? magT.toFixed(1) + 's' : '-') + ' · COIN ' + (coinT > 0 ? coinT.toFixed(1) + 's' : '-') + ' · NOTES ' + notesGot + (noteCharge ? ' · FULLCHG' : ''),
+    'AUD ' + (actx ? 'web-' + actx.state : 'element') + ' bufD ' + (bufD ? 'Y' : '-') + ' bufS ' + (bufS ? 'Y' : '-') + ' · el ' + (music && music.src ? music.src.split('/').pop() : '-') + ' ' + (music ? (music.paused ? 'PAUSED' : 'playing') + ' @' + (music.currentTime || 0).toFixed(1) : '-'),
     ghostTxt
   ];
   if (DBG_EV.length) lines.push('- EVENTS -', ...DBG_EV.slice(-4));
@@ -2454,7 +2458,7 @@ function loop(ts) {
   ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
   { let rainOn = false; for (const p of plats) { if ((p.dark || p.storm) && !p.gone && (p.sink || 0) <= 640 && p.x + p.len > camX && p.x < camX + viewW / zoom) { rainOn = true; break; }   /* v0.98: the storm decks count too — the watch used to wait for a true DARK deck only, so a run through storm banks (Keith's 1,846-3,321 FT runs) never cracked once */ } if (rainOn && !rainHeard) { playThunder(); rainHeard = true; } else if (!rainOn) rainHeard = false; }   /* v0.95 (Keith): 'when rain clouds show up on screen play this once for the group' — one crack when the dark clouds arrive in view, never per cloud, and the next group cracks again */
   audioBeat += dt;   /* THE AUDIO HEARTBEAT (v0.67, Keith: "after you die and come back the audio is muted even with it set to play"): every half second the live scene re-asserts its routing. Death, the initials keyboard, an app switch, a suspended context resuming a beat late — every one of those could strand the gains or the element on the wrong side of a boundary, and a boundary-only design stays stranded until the NEXT boundary. playTrack is idempotent, so re-asserting it twice a second costs nothing and no stuck state survives longer than half a second. */
-  if (audioBeat > 0.5) { audioBeat = 0; if (mode !== 'title' || titleMusicOn) playTrack(); }
+  if (audioBeat > 0.5) { audioBeat = 0; if ((mode !== 'title' || titleMusicOn) && animLoaded >= animTotal) playTrack(); }   /* DEV FORK: the heartbeat also stands down while assets stream — the load window is where the chop was heard */
   draw();
   requestAnimationFrame(loop);
 }
