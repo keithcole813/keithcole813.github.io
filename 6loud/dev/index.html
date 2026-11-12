@@ -100,6 +100,10 @@
   #dbg { position:absolute; top:calc(64px + env(safe-area-inset-top)); left:10px; z-index:25; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; line-height:1.5; color:#aef2a6; background:rgba(0,0,0,.48); padding:6px 8px; border-radius:8px; white-space:pre; pointer-events:none; }
   #reviveRow { display:none; margin-top:14px; text-align:center; }
   #reviveBtn { background:linear-gradient(#ffe259,#ffa751); color:#3a1503; }
+  #mapBtn { display:none; margin:10px auto 0; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:14px; letter-spacing:1px; color:#eaf2ff; background:linear-gradient(#2b3a67,#16224a); border:2px solid #ffd94d; border-radius:999px; padding:8px 20px; cursor:pointer; }   /* DEV FORK 26: the start-area toggle (title only, unlocked only) */
+  #mapToast { position:fixed; left:50%; top:21%; transform:translateX(-50%); z-index:30; text-align:center; pointer-events:none; }   /* DEV FORK 26: the unlock moment */
+  #mapToast .mt1 { font-family:'Luckiest Guy',cursive; font-size:15px; letter-spacing:3px; color:#ffd94d; text-shadow:0 2px 0 rgba(58,21,3,.85), 0 6px 18px rgba(0,0,0,.5); }
+  #mapToast .mt2 { font-family:'Luckiest Guy',cursive; font-size:44px; letter-spacing:2px; color:#ffffff; text-shadow:0 3px 0 rgba(20,30,80,.9), 0 10px 26px rgba(0,0,0,.55); }
   #reviveNote { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; color:#ffd94d; letter-spacing:1px; margin-top:6px; min-height:15px; }
   #adSim { position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; background:rgba(5,3,14,.88); }
   .adSimIn { position:relative; width:min(430px,92vw); background:linear-gradient(180deg,#241a4d,#120b2c); border:2px solid #ffd23f; border-radius:18px; padding:26px 20px 20px; text-align:center; box-shadow:0 18px 50px rgba(0,0,0,.65); }
@@ -224,7 +228,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 25</div></div>
+  <div id="mapToast" style="display:none;"><div class="mt1">NEW MAP UNLOCKED</div><div class="mt2">CITY NIGHTS</div></div><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 26</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -247,7 +251,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 25 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 26 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -343,6 +347,19 @@
    ceiling for every player, paid or not. One app,
    locked characters (earn or pay) and the IAP packs
    are the 1.0 shape — this fork tests the flow only.
+   FORK 26: CITY NIGHTS — the unlockable second map
+   (Keith: unlock at 5,000 FT, ship for 1.0). The
+   mountain ridges give way to procedural skyline
+   silhouettes in the same parallax depths, the sky
+   pins to the night band (the prolonged night), and
+   lit windows wake as the night deepens — a world
+   over the same clouds, course and physics, so the
+   board stays one board. Crossing 5,000 FT shows
+   NEW MAP UNLOCKED; from the next restart the title
+   offers a MAP toggle, and starting at the city is
+   a fresh run there at beginner speed. The fork
+   DEV-UNLOCKS the city for Keith (?maplock=1 starts
+   locked to test the unlock moment itself).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -863,6 +880,40 @@ function skyAt(ph) {
   }
   return { c: SKY_KEYS[0].c, star: 0 };
 }
+function drawCitySkyline(mFade, sky) {   /* DEV FORK 26: CITY NIGHTS — the ridges' city counterpart: procedural skyline silhouettes in the same three parallax depths, tinted from the live sky every frame; lit windows on the near layer, waking with the night's star depth. Same climb fade — he rises above the city too. */
+  if (mFade <= 0.01) return;
+  const bh = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+  const LAYERS = [
+    { par: 0.08, pv: 0.10, base: 235, hMax: 190, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50, win: 0 },
+    { par: 0.14, pv: 0.16, base: 195, hMax: 145, col: mixc(sky.c[2], sky.c[0], 0.45), a: 0.72, win: 0 },
+    { par: 0.22, pv: 0.22, base: 160, hMax: 100, col: mixc(sky.c[1], [10, 6, 20], 0.55), a: 0.92, win: 1 } ];
+  const vw2 = viewW / zoom, vh2 = viewH / zoom;
+  const lit = 0.2 + 0.8 * sky.star;
+  for (const L of LAYERS) {
+    const baseY = L.base - camSmY * L.pv + vh2 * 0.55 - tiltY * L.par * 30;
+    if (baseY - L.hMax > vh2 + 60) continue;
+    const off = camX * L.par + tiltX * L.par * 90;
+    const i0 = Math.floor((off - 80) / 46), i1 = Math.floor((off + vw2 + 80) / 46);
+    ctx.save(); ctx.globalAlpha = L.a * mFade * (1 - 0.35 * sky.star); ctx.fillStyle = `rgb(${L.col})`;
+    for (let bi = i0; bi <= i1; bi++) {
+      const bx = bi * 46 - off, bw = 34 + Math.floor(bh(bi * 3 + L.par * 100) * 24), bhgt = L.hMax * (0.35 + 0.65 * bh(bi * 7 + L.par * 57));
+      ctx.fillRect(bx, baseY - bhgt, bw, bhgt + vh2 + 120);
+      if (bh(bi * 29 + L.par * 7) > 0.82) ctx.fillRect(bx + bw * 0.42, baseY - bhgt - 14, 3, 14);   /* antenna spire */
+      else if (bh(bi * 31 + L.par * 3) > 0.86) ctx.fillRect(bx + bw * 0.3, baseY - bhgt - 8, bw * 0.34, 8);   /* water tower cap */
+    }
+    ctx.restore();
+    if (L.win) { ctx.save(); ctx.globalAlpha = L.a * mFade * lit;
+      for (let bi = i0; bi <= i1; bi++) {
+        const bx = bi * 46 - off, bw = 34 + Math.floor(bh(bi * 3 + L.par * 100) * 24), bhgt = L.hMax * (0.35 + 0.65 * bh(bi * 7 + L.par * 57));
+        for (let wy = baseY - bhgt + 8; wy < baseY - 12; wy += 13) for (let wx = bx + 5; wx < bx + bw - 6; wx += 9) {
+          if (bh(bi * 131 + wy * 3 + wx * 7) > 0.62) { ctx.fillStyle = bh(bi * 57 + wx) > 0.85 ? 'rgb(190,220,255)' : 'rgb(255,196,110)'; ctx.fillRect(wx, wy, 4, 6); }
+        }
+      }
+      ctx.restore(); }
+  }
+}
+window.__drawCity = drawCitySkyline;
 /* decorative cloud fields (ChatGPT's layering, via Keith 2026-11-06):
    distant = blurred sprites, faint, slowest parallax; middle = crisp,
    stronger, faster. Both span high above the top band to below the first,
@@ -2146,7 +2197,7 @@ function ghostPick() {
 }
 function draw() {
   const ph = (time % SKY_PERIOD) / SKY_PERIOD;
-  const sky = skyAt(ph);
+  const sky = skyAt(window.__map === 'city' ? 0.40 + ph * 0.42 : ph);   /* DEV FORK 26: CITY NIGHTS pins the sky to the night band (nightfall -> pre-dawn) — the prolonged night from Keith's brainstorm; the mountains keep the full sunset cycle */
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, `rgb(${sky.c[0]})`); g.addColorStop(0.45, `rgb(${sky.c[1]})`);
   g.addColorStop(0.75, `rgb(${sky.c[2]})`); g.addColorStop(1, `rgb(${sky.c[3]})`);
@@ -2256,8 +2307,8 @@ function draw() {
   {
     const climb = Math.max(0, -camSmY - viewH / zoom * 0.42);   /* slow camera (v0.21): the fade can't pump with hops either */
     const mFade = Math.max(0, Math.min(1, 1.15 - climb / 650));
-    if (mFade > 0.01) {
-      const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+    if (window.__map === 'city') { drawCitySkyline(mFade, sky); } else if (mFade > 0.01) {
+      const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));   /* DEV FORK 26: in the city the skyline takes the ridges' place — same slot, same fade */
       const RIDGES = [
         { par: 0.05, pv: 0.07, base: 235, amp: 210, f1: 0.0038, p1: 1.7, p2: 0.4, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50 },
         { par: 0.10, pv: 0.12, base: 195, amp: 158, f1: 0.0052, p1: 4.2, p2: 2.9, col: mixc(sky.c[2], sky.c[0], 0.45), a: 0.72 },
@@ -2593,12 +2644,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK25 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK26 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK25 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK26 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2716,6 +2767,13 @@ $('reviveBtn').onclick = () => {
   });
 };
 window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } };   /* DEV FORK 24: the START GAME tap in callable form — the button routes here, and so does forkcheck */
+/* DEV FORK 26: map state — 'mnt' (the mountain course) or 'city' (CITY NIGHTS). Map 2 unlocks crossing 5,000 FT in a run and persists; starting at the city is a fresh run there (beginner speed — his unlocked-area ruling). */
+window.__map = 'mnt'; window.__MAP_FT = 5000;
+try { window.__map2 = localStorage.getItem('sixlouddev_map2') === '1'; } catch (e) { window.__map2 = false; }
+try { if (!window.__map2 && !/[?&]maplock=1/.test(location.search || '')) window.__map2 = true; } catch (e) {}   /* DEV FORK: Keith starts UNLOCKED in the fork (his order) — ?maplock=1 starts locked so the unlock moment itself can be tested */
+window.__setMap = m => { window.__map = m; const b = $('mapBtn'); if (b) b.textContent = m === 'city' ? 'MAP: CITY NIGHTS' : 'MAP: MOUNTAINS'; };
+$('mapBtn').onclick = () => { if (!window.__map2) return; window.__setMap(window.__map === 'city' ? 'mnt' : 'city'); AD.log('start area: ' + (window.__map === 'city' ? 'CITY NIGHTS' : 'MOUNTAINS')); };
+window.__unlockMap2 = () => { if (window.__map2) return; window.__map2 = true; try { localStorage.setItem('sixlouddev_map2', '1'); } catch (e) {} const t = $('mapToast'); if (t) { t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4200); } AD.log('NEW MAP UNLOCKED — CITY NIGHTS at ' + Math.round(runFt()) + ' FT'); };
 /* the between-runs interstitial rides the two exits: a capture-phase
    listener takes the tap BEFORE the button's own handler, holds it
    while the ad plays, then re-fires the click so the normal save +
@@ -2815,8 +2873,9 @@ function loop(ts) {
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('selectStack').style.display = cu ? 'flex' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
-  const sb = (mode === 'title' && loadState === 'done') || !!window.__reviveArmed;   /* DEV FORK 24: START GAME also rises while a revive waits on it (Keith) */   /* START GAME shows only when the title is ready (v0.57) */
-  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; }   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
+  const sb = (mode === 'title' && loadState === 'done') || !!window.__reviveArmed;   /* DEV FORK 24: START GAME also rises while a revive waits on it (Keith) */
+  if (!window.__map2 && mode === 'run' && runFt() >= (window.__MAP_FT || 5000)) window.__unlockMap2();   /* DEV FORK 26: crossing 5,000 FT unlocks CITY NIGHTS (Keith) */   /* START GAME shows only when the title is ready (v0.57) */
+  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; const mb = $('mapBtn'); if (mb) mb.style.display = (sb && window.__map2) ? 'block' : 'none'; }   /* DEV FORK 26: the MAP toggle rides START's flag too, and only once Map 2 is unlocked */   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
   if (!window.__AD || !window.__AD.busy) ghostUpdate(dt);   /* DEV FORK 13: the ghost freezes with the world while an ad is up */   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
