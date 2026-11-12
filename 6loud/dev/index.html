@@ -224,7 +224,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 18</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 19</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -247,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 18 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 19 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -308,6 +308,12 @@
    overlapped the TEST AD tag and could not be hit — onto
    its own big gold CLAIM REVIVE button wired on click
    and touchend; the pill is bail-only and retires at DONE.
+   FORK 19: TRY AGAIN can never be held hostage — once
+   an interstitial is due (only after extended play),
+   the exit gets a hard 10 s deadline: abort the ad,
+   run the exit anyway, once-guarded, save and exit
+   guarded separately; busy taps are swallowed whole;
+   a late Google beforeAd stands the sim down.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2558,12 +2564,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK18 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK19 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK18 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK19 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2617,7 +2623,7 @@ const AD = {
     const finish = v => { if (!finished) { finished = true; done(v); } };
     try {
       window.adBreak({ type: kind === 'rewarded' ? 'reward' : 'next', name: kind === 'rewarded' ? 'revive' : 'between-runs',
-        beforeAd: () => { called = true; try { $('adSim').style.display = 'none'; } catch (e) {} AD.log('google ad showing'); },   /* DEV FORK 17: a real Google ad takes the screen — the veil steps aside */
+        beforeAd: () => { called = true; if (AD._simCancel) AD._simCancel(); try { $('adSim').style.display = 'none'; } catch (e) {} AD.log('google ad showing'); },   /* DEV FORK 17: a real Google ad takes the screen — the veil steps aside */
         adViewed: () => { AD.log('google ad viewed'); },
         adDismissed: () => { AD.log('google ad dismissed'); },
         adBreakDone: info => { const st = info && info.breakStatus; AD.log('google done: ' + st); if (!called) finish(null); else finish(kind === 'rewarded' ? st === 'viewed' : st !== 'error'); } });
@@ -2631,7 +2637,7 @@ const AD = {
     $('adSimHint').textContent = kind === 'rewarded' ? 'Watch to the end — the revive lands when it finishes.' : 'Between-runs break. Cap: once per ' + AD.CAP_RUNS + ' runs, at most once per ' + (AD.CAP_MS / 60000) + ' min.';
     box.style.display = 'flex'; close.style.display = ''; try { const cl0 = $('adSimClaim'); cl0.style.display = 'none'; cl0.onclick = null; cl0.ontouchend = null; } catch (e) {}   /* DEV FORK 18: every sim starts clean — pill restored, big claim hidden until DONE */
     const total = kind === 'rewarded' ? 5 : 3; let left = total, ended = false;
-    const end = ok => { if (ended) return; ended = true; clearInterval(iv); box.style.display = 'none'; close.onclick = null; try { $('adSimClaim').style.display = 'none'; } catch (e) {} done(ok); };
+    const end = ok => { if (ended) return; ended = true; clearInterval(iv); AD._simCancel = null; box.style.display = 'none'; close.onclick = null; try { $('adSimClaim').style.display = 'none'; } catch (e) {} done(ok); };
     close.disabled = true; close.textContent = '✕'; $('adSimCount').textContent = Math.ceil(left) + 's'; $('adSimFill').style.width = '0%';
     const iv = setInterval(() => {
       left = Math.max(0, left - 0.1);
@@ -2640,6 +2646,7 @@ const AD = {
       if (kind === 'rewarded' && left > 0 && left <= total - 1 && !close.onclick) { close.disabled = false; close.onclick = () => end(false); }   /* he may bail after 1 s — but a bailed ad pays no revive */
       if (left <= 0) { clearInterval(iv); close.disabled = false; close.textContent = kind === 'rewarded' ? 'CLAIM REVIVE ✕' : 'CLOSE ✕'; close.onclick = () => end(true); if (kind === 'rewarded') { close.style.display = 'none'; const cl = $('adSimClaim'); cl.style.display = ''; cl.onclick = () => end(true); cl.ontouchend = e => { if (e) e.preventDefault(); end(true); }; }   /* DEV FORK 18: DONE hands the claim to the big gold button — click AND touchend, so no tap path can strand it; the corner pill retires */ if (kind === 'interstitial') setTimeout(() => end(true), 700); }   /* DEV FORK 13: an interstitial hands control back BY ITSELF — FORK 7 waited on the CLOSE tap while the game sat consumed underneath */
     }, 100);
+    AD._simCancel = () => { if (!ended) { ended = true; clearInterval(iv); AD._simCancel = null; try { box.style.display = 'none'; } catch (e) {} close.onclick = null; AD.log('sim cancelled — a google ad took over late'); } };   /* DEV FORK 19: a late beforeAd stands the sim down */
     window.__adTestFinish = () => end(true);   /* forkcheck hook */
     AD.log('simulated ' + kind + ' showing');
   },
@@ -2647,8 +2654,9 @@ const AD = {
     if (AD.busy) return; AD.busy = true; AD.holdAudio(); AD.log(kind + ' requested');
     try { $('boardPage').style.display = 'none'; } catch (e) {} try { $('nbCard').style.display = 'none'; } catch (e) {}   /* DEV FORK 17: an ad starts from the WIPEOUT and nowhere else — the full board and the NEW BEST card close first */
     try { $('adSimKind').textContent = kind === 'rewarded' ? 'REWARDED VIDEO' : 'INTERSTITIAL'; $('adSimHint').textContent = 'Finding your ad…'; $('adSimCount').textContent = '…'; $('adSimFill').style.width = '0%'; const vc = $('adSimClose'); vc.disabled = true; vc.textContent = '✕'; $('adSim').style.display = 'flex'; } catch (e) {}   /* DEV FORK 17: the veil goes up NOW, for the whole attempt — FORK 7–16 left the page tappable through the Google window (Keith's revive landed under the board) */
-    setTimeout(() => { if (AD.busy) { AD.log('watchdog: ad stranded — force-closing'); finish(false); } }, 15000);   /* DEV FORK 13: no ad may hold the game hostage — Keith had to force-close the app */
-    let finished = false; const finish = ok => { if (finished) return; finished = true; AD.busy = false; try { $('adSim').style.display = 'none'; } catch (e) {} AD.freeAudio(); AD.log(kind + ' closed' + (ok ? ' (completed)' : ' (not completed)')); done(ok); };   /* DEV FORK 13: finish runs ONCE, and every finish path takes the sim overlay down with it */
+    const wd = setTimeout(() => { if (AD.busy) { AD.log('watchdog: ad stranded — force-closing'); finish(false); } }, 15000);   /* DEV FORK 13: no ad may hold the game hostage — Keith had to force-close the app */
+    let finished = false; const finish = ok => { if (finished) return; finished = true; clearTimeout(wd); AD.busy = false; AD._finish = null; try { $('adSim').style.display = 'none'; } catch (e) {} AD.freeAudio(); AD.log(kind + ' closed' + (ok ? ' (completed)' : ' (not completed)')); done(ok); };   /* DEV FORK 13: finish runs ONCE, and every finish path takes the sim overlay down with it */
+    AD._finish = finish; AD.abort = () => { if (AD._finish) AD._finish(false); };   /* DEV FORK 19: the release valve the exit deadline pulls */
     if (!AD.h5(kind, v => { if (v === null) AD.sim(kind, finish); else finish(v); })) AD.sim(kind, finish);
   },
   revive() {
@@ -2682,12 +2690,18 @@ $('reviveBtn').onclick = () => {
    while the ad plays, then re-fires the click so the normal save +
    exit flow runs untouched */
 if (document.addEventListener) document.addEventListener('click', e => {
-  if (window.__adBypass || AD.busy) return;
   const id = e.target && e.target.id;
-  if ((id === 'again' || id === 'titleBtn') && typeof mode !== 'undefined' && mode === 'over' && AD.due()) {
+  if (id !== 'again' && id !== 'titleBtn') return;
+  if (window.__adBypass) return;
+  if (AD.busy) { e.preventDefault(); e.stopPropagation(); return; }   /* DEV FORK 19: while an ad owns the screen the exit tap is swallowed whole — FORK 7–18 let it fall through to the button's own handler mid-ad, so a stranded ad could double-start the run when it finally closed */
+  if (typeof mode !== 'undefined' && mode === 'over' && AD.due()) {
     e.preventDefault(); e.stopPropagation();
-    AD.show('interstitial', () => { AD.runsSince = 0; AD.lastAt = Date.now(); AD.save();   /* DEV FORK 13: run the exit DIRECTLY (the same work as the button's own handler) — FORK 7 re-fired the tap through the stale event object, one more link that could snap */
-      try { if (id === 'again') { const s = pendingSave; pendingSave = null; if (s) s(); startRun(); } else backToTitle(); } catch (err) { AD.log('proceed failed: ' + err); } });
+    let proceeded = false;
+    const proceed = () => { if (proceeded) return; proceeded = true; AD.runsSince = 0; AD.lastAt = Date.now(); AD.save();
+      try { const s = pendingSave; pendingSave = null; if (s) s(); } catch (err) { AD.log('exit save failed: ' + err); }
+      try { if (id === 'again') startRun(); else backToTitle(); } catch (err) { AD.log('proceed failed: ' + err); } };   /* DEV FORK 19: save and exit guarded separately — a save hiccup can never eat the restart */
+    const dl = setTimeout(() => { AD.log('exit deadline: ad did not release the tap — running the exit anyway'); if (AD.abort) AD.abort(); proceed(); }, window.__adExitDeadlineMs || 10000);   /* DEV FORK 19: the hard deadline — no ad holds an exit past 10 s */
+    AD.show('interstitial', () => { clearTimeout(dl); proceed(); });   /* DEV FORK 13: run the exit DIRECTLY (the same work as the button's own handler) — FORK 7 re-fired the tap through the stale event object, one more link that could snap */
   }
 }, true);
 
