@@ -224,7 +224,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 21</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 22</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -247,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 21 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 22 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -322,6 +322,11 @@
    never-lands exception is retired at Keith's ruling
    ('Clouds below me should have caught me'): a cloud
    under a falling man catches him, middle included.
+   FORK 22: THE UNIVERSAL CATCH (Keith's clarification):
+   any cliff can be caught even from another cliff,
+   any distance, wings or not — the ledge grab no
+   longer demands a jump, and a fall is only doomed
+   when NO cloud is below. You cant fall through clouds.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -877,7 +882,7 @@ function recSample() {
   if (slipPlat) code = 5;
   else if (!grounded && !airMove && !hangPlat && vy > 40) {
     /* 6 = a DOOMED plunge only (v0.71): the slip release (noLand) or a fall with no cloud below within reach — the same test playerAnim poses by. A fall that will LAND records as the arms-open air pose (4) and the ghost lands it too. From the first sample off the lip (v0.52), so he never runs on air. */
-    if (noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py && p.y - py < 640)) code = 6;
+    if (noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py)) code = 6;   /* DEV FORK 22: doomed means NO cloud below at all — the 640 cutoff posed far falls as death plunges even though the cloud below was always going to catch him (Keith: a fall does not mean death, no matter how far) */
   }
   if (!grounded && airMove && !flipped && code === 4) code = 7;   /* v0.81: a jump's rise + apex pose in armsopen but they ARE the jump — record 7 (runjump) or the ghost floats through every jump in the air pose and barely ever runs (Keith, 2026-11-09) */
   REC.frames.push([Math.round(dist - Math.max(REC.lastDist, courseDist)), Math.round(py), code, (champMode || flareT > 0) ? 1 : 0, wingT > 0 ? 1 : 0]);   /* course-space delta + the charge flag (Keith v0.30) + v0.98: the WING flag — the ghost used to fly his winged stretches bare because the recording never said he was wearing them (Keith: 'ghost runner flying, maybe he missing wings?') */
@@ -1874,8 +1879,8 @@ function update(dt) {
         break;
       }
     }
-    /* ledge grab: only off a jump, falling short at the left edge */
-    if (!grounded && airMove) for (const p of plats) {
+    /* ledge grab: falling short at the left edge — off ANY fall since FORK 22 (Keith, 2026-11-12: 'Any cliff can be caught even if from another cliff. No matter how far falling from. No matter if with wings. You cant fall through clouds') — before this the grab demanded a jump (airMove), so a run-off, a hang drop or a slip fall could never catch a lower lip, only a top */
+    if (!grounded) for (const p of plats) {
       if (p.gone) continue;   /* v0.91: no grabbing a cloud that already sank away */
       if (px + 70 < p.x || px - 40 > p.x + p.len) continue;
       const top = p.y;
@@ -2069,7 +2074,7 @@ function playerAnim() {
   if (slipPlat) { if (PSKIN.man.climbfall) return { move: 'climbfall', idx: Math.min(PSKIN.man.climbfall.n - 1, Math.floor(slipT * 30)) };   // the real Climb Attempt and Fall plays ONE WAY, once
     return { move: 'armsopen', idx: 5 * R + Math.min(3 * R, Math.floor(slipT / SLIP_DUR * 4 * R)) }; }   /* fallback: ONE WAY from the grip into the peel (5,6 grip -> 7 peeling -> 8 folding). NEVER a restart at frame 0 and never a pingpong — the old slip restarted the whole arms-open motion and swept back UP through the grip frames: a visible let-go-and-grab before the fall (Keith's video, v0.38) */
   if (!grounded && !airMove && (vy > 260 || flutterT > 0)) {
-    const doomed = noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py && p.y - py < 640);
+    const doomed = noLand || !plats.some(p => px + 68 >= p.x && px - 36 <= p.x + p.len && p.y > py);   /* DEV FORK 22: the same law as the recorder — doomed only when nothing is below */
     if (doomed) { const m = PSKIN.man.fall2 ? 'fall2' : 'armsopen'; return { move: m, idx: pingpong(Math.floor(time * 14 * R), PSKIN.man[m].n) }; }   // the fatal plunge (Fall 2)
     return { move: 'armsopen', idx: 15 * R + Math.floor(airT * 18 * R) % (10 * R) };   /* a fall with a cloud coming: the reaching descent, then he LANDS (Keith v0.71) */
   }
@@ -2572,12 +2577,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK21 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK22 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK21 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK22 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
