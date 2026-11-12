@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 32</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 33</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 32 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 33 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -410,6 +410,13 @@
    moonlight shimmer on the near water; Level 1
    keeps its mountains. The loader outline is
    softened (his FORK 31 shot: too heavy a frame).
+   FORK 33: ONE SKY LAW — Keith flagged the moon /
+   cloudscape physics ('something isnt right'):
+   the sky's layers each rode a different motion
+   signal and slid against each other mid-climb.
+   Stars, moon and planet now share one drift
+   (tilt + altitude settle); the clouds keep their
+   own slower cameras — that part is real parallax.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2291,26 +2298,27 @@ function draw() {
     ctx.fillStyle = sg2; ctx.fillRect(0, 0, W, H);
   }
   /* stars */
-  if (sky.star > 0.03) {
+  if (sky.star > 0.03) {   /* DEV FORK 33: ONE SKY LAW — the whole celestial sheet shares this drift (Keith: the moon/cloudscape physics 'isnt right' — the sky's layers were sliding against each other) */
+    const skyOX = tiltX * 5, skyOY = tiltY * 3 - altSm * H * 0.045;
     for (const st of stars) {
       const a = sky.star * (0.55 + 0.45 * Math.sin(time * 2 + st.tw));
       ctx.fillStyle = `rgba(255,255,255,${Math.max(0, a)})`;
-      ctx.fillRect(st.x * W - tiltX * 5, st.y * H - tiltY * 3, st.r, st.r);
+      ctx.fillRect(st.x * W - skyOX, st.y * H - skyOY, st.r, st.r);   /* DEV FORK 33: the stars take the shared sky drift */
     }
     if (sky.star > 0.55) {
       const f2 = (sky.star - 0.55) / 0.45;
       for (const st of stars2) {
         const a = f2 * (0.4 + 0.6 * Math.abs(Math.sin(time * 1.4 + st.tw)));
         ctx.fillStyle = `rgba(255,255,255,${Math.max(0, a)})`;
-        ctx.fillRect(st.x * W - tiltX * 5, st.y * H - tiltY * 3, st.r, st.r);
+        ctx.fillRect(st.x * W - skyOX, st.y * H - skyOY, st.r, st.r);   /* DEV FORK 33: the stars take the shared sky drift */
       }
     }
     if (window.__map === 'night') {   /* DEV FORK 29: the EXTENDED NIGHT sky dressing (Keith's comment pass, 2026-11-12) — drawn with the stars, so the dress clouds still cross in front of everything */
       window.__moonImg = window.__moonImg || (() => { const i = new Image(); i.src = 'moon.webp'; return i; })();
       window.__planetImg = window.__planetImg || (() => { const i = new Image(); i.src = 'planet.webp'; return i; })();
       window.__satImg = window.__satImg || (() => { const i = new Image(); i.src = '../play/assets/satellite.webp'; return i; })();   /* pre-rewrite form on purpose: the isolation pass below prefixes it like every shared-tree path */
-      const mR = Math.min(W, H) * 0.19, mX = W * 0.74 - tiltX * 14 + Math.sin(time * 0.05) * 3, mY = H * 0.21 + altSm * H * 0.045 - tiltY * 8;   /* DEV FORK 31: the moon UN-GLUED — it rides the smoothed altitude and the device tilt at celestial scale and breathes on a slow sway; still screen-space, so the zoom never pumps it */
-      if (window.__planetImg.naturalWidth) { ctx.save(); ctx.globalAlpha = 0.88; const pw = Math.min(W, H) * 0.17; ctx.drawImage(window.__planetImg, W * 0.15 - pw / 2 - tiltX * 7, H * 0.14 - pw / 2 + altSm * H * 0.02 - tiltY * 4, pw, pw); ctx.restore(); }   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 31: half the moon's drift — it's farther away */
+      const mR = Math.min(W, H) * 0.19, mX = W * 0.74 - skyOX, mY = H * 0.21 - skyOY;   /* DEV FORK 33: the moon takes the sky's shared drift — its private tilt factors and breathing sway are gone; the sheet is rigid */
+      if (window.__planetImg.naturalWidth) { ctx.save(); ctx.globalAlpha = 0.88; const pw = Math.min(W, H) * 0.17; ctx.drawImage(window.__planetImg, W * 0.15 - pw / 2 - skyOX, H * 0.14 - pw / 2 - skyOY, pw, pw); ctx.restore(); }   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 33: same sheet, same drift as everything up there */
       if (window.__moonImg.naturalWidth) ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2);   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
       const satC = time % 90;   /* our satellite transits IN FRONT of the moon on a slow cycle (Keith's placement) */
       if (satC > 8 && satC < 30 && window.__satImg.naturalWidth) { const sp = (satC - 8) / 22, sw = Math.min(W, H) * 0.115, sh = sw * window.__satImg.naturalHeight / window.__satImg.naturalWidth; ctx.save(); ctx.globalAlpha = 0.96; ctx.drawImage(window.__satImg, mX + (sp - 0.5) * mR * 5.4 - sw / 2, mY - mR * 0.30 + sp * mR * 0.55 - sh / 2, sw, sh); ctx.restore(); }
@@ -2731,12 +2739,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK32 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK33 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK32 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK33 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
