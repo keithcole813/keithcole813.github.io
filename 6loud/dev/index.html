@@ -224,7 +224,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 23</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 24</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -247,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 23 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 24 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -331,6 +331,10 @@
    triple -> flutter down) is eligible to hang — a
    fluttering descent hangs at any sink speed, since
    the flutter tap itself resets vy under the old floor.
+   FORK 24: a watched ad ARMS the revive instead of
+   firing it — the wipeout clears and the title's own
+   START GAME button comes up over the frozen course;
+   the run resumes on his tap, not the ad's schedule.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1763,7 +1767,7 @@ $('strip').addEventListener('click', e => { const c = e.target && e.target.datas
 $('charR').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('charR').addEventListener('click', e => { e.stopPropagation(); cycleChar(1); });
 $('startBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
-$('startBtn').addEventListener('click', e => { e.stopPropagation(); if (mode === 'title' && loadState === 'done') { kickDecode(); startRun(); } });
+$('startBtn').addEventListener('click', e => { e.stopPropagation(); if (window.__reviveArmed) { if (window.__reviveStart) window.__reviveStart(); return; } if (mode === 'title' && loadState === 'done') { kickDecode(); startRun(); } });   /* DEV FORK 24: an armed revive outranks the title branch — same button, same tap, but it resumes this run instead of starting a new one */
 addEventListener('pointerup', () => release());
 addEventListener('pointercancel', () => release());
 
@@ -2581,12 +2585,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK23 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK24 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK23 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK24 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2698,10 +2702,11 @@ try { window.adConfig({ preloadAdBreaks: 'on' }); } catch (e) {}
 $('reviveBtn').onclick = () => {
   if (AD.busy || window.__reviveUsed) return;
   AD.show('rewarded', ok => {
-    if (ok) { window.__reviveUsed = true; if (!AD.revive()) $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; }
+    if (ok) { window.__reviveUsed = true; window.__reviveArmed = true; $('over').style.display = 'none'; AD.log('revive earned — waiting on the START GAME button'); }   /* DEV FORK 24 (Keith, 2026-11-12): the ad earns the revive, the BUTTON starts it — no more automatic start */
     else $('reviveNote').textContent = 'AD NOT FINISHED — NO REVIVE';
   });
 };
+window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } };   /* DEV FORK 24: the START GAME tap in callable form — the button routes here, and so does forkcheck */
 /* the between-runs interstitial rides the two exits: a capture-phase
    listener takes the tap BEFORE the button's own handler, holds it
    while the ad plays, then re-fires the click so the normal save +
@@ -2801,7 +2806,7 @@ function loop(ts) {
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('selectStack').style.display = cu ? 'flex' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
-  const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
+  const sb = (mode === 'title' && loadState === 'done') || !!window.__reviveArmed;   /* DEV FORK 24: START GAME also rises while a revive waits on it (Keith) */   /* START GAME shows only when the title is ready (v0.57) */
   if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; }   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
