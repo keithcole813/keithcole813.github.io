@@ -102,6 +102,8 @@
   #reviveBtn { background:linear-gradient(#ffe259,#ffa751); color:#3a1503; }
   #mapBtn { display:none; margin:10px auto 0; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:14px; letter-spacing:1px; color:#eaf2ff; background:linear-gradient(#2b3a67,#16224a); border:2px solid #ffd94d; border-radius:999px; padding:8px 20px; cursor:pointer; }   /* DEV FORK 26: the start-area toggle (title only, unlocked only) */
   #mapToast { position:fixed; left:50%; top:21%; transform:translateX(-50%); z-index:30; text-align:center; pointer-events:none; }   /* DEV FORK 26: the unlock moment */
+  #mapBadge { width:min(80vw,560px); height:auto; filter:drop-shadow(0 10px 24px rgba(0,0,0,.45)); animation:mapPop .45s ease-out; }   /* DEV FORK 27: Keith's keyed badge art + a pop-in */
+  @keyframes mapPop { 0% { transform:scale(.7); } 60% { transform:scale(1.06); } 100% { transform:scale(1); } }
   #mapToast .mt1 { font-family:'Luckiest Guy',cursive; font-size:15px; letter-spacing:3px; color:#ffd94d; text-shadow:0 2px 0 rgba(58,21,3,.85), 0 6px 18px rgba(0,0,0,.5); }
   #mapToast .mt2 { font-family:'Luckiest Guy',cursive; font-size:44px; letter-spacing:2px; color:#ffffff; text-shadow:0 3px 0 rgba(20,30,80,.9), 0 10px 26px rgba(0,0,0,.55); }
   #reviveNote { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; color:#ffd94d; letter-spacing:1px; margin-top:6px; min-height:15px; }
@@ -228,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><div class="mt1">NEW MAP UNLOCKED</div><div class="mt2">CITY NIGHTS</div></div><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 26</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">CITY NIGHTS</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 27</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -251,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 26 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 27 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -360,6 +362,12 @@
    a fresh run there at beginner speed. The fork
    DEV-UNLOCKS the city for Keith (?maplock=1 starts
    locked to test the unlock moment itself).
+   FORK 27: the unlock toast fires Keith's own
+   NEW LEVEL UNLOCKED! badge art (green-screen art
+   he made; the green was keyed out by code —
+   ChatGPT was locked and Gemini can't do clear
+   PNGs) with a pop-in, the gold CITY NIGHTS line
+   under it naming the map.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2644,12 +2652,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK26 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK27 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK26 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK27 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
