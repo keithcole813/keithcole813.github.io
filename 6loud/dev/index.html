@@ -135,6 +135,10 @@
   .audTg.off { color:#9aa3c7; border-color:rgba(154,163,199,.5); background:rgba(20,24,64,.5); text-decoration:line-through; }
   /* DEV FORK 13: the title toggle pair starts hidden — the loop sb gate shows it with START */
   #audRow { display:none; }
+  /* DEV FORK 14: PULL UP!! anchors to the viewport itself, never a container corner */
+  #pullup { position:fixed; }
+  /* DEV FORK 15: WIPEOUT top-anchored + scrollable at every height; tail padded clear of the debug strip */
+  #over { justify-content:flex-start; overflow-y:auto; touch-action:pan-y; padding:14px 0 96px; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -211,7 +215,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 13</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 15</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -220,6 +224,7 @@
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
     <img id="newRecord" src="../play/assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
+    <div id="reviveRow"><button class="btn" id="reviveBtn">WATCH AD TO REVIVE</button><div id="reviveNote"></div></div>
     <div id="board"></div>
     <div id="nbCard"><div class="nbIn" id="nbIn"><div class="nbTitle">★ NEW BEST! ★</div><div class="nbRank" id="nbRank">RANK #– GLOBAL</div><div class="nbHint">Blank initials = this run isn't saved anywhere.</div></div></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
@@ -228,14 +233,13 @@
     <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
     <div id="audRow2"><button id="tgMusic2" class="audTg">MUSIC ON</button><button id="tgSfx2" class="audTg">SOUND ON</button></div>
     <div id="pubNote"></div>
-    <div id="reviveRow"><button class="btn" id="reviveBtn">WATCH AD TO REVIVE</button><div id="reviveNote"></div></div>
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 13 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 15 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -267,6 +271,18 @@
    back by itself, the exit runs directly instead of re-firing the
    tap, finish() runs once and always drops the overlay, and a
    15 s watchdog force-closes a stranded ad.
+   FORK 14: PULL UP!! is run-only and viewport-anchored —
+   its gate never had the mode check its sibling helper has,
+   so the background sim behind the title could light it on
+   the LOADING screen, parked in the corner (Keith).
+   FORK 15: the buried revive button — WATCH AD TO REVIVE
+   sat dead last in a WIPEOUT column taller than the phone,
+   centered with no scroll at his height, so it fell off the
+   bottom (Keith). The revive row now sits directly under
+   the score, the column is top-anchored and scrollable at
+   every height with its tail padded clear of the debug
+   strip, and the strip finally reads the real fork number
+   (it still said FORK9, hiding every push since).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2517,12 +2533,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK9 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK15 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK9 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK15 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2721,7 +2737,7 @@ function loop(ts) {
   tiltEase(dt);   /* the depth eases toward the phone's pose every frame, every mode (v0.83) */
   if (mode === 'title') titleFlow(dt);
   if (!window.__AD || !window.__AD.busy) update(dt);   /* DEV FORK 13: the world FREEZES while an ad is up — FORK 7 let gameplay run on underneath it (Keith) */
-  const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
+  const pu = mode === 'run' && !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) — DEV FORK 14: RUN-ONLY (its sibling helper always had this guard; the background sim behind the title could light this one mid-load, Keith's screenshot) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
   const db = !pu && mode === 'run' && (coinT > 0 ||   /* !pu (v0.97): the two helpers never show at once — Keith's 1,720 FT screenshot had AIR JUMP READY lit while he hung from a lip (the coin clause bypassed the hang check) */ (!grounded && !hangPlat && !slipPlat && ((doubleArmed && !doubleUsed) || (wingT > 0 && doubleUsed && !tripleUsed))));   /* AIR JUMP READY helper: while a mid-air tap would fire the double (Keith v0.70.1) — flashing for the whole coin charge (Keith v0.85) — and, v0.96/v0.97, while the wings' triple still waits behind a spent double */
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
