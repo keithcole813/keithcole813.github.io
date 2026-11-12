@@ -224,7 +224,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 24</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 25</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -233,7 +233,7 @@
     <h1>WIPEOUT</h1>
     <div id="overStats"></div>
     <img id="newRecord" src="../play/assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
-    <div id="reviveRow"><button class="btn" id="reviveBtn">WATCH AD TO REVIVE</button><div id="reviveNote"></div></div>
+    <div id="reviveRow"><button class="btn" id="reviveBtn">REVIVE — FREE</button><div id="reviveNote"></div></div>
     <div id="board"></div>
     <div id="nbCard"><div class="nbIn" id="nbIn"><div class="nbTitle">★ NEW BEST! ★</div><div class="nbRank" id="nbRank">RANK #– GLOBAL</div><div class="nbHint">Blank initials = this run isn't saved anywhere.</div></div></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
@@ -247,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 24 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 25 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -335,6 +335,14 @@
    firing it — the wipeout clears and the title's own
    START GAME button comes up over the frozen course;
    the run resumes on his tap, not the ad's schedule.
+   FORK 25: EVERYONE gets the first revive FREE
+   (Keith's monetization rulings, 2026-11-12) — no ad
+   in front of it; the tap arms it and START GAME
+   resumes, same as an earned one. The rewarded ad
+   moves to the SECOND revive; two per run is the
+   ceiling for every player, paid or not. One app,
+   locked characters (earn or pay) and the IAP packs
+   are the 1.0 shape — this fork tests the flow only.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1490,7 +1498,7 @@ const FEET = 16;            // his feet sit this deep in the cloud tops
 
 function startRun() {
   recStart();   /* record from the very first platform (v0.24) */
-  window.__reviveUsed = false; window.__adGuardT = 0;   /* DEV FORK 7: a fresh run re-arms the one ad revive */
+  window.__revivesUsed = 0; window.__adGuardT = 0;   /* DEV FORK 25: a fresh run re-arms BOTH revives (free first, ad second) */   /* DEV FORK 7: a fresh run re-arms the one ad revive */
   prepRace();
   lastDarkX = -1e9;
   resetWorld();
@@ -1640,7 +1648,7 @@ function gameOver() {
   $('pubRow').style.display = qualifiesGlobal ? 'flex' : 'none'; pubState = 'none'; $('pubBtn').style.display = ''; $('skipBtn').style.display = ''; $('pubDone').style.display = 'none';   /* DEV FORK: a fresh publish choice on every qualifying wipeout */
   nbMove($('nameRow'), qualifiesGlobal); $('nbCard').style.display = qualifiesGlobal ? 'flex' : 'none'; if (qualifiesGlobal) { let rkN = 1; for (const e of gBoard) if (e && e.geo === 2 && (e.dist_ft || 0) > myFt) rkN++; $('nbRank').textContent = 'RANK #' + rkN + ' GLOBAL'; } $('pubNote').textContent = ''; $('pubNote').className = '';   /* DEV FORK: Option A (Keith 2026-11-11) — the NEW BEST card pops for a world-board run and the initials row moves into it; a local-only run keeps the inline row where it lives */
   AD.runsSince++; AD.save();   /* DEV FORK 7: another finished run toward the interstitial cap */
-  $('reviveRow').style.display = window.__reviveUsed ? 'none' : 'block'; $('reviveNote').textContent = '';   /* DEV FORK 7: one ad revive offered per run */
+  $('reviveRow').style.display = (window.__revivesUsed || 0) >= 2 ? 'none' : 'block'; $('reviveBtn').textContent = (window.__revivesUsed || 0) === 0 ? 'REVIVE — FREE' : 'WATCH AD TO REVIVE'; $('reviveNote').textContent = (window.__revivesUsed || 0) === 0 ? 'FIRST ONE IS FREE — NO AD' : 'SECOND ONE COSTS AN AD';   /* DEV FORK 25: the row offers whichever revive is next — free first, ad second, gone at the ceiling of two */   /* DEV FORK 7: one ad revive offered per run */
   $('over').style.display = 'flex';
   if (qualifies) { $('ini').value = (function () { try { return localStorage.getItem('sixlouddev_initials') || ''; } catch (e) { return ''; } })(); setTimeout(() => $('ini').focus(), 60); }   /* v0.99.7 (Keith): the initials box REMEMBERS the local player and PREFILLS their initials — a returning player's name is already in the box; a first-timer's box starts empty, and empty still saves nowhere */
   renderBoard();   /* global board swaps in when it has loaded */
@@ -2585,12 +2593,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK24 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK25 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK24 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK25 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2655,7 +2663,7 @@ const AD = {
   sim(kind, done) {
     const box = $('adSim'), close = $('adSimClose');
     $('adSimKind').textContent = kind === 'rewarded' ? 'REWARDED VIDEO' : 'INTERSTITIAL';
-    $('adSimHint').textContent = kind === 'rewarded' ? 'Watch to the end — the revive lands when it finishes.' : 'Between-runs break. Cap: once per ' + AD.CAP_RUNS + ' runs, at most once per ' + (AD.CAP_MS / 60000) + ' min.';
+    $('adSimHint').textContent = kind === 'rewarded' ? 'Watch to the end — the revive arms when it finishes.' : 'Between-runs break. Cap: once per ' + AD.CAP_RUNS + ' runs, at most once per ' + (AD.CAP_MS / 60000) + ' min.';
     box.style.display = 'flex'; close.style.display = ''; try { const cl0 = $('adSimClaim'); cl0.style.display = 'none'; cl0.onclick = null; cl0.ontouchend = null; } catch (e) {}   /* DEV FORK 18: every sim starts clean — pill restored, big claim hidden until DONE */
     const total = kind === 'rewarded' ? 5 : 3; let left = total, ended = false;
     const end = ok => { if (ended) return; ended = true; clearInterval(iv); AD._simCancel = null; box.style.display = 'none'; close.onclick = null; try { $('adSimClaim').style.display = 'none'; } catch (e) {} done(ok); };
@@ -2700,9 +2708,10 @@ window.__AD = AD;
 try { const s = JSON.parse(localStorage.getItem('sixlouddev_ads') || '{}'); AD.runsSince = s.runs || 0; AD.lastAt = s.last || 0; } catch (e) {}
 try { window.adConfig({ preloadAdBreaks: 'on' }); } catch (e) {}
 $('reviveBtn').onclick = () => {
-  if (AD.busy || window.__reviveUsed) return;
+  if (AD.busy || window.__reviveArmed || (window.__revivesUsed || 0) >= 2) return;
+  if ((window.__revivesUsed || 0) === 0) { window.__revivesUsed = 1; window.__reviveArmed = true; $('over').style.display = 'none'; AD.log('FREE revive armed — waiting on the START GAME button'); return; }   /* DEV FORK 25 (Keith, 2026-11-12): revive #1 is FREE for everyone — the tap arms it, no ad stands in front of it */
   AD.show('rewarded', ok => {
-    if (ok) { window.__reviveUsed = true; window.__reviveArmed = true; $('over').style.display = 'none'; AD.log('revive earned — waiting on the START GAME button'); }   /* DEV FORK 24 (Keith, 2026-11-12): the ad earns the revive, the BUTTON starts it — no more automatic start */
+    if (ok) { window.__revivesUsed = 2; window.__reviveArmed = true; $('over').style.display = 'none'; AD.log('AD revive armed (the second) — waiting on the START GAME button'); }   /* DEV FORK 25: the rewarded ad buys the SECOND revive now — the first is free (Keith) */
     else $('reviveNote').textContent = 'AD NOT FINISHED — NO REVIVE';
   });
 };
