@@ -128,7 +128,7 @@
   #ldBarWrap { position:relative; width:min(72vw,620px); margin-top:14px; }
   #ldBar { height:26px; border-radius:99px; background:#241448; border:2px solid rgba(210,220,255,.9); box-shadow:0 0 0 3px rgba(36,20,72,.45), 0 10px 24px rgba(10,20,60,.35), inset 0 3px 8px rgba(0,0,0,.65); overflow:hidden; }
   #ldFill { height:100%; width:0%; background:repeating-linear-gradient(115deg,#ffd23f 0 18px,#ffb52e 18px 36px); box-shadow:inset 0 2px 3px rgba(255,255,255,.7), inset 0 -4px 6px rgba(160,80,0,.45); transition:width .25s ease; }
-  #ldSub { position:relative; margin-top:13px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:clamp(16px,4.2vw,25px); letter-spacing:2px; color:#fff; -webkit-text-stroke:1.5px #160b29; text-shadow:0 2px 0 #160b29, 2px 0 0 #160b29, -2px 0 0 #160b29, 0 -2px 0 #160b29, 0 5px 12px rgba(15,10,35,.55); }   /* DEV FORK 31: white on white fixed (Keith) — a crisp navy outline replaces the white glow that was washing it out over the bright band */
+  #ldSub { position:relative; margin-top:13px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:clamp(16px,4.2vw,25px); letter-spacing:2px; color:#fff; -webkit-text-stroke:1px rgba(22,11,41,.9); text-shadow:0 2px 3px rgba(15,10,35,.65), 0 0 2px rgba(15,10,35,.5);   /* DEV FORK 32: softened (Keith: the outline is too — his sentence cut off; the heavy block frame in his screenshot is gone, readability stays) */ }   /* DEV FORK 31: white on white fixed (Keith) — a crisp navy outline replaces the white glow that was washing it out over the bright band */
   #ldPct { position:relative; margin-top:6px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:19px; letter-spacing:2px; color:#ffe9a8; -webkit-text-stroke:1px #3a1503; text-shadow:0 2px 0 rgba(30,10,0,.6), 0 0 8px rgba(255,190,60,.25); min-height:23px; }   /* DEV FORK 31: the gold % line firms up the same way */
   #ldTip { position:relative; margin-top:16px; max-width:min(86vw,560px); background:rgba(20,24,64,.78); border:2px solid rgba(255,210,63,.85); border-radius:99px; padding:9px 20px; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:14.5px; letter-spacing:1px; color:#fff6d8; }
   #ldTip b { color:#ffd23f; }
@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 31</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 32</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 31 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 32 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -404,6 +404,12 @@
    fires in night runs; identical, not imitated.
    Loader: GET READY TO JUMP gets a navy outline —
    white on white fixed without repainting his sky.
+   FORK 32: the mountain range FLATTENS into an
+   OCEAN in Extended Night (Keith) — three smooth
+   swell silhouettes on the ridges' own anchors +
+   moonlight shimmer on the near water; Level 1
+   keeps its mountains. The loader outline is
+   softened (his FORK 31 shot: too heavy a frame).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -925,6 +931,27 @@ function skyAt(ph) {
   return { c: SKY_KEYS[0].c, star: 0 };
 }
 function drawCitySkyline(mFade, sky) {   /* RETIRED in FORK 29 (Keith, 2026-11-12): CITY NIGHTS is dead — Map 2 is EXTENDED NIGHT. This body never runs. */ if (true) return;
+function drawOcean(mFade, sky) {   /* DEV FORK 32: EXTENDED NIGHT's world-below — the mountain range flattened into an ocean (Keith). Same anchors, depths and climb fade as the ridges; the shape is swells, not peaks. */
+  const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+  const vw2 = viewW / zoom, vh2 = viewH / zoom;
+  const SWELLS = [
+    { par: 0.08, pv: 0.10, base: 235, amp: 7, f1: 0.0021, p1: 1.7, col: mixc(sky.c[3], sky.c[0], 0.30), a: 0.50 },
+    { par: 0.14, pv: 0.16, base: 212, amp: 5, f1: 0.0031, p1: 4.2, col: mixc(sky.c[2], [6, 10, 26], 0.45), a: 0.72 },
+    { par: 0.22, pv: 0.22, base: 190, amp: 4, f1: 0.0043, p1: 0.6, col: mixc(sky.c[1], [4, 8, 22], 0.60), a: 0.95 } ];
+  for (const r of SWELLS) {
+    const baseY = r.base - camSmY * r.pv + vh2 * 0.55 - tiltY * r.par * 30;
+    if (baseY - r.amp > vh2 + 60) continue;
+    ctx.save(); ctx.globalAlpha = r.a * mFade * (1 - 0.35 * sky.star); ctx.fillStyle = `rgb(${r.col})`;
+    ctx.beginPath(); ctx.moveTo(-60, vh2 + 80);
+    for (let sx = -60; sx <= vw2 + 60; sx += 30) { const wx = sx + camX * r.par + tiltX * r.par * 90; const h = r.amp * (0.5 + 0.5 * Math.sin(wx * r.f1 + r.p1)) + r.amp * 0.4 * Math.sin(wx * r.f1 * 3.1 + r.p1 * 2.0); ctx.lineTo(sx, baseY - h); }
+    ctx.lineTo(vw2 + 60, vh2 + 80); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  const hb = (n) => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
+  const hzY = 190 - camSmY * 0.22 + vh2 * 0.55 - tiltY * 0.22 * 30;   /* the near swell's waterline */
+  ctx.save(); ctx.fillStyle = 'rgb(255,240,200)';
+  for (let gx = -40; gx <= vw2 + 40; gx += 24) { const wx = gx + camX * 0.22 + tiltX * 0.22 * 90; const cell = Math.floor(wx / 24); const rr = hb(cell * 3 + 7); if (rr < 0.45) continue; const tw = 0.5 + 0.5 * Math.sin(time * 2.2 + cell * 1.7); ctx.globalAlpha = (0.05 + 0.30 * tw) * mFade * (0.4 + 0.6 * rr) * (0.35 + 0.65 * Math.max(0, Math.min(1, gx / vw2))); ctx.fillRect(gx + rr * 8, hzY + 8 + hb(cell * 5 + 1) * Math.max(10, (vh2 - hzY) * 0.35), 5 + rr * 9, 1.6); }
+  ctx.restore();
+}   /* moonlight shimmer: hashed dash cells on the near water, twinkling, denser toward the moon's side of the screen */
   if (mFade <= 0.01) return;
   const baseFar = 235 - camSmY * 0.10 + (viewH / zoom) * 0.55;
   { const gg = ctx.createLinearGradient(0, baseFar - 320, 0, baseFar + 30); const hc = sky.c[3]; gg.addColorStop(0, `rgba(${hc[0]},${hc[1]},${hc[2]},0)`); gg.addColorStop(0.78, `rgba(${hc[0]},${hc[1]},${hc[2]},0.20)`); gg.addColorStop(1, `rgba(${hc[0]},${hc[1]},${hc[2]},0.05)`); ctx.save(); ctx.globalAlpha = mFade; ctx.fillStyle = gg; ctx.fillRect(-80, baseFar - 320, viewW / zoom + 160, 350); ctx.restore(); }   /* DEV FORK 28: the horizon glow — the city's light on the sky, tinted from the sky's own horizon color */
@@ -2367,7 +2394,7 @@ function draw() {
   {
     const climb = Math.max(0, -camSmY - viewH / zoom * 0.42);   /* slow camera (v0.21): the fade can't pump with hops either */
     const mFade = Math.max(0, Math.min(1, 1.15 - climb / 650));
-    if (mFade > 0.01) {   /* DEV FORK 29: the ridges draw in BOTH worlds again — the city is retired (Keith, 2026-11-12) */
+    if (mFade > 0.01 && window.__map === 'night') { drawOcean(mFade, sky); } else if (mFade > 0.01) {   /* DEV FORK 32: in EXTENDED NIGHT the world-below is the OCEAN (Keith: flatten the range) — the ridges keep Level 1 */
       const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));   /* DEV FORK 26: in the city the skyline takes the ridges' place — same slot, same fade */
       const RIDGES = [
         { par: 0.05, pv: 0.07, base: 235, amp: 210, f1: 0.0038, p1: 1.7, p2: 0.4, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50 },
@@ -2704,12 +2731,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK31 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK32 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK31 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK32 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
