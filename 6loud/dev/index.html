@@ -128,8 +128,8 @@
   #ldBarWrap { position:relative; width:min(72vw,620px); margin-top:14px; }
   #ldBar { height:26px; border-radius:99px; background:#241448; border:2px solid rgba(210,220,255,.9); box-shadow:0 0 0 3px rgba(36,20,72,.45), 0 10px 24px rgba(10,20,60,.35), inset 0 3px 8px rgba(0,0,0,.65); overflow:hidden; }
   #ldFill { height:100%; width:0%; background:repeating-linear-gradient(115deg,#ffd23f 0 18px,#ffb52e 18px 36px); box-shadow:inset 0 2px 3px rgba(255,255,255,.7), inset 0 -4px 6px rgba(160,80,0,.45); transition:width .25s ease; }
-  #ldSub { position:relative; margin-top:13px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:clamp(16px,4.2vw,25px); letter-spacing:2px; color:#fff; text-shadow:0 2px 0 rgba(30,40,90,.55), 0 0 12px rgba(255,255,255,.35); }
-  #ldPct { position:relative; margin-top:6px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:19px; letter-spacing:2px; color:#ffe9a8; -webkit-text-stroke:1px rgba(58,21,3,.65); text-shadow:0 2px 0 rgba(0,0,0,.35); min-height:23px; }
+  #ldSub { position:relative; margin-top:13px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:clamp(16px,4.2vw,25px); letter-spacing:2px; color:#fff; -webkit-text-stroke:1.5px #160b29; text-shadow:0 2px 0 #160b29, 2px 0 0 #160b29, -2px 0 0 #160b29, 0 -2px 0 #160b29, 0 5px 12px rgba(15,10,35,.55); }   /* DEV FORK 31: white on white fixed (Keith) — a crisp navy outline replaces the white glow that was washing it out over the bright band */
+  #ldPct { position:relative; margin-top:6px; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:19px; letter-spacing:2px; color:#ffe9a8; -webkit-text-stroke:1px #3a1503; text-shadow:0 2px 0 rgba(30,10,0,.6), 0 0 8px rgba(255,190,60,.25); min-height:23px; }   /* DEV FORK 31: the gold % line firms up the same way */
   #ldTip { position:relative; margin-top:16px; max-width:min(86vw,560px); background:rgba(20,24,64,.78); border:2px solid rgba(255,210,63,.85); border-radius:99px; padding:9px 20px; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:14.5px; letter-spacing:1px; color:#fff6d8; }
   #ldTip b { color:#ffd23f; }
   @media (max-height:560px) { #ldEmblem { height:30vh; } #ldWord { font-size:28px; margin-top:4px; } #ldTip { display:none; } #ldBarWrap { margin-top:8px; } }
@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 30</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 31</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 30 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 31 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -394,6 +394,16 @@
    per his instruction, and his midnight-at-5000ft
    moonrise idea for Level 1 is filed for later,
    not built here.
+   FORK 31: the moon UN-GLUED (Keith: 'attached to
+   the screen') — it rides the smoothed altitude +
+   device tilt at celestial scale; the art is now
+   his Copilot moon from Drive (illustrated
+   purple-gold, own halo; Amy's glow retired).
+   Amy's ambient sky-rocket REMOVED — the game's
+   own v0.96 launch (Level 1's, his design) already
+   fires in night runs; identical, not imitated.
+   Loader: GET READY TO JUMP gets a navy outline —
+   white on white fixed without repainting his sky.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2272,14 +2282,12 @@ function draw() {
       window.__moonImg = window.__moonImg || (() => { const i = new Image(); i.src = 'moon.webp'; return i; })();
       window.__planetImg = window.__planetImg || (() => { const i = new Image(); i.src = 'planet.webp'; return i; })();
       window.__satImg = window.__satImg || (() => { const i = new Image(); i.src = '../play/assets/satellite.webp'; return i; })();   /* pre-rewrite form on purpose: the isolation pass below prefixes it like every shared-tree path */
-      const mR = Math.min(W, H) * 0.18, mX = W * 0.74, mY = H * 0.21;   /* the moon: big, bright and CLOSE (Keith) — a real photograph, fixed in the far sky like everything up there */
-      if (window.__planetImg.naturalWidth) { ctx.save(); ctx.globalAlpha = 0.88; const pw = Math.min(W, H) * 0.17; ctx.drawImage(window.__planetImg, W * 0.15 - pw / 2, H * 0.14 - pw / 2, pw, pw); ctx.restore(); }   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet */
-      if (window.__moonImg.naturalWidth) { const gg2 = ctx.createRadialGradient(mX, mY, mR * 0.8, mX, mY, mR * 2.2); gg2.addColorStop(0, 'rgba(215,226,255,0.20)'); gg2.addColorStop(1, 'rgba(215,226,255,0)'); ctx.fillStyle = gg2; ctx.fillRect(mX - mR * 2.2, mY - mR * 2.2, mR * 4.4, mR * 4.4); ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2); }
+      const mR = Math.min(W, H) * 0.19, mX = W * 0.74 - tiltX * 14 + Math.sin(time * 0.05) * 3, mY = H * 0.21 + altSm * H * 0.045 - tiltY * 8;   /* DEV FORK 31: the moon UN-GLUED — it rides the smoothed altitude and the device tilt at celestial scale and breathes on a slow sway; still screen-space, so the zoom never pumps it */
+      if (window.__planetImg.naturalWidth) { ctx.save(); ctx.globalAlpha = 0.88; const pw = Math.min(W, H) * 0.17; ctx.drawImage(window.__planetImg, W * 0.15 - pw / 2 - tiltX * 7, H * 0.14 - pw / 2 + altSm * H * 0.02 - tiltY * 4, pw, pw); ctx.restore(); }   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 31: half the moon's drift — it's farther away */
+      if (window.__moonImg.naturalWidth) ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2);   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
       const satC = time % 90;   /* our satellite transits IN FRONT of the moon on a slow cycle (Keith's placement) */
       if (satC > 8 && satC < 30 && window.__satImg.naturalWidth) { const sp = (satC - 8) / 22, sw = Math.min(W, H) * 0.115, sh = sw * window.__satImg.naturalHeight / window.__satImg.naturalWidth; ctx.save(); ctx.globalAlpha = 0.96; ctx.drawImage(window.__satImg, mX + (sp - 0.5) * mR * 5.4 - sw / 2, mY - mR * 0.30 + sp * mR * 0.55 - sh / 2, sw, sh); ctx.restore(); }
-      window.__rocketImg = window.__rocketImg || (() => { const i = new Image(); i.src = '../play/assets/rocket.webp'; return i; })();
-      const rkC = time % 150;   /* DEV FORK 30: our rocket, wired at Keith's 'wire it all' — night world only; Level 1's sky is untouched (Keith) */
-      if (rkC > 20 && rkC < 36 && window.__rocketImg.naturalWidth) { const rp = (rkC - 20) / 16, rw2 = Math.min(W, H) * 0.075, rh2 = rw2 * window.__rocketImg.naturalHeight / window.__rocketImg.naturalWidth, rx = W * 0.30 + rp * W * 0.12, ry = H * 0.88 - (1 - Math.pow(1 - rp, 2)) * H * 0.58; ctx.save(); ctx.fillStyle = 'rgb(255,214,160)'; for (let ti = 1; ti <= 6; ti++) { ctx.globalAlpha = 0.15 * (1 - ti / 7); ctx.beginPath(); ctx.arc(rx - ti * 3, ry + rh2 * 0.5 + ti * rh2 * 0.30, rw2 * 0.17 * (1 - ti / 8), 0, 6.29); ctx.fill(); } ctx.globalAlpha = 0.95; ctx.translate(rx, ry); ctx.rotate(-0.10 + rp * 0.22); ctx.drawImage(window.__rocketImg, -rw2 / 2, -rh2 / 2, rw2, rh2); ctx.restore(); }
+      /* DEV FORK 31: Amy's ambient sky-rocket REMOVED (Keith: 'The rocket launch was better in level 1, mimic that') — the game's own v0.96 launch already fires in Extended Night runs: 55 s in, ignition flash, the runner's own puffs as its smoke trailer, behind the clouds. Identical, not imitated. */
     }
     meteorT -= 1 / 60;
     if (!meteor && meteorT <= 0 && sky.star > 0.7) { meteor = { x: Math.random() * W * 0.7, y: Math.random() * H * 0.25, v: 620 + Math.random() * 300 }; meteorT = 5 + Math.random() * 7; }
@@ -2696,12 +2704,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK30 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK31 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK30 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK31 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
