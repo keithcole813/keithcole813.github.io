@@ -127,6 +127,12 @@
   #ldTip { position:relative; margin-top:16px; max-width:min(86vw,560px); background:rgba(20,24,64,.78); border:2px solid rgba(255,210,63,.85); border-radius:99px; padding:9px 20px; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:14.5px; letter-spacing:1px; color:#fff6d8; }
   #ldTip b { color:#ffd23f; }
   @media (max-height:560px) { #ldEmblem { height:30vh; } #ldWord { font-size:28px; margin-top:4px; } #ldTip { display:none; } #ldBarWrap { margin-top:8px; } }
+  /* DEV FORK 12 audio toggles: pills on the title + WIPEOUT stacks only */
+  #audRow, #audRow2 { display:flex; gap:10px; justify-content:center; }
+  #audRow { margin-top:2px; }
+  #audRow2 { margin-top:12px; }
+  .audTg { pointer-events:auto; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:13px; letter-spacing:1.5px; color:#ffe9a8; background:rgba(20,24,64,.82); border:2px solid rgba(255,210,63,.8); border-radius:99px; padding:7px 16px; cursor:pointer; }
+  .audTg.off { color:#9aa3c7; border-color:rgba(154,163,199,.5); background:rgba(20,24,64,.5); text-decoration:line-through; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -203,7 +209,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="ver">v0.99.7 · DEV FORK 11</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 12</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -218,6 +224,7 @@
     <div id="pubRow"><button class="btn pubBtn" id="pubBtn">PUBLISH TO WORLD</button><button class="btn pubBtn" id="skipBtn">SKIP</button><span id="pubDone" class="pubDone" style="display:none"></span></div>
     <button class="btn" id="again">TRY AGAIN</button>
     <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
+    <div id="audRow2"><button id="tgMusic2" class="audTg">MUSIC ON</button><button id="tgSfx2" class="audTg">SOUND ON</button></div>
     <div id="pubNote"></div>
     <div id="reviveRow"><button class="btn" id="reviveBtn">WATCH AD TO REVIVE</button><div id="reviveNote"></div></div>
   </div>
@@ -226,7 +233,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 11 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 12 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -244,6 +251,13 @@
    on the real %, GET READY TO JUMP!, rotating mechanics tips); at
    READY the loader fades and the runner DROPS IN from the sky at
    the LEFT of the title cloud, lands, and runs to his mark.
+   FORK 12: the AUDIO BUSES — the second stab at in-game audio
+   controls (Keith, after re-reading the Gemini 'Music in Apps'
+   chat): MUSIC and SOUND master gain buses under every per-sound
+   gain; toggles live ONLY on the title and WIPEOUT screens (never
+   mid-run); a toggle only ramps its bus, nothing pauses or resets
+   on the WebAudio route, so the old stuck-silence family cannot
+   return; preference saved, default ON.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -306,23 +320,23 @@ function playNote() {   /* Keith's note pick (v0.83): each successive note in a 
   noteStreak = (time - lastNoteT < 2.5) ? Math.min(noteStreak + 1, 12) : 0;
   lastNoteT = time;
   if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
-  if (!gainNote) { gainNote = actx.createGain(); gainNote.gain.value = 0.7; gainNote.connect(actx.destination); }
+  if (!gainNote) { gainNote = actx.createGain(); gainNote.gain.value = 0.7; gainNote.connect(audBusS()); }
   const src = actx.createBufferSource(); src.buffer = bufNote; src.playbackRate.value = Math.pow(2, noteStreak / 12); src.connect(gainNote); src.start();
   noteSrc = src;
 }
 function playCoin() {   /* the power-up sweep the moment the coin lands (Keith's pick, v0.83) */
   if (!actx || !bufCoin || actx.state !== 'running') return;
-  if (!gainCoin) { gainCoin = actx.createGain(); gainCoin.gain.value = 0.8; gainCoin.connect(actx.destination); }
+  if (!gainCoin) { gainCoin = actx.createGain(); gainCoin.gain.value = 0.8; gainCoin.connect(audBusS()); }
   const src = actx.createBufferSource(); src.buffer = bufCoin; src.connect(gainCoin); src.start();
 }
 function playSpark() {   /* Keith's electric spark (v0.94): fires the moment a MAGNETIZED player jumps — takeoff or double — the current bites as he leaves the ground */
   if (!actx || !bufSpark || actx.state !== 'running') return;
-  if (!gainSpark) { gainSpark = actx.createGain(); gainSpark.gain.value = 0.85; gainSpark.connect(actx.destination); }
+  if (!gainSpark) { gainSpark = actx.createGain(); gainSpark.gain.value = 0.85; gainSpark.connect(audBusS()); }
   const src = actx.createBufferSource(); src.buffer = bufSpark; src.connect(gainSpark); src.start();
 }
 function playThunder() {   /* Keith's thunder (v0.95): one crack as the storm bank arrives — the forks are coming */
   if (!actx || !bufTh || actx.state !== 'running') return;
-  if (!gainTh) { gainTh = actx.createGain(); gainTh.gain.value = 0.9; gainTh.connect(actx.destination); }
+  if (!gainTh) { gainTh = actx.createGain(); gainTh.gain.value = 0.9; gainTh.connect(audBusS()); }
   const src = actx.createBufferSource(); src.buffer = bufTh; src.connect(gainTh); src.start();
 }
 function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud (v0.33) */
@@ -331,7 +345,7 @@ function playBoom() {   /* Keith's cinematic boom: a CHARGED landing on a cloud 
   const now = actx.currentTime;
   if (now - lastBoomT < 0.4) return;   /* never machine-gun it */
   lastBoomT = now;
-  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 0.86; gainBoom.connect(actx.destination); }   /* 1.35 x 0.8 — down 20% (Keith v0.42) */
+  if (!gainBoom) { gainBoom = actx.createGain(); gainBoom.gain.value = 0.86; gainBoom.connect(audBusS()); }   /* 1.35 x 0.8 — down 20% (Keith v0.42) */
   const src = actx.createBufferSource(); src.buffer = bufBoom; src.connect(gainBoom); src.start();
 }
 /* v0.13.4 — the silent-first-run fix (Keith: "music doesn't start when
@@ -393,20 +407,20 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
   playTrack._key = trackKey;
   if (actx && bufD && actx.state === 'running') {
     if (!srcD) {
-      gainD = actx.createGain(); gainD.connect(actx.destination);
+      gainD = actx.createGain(); gainD.connect(audBusM());
       srcD = actx.createBufferSource(); srcD.buffer = bufD; srcD.loop = true; srcD.connect(gainD); srcD.start();
       if (bufB) {
-        gainB = actx.createGain(); gainB.connect(actx.destination);
+        gainB = actx.createGain(); gainB.connect(audBusM());
         srcB = actx.createBufferSource(); srcB.buffer = bufB; srcB.loop = true; srcB.connect(gainB); srcB.start();
       }
       if (bufW && !srcW) {
-        gainW = actx.createGain(); gainW.gain.value = 0; gainW.connect(actx.destination);
+        gainW = actx.createGain(); gainW.gain.value = 0; gainW.connect(audBusM());
         srcW = actx.createBufferSource(); srcW.buffer = bufW; srcW.loop = true; srcW.connect(gainW); srcW.start();
       }
     }
-    if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(actx.destination); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
-    if (bufDk && !srcDk) { gainDk = actx.createGain(); gainDk.gain.value = 0; gainDk.connect(actx.destination); srcDk = actx.createBufferSource(); srcDk.buffer = bufDk; srcDk.loop = true; srcDk.connect(gainDk); srcDk.start(); }   /* the water walk runs silent behind its gate (v0.91), like the steps chain */
-    if (bufMg && !srcMg) { gainMg = actx.createGain(); gainMg.gain.value = 0; gainMg.connect(actx.destination); srcMg = actx.createBufferSource(); srcMg.buffer = bufMg; srcMg.loop = true; srcMg.connect(gainMg); srcMg.start(); }   /* the magnet loop runs silent behind its scene too (v0.94) */
+    if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(audBusS()); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
+    if (bufDk && !srcDk) { gainDk = actx.createGain(); gainDk.gain.value = 0; gainDk.connect(audBusS()); srcDk = actx.createBufferSource(); srcDk.buffer = bufDk; srcDk.loop = true; srcDk.connect(gainDk); srcDk.start(); }   /* the water walk runs silent behind its gate (v0.91), like the steps chain */
+    if (bufMg && !srcMg) { gainMg = actx.createGain(); gainMg.gain.value = 0; gainMg.connect(audBusM()); srcMg = actx.createBufferSource(); srcMg.buffer = bufMg; srcMg.loop = true; srcMg.connect(gainMg); srcMg.start(); }   /* the magnet loop runs silent behind its scene too (v0.94) */
     const t = actx.currentTime;
     gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(sc === 'day' ? musV() : 0, t, 0.18);
     if (gainB) { gainB.gain.cancelScheduledValues(t); gainB.gain.setTargetAtTime(sc === 'battle' ? musV() : 0, t, 0.18); }
@@ -415,10 +429,11 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
     if (gainMg) { gainMg.gain.cancelScheduledValues(t); gainMg.gain.setTargetAtTime(sc === 'magnet' ? musV() : 0, t, 0.18); }   /* 'Best Intentions' fades in with the magnet, out when it lets go (v0.94) */   /* the trippin loop fades in with the wings, out when they end (v0.86) */   /* the steps fade in as the intro bg fades out (Keith v0.35) */
     if (mScene === 'steps' && !srcS) {   /* no WebAudio steps chain on this device (the steps buffer failed or has not decoded) — the plain element carries the steps instead of pausing into silence (v0.66: Keith "cant hear steps"; the title music had also loaded daylight into the element, and gateSteps only revives a steps-loaded element) */
       if ((music.src || '').split('/').pop() !== 'steps.mp3') { music.src = '../play/assets/steps.mp3'; music.currentTime = 0; }   /* DEV FORK 8: filename compare */
-      if (stepsGateOn) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();
+      if (stepsGateOn && !window.__sfxOff) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause();   /* DEV FORK 12: element-carried steps honor the SOUND bus */
     } else music.pause();
   } else {
     /* do NOT zero the WebAudio gains here (the v0.62 stuck-silence fix): if the context is merely suspended, those gains are inaudible anyway — and wiping them left the game silent-but-unmuted after the context resumed, because nothing re-applies gains until a scene boundary. The gains keep their last scene values and the routes hand off cleanly. */
+    if (mScene === 'steps' ? window.__sfxOff : window.__musOff) { music.pause(); return; }   /* DEV FORK 12: the element route honors the buses — pause is the only mute an <audio> element obeys on iOS, and the latch keeps heartbeats from restarting it while muted */
     music.volume = mScene === 'steps' ? stpV() : musV();
     if ((music.src || '').split('/').pop() !== want.split('/').pop()) { music.src = want; music.currentTime = 0; }   /* DEV FORK 8: filename compare — see the latch note above */
     if (mScene === 'steps' && stepsGateOn === false) music.pause();
@@ -429,7 +444,7 @@ function gateSteps() {   /* footsteps sound only while his feet are on a cloud �
   const on = mScene === 'steps' && mode === 'run' && !!grounded && !(grounded && grounded.dark) && !hangPlat && !slipPlat;   /* v0.91: on a DARK cloud the snow steps stop — the water walk (gateDark) is the footstep there */
   if (on === stepsGateOn) return; stepsGateOn = on;
   if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
-  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }
+  else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on && !window.__sfxOff) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }   /* DEV FORK 12: same SOUND-bus respect in gateSteps */
 }
 function gateDark() {   /* Keith (v0.91): the water walk sounds 'when your feet are on a dark cloud only. not before or after. it doesnt continue' — a hard little gate on the dark chain, checked every frame next to gateSteps, fading at the steps' own snappy rate */
   const on = mode === 'run' && !!grounded && !!grounded.dark && !hangPlat && !slipPlat;
@@ -2646,6 +2661,48 @@ function ldTick(t) {
   if (el) { el.innerHTML = LD_TIPS[ldTipI % LD_TIPS.length]; ldTipI++; }
 }
 if (/[?&]loadhold=1/.test(location.search)) window.__ldHold = true;
+
+/* DEV FORK 12 — THE AUDIO BUSES (Keith, 2026-11-11): the second stab
+   at in-game audio controls, fork-first. The v0.53-v0.68 toggle era
+   died of STATE — pauses, element resets and gain wipes stranded the
+   sound until a restart. This design holds no state that can strand:
+   audBusM/audBusS are two master gains between every per-sound gain
+   and the destination, born already set to the saved preference, and
+   a toggle only RAMPS its bus — sources never stop, scene gains
+   never wipe, the heartbeat never touches the buses. On the
+   no-WebAudio element route, playTrack/gateSteps pause the element
+   by scene (the only mute iOS obeys there). The controls live ONLY
+   on the title and WIPEOUT screens — never mid-run, where the whole
+   screen is the jump button. Saved in sixlouddev_aud, default ON. */
+let busM = null, busS = null;
+window.__musOff = false; window.__sfxOff = false;
+try { const s = JSON.parse(localStorage.getItem('sixlouddev_aud') || '{}'); window.__musOff = !!s.m; window.__sfxOff = !!s.s; } catch (e) {}
+function audBusM() { if (!busM) { busM = actx.createGain(); busM.gain.value = window.__musOff ? 0 : 1; busM.connect(actx.destination); } return busM; }
+function audBusS() { if (!busS) { busS = actx.createGain(); busS.gain.value = window.__sfxOff ? 0 : 1; busS.connect(actx.destination); } return busS; }
+function audSave() { try { localStorage.setItem('sixlouddev_aud', JSON.stringify({ m: window.__musOff ? 1 : 0, s: window.__sfxOff ? 1 : 0 })); } catch (e) {} }
+function audUI() {
+  const pairs = [['tgMusic', window.__musOff, 'MUSIC'], ['tgSfx', window.__sfxOff, 'SOUND'], ['tgMusic2', window.__musOff, 'MUSIC'], ['tgSfx2', window.__sfxOff, 'SOUND']];
+  for (const [id, off, label] of pairs) { const el = document.getElementById(id); if (el) { el.textContent = label + (off ? ' OFF' : ' ON'); el.classList.remove('off'); if (off) el.classList.add('off'); } }
+}
+function audApply() {
+  if (actx) { const t = actx.currentTime; if (busM) busM.gain.setTargetAtTime(window.__musOff ? 0 : 1, t, 0.05); if (busS) busS.gain.setTargetAtTime(window.__sfxOff ? 0 : 1, t, 0.05); }
+  if (typeof playTrack === 'function') playTrack(true);   /* one forced routing pass: a live element stops (or resumes) NOW, and the WebAudio scenes re-assert behind the buses */
+  stepsGateOn = null; darkGateOn = null;   /* the element-carried gates re-decide under the new bus state */
+  if (typeof gateSteps === 'function') gateSteps();
+  if (typeof gateDark === 'function') gateDark();
+  audUI();
+}
+function audToggle(which) {
+  if (which === 'm') window.__musOff = !window.__musOff; else window.__sfxOff = !window.__sfxOff;
+  audSave(); audApply();
+  if (typeof dbgLog === 'function') dbgLog('AUD ' + (which === 'm' ? 'MUSIC ' : 'SOUND ') + ((which === 'm' ? window.__musOff : window.__sfxOff) ? 'OFF' : 'ON'));
+}
+for (const [id, w] of [['tgMusic', 'm'], ['tgSfx', 's'], ['tgMusic2', 'm'], ['tgSfx2', 's']]) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', e => { e.stopPropagation(); audToggle(w); });
+}
+audUI();
+window.__audTest = { toggle: audToggle, state: () => ({ m: !!window.__musOff, s: !!window.__sfxOff }) };
 
 function loop(ts) {
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
