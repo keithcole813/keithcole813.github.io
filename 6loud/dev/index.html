@@ -224,7 +224,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 20</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 21</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -247,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 20 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 21 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -318,6 +318,10 @@
    cloud with the whole cloud as runway — the old
    death-x restore dropped him at its end, in front
    of the same gap he died in (Keith).
+   FORK 21: the ledge-slip plunge LANDS — the v0.71
+   never-lands exception is retired at Keith's ruling
+   ('Clouds below me should have caught me'): a cloud
+   under a falling man catches him, middle included.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1824,7 +1828,7 @@ function update(dt) {
       px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* same rigid ride through the slip */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
-    if (slipT >= SLIP_DUR) {   /* fingers go — the Fall 2 plunge: the ONE fall that never lands (noLand), no grab either. v0.99.1 THE DANGLE CATCH (Keith, at the storm fork: 'I was hanging on a cloud that was over 2 clouds and went right through them'): his body hangs ~284 under the lip, so a deck his dangle already overlaps is one he is effectively hanging THROUGH — the plunge may not pass it. He lands on the highest deck his hang overlapped; decks below his feet keep the v0.71 rule untouched */
+    if (slipT >= SLIP_DUR) {   /* fingers go — the Fall 2 plunge: no grab on the way down (and since FORK 21 it LANDS on any cloud below — Keith, 2026-11-12). v0.99.1 THE DANGLE CATCH (Keith, at the storm fork: 'I was hanging on a cloud that was over 2 clouds and went right through them'): his body hangs ~284 under the lip, so a deck his dangle already overlaps is one he is effectively hanging THROUGH — the plunge may not pass it. He lands on the highest deck his hang overlapped; decks below his feet keep the v0.71 rule untouched */
       let catchP = null;
       for (const p of plats) { if (p.gone || p === slipPlat) continue;
         if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
@@ -1832,7 +1836,7 @@ function update(dt) {
         if (top > slipPlat.y && top < py && (!catchP || top < catchP.y + (catchP.sink || 0))) catchP = p; }
       if (catchP) { const top = catchP.y + (catchP.sink || 0); py = top; vy = 0; grounded = catchP; slipPlat = null; catchP.sinkV = (catchP.sinkV || 0) + 300;
         landMove = 'basic'; landFrom = 24; landTo = 30; landRate = 30; landDur = (landTo - landFrom + 1) / landRate; landT = 0; }
-      else { slipPlat = null; vy = 140; noLand = true; }
+      else { slipPlat = null; vy = 140; }   /* DEV FORK 21 (Keith, 2026-11-12): the slip plunge LANDS — 'Clouds below me should have caught me.' The v0.71 never-lands exception is retired; no grab on the way down and no mid-air jump, as ever */
     }
   } else if (!grounded) {
     if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1) * (magT > 0 ? 1.6 : 1);   /* v0.94: the MAGNET multiplies whatever gravity the moment already has by 1.6 while its 7 seconds run */ if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
@@ -1843,7 +1847,7 @@ function update(dt) {
       zoom = Math.min(1.07, zoom + 0.03);
     }
     if (flipped) flipT += dt;
-    /* a fall CAN land on a cloud (Keith v0.71 — retires the v0.4 jump-only landing rule and its v0.43 staircase exception, now just the general case). The one fall that never lands is the ledge-slip plunge (noLand). */
+    /* a fall CAN land on a cloud (Keith v0.71 — retires the v0.4 jump-only landing rule and its v0.43 staircase exception, now just the general case). Every fall lands now — FORK 21 retired the ledge-slip plunge's never-lands exception (Keith, 2026-11-12). */
     if (!noLand) for (const p of plats) {
       if (p.gone) continue;   /* v0.91: a dark cloud that sank away catches no one */
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
@@ -2568,12 +2572,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK20 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK21 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK20 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK21 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
