@@ -139,6 +139,9 @@
   #pullup { position:fixed; }
   /* DEV FORK 15: WIPEOUT top-anchored + scrollable at every height; tail padded clear of the debug strip */
   #over { justify-content:flex-start; overflow-y:auto; touch-action:pan-y; padding:14px 0 96px; }
+  /* DEV FORK 17: PULL UP!! re-declared plain — core geometry in one boring rule, the garnish in another, so no single exotic token can take the whole presentation down with it */
+  #pullup { position:fixed; left:50%; top:24%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; color:#00F5FF; z-index:7; }
+  #pullup { letter-spacing:1.5px; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -215,7 +218,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 16</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 17</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -239,7 +242,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 16 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 17 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -288,6 +291,13 @@
    assets/lash/ at rate 2 with the approved falling fit;
    the live game's LaShmoove stays the old model until
    Keith calls the ALT perfect.
+   FORK 17: two FORK 16 field fixes — the revive that
+   landed UNDER the open board page (an ad now closes the
+   board and card on entry, a loading veil covers the
+   whole attempt, and revive force-closes both overlays),
+   and PULL UP!! still haunting the top-left corner on
+   Keith's phone (the helper is re-declared plain and its
+   presentation is written inline at show time).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2538,12 +2548,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK16 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK17 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK16 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK17 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2597,7 +2607,7 @@ const AD = {
     const finish = v => { if (!finished) { finished = true; done(v); } };
     try {
       window.adBreak({ type: kind === 'rewarded' ? 'reward' : 'next', name: kind === 'rewarded' ? 'revive' : 'between-runs',
-        beforeAd: () => { called = true; AD.log('google ad showing'); },
+        beforeAd: () => { called = true; try { $('adSim').style.display = 'none'; } catch (e) {} AD.log('google ad showing'); },   /* DEV FORK 17: a real Google ad takes the screen — the veil steps aside */
         adViewed: () => { AD.log('google ad viewed'); },
         adDismissed: () => { AD.log('google ad dismissed'); },
         adBreakDone: info => { const st = info && info.breakStatus; AD.log('google done: ' + st); if (!called) finish(null); else finish(kind === 'rewarded' ? st === 'viewed' : st !== 'error'); } });
@@ -2625,6 +2635,8 @@ const AD = {
   },
   show(kind, done) {
     if (AD.busy) return; AD.busy = true; AD.holdAudio(); AD.log(kind + ' requested');
+    try { $('boardPage').style.display = 'none'; } catch (e) {} try { $('nbCard').style.display = 'none'; } catch (e) {}   /* DEV FORK 17: an ad starts from the WIPEOUT and nowhere else — the full board and the NEW BEST card close first */
+    try { $('adSimKind').textContent = kind === 'rewarded' ? 'REWARDED VIDEO' : 'INTERSTITIAL'; $('adSimHint').textContent = 'Finding your ad…'; $('adSimCount').textContent = '…'; $('adSimFill').style.width = '0%'; const vc = $('adSimClose'); vc.disabled = true; vc.textContent = '✕'; $('adSim').style.display = 'flex'; } catch (e) {}   /* DEV FORK 17: the veil goes up NOW, for the whole attempt — FORK 7–16 left the page tappable through the Google window (Keith's revive landed under the board) */
     setTimeout(() => { if (AD.busy) { AD.log('watchdog: ad stranded — force-closing'); finish(false); } }, 15000);   /* DEV FORK 13: no ad may hold the game hostage — Keith had to force-close the app */
     let finished = false; const finish = ok => { if (finished) return; finished = true; AD.busy = false; try { $('adSim').style.display = 'none'; } catch (e) {} AD.freeAudio(); AD.log(kind + ' closed' + (ok ? ' (completed)' : ' (not completed)')); done(ok); };   /* DEV FORK 13: finish runs ONCE, and every finish path takes the sim overlay down with it */
     if (!AD.h5(kind, v => { if (v === null) AD.sim(kind, finish); else finish(v); })) AD.sim(kind, finish);
@@ -2639,7 +2651,7 @@ const AD = {
     airMove = null; hangPlat = null; slipPlat = null; held = false; pressT = 0;
     flipped = false; flipMove = null; landMove = null; landT = 0; doubleArmed = false;
     dead = false; mode = 'run'; window.__adGuardT = 1.5;
-    $('over').style.display = 'none';
+    try { $('boardPage').style.display = 'none'; } catch (e) {} try { $('nbCard').style.display = 'none'; } catch (e) {} $('over').style.display = 'none';   /* DEV FORK 17: a granted revive lands on the GAME — FORK 16 could revive him underneath the open board page (Keith: 'it did not revive me') */
     mScene = 'steps'; playTrack(true);
     AD.log('REVIVE granted — back on a cloud at ' + Math.round(runFt()) + ' FT, 1.5 s float guard');
     return true;
@@ -2743,7 +2755,7 @@ function loop(ts) {
   if (mode === 'title') titleFlow(dt);
   if (!window.__AD || !window.__AD.busy) update(dt);   /* DEV FORK 13: the world FREEZES while an ad is up — FORK 7 let gameplay run on underneath it (Keith) */
   const pu = mode === 'run' && !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) — DEV FORK 14: RUN-ONLY (its sibling helper always had this guard; the background sim behind the title could light this one mid-load, Keith's screenshot) */
-  if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
+  if (pu !== puShown) { puShown = pu; const pe = $('pullup'); if (pu) { pe.style.cssText = 'position:fixed;left:50%;top:24%;transform:translateX(-50%);font:700 42px Fredoka,sans-serif;color:#00F5FF;z-index:7;pointer-events:none;white-space:nowrap;display:block;'; } else pe.style.display = 'none'; }   /* DEV FORK 17: the helper's whole presentation is written INLINE at show time — on Keith's phone the stylesheet rule alone left it small, white and parked at the layout origin; inline styles answer to no stylesheet */
   const db = !pu && mode === 'run' && (coinT > 0 ||   /* !pu (v0.97): the two helpers never show at once — Keith's 1,720 FT screenshot had AIR JUMP READY lit while he hung from a lip (the coin clause bypassed the hang check) */ (!grounded && !hangPlat && !slipPlat && ((doubleArmed && !doubleUsed) || (wingT > 0 && doubleUsed && !tripleUsed))));   /* AIR JUMP READY helper: while a mid-air tap would fire the double (Keith v0.70.1) — flashing for the whole coin charge (Keith v0.85) — and, v0.96/v0.97, while the wings' triple still waits behind a spent double */
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
