@@ -133,6 +133,8 @@
   #audRow2 { margin-top:12px; }
   .audTg { pointer-events:auto; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:13px; letter-spacing:1.5px; color:#ffe9a8; background:rgba(20,24,64,.82); border:2px solid rgba(255,210,63,.8); border-radius:99px; padding:7px 16px; cursor:pointer; }
   .audTg.off { color:#9aa3c7; border-color:rgba(154,163,199,.5); background:rgba(20,24,64,.5); text-decoration:line-through; }
+  /* DEV FORK 13: the title toggle pair starts hidden — the loop sb gate shows it with START */
+  #audRow { display:none; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -209,7 +211,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 12</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 13</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -233,7 +235,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 12 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 13 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -258,6 +260,13 @@
    mid-run); a toggle only ramps its bus, nothing pauses or resets
    on the WebAudio route, so the old stuck-silence family cannot
    return; preference saved, default ON.
+   FORK 13: Keith's two field fixes — the title toggle pair now
+   rides START's visibility flag (FORK 12's floated through runs
+   and doubled on WIPEOUT), and the interstitial is hardened: the
+   world freezes while an ad is up, an interstitial hands control
+   back by itself, the exit runs directly instead of re-firing the
+   tap, finish() runs once and always drops the overlay, and a
+   15 s watchdog force-closes a stranded ad.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2588,14 +2597,15 @@ const AD = {
       $('adSimCount').textContent = left > 0 ? Math.ceil(left) + 's' : 'DONE';
       $('adSimFill').style.width = ((total - left) / total * 100) + '%';
       if (kind === 'rewarded' && left > 0 && left <= total - 1 && !close.onclick) { close.disabled = false; close.onclick = () => end(false); }   /* he may bail after 1 s — but a bailed ad pays no revive */
-      if (left <= 0) { clearInterval(iv); close.disabled = false; close.textContent = kind === 'rewarded' ? 'CLAIM REVIVE ✕' : 'CLOSE ✕'; close.onclick = () => end(true); }
+      if (left <= 0) { clearInterval(iv); close.disabled = false; close.textContent = kind === 'rewarded' ? 'CLAIM REVIVE ✕' : 'CLOSE ✕'; close.onclick = () => end(true); if (kind === 'interstitial') setTimeout(() => end(true), 700); }   /* DEV FORK 13: an interstitial hands control back BY ITSELF — FORK 7 waited on the CLOSE tap while the game sat consumed underneath */
     }, 100);
     window.__adTestFinish = () => end(true);   /* forkcheck hook */
     AD.log('simulated ' + kind + ' showing');
   },
   show(kind, done) {
     if (AD.busy) return; AD.busy = true; AD.holdAudio(); AD.log(kind + ' requested');
-    const finish = ok => { AD.busy = false; AD.freeAudio(); AD.log(kind + ' closed' + (ok ? ' (completed)' : ' (not completed)')); done(ok); };
+    setTimeout(() => { if (AD.busy) { AD.log('watchdog: ad stranded — force-closing'); finish(false); } }, 15000);   /* DEV FORK 13: no ad may hold the game hostage — Keith had to force-close the app */
+    let finished = false; const finish = ok => { if (finished) return; finished = true; AD.busy = false; try { $('adSim').style.display = 'none'; } catch (e) {} AD.freeAudio(); AD.log(kind + ' closed' + (ok ? ' (completed)' : ' (not completed)')); done(ok); };   /* DEV FORK 13: finish runs ONCE, and every finish path takes the sim overlay down with it */
     if (!AD.h5(kind, v => { if (v === null) AD.sim(kind, finish); else finish(v); })) AD.sim(kind, finish);
   },
   revive() {
@@ -2633,7 +2643,8 @@ if (document.addEventListener) document.addEventListener('click', e => {
   const id = e.target && e.target.id;
   if ((id === 'again' || id === 'titleBtn') && typeof mode !== 'undefined' && mode === 'over' && AD.due()) {
     e.preventDefault(); e.stopPropagation();
-    AD.show('interstitial', () => { AD.runsSince = 0; AD.lastAt = Date.now(); AD.save(); window.__adBypass = true; try { e.target.click(); } catch (err) {} window.__adBypass = false; });
+    AD.show('interstitial', () => { AD.runsSince = 0; AD.lastAt = Date.now(); AD.save();   /* DEV FORK 13: run the exit DIRECTLY (the same work as the button's own handler) — FORK 7 re-fired the tap through the stale event object, one more link that could snap */
+      try { if (id === 'again') { const s = pendingSave; pendingSave = null; if (s) s(); startRun(); } else backToTitle(); } catch (err) { AD.log('proceed failed: ' + err); } });
   }
 }, true);
 
@@ -2709,7 +2720,7 @@ function loop(ts) {
   dbgTick(ts);   /* DEV FORK: the debug overlay rides the frame loop */
   tiltEase(dt);   /* the depth eases toward the phone's pose every frame, every mode (v0.83) */
   if (mode === 'title') titleFlow(dt);
-  update(dt);
+  if (!window.__AD || !window.__AD.busy) update(dt);   /* DEV FORK 13: the world FREEZES while an ad is up — FORK 7 let gameplay run on underneath it (Keith) */
   const pu = !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) */
   if (pu !== puShown) { puShown = pu; $('pullup').style.display = pu ? 'block' : 'none'; }
   const db = !pu && mode === 'run' && (coinT > 0 ||   /* !pu (v0.97): the two helpers never show at once — Keith's 1,720 FT screenshot had AIR JUMP READY lit while he hung from a lip (the coin clause bypassed the hang check) */ (!grounded && !hangPlat && !slipPlat && ((doubleArmed && !doubleUsed) || (wingT > 0 && doubleUsed && !tripleUsed))));   /* AIR JUMP READY helper: while a mid-air tap would fire the double (Keith v0.70.1) — flashing for the whole coin charge (Keith v0.85) — and, v0.96/v0.97, while the wings' triple still waits behind a spent double */
@@ -2717,10 +2728,10 @@ function loop(ts) {
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('selectStack').style.display = cu ? 'flex' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
   const sb = mode === 'title' && loadState === 'done';   /* START GAME shows only when the title is ready (v0.57) */
-  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; }
+  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; }   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; }
-  ghostUpdate(dt);   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
+  if (!window.__AD || !window.__AD.busy) ghostUpdate(dt);   /* DEV FORK 13: the ghost freezes with the world while an ad is up */   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
   { let rainOn = false; for (const p of plats) { if ((p.dark || p.storm) && !p.gone && (p.sink || 0) <= 640 && p.x + p.len > camX && p.x < camX + viewW / zoom) { rainOn = true; break; }   /* v0.98: the storm decks count too — the watch used to wait for a true DARK deck only, so a run through storm banks (Keith's 1,846-3,321 FT runs) never cracked once */ } if (rainOn && !rainHeard) { playThunder(); rainHeard = true; } else if (!rainOn) rainHeard = false; }   /* v0.95 (Keith): 'when rain clouds show up on screen play this once for the group' — one crack when the dark clouds arrive in view, never per cloud, and the next group cracks again */
   audioBeat += dt;   /* THE AUDIO HEARTBEAT (v0.67, Keith: "after you die and come back the audio is muted even with it set to play"): every half second the live scene re-asserts its routing. Death, the initials keyboard, an app switch, a suspended context resuming a beat late — every one of those could strand the gains or the element on the wrong side of a boundary, and a boundary-only design stays stranded until the NEXT boundary. playTrack is idempotent, so re-asserting it twice a second costs nothing and no stuck state survives longer than half a second. */
   if (audioBeat > 0.5) { audioBeat = 0; if ((mode !== 'title' || titleMusicOn) && animLoaded >= animTotal) playTrack(); }   /* DEV FORK: the heartbeat also stands down while assets stream — the load window is where the chop was heard */
