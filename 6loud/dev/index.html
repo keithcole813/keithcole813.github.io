@@ -224,7 +224,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 19</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 20</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -247,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 19 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 20 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -314,6 +314,10 @@
    run the exit anyway, once-guarded, save and exit
    guarded separately; busy taps are swallowed whole;
    a late Google beforeAd stands the sim down.
+   FORK 20: the revive lands at the START of the
+   cloud with the whole cloud as runway — the old
+   death-x restore dropped him at its end, in front
+   of the same gap he died in (Keith).
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2564,12 +2568,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK19 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK20 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK19 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK20 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2664,7 +2668,7 @@ const AD = {
     for (const p of plats) { if (p.x + p.len > px - 40 && p.x < px + 900 && (!cand || p.x < cand.x)) cand = p; }
     if (!cand) cand = plats[plats.length - 1];
     if (!cand) return false;
-    px = Math.max(cand.x + 70, Math.min(px, cand.x + cand.len - 130));
+    px = cand.x + Math.min(110, Math.max(70, cand.len * 0.2));   /* DEV FORK 20: land at the START of the cloud, whole cloud as runway — FORK 7–19 restored his death x clamped inside, dropping him at the cloud's END in front of the same gap (Keith) */
     py = cand.y; vy = 0; grounded = cand;
     airMove = null; hangPlat = null; slipPlat = null; held = false; pressT = 0;
     flipped = false; flipMove = null; landMove = null; landT = 0; doubleArmed = false;
