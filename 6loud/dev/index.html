@@ -142,6 +142,12 @@
   /* DEV FORK 17: PULL UP!! re-declared plain — core geometry in one boring rule, the garnish in another, so no single exotic token can take the whole presentation down with it */
   #pullup { position:fixed; left:50%; top:24%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; color:#00F5FF; z-index:7; }
   #pullup { letter-spacing:1.5px; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; }
+  /* DEV FORK 18: exits side by side; the sim tag gets its own row and the pill a real hit area */
+  #overBtns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  #overBtns .btn { padding:12px 20px; }
+  .adSimTag { margin-top:26px; }
+  #adSimClose { z-index:2; min-width:44px; min-height:32px; }
+  #adSimClaim { margin-top:12px; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
     #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
@@ -218,9 +224,9 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 17</div></div>
+  <div id="titleUI"><button id="startBtn">START GAME</button><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 18</div></div>
   <div id="dbg"></div>
-  <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><div class="adSimHint" id="adSimHint"></div></div></div>
+  <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
@@ -232,8 +238,7 @@
     <div id="nbCard"><div class="nbIn" id="nbIn"><div class="nbTitle">★ NEW BEST! ★</div><div class="nbRank" id="nbRank">RANK #– GLOBAL</div><div class="nbHint">Blank initials = this run isn't saved anywhere.</div></div></div>
     <div id="nameRow"><span>NEW BEST — YOUR INITIALS:</span><input id="ini" maxlength="3" autocomplete="off"></div>
     <div id="pubRow"><button class="btn pubBtn" id="pubBtn">PUBLISH TO WORLD</button><button class="btn pubBtn" id="skipBtn">SKIP</button><span id="pubDone" class="pubDone" style="display:none"></span></div>
-    <button class="btn" id="again">TRY AGAIN</button>
-    <button class="btn" id="titleBtn" style="margin-top:10px;">MAIN MENU</button>
+    <div id="overBtns"><button class="btn" id="again">TRY AGAIN</button><button class="btn" id="titleBtn">MAIN MENU</button></div>   <!-- DEV FORK 18: the exits side by side (Keith) -->
     <div id="audRow2"><button id="tgMusic2" class="audTg">MUSIC ON</button><button id="tgSfx2" class="audTg">SOUND ON</button></div>
     <div id="pubNote"></div>
   </div>
@@ -242,7 +247,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 17 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 18 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -298,6 +303,11 @@
    and PULL UP!! still haunting the top-left corner on
    Keith's phone (the helper is re-declared plain and its
    presentation is written inline at show time).
+   FORK 18: the exits sit side by side (Keith), and the
+   sim's claim moves off the little corner pill — which
+   overlapped the TEST AD tag and could not be hit — onto
+   its own big gold CLAIM REVIVE button wired on click
+   and touchend; the pill is bail-only and retires at DONE.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2548,12 +2558,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK17 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK18 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK17 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK18 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2619,16 +2629,16 @@ const AD = {
     const box = $('adSim'), close = $('adSimClose');
     $('adSimKind').textContent = kind === 'rewarded' ? 'REWARDED VIDEO' : 'INTERSTITIAL';
     $('adSimHint').textContent = kind === 'rewarded' ? 'Watch to the end — the revive lands when it finishes.' : 'Between-runs break. Cap: once per ' + AD.CAP_RUNS + ' runs, at most once per ' + (AD.CAP_MS / 60000) + ' min.';
-    box.style.display = 'flex';
+    box.style.display = 'flex'; close.style.display = ''; try { const cl0 = $('adSimClaim'); cl0.style.display = 'none'; cl0.onclick = null; cl0.ontouchend = null; } catch (e) {}   /* DEV FORK 18: every sim starts clean — pill restored, big claim hidden until DONE */
     const total = kind === 'rewarded' ? 5 : 3; let left = total, ended = false;
-    const end = ok => { if (ended) return; ended = true; clearInterval(iv); box.style.display = 'none'; close.onclick = null; done(ok); };
+    const end = ok => { if (ended) return; ended = true; clearInterval(iv); box.style.display = 'none'; close.onclick = null; try { $('adSimClaim').style.display = 'none'; } catch (e) {} done(ok); };
     close.disabled = true; close.textContent = '✕'; $('adSimCount').textContent = Math.ceil(left) + 's'; $('adSimFill').style.width = '0%';
     const iv = setInterval(() => {
       left = Math.max(0, left - 0.1);
       $('adSimCount').textContent = left > 0 ? Math.ceil(left) + 's' : 'DONE';
       $('adSimFill').style.width = ((total - left) / total * 100) + '%';
       if (kind === 'rewarded' && left > 0 && left <= total - 1 && !close.onclick) { close.disabled = false; close.onclick = () => end(false); }   /* he may bail after 1 s — but a bailed ad pays no revive */
-      if (left <= 0) { clearInterval(iv); close.disabled = false; close.textContent = kind === 'rewarded' ? 'CLAIM REVIVE ✕' : 'CLOSE ✕'; close.onclick = () => end(true); if (kind === 'interstitial') setTimeout(() => end(true), 700); }   /* DEV FORK 13: an interstitial hands control back BY ITSELF — FORK 7 waited on the CLOSE tap while the game sat consumed underneath */
+      if (left <= 0) { clearInterval(iv); close.disabled = false; close.textContent = kind === 'rewarded' ? 'CLAIM REVIVE ✕' : 'CLOSE ✕'; close.onclick = () => end(true); if (kind === 'rewarded') { close.style.display = 'none'; const cl = $('adSimClaim'); cl.style.display = ''; cl.onclick = () => end(true); cl.ontouchend = e => { if (e) e.preventDefault(); end(true); }; }   /* DEV FORK 18: DONE hands the claim to the big gold button — click AND touchend, so no tap path can strand it; the corner pill retires */ if (kind === 'interstitial') setTimeout(() => end(true), 700); }   /* DEV FORK 13: an interstitial hands control back BY ITSELF — FORK 7 waited on the CLOSE tap while the game sat consumed underneath */
     }, 100);
     window.__adTestFinish = () => end(true);   /* forkcheck hook */
     AD.log('simulated ' + kind + ' showing');
