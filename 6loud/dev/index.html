@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">CITY NIGHTS</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 27</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">CITY NIGHTS</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 28</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 27 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 28 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -368,6 +368,16 @@
    ChatGPT was locked and Gemini can't do clear
    PNGs) with a pop-in, the gold CITY NIGHTS line
    under it naming the map.
+   FORK 28: CITY NIGHTS polish from Keith's field
+   screenshot (+ his relayed Gemini critique, vetted):
+   the vertical streaks were Amy's bug — FORK 26
+   drew buildings vh2+120 below their ground line
+   and the stacked rect edges striped the lower
+   screen; buildings now stop at the ground line
+   over one solid band. Near skyline near-black +
+   taller, dress haze thinned in city mode only,
+   horizon glow added, windows varied (gold / cool
+   / magenta), red aviation blinkers, crescent moon.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -890,12 +900,15 @@ function skyAt(ph) {
 }
 function drawCitySkyline(mFade, sky) {   /* DEV FORK 26: CITY NIGHTS — the ridges' city counterpart: procedural skyline silhouettes in the same three parallax depths, tinted from the live sky every frame; lit windows on the near layer, waking with the night's star depth. Same climb fade — he rises above the city too. */
   if (mFade <= 0.01) return;
+  const baseFar = 235 - camSmY * 0.10 + (viewH / zoom) * 0.55;
+  { const gg = ctx.createLinearGradient(0, baseFar - 320, 0, baseFar + 30); const hc = sky.c[3]; gg.addColorStop(0, `rgba(${hc[0]},${hc[1]},${hc[2]},0)`); gg.addColorStop(0.78, `rgba(${hc[0]},${hc[1]},${hc[2]},0.20)`); gg.addColorStop(1, `rgba(${hc[0]},${hc[1]},${hc[2]},0.05)`); ctx.save(); ctx.globalAlpha = mFade; ctx.fillStyle = gg; ctx.fillRect(-80, baseFar - 320, viewW / zoom + 160, 350); ctx.restore(); }   /* DEV FORK 28: the horizon glow — the city's light on the sky, tinted from the sky's own horizon color */
+  { const mxp = viewW / zoom * 0.78 - (camX * 0.02 % 60), myp = viewH / zoom * 0.15; ctx.save(); ctx.globalAlpha = 0.9 * mFade; ctx.fillStyle = 'rgb(238,240,255)'; ctx.beginPath(); ctx.arc(mxp, myp, 25, 0, 6.29); ctx.fill(); ctx.fillStyle = `rgb(${sky.c[0]})`; ctx.beginPath(); ctx.arc(mxp + 10, myp - 7, 22, 0, 6.29); ctx.fill(); ctx.restore(); }   /* DEV FORK 28: the crescent moon, city only — a pale disc carved by the sky's top color */
   const bh = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
   const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
   const LAYERS = [
     { par: 0.08, pv: 0.10, base: 235, hMax: 190, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50, win: 0 },
-    { par: 0.14, pv: 0.16, base: 195, hMax: 145, col: mixc(sky.c[2], sky.c[0], 0.45), a: 0.72, win: 0 },
-    { par: 0.22, pv: 0.22, base: 160, hMax: 100, col: mixc(sky.c[1], [10, 6, 20], 0.55), a: 0.92, win: 1 } ];
+    { par: 0.14, pv: 0.16, base: 195, hMax: 175, col: mixc(sky.c[2], [8, 5, 16], 0.52), a: 0.78, win: 0 },   /* DEV FORK 28: deeper + taller */
+    { par: 0.22, pv: 0.22, base: 160, hMax: 150, col: mixc(sky.c[1], [6, 4, 14], 0.80), a: 0.96, win: 1 } ];   /* DEV FORK 28: the near skyline goes near-black against the night (Gemini's #120D24 instinct, vetted) and 50% taller */
   const vw2 = viewW / zoom, vh2 = viewH / zoom;
   const lit = 0.2 + 0.8 * sky.star;
   for (const L of LAYERS) {
@@ -906,16 +919,18 @@ function drawCitySkyline(mFade, sky) {   /* DEV FORK 26: CITY NIGHTS — the rid
     ctx.save(); ctx.globalAlpha = L.a * mFade * (1 - 0.35 * sky.star); ctx.fillStyle = `rgb(${L.col})`;
     for (let bi = i0; bi <= i1; bi++) {
       const bx = bi * 46 - off, bw = 34 + Math.floor(bh(bi * 3 + L.par * 100) * 24), bhgt = L.hMax * (0.35 + 0.65 * bh(bi * 7 + L.par * 57));
-      ctx.fillRect(bx, baseY - bhgt, bw, bhgt + vh2 + 120);
+      ctx.fillRect(bx, baseY - bhgt, bw, bhgt);   /* DEV FORK 28: buildings STOP at their ground line — FORK 26 ran them vh2+120 past it and the stacked rect edges striped the lower screen (Keith's screenshot: the vertical streaks; Amy's bug, owned) */
       if (bh(bi * 29 + L.par * 7) > 0.82) ctx.fillRect(bx + bw * 0.42, baseY - bhgt - 14, 3, 14);   /* antenna spire */
       else if (bh(bi * 31 + L.par * 3) > 0.86) ctx.fillRect(bx + bw * 0.3, baseY - bhgt - 8, bw * 0.34, 8);   /* water tower cap */
+      if (L.win && bh(bi * 41) > 0.90) { ctx.save(); ctx.globalAlpha = (0.25 + 0.75 * (0.5 + 0.5 * Math.sin(time * 2.2 + bi * 1.7))) * L.a * mFade; ctx.fillStyle = 'rgb(255,64,64)'; ctx.beginPath(); ctx.arc(bx + bw * 0.42, baseY - bhgt - (bh(bi * 29 + L.par * 7) > 0.82 ? 16 : 3), 2.4, 0, 6.29); ctx.fill(); ctx.restore(); }   /* DEV FORK 28: red aviation blinkers on the tall towers */
     }
+    ctx.fillRect(-80, baseY, vw2 + 160, vh2 + 120);   /* DEV FORK 28: one solid ground band under the skyline — no internal edges below the ground line, no streaks */
     ctx.restore();
     if (L.win) { ctx.save(); ctx.globalAlpha = L.a * mFade * lit;
       for (let bi = i0; bi <= i1; bi++) {
         const bx = bi * 46 - off, bw = 34 + Math.floor(bh(bi * 3 + L.par * 100) * 24), bhgt = L.hMax * (0.35 + 0.65 * bh(bi * 7 + L.par * 57));
         for (let wy = baseY - bhgt + 8; wy < baseY - 12; wy += 13) for (let wx = bx + 5; wx < bx + bw - 6; wx += 9) {
-          if (bh(bi * 131 + wy * 3 + wx * 7) > 0.62) { ctx.fillStyle = bh(bi * 57 + wx) > 0.85 ? 'rgb(190,220,255)' : 'rgb(255,196,110)'; ctx.fillRect(wx, wy, 4, 6); }
+          if (bh(bi * 131 + wy * 3 + wx * 7) > 0.62) { const wr = bh(bi * 57 + wx); ctx.fillStyle = wr > 0.93 ? 'rgb(255,120,220)' : wr > 0.85 ? 'rgb(190,220,255)' : 'rgb(255,196,110)'; ctx.fillRect(wx, wy, 3 + Math.floor(wr * 40) % 3, 6); }   /* DEV FORK 28: window variety — gold majority, cool blue, a magenta minority, varied widths, so the grid stops reading as dot-matrix */
         }
       }
       ctx.restore(); }
@@ -2303,7 +2318,7 @@ function draw() {
     if (!img || !img.naturalWidth) continue;
     let dx = (((d.x - camX * 0.12) % 3450) + 3450) % 3450 - 1150;   /* FIXED wrap period (v0.39): the old span divided by zoom, so every zoom breath dragged these clouds sideways — Keith's circled cloud sweeping in his video */
     const dy = d.y - camBgY * 0.12 + viewH / zoom * 0.55;   /* slow background camera (v0.41) — was instant camY: these clouds hopped at 84% strength */
-    ctx.save(); ctx.globalAlpha = (0.34 + 0.24 * warmBg) * nightDim;
+    ctx.save(); ctx.globalAlpha = (0.34 + 0.24 * warmBg) * nightDim * (window.__map === 'city' ? 0.8 : 1);   /* DEV FORK 28: the far haze thins over the city */
     ctx.drawImage(img, dx - 575 - tiltX * 7, dy - tiltY * 3, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
   /* mountain ridges — Gemini's art direction (via Keith), built our
@@ -2348,7 +2363,7 @@ function draw() {
     if (!img || !img.naturalWidth) continue;
     let dx = (((d.x - camX * 0.46) % 3450) + 3450) % 3450 - 820;   /* same fixed wrap — the mid layer was the worst sweeper (72 units of drag across the normal speed zoom-out alone) */
     const dy = d.y - camBgY * 0.44 + viewH / zoom * 0.55;   /* slow background camera (v0.41) — was instant camY: the mid clouds hopped with every jump */
-    ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim;
+    ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim * (window.__map === 'city' ? 0.6 : 1);   /* DEV FORK 28: the mid haze was washing the skyline out (Keith's shot) — city only; the mountains keep their weather */
     ctx.drawImage(img, dx - 410 - tiltX * 20, dy - tiltY * 8, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();
   }
   for (const q of trail) { const la = Math.max(0, q.life / q.max);
@@ -2652,12 +2667,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK27 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK28 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK27 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK28 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
