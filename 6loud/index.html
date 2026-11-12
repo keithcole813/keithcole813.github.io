@@ -207,13 +207,20 @@
     return d;
   }
   var NAMES = { blade: '6LADE', lash: 'LASHMOOVE', yoro: 'YOROKOBI', ivey: 'POISON IVEY', sayori: 'SAYORI' };
-  function charOf(rep){ try { var c = (JSON.parse(rep) || {}).char; return NAMES[c] || ''; } catch (e) { return ''; } }
+  function repObj(rep){ if (!rep) return null; try { return typeof rep === 'string' ? JSON.parse(rep) : rep; } catch (e) { return null; } }
+  function charOf(rep){ var o = repObj(rep); return (o && NAMES[o.char]) || ''; }
+  /* the SAME rule the game ranks by (v0.99.5 board reset): only
+     current-geometry (geo 2) posts count — legacy rows still sit in
+     the table but they are inert, in the game and now here too.
+     Fetch wide like the game (100), filter, then take the top 20. */
+  function isLive(rep){ var o = repObj(rep); return !!o && o.geo === 2; }
   function load(){
-    fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=20', { headers: H })
+    fetch(SB_URL + '/rest/v1/scores?select=initials,dist_ft,replay&order=dist_ft.desc&limit=100', { headers: H })
       .then(function(r){ return r.json(); })
       .then(function(rows){
         box.innerHTML = '';
-        if (!rows || !rows.length){
+        rows = (rows || []).filter(function(r){ return isLive(r.replay); }).slice(0, 20);
+        if (!rows.length){
           box.innerHTML = '<p class="dim" style="margin-top:10px">No runs on the board yet — be the first.</p>';
           return;
         }
