@@ -91,6 +91,7 @@
   .pubDone.dim { color:rgba(245,239,220,.6); }
   #boardPage { position:absolute; inset:0; display:none; flex-direction:column; background:rgba(12,6,28,.97); z-index:40; }
   #optPage { position:absolute; inset:0; display:none; flex-direction:column; background:rgba(12,6,28,.97); z-index:41; }
+  #noteBank { font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:13px; letter-spacing:1.5px; color:#8be89a; }
   .optBody { display:flex; flex-direction:column; gap:14px; padding:18px 18px 24px; overflow-y:auto; }
   .optRow { display:flex; align-items:center; justify-content:space-between; gap:14px; }
   .optLab { display:flex; flex-direction:column; gap:2px; }
@@ -244,7 +245,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 52</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 53</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -263,12 +264,12 @@
     <div id="pubNote"></div>
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
-  <div id="optPage"><div class="bpHead"><button id="optBack">‹ BACK</button><div class="bpTitle">OPTIONS</div></div><div class="optBody"><div class="optRow"><div class="optLab"><div class="optName">GHOST RUNNERS</div><div class="optSub">Race the best runs. Turn off to run alone.</div></div><button id="optGhosts" class="audTg">GHOSTS ON</button></div><div class="optRow"><div class="optLab"><div class="optName">MUSIC</div><div class="optSub">The game's beats, on or off.</div></div><button id="optMusic" class="audTg">MUSIC ON</button></div><div class="optRow"><div class="optLab"><div class="optName">SOUND</div><div class="optSub">Steps, pickups and booms.</div></div><button id="optSfx" class="audTg">SOUND ON</button></div><div class="optRow"><div class="optLab"><div class="optName">RESTORE PURCHASES</div><div class="optSub">On a new device? Bring back what you bought.</div></div><button id="optRestore" class="optBtn">RESTORE</button></div><div class="optRow"><div class="optLab"><div class="optName">RESET LOCAL SCORES</div><div class="optSub">Clears this device's scores, bests and ghost recordings. The world board is not touched.</div></div><button id="optReset" class="optBtn">RESET</button></div><div id="optMsg"></div><div class="optFoot"><div class="optCredit">A NINJA MUSIC RECORDS GAME</div><div id="optVer"></div><a id="optPriv" href="https://keithcole813.github.io/6loud/">PRIVACY POLICY</a></div></div></div>
+  <div id="optPage"><div class="bpHead"><button id="optBack">‹ BACK</button><div class="bpTitle">OPTIONS</div></div><div class="optBody"><div class="optRow"><div class="optLab"><div class="optName">NOTE BALANCE</div><div class="optSub">Notes are the currency — characters cost 3,000.</div></div><div id="optNotes" class="optName">0</div></div><div class="optRow"><div class="optLab"><div class="optName">GHOST RUNNERS</div><div class="optSub">Race the best runs. Turn off to run alone.</div></div><button id="optGhosts" class="audTg">GHOSTS ON</button></div><div class="optRow"><div class="optLab"><div class="optName">MUSIC</div><div class="optSub">The game's beats, on or off.</div></div><button id="optMusic" class="audTg">MUSIC ON</button></div><div class="optRow"><div class="optLab"><div class="optName">SOUND</div><div class="optSub">Steps, pickups and booms.</div></div><button id="optSfx" class="audTg">SOUND ON</button></div><div class="optRow"><div class="optLab"><div class="optName">RESTORE PURCHASES</div><div class="optSub">On a new device? Bring back what you bought.</div></div><button id="optRestore" class="optBtn">RESTORE</button></div><div class="optRow"><div class="optLab"><div class="optName">RESET LOCAL SCORES</div><div class="optSub">Clears this device's scores, bests and ghost recordings. The world board is not touched.</div></div><button id="optReset" class="optBtn">RESET</button></div><div id="optMsg"></div><div class="optFoot"><div class="optCredit">A NINJA MUSIC RECORDS GAME</div><div id="optVer"></div><a id="optPriv" href="https://keithcole813.github.io/6loud/">PRIVACY POLICY</a></div></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 52 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 53 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -585,7 +586,11 @@
    purchases (the store bridge's hook),
    reset local scores (two-tap confirm;
    the world board is untouched), version,
-   credit, privacy policy. Live game untouched.
+   credit, privacy policy. FORK 53: THE NOTE WALLET — notes are
+   the currency (characters: 3,000 notes or $0.99), so the tally
+   now persists on the device (sixlouddev_notes), credited the
+   moment a note is grabbed, shown on the title and in Options.
+   Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2323,7 +2328,7 @@ function update(dt) {
   for (const n of notes) {
     if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 95) {   /* window tightened with the raise: only a jump collects (Keith v0.84) */
       const tier = n.img === 'notegreen' ? 3 : n.img === 'notepurple' ? 2 : 1;   /* v0.94 (Keith): PURPLE pays 2x — 50 FT and the note sound twice; GREEN pays 3x — 75 FT and the note sound three times; the strikes climb because each one climbs the pitch ladder */
-      n.got = true; noteFt += 25 * tier; notesGot++; playNote();
+      n.got = true; noteFt += 25 * tier; notesGot++; playNote(); noteBank(1);   /* DEV FORK 53: the wallet is credited the moment a note lands — the got flag fires once per note, so no revive or re-run can double-credit */
       for (let e = 1; e < tier; e++) setTimeout(() => { if (mode === 'run') playNote(); }, e * 110);   /* the extra strikes in succession, each a ladder step higher (and cutting the prior tail, per the standing note rule) */
       floaters.push({ x: n.x, y: n.y - 34, t: 0, mult: tier });   /* flash the +25 FT right where it was collected (Keith) — with its 2X/3X badge beside it on the paying tiers */
       spawnPuff(n.x, n.y, 13, 150); pushTrail(n.x, n.y, CHAR_FX[selChar].streak);
@@ -2924,12 +2929,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK52 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK53 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK52 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK53 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3196,7 +3201,15 @@ window.__restorePurchases = function () { let ent = {}; try { ent = JSON.parse(l
 window.__optResetScores = function () { try { localStorage.setItem('sixlouddev_scores_ft', '[]'); localStorage.setItem('sixlouddev_char_bests', '{}'); } catch (e) {} optMsg('Local scores cleared. The world board is untouched.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS local scores reset'); };
 { const b = document.getElementById('optBtn'); if (b) b.addEventListener('click', e => { e.stopPropagation(); openOptions(); }); const bk = document.getElementById('optBack'); if (bk) bk.addEventListener('click', e => { e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }); const gh = document.getElementById('optGhosts'); if (gh) gh.addEventListener('click', e => { e.stopPropagation(); optToggleGhosts(); }); const mu2 = document.getElementById('optMusic'); if (mu2) mu2.addEventListener('click', e => { e.stopPropagation(); audToggle('m'); optUI(); }); const sf2 = document.getElementById('optSfx'); if (sf2) sf2.addEventListener('click', e => { e.stopPropagation(); audToggle('s'); optUI(); }); const rs = document.getElementById('optRestore'); if (rs) rs.addEventListener('click', e => { e.stopPropagation(); window.__restorePurchases(); }); const rx = document.getElementById('optReset'); if (rx) rx.addEventListener('click', e => { e.stopPropagation(); if (rx.dataset.arm) { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); window.__optResetScores(); } else { rx.dataset.arm = '1'; rx.textContent = 'ARE YOU SURE?'; rx.classList.add('armed'); setTimeout(() => { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); }, 3500); } }); }
 window.__optTest = { state: () => ({ ghostsOff: !!window.__optGhostsOff, m: !!window.__musOff, s: !!window.__sfxOff }), toggleGhosts: optToggleGhosts, resetScores: window.__optResetScores, restore: window.__restorePurchases, open: openOptions };
-if (new URLSearchParams(location.search).has('options')) setTimeout(openOptions, 2000);   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
+if (new URLSearchParams(location.search).has('options')) setTimeout(openOptions, 2000);
+/* DEV FORK 53: THE NOTE WALLET (Keith, 2026-11-13 — notes are the currency; characters cost 3,000 notes or $0.99). The running tally lives in sixlouddev_notes on the device. */
+window.__notes = 0;
+try { window.__notes = parseInt(localStorage.getItem('sixlouddev_notes') || '0', 10) || 0; } catch (e) {}
+function noteSave() { try { localStorage.setItem('sixlouddev_notes', String(window.__notes | 0)); } catch (e) {} }
+function noteUI() { const b = document.getElementById('noteBank'); if (b) b.textContent = '♪ ' + (window.__notes | 0).toLocaleString('en-US') + ' NOTES'; const o = document.getElementById('optNotes'); if (o) o.textContent = (window.__notes | 0).toLocaleString('en-US'); }
+function noteBank(n) { window.__notes = (window.__notes | 0) + (n | 0); noteSave(); noteUI(); }
+noteUI();
+window.__noteTest = { bal: () => window.__notes | 0, bank: noteBank };   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
 requestAnimationFrame(loop);
 </script>
 </body>
