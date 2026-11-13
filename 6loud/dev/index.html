@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 68</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 69</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 68 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 69 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -654,8 +654,11 @@
    water footsteps on every cloud (Keith). FORK 68: THE
    RAIN CLOUDS WIRED — Storm Season's decks now wear
    Keith's 100 realistic rain clouds (dev/rainreal/), each
-   measured for its own shape and surface. Fork only;
-   live game untouched.
+   measured for its own shape and surface. FORK 69: the
+   last standard clouds dressed (staircase, climb, event
+   lines), Storm Season's own sky palette + mountain
+   range, and the 20 mound-shaped rain clouds eliminated
+   (Keith). Fork only; live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1635,7 +1638,7 @@ function addPlat(x, band, lenClass, storm) {
   if (!storm && runTime > 40 && x - courseBase > 9000 && x - lastDarkX > 2800 && Math.random() < 0.14) { dark = true; img = rnd(STORMC); lastDarkX = x; }
   const __np = { x, y: BAND_Y[band], len, img, storm: !!storm || window.__map === 'rain' || window.__map === 'rain2', dark };   /* DEV FORK 67: every STORM SEASON deck is a storm cloud (Keith) */
   if ((window.__map === 'rain' || window.__map === 'rain2') && x - courseBase > 6000) { const hT = Math.abs(Math.sin(x * 3.7711) * 12543.21) % 1; if (hT < 0.09) __np.thunder = true; }
-  if (window.__map === 'rain' || window.__map === 'rain2') __np.rain = Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * 100);   /* DEV FORK 68: every STORM SEASON deck wears one of Keith's rain clouds */   /* DEV FORK 67: thunder clouds scattered through the map (Keith) */
+  if (window.__map === 'rain' || window.__map === 'rain2') __np.rain = window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)];   /* DEV FORK 68: every STORM SEASON deck wears one of Keith's rain clouds */   /* DEV FORK 67: thunder clouds scattered through the map (Keith) */
   if (!storm && !dark && typeof mode !== 'undefined' && mode === 'run' && x - courseBase > 6000) { const h = Math.abs(Math.sin(x * 12.9898) * 43758.5453) % 1; if (window.__map.endsWith('2')) { if (h < 0.12) __np.kind = 'flip'; else if (h < 0.24) __np.kind = 'saw'; else if (h < 0.34) __np.kind = 'shiv'; else if (h < 0.44) __np.kind = 'drop'; } else if (window.__map === 'rain') { if (h < 0.12) __np.kind = 'flip';   /* DEV FORK 64: in the (2) worlds the full vocabulary runs from level 1 (Keith) */ else if (h < 0.24) __np.kind = 'saw'; else if (h < 0.34) __np.kind = 'shiv'; else if (h < 0.44) __np.kind = 'drop'; } else if (window.__map === 'night') { const dFt = (x - courseBase) / 15.24; if (dFt >= 5000) { if (h < 0.12) __np.kind = 'saw'; else if (h < 0.24) __np.kind = 'shiv'; else if (h < 0.34) __np.kind = 'drop'; } else if (h < 0.16) __np.kind = 'saw'; }   /* DEV FORK 63: shiver + drop clouds debut at MIDNIGHT RUN's halfway (Keith) and ride STORM SEASON from its start */ if (__np.kind) __np.fph = h * 7; }   /* DEV FORK 61: deck kinds by a deterministic hash of x — STORM SEASON flips + see-saws, MIDNIGHT RUN see-saws (Keith's hazard map); storm and dark decks keep their own natures, and the opening stretch stays plain */
   plats.push(__np);
   if (REC) REC.plats.push([x - courseBase, BAND_Y[band], len, img, storm ? 1 : 0, dark ? 1 : 0]);   /* the recorder keeps the course — in course space (v0.47); the 5th slot carries the storm flag (v0.83), the 6th the dark flag (v0.91) */
@@ -1661,10 +1664,10 @@ function buildStormStep() {
   const lenT = rnd([LEN.LONG, LEN.MED, LEN.LONG]);
   const imgT = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 67: the storm-event decks in STORM SEASON wear storm clouds too */
   const tb = Math.max(0, b - 2);   /* v0.98 (Keith, 2026-11-10: 'rain clouds need to go lower still'): the through deck drops TWO bands now (v0.95 dropped it one) and the climb stands three bands over it (cb = tb + 3) — the pair is 510 apart, real sky between the rain deck and the climb. Missing the climb commits you to the low road: the fork's original v0.82 bargain, and the through-to-climb recovery hop goes with it */
-  plats.push({ x, y: BAND_Y[tb], len: lenT, img: imgT, storm: true, rain: (window.__map === 'rain' || window.__map === 'rain2') ? Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * 100) : undefined });   /* DEV FORK 68: storm-event decks wear rain clouds too */
+  plats.push({ x, y: BAND_Y[tb], len: lenT, img: imgT, storm: true, rain: (window.__map === 'rain' || window.__map === 'rain2') ? window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)] : undefined });   /* DEV FORK 68: storm-event decks wear rain clouds too */
   if (REC) REC.plats.push([x - courseBase, BAND_Y[tb], lenT, imgT, 1]);
-  const cx = x + Math.round(lenT * 0.6), cl = rnd([LEN.SHORT, LEN.MED]), imgC = rnd(LONGC), cb = Math.min(5, tb + 3);   /* v0.93 (Keith: 'there are still clouds stacked on top of clouds'): the climb deck used to start 150 in and run LONG — up to 83% of it sat directly over the through deck, a stack with a choice painted on. It now starts 60% along the through deck and runs SHORT/MED, so the pair reads as a step up at the fork's end; the through line still runs beneath its start, so the choice can never strand you */
-  plats.push({ x: cx, y: BAND_Y[cb], len: cl, img: imgC });
+  const cx = x + Math.round(lenT * 0.6), cl = rnd([LEN.SHORT, LEN.MED]), imgC = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC)   /* DEV FORK 69: the climb deck's stand-in art matches the world */, cb = Math.min(5, tb + 3);   /* v0.93 (Keith: 'there are still clouds stacked on top of clouds'): the climb deck used to start 150 in and run LONG — up to 83% of it sat directly over the through deck, a stack with a choice painted on. It now starts 60% along the through deck and runs SHORT/MED, so the pair reads as a step up at the fork's end; the through line still runs beneath its start, so the choice can never strand you */
+  plats.push({ x: cx, y: BAND_Y[cb], len: cl, img: imgC, ...window.__rainDeck(cx) });   /* DEV FORK 69: the storm-step climb deck wears rain clouds in STORM SEASON */
   if (REC) REC.plats.push([cx - courseBase, BAND_Y[cb], cl, imgC]);
   worldEnd = Math.max(x + lenT, cx + cl); exitBand = tb;   /* the course frontier covers the climb deck too — the next segment used to start under its tail and stack clouds; the course continues from the THROUGH band (v0.95: tb) */
 }
@@ -1687,11 +1690,11 @@ function buildStormEvent() {
   for (const [lo, mid, hi] of COLS) {
     let colEnd = x;
     if (lo !== null) { const len = rnd([LEN.LONG, LEN.LONG, LEN.MED]), img = rnd(STORMC);
-      plats.push({ x, y: E + lo, len, img, storm: true, rain: (window.__map === 'rain' || window.__map === 'rain2') ? Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * 100) : undefined });   /* DEV FORK 68: storm-event decks wear rain clouds too */ if (REC) REC.plats.push([x - courseBase, E + lo, len, img, 1]); colEnd = Math.max(colEnd, x + len); }
+      plats.push({ x, y: E + lo, len, img, storm: true, rain: (window.__map === 'rain' || window.__map === 'rain2') ? window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)] : undefined });   /* DEV FORK 68: storm-event decks wear rain clouds too */ if (REC) REC.plats.push([x - courseBase, E + lo, len, img, 1]); colEnd = Math.max(colEnd, x + len); }
     if (mid !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC), mx = x + 60   /* DEV FORK 67: storm art in the rain worlds */;
-      plats.push({ x: mx, y: E + mid, len, img }); if (REC) REC.plats.push([mx - courseBase, E + mid, len, img]); colEnd = Math.max(colEnd, mx + len); }
+      plats.push({ x: mx, y: E + mid, len, img, ...window.__rainDeck(mx) });   /* DEV FORK 69: the storm event's middle line wears rain clouds in STORM SEASON */ if (REC) REC.plats.push([mx - courseBase, E + mid, len, img]); colEnd = Math.max(colEnd, mx + len); }
     if (hi !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC), hx = x + 120   /* DEV FORK 67: storm art in the rain worlds */;
-      plats.push({ x: hx, y: E + hi, len, img }); if (REC) REC.plats.push([hx - courseBase, E + hi, len, img]); colEnd = Math.max(colEnd, hx + len); }
+      plats.push({ x: hx, y: E + hi, len, img, ...window.__rainDeck(hx) });   /* DEV FORK 69: the storm event's high line wears rain clouds in STORM SEASON */ if (REC) REC.plats.push([hx - courseBase, E + hi, len, img]); colEnd = Math.max(colEnd, hx + len); }
     x = colEnd + 380;
   }
   worldEnd = x - 380;   /* the frontier is the last column's end; exitBand is untouched — the event leaves on the level it entered (the middle line's promise) */
@@ -1823,8 +1826,8 @@ function resetWorld() {
     const stairs = [[30, 130, 800], [30, 260, 800], [90, 340, 700]];
     for (const [gap, y, len] of stairs) {
       sx += gap;
-      const img = rnd(LONGC);
-      plats.push({ x: sx, y, len, img });
+      const img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 69: the staircase's stand-in art matches the world */
+      plats.push({ x: sx, y, len, img, ...window.__rainDeck(sx) });   /* DEV FORK 69: the opening staircase wears rain clouds in STORM SEASON — the first decks a player sees (Keith's screenshot) */
       sx += len;
     }
     worldEnd = sx; openerEnd = sx;
@@ -2660,7 +2663,11 @@ function draw() {
     const mFade = Math.max(0, Math.min(1, 1.15 - climb / 650));
     if (mFade > 0.01 && (window.__map === 'night' || window.__map === 'night2')) { drawOcean(mFade, sky); }   /* DEV FORK 64: the (2) night keeps its ocean */ else if (mFade > 0.01) {   /* DEV FORK 32: in EXTENDED NIGHT the world-below is the OCEAN (Keith: flatten the range) — the ridges keep Level 1 */
       const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));   /* DEV FORK 26: in the city the skyline takes the ridges' place — same slot, same fade */
-      const RIDGES = [
+      const RIDGES = (window.__map === 'rain' || window.__map === 'rain2') ? [   /* DEV FORK 69: STORM SEASON's own range (Keith) — taller, sharper, different peaks than the day range */
+        { par: 0.05, pv: 0.07, base: 252, amp: 252, f1: 0.0058, p1: 8.4, p2: 2.2, col: mixc(sky.c[3], sky.c[0], 0.50), a: 0.55 },
+        { par: 0.10, pv: 0.12, base: 208, amp: 196, f1: 0.0078, p1: 1.3, p2: 6.1, col: mixc(sky.c[2], sky.c[0], 0.55), a: 0.78 },
+        { par: 0.17, pv: 0.18, base: 168, amp: 142, f1: 0.0102, p1: 5.5, p2: 0.9, col: mixc(sky.c[1], [8, 8, 18], 0.60), a: 0.95 }
+      ] : [
         { par: 0.05, pv: 0.07, base: 235, amp: 210, f1: 0.0038, p1: 1.7, p2: 0.4, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50 },
         { par: 0.10, pv: 0.12, base: 195, amp: 158, f1: 0.0052, p1: 4.2, p2: 2.9, col: mixc(sky.c[2], sky.c[0], 0.45), a: 0.72 },
         { par: 0.17, pv: 0.18, base: 160, amp: 112, f1: 0.0068, p1: 0.6, p2: 5.1, col: mixc(sky.c[1], [10, 6, 20], 0.55), a: 0.92 }
@@ -3009,12 +3016,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK68 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK69 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK68 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK69 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3137,7 +3144,7 @@ window.__playCkpt = function () { try { if (typeof actx === 'undefined' || !actx
 window.__skyFrac = function (d) { const dd = (typeof d === 'number') ? d : ((typeof dist === 'number') ? dist : 0); const gate = (window.__MAP_FT || 5000) * 15.24; return Math.max(0, Math.min(1, dd / gate)); };   /* DEV FORK 40: the run's fraction of the gate distance */
 window.__DAY_KEYS = [{ t: 0.00, c: [[52,40,92],[150,80,120],[240,130,90],[255,190,120]], star: 0.1 }, { t: 0.12, c: [[86,120,180],[140,170,215],[200,200,190],[255,214,150]], star: 0 }, { t: 0.32, c: [[52,110,205],[110,165,228],[168,205,238],[215,235,245]], star: 0 }, { t: 0.52, c: [[58,105,190],[120,160,215],[185,195,200],[250,215,160]], star: 0 }, { t: 0.65, c: [[70,70,130],[165,95,125],[245,145,85],[255,195,115]], star: 0 }, { t: 0.76, c: [[43,32,84],[178,74,116],[255,138,76],[255,196,110]], star: 0 }, { t: 0.85, c: [[24,20,58],[58,44,102],[104,66,120],[150,96,110]], star: 0.35 }, { t: 0.93, c: [[10,11,40],[22,24,64],[38,42,88],[58,62,102]], star: 0.8 }, { t: 1.00, c: [[8,10,38],[18,22,62],[32,38,84],[48,56,100]], star: 1 }];   /* DEV FORK 45: THE JOURNEY (Keith) — Level 1's arc no longer stops at sunset: the daylight stops compress into the first 0.76, SUNSET sits at 0.76, then darker and darker (dusk 0.85, deepening dark 0.93) landing on FULL NIGHT at the gate — the exact TRUE-night stop Level 2 pins to, so the two stages meet */   /* DEV FORK 40: Level 1's day — sunrise, morning, noon, afternoon, golden hour, sunset (the stop set Level 1 never had) */
 window.__dayAt = function (f) { const K = window.__DAY_KEYS; for (let i = 0; i < K.length - 1; i++) { const a = K[i], b = K[i + 1]; if (f >= a.t && f <= b.t) { const g = (f - a.t) / Math.max(0.0001, b.t - a.t); const c = a.c.map((col, k) => col.map((v, j) => Math.round(v + (b.c[k][j] - v) * g))); return { c, star: a.star + (b.star - a.star) * g }; } } return { c: K[0].c, star: 0 }; };
-window.__arcSky = function () { const f = window.__skyFrac(); if (window.__map === 'night' || window.__map === 'night2') return skyAt(0.68); if (window.__map === 'rain' || window.__map === 'rain2') return skyAt(((typeof runFt === 'function' ? runFt() : 0) % 10000) / 10000);   /* DEV FORK 64: the (2) worlds keep their base skies */   /* DEV FORK 61: STORM SEASON rides a FULL day-and-night cycle per movement (Keith) */   /* DEV FORK 45: Level 2 IS night (Keith) — pinned to the TRUE-night plateau, star = 1 from its title on; FORK 40's sunset-to-sunrise ride is retired (the map never showed up as night, and the satellite looked out of place in a sunset) */
+window.__arcSky = function () { const f = window.__skyFrac(); if (window.__map === 'night' || window.__map === 'night2') return skyAt(0.68); if (window.__map === 'rain' || window.__map === 'rain2') return window.__skyRain(((typeof runFt === 'function' ? runFt() : 0) % 10000) / 10000);   /* DEV FORK 69: STORM SEASON's own storm palette (Keith) */   /* DEV FORK 64: the (2) worlds keep their base skies */   /* DEV FORK 61: STORM SEASON rides a FULL day-and-night cycle per movement (Keith) */   /* DEV FORK 45: Level 2 IS night (Keith) — pinned to the TRUE-night plateau, star = 1 from its title on; FORK 40's sunset-to-sunrise ride is retired (the map never showed up as night, and the satellite looked out of place in a sunset) */
  return window.__dayAt(f); };   /* DEV FORK 40: Level 1 rides the new day arc, sunrise to sunset */
 window.__sunPos = function () { if (window.__map === 'night' || window.__map === 'night2') return   /* DEV FORK 64: same night sky body */ { x: W * 0.5, y: H * 0.80, g: 1 }; const f = Math.min(1, window.__skyFrac() / 0.76); const s = Math.sin(Math.PI * f); return { x: W * (0.16 + 0.68 * f), y: H * (0.82 - s * 0.54), g: 1 - s * 0.45 };   /* DEV FORK 45: the sun sets AT the sunset stop (0.76 of the arc); past it the afterglow sits on the horizon and dies as the dark takes over */ };   /* DEV FORK 40: the sun travels Level 1's arc — up from the left horizon, high at noon (glow eased so noon doesn't wash out), down to the right horizon at the gate */
 window.__realMoon = function (star) { const t = Math.max(0, Math.min(1, ((star || 0) - 0.72) / 0.23)); const e = t * t * (3 - 2 * t); return { x: W * (1.10 - 0.30 * e), y: H * (0.10 + 0.07 * e), a: e * 0.95, r: Math.min(W, H) * 0.085 }; };   /* DEV FORK 45: THE REAL MOON LAW (Keith) — no moon at sunset; only as the sky reaches FULL dark (star through ~0.95) has his photo moon slid in from the right edge to its distant perch (x 0.80 of the width, radius 0.085 of the short side — far away, not a billboard); it slides back out before the sunrise. FORK 40's come-and-go arc retires with the manga moon. */   /* DEV FORK 40: the moon comes and goes (Keith) — rises low right just after sunset, peaks mid-night, sets low left before the sunrise, fading at both horizons */
@@ -3377,8 +3384,12 @@ window.__unlockLoop2 = () => { if (window.__loop2) return; window.__loop2 = true
 window.__loop2Test = { unlocked: () => !!window.__loop2, unlock: () => window.__unlockLoop2() };
 window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') return; if (!window.__gainThF) { window.__gainThF = actx.createGain(); window.__gainThF.gain.value = 0.32; window.__gainThF.connect(audBusS()); } const src = actx.createBufferSource(); src.buffer = bufTh; src.playbackRate.value = 0.7; src.connect(window.__gainThF); src.start(); };   /* DEV FORK 67: the distant crack — same thunder, lower and slower, as a thunder cloud rolls in */
 window.__thunderTest = { mk: (x) => { const b = plats.length; addPlat(x, 2, 1, false); return plats[b]; } };
+window.__RAINKEYS = [ { t: 0, c: [[74,84,108],[104,112,132],[138,140,152],[168,164,158]], star: 0 }, { t: 0.30, c: [[52,56,84],[76,76,104],[104,96,116],[128,110,118]], star: 0.25 }, { t: 0.42, c: [[16,20,38],[28,34,58],[44,50,74],[60,64,88]], star: 0.85 }, { t: 0.68, c: [[12,16,34],[24,30,54],[38,44,70],[54,58,84]], star: 1 }, { t: 0.80, c: [[30,36,60],[56,60,88],[84,84,104],[110,104,110]], star: 0.45 }, { t: 0.90, c: [[62,66,92],[104,102,118],[146,134,124],[178,158,128]], star: 0.08 }, { t: 1.00, c: [[74,84,108],[104,112,132],[138,140,152],[168,164,158]], star: 0 } ];   /* DEV FORK 69: the storm palette — slate, bruised mauve, ink; the cycle's shape is the base sky's, the weather never leaves */
+window.__skyRain = function (ph) { const K = window.__RAINKEYS; for (let i = 0; i < K.length - 1; i++) { const a = K[i], b = K[i + 1]; if (ph >= a.t && ph <= b.t) { const f = (ph - a.t) / Math.max(0.0001, b.t - a.t); const c = a.c.map((col, k) => col.map((v, j) => Math.round(v + (b.c[k][j] - v) * f))); return { c, star: a.star + (b.star - a.star) * f }; } } return { c: K[0].c, star: 0 }; };
+window.__rainDeck = (x) => (window.__map === 'rain' || window.__map === 'rain2') ? { storm: true, rain: window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)] } : {};   /* DEV FORK 69: one dresser for every non-addPlat deck (staircase, climb, event lines) */
+window.__RAINKEEP = [1,2,3,4,5,6,7,9,10,11,12,13,14,15,17,18,19,20,21,22,23,24,25,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,47,48,49,50,53,56,57,58,59,61,63,64,65,67,68,69,70,72,73,74,75,78,80,81,82,83,84,85,86,88,90,91,92,94,96,97,98,99];   /* DEV FORK 69: the 80 rain clouds that stay — the 20 mound-shaped ones are eliminated (Keith) */
 window.__RAINCD = [[0.578,0.18],[0.656,0.164],[0.594,0.093],[0.443,0.157],[0.368,0.094],[0.586,0.131],[0.591,0.109],[0.518,0.089],[0.343,0.2],[0.409,0.116],[0.342,0.133],[0.595,0.099],[0.734,0.118],[0.708,0.123],[0.444,0.204],[0.302,0.135],[0.584,0.17],[0.599,0.138],[0.628,0.074],[0.404,0.158],[0.315,0.128],[0.691,0.106],[0.573,0.077],[0.599,0.068],[0.401,0.088],[0.281,0.2],[0.47,0.182],[0.502,0.138],[0.572,0.174],[0.632,0.157],[0.43,0.109],[0.649,0.143],[0.554,0.105],[0.632,0.093],[0.388,0.113],[0.438,0.05],[0.554,0.117],[0.459,0.133],[0.623,0.115],[0.513,0.098],[0.497,0.092],[0.512,0.094],[0.645,0.171],[0.442,0.152],[0.51,0.14],[0.391,0.077],[0.631,0.177],[0.557,0.071],[0.411,0.091],[0.472,0.074],[0.396,0.065],[0.769,0.136],[0.496,0.205],[0.629,0.134],[0.395,0.233],[0.394,0.144],[0.765,0.107],[0.532,0.195],[0.482,0.203],[0.582,0.142],[0.442,0.228],[0.799,0.116],[0.533,0.197],[0.593,0.157],[0.412,0.126],[0.389,0.112],[0.749,0.179],[0.635,0.101],[0.449,0.104],[0.432,0.152],[0.429,0.085],[0.75,0.153],[0.475,0.207],[0.614,0.19],[0.489,0.072],[0.359,0.067],[0.677,0.182],[0.539,0.163],[0.453,0.117],[0.419,0.183],[0.326,0.143],[0.491,0.138],[0.466,0.189],[0.516,0.073],[0.388,0.106],[0.338,0.124],[0.533,0.149],[0.578,0.22],[0.612,0.109],[0.433,0.301],[0.333,0.169],[0.568,0.147],[0.479,0.143],[0.446,0.154],[0.393,0.12],[0.348,0.21],[0.612,0.216],[0.48,0.142],[0.528,0.097],[0.377,0.221]];   /* DEV FORK 68: per-cloud measurements (aspect, surface line) for Keith's rain clouds, scanned from their alpha */
-for (let __ri = 0; __ri < 100; __ri++) loadImg('rain' + __ri, 'rainreal/rainreal' + String(__ri + 1).padStart(2, '0') + '.webp');   /* DEV FORK 68: the rainreal pool, fork-local beside the page */
+for (const __ri of window.__RAINKEEP) loadImg('rain' + __ri,   /* DEV FORK 69: only the keepers load */ 'rainreal/rainreal' + String(__ri + 1).padStart(2, '0') + '.webp');   /* DEV FORK 68: the rainreal pool, fork-local beside the page */
 window.__mapLockSync = () => { const id = window.__map || 'mnt'; window.__mapLocked = !window.__devOpen && ((id === 'night' && !window.__map2) || (id === 'rain' && !window.__map3) || (id.endsWith('2') && !window.__loop2));   /* DEV FORK 66: the fork's test door — the feat flags underneath stay honest */ const mb = $('mapBtn'); if (mb) mb.textContent = 'MAP: ' + (window.__MAPNAMES[id] || 'DAY BREAK') + (window.__mapLocked ? ' 🔒' : ''); const sb = $('startBtn'); if (sb) sb.textContent = window.__mapLocked ? '🔒 ' + ({ night: '5,000 FT FROM DAY BREAK', rain: '10,000 FT FROM MIDNIGHT RUN' }[id] || 'BEAT THE GAME TO OPEN') : '▶ START GAME'; };
 window.__mapLockSync();   /* DEV FORK 65: sync once at boot, then on every pick */
 /* DEV FORK 66: KEITH'S TEST SETUP (2026-11-13) — FORK ONLY, never ports to the real game: every map open for starting, a one-time grant of 20,000 notes, and the chosen 3 reset to locked so the buy flow can be run end to end. */
