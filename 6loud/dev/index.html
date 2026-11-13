@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 39</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 40</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 39 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 40 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -445,7 +445,13 @@
    game's own banner family), same pop ride.
    FORK 39: Keith's level-up sting fires on the
    unlock (the 5,000 FT crossing), trimmed to the
-   toast's 4.2 s. Live game untouched.
+   toast's 4.2 s.
+   FORK 40: the sky arcs, keyed to DISTANCE (his
+   pick): Level 1 sunrise -> sunset over a new day
+   palette with a travelling sun; Level 2 sunset ->
+   sunrise over the loop's own night; the moon
+   rises, crosses and sets with the run. Live game
+   untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2310,7 +2316,7 @@ function ghostPick() {
 }
 function draw() {
   const ph = (time % SKY_PERIOD) / SKY_PERIOD;
-  const sky = skyAt(window.__map === 'night' ? 0.50 + ph * 0.18 : ph);   /* DEV FORK 29: EXTENDED NIGHT — the phase pins inside the deep-night plateau where star = 1 the whole way (both star layers out, all run long) over Bg1's own mountains; Level 1 keeps the full sunset cycle */
+  const sky = window.__arcSky ? window.__arcSky() : skyAt(ph);   /* DEV FORK 40: the phase comes from DISTANCE now (Keith's ruling) — Level 1 sunrise->sunset, Level 2 sunset->sunrise, each across the gate distance; FORK 29's pinned plateau is retired */   /* DEV FORK 29: EXTENDED NIGHT — the phase pins inside the deep-night plateau where star = 1 the whole way (both star layers out, all run long) over Bg1's own mountains; Level 1 keeps the full sunset cycle */
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, `rgb(${sky.c[0]})`); g.addColorStop(0.45, `rgb(${sky.c[1]})`);
   g.addColorStop(0.75, `rgb(${sky.c[2]})`); g.addColorStop(1, `rgb(${sky.c[3]})`);
@@ -2318,13 +2324,14 @@ function draw() {
   /* the sun's glow (v0.19, chasing the mockup): a radiant core low in
      the sky during the warm phases — the flat gradient alone never
      glowed. Fades out as the stars take over. */
+  const __sp = window.__sunPos ? window.__sunPos() : { x: W * 0.5, y: H * 0.80, g: 1 }; const sunGX = __sp.x, sunGY = __sp.y, sunG = __sp.g;   /* DEV FORK 40: the sun's glow rides its arc in Level 1; Level 2 keeps the low fixed glow at its sunset/sunrise edges */
   const warm = 1 - sky.star;
   if (warm > 0.03) {
-    const sg = ctx.createRadialGradient(W * 0.5, H * 0.80, 10, W * 0.5, H * 0.80, H * 0.62);
-    sg.addColorStop(0, `rgba(255,183,102,${0.34 * warm})`); sg.addColorStop(1, 'rgba(255,183,102,0)');
+    const sg = ctx.createRadialGradient(sunGX, sunGY, 10, sunGX, sunGY, H * 0.62);
+    sg.addColorStop(0, `rgba(255,183,102,${0.34 * warm * sunG})`); sg.addColorStop(1, 'rgba(255,183,102,0)');
     ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
-    const sg2 = ctx.createRadialGradient(W * 0.5, H * 0.80, 4, W * 0.5, H * 0.80, H * 0.24);
-    sg2.addColorStop(0, `rgba(255,226,170,${0.42 * warm})`); sg2.addColorStop(1, 'rgba(255,226,170,0)');
+    const sg2 = ctx.createRadialGradient(sunGX, sunGY, 4, sunGX, sunGY, H * 0.24);
+    sg2.addColorStop(0, `rgba(255,226,170,${0.42 * warm * sunG})`); sg2.addColorStop(1, 'rgba(255,226,170,0)');
     ctx.fillStyle = sg2; ctx.fillRect(0, 0, W, H);
   }
   /* stars */
@@ -2347,9 +2354,9 @@ function draw() {
       window.__moonImg = window.__moonImg || (() => { const i = new Image(); i.src = 'moon.webp'; return i; })();
       window.__planetImg = window.__planetImg || (() => { const i = new Image(); i.src = 'planet.webp'; return i; })();
       window.__satImg = window.__satImg || (() => { const i = new Image(); i.src = '../play/assets/satellite.webp'; return i; })();   /* pre-rewrite form on purpose: the isolation pass below prefixes it like every shared-tree path */
-      const mR = Math.min(W, H) * 0.19, mX = W * 0.74 - skyOX, mY = H * 0.21 - skyOY;   /* DEV FORK 33: the moon takes the sky's shared drift — its private tilt factors and breathing sway are gone; the sheet is rigid */
+      const mR = Math.min(W, H) * 0.19, __mp = window.__moonPos ? window.__moonPos(window.__skyFrac()) : { x: W * 0.74, y: H * 0.21, a: 1 }, mX = __mp.x - skyOX, mY = __mp.y - skyOY;   /* DEV FORK 40: the moon rides its come-and-go arc (the shared sky drift still applies on top) */   /* DEV FORK 33: the moon takes the sky's shared drift — its private tilt factors and breathing sway are gone; the sheet is rigid */
       if (window.__planetImg.naturalWidth) { ctx.save(); ctx.globalAlpha = 0.88; const pw = Math.min(W, H) * 0.17; ctx.drawImage(window.__planetImg, W * 0.15 - pw / 2 - skyOX, H * 0.14 - pw / 2 - skyOY, pw, pw); ctx.restore(); }   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 33: same sheet, same drift as everything up there */
-      if (window.__moonImg.naturalWidth) ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2);   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
+      if (window.__moonImg.naturalWidth && __mp.a > 0.01) { ctx.save(); ctx.globalAlpha = __mp.a; ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2); ctx.restore(); }   /* DEV FORK 40: the moon fades in at its rising and out at its setting */   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
       const satC = time % 90;   /* our satellite transits IN FRONT of the moon on a slow cycle (Keith's placement) */
       if (satC > 8 && satC < 30 && window.__satImg.naturalWidth) { const sp = (satC - 8) / 22, sw = Math.min(W, H) * 0.115, sh = sw * window.__satImg.naturalHeight / window.__satImg.naturalWidth; ctx.save(); ctx.globalAlpha = 0.96; ctx.drawImage(window.__satImg, mX + (sp - 0.5) * mR * 5.4 - sw / 2, mY - mR * 0.30 + sp * mR * 0.55 - sh / 2, sw, sh); ctx.restore(); }
       /* DEV FORK 31: Amy's ambient sky-rocket REMOVED (Keith: 'The rocket launch was better in level 1, mimic that') — the game's own v0.96 launch already fires in Extended Night runs: 55 s in, ignition flash, the runner's own puffs as its smoke trailer, behind the clouds. Identical, not imitated. */
@@ -2775,12 +2782,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK39 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK40 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK39 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK40 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2900,6 +2907,13 @@ $('reviveBtn').onclick = () => {
 window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (window.__spawn) { px = window.__spawn.plat.x + 100; py = window.__spawn.plat.y; } if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } else { dist = px + 200; window.__holdT = 1.0; window.__easeT = 0; AD.log('REVIVE at the restart flag — ' + Math.round(runFt()) + ' FT, running in place, world eases in'); } };   /* DEV FORK 35 (Keith): the revive lands on the SPAWN STATION (the last flag passed), not the death cloud — dist rewinds to the spot (the checkpoint bargain), then he runs in place for a beat before the world moves */
 window.__plantFlags = function () { const F = window.__flags || (window.__flags = []); let lastX = F.length ? F[F.length - 1].plat.x : -15240;   /* DEV FORK 37: checkpoints every 1,000 FT (Keith: closer — going back 1,999 FT is a lot) */ for (let i = 0; i < plats.length; i++) { const p = plats[i]; if (p.gone || p.len < 260 || p.x < lastX + 15240) continue; let nx = null; for (let j = i + 1; j < plats.length; j++) { if (!plats[j].gone) { nx = plats[j]; break; } } let target = Math.max(p.len, 900); if (nx) target = Math.min(target, nx.x - p.x - 120); if (target < 480) continue; p.len = target; F.push({ plat: p, x: p.x + 34, on: false, actT: -9 }); lastX = p.x; } if (!window.__spawn && F.length) { window.__spawn = F[0]; F[0].on = true; } };   /* stations ~every 2,000 FT: the deck grows to first-cloud size (900), capped so a real gap survives before the next deck; fork-only — a production build would plant at course-build time, before the recorder sees the plats */
 window.__playCkpt = function () { try { if (typeof actx === 'undefined' || !actx) return; if (!window.__ckBuf) { if (window.__ckBusy) return; window.__ckBusy = true; fetch('checkpoint.mp3').then(r => r.arrayBuffer()).then(ab => actx.decodeAudioData(ab)).then(b => { window.__ckBuf = b; window.__ckBusy = false; window.__playCkpt(); }).catch(() => { window.__ckBusy = false; }); return; } const s = actx.createBufferSource(); s.buffer = window.__ckBuf; const g = actx.createGain(); g.gain.value = 0.85; s.connect(g); g.connect(actx.destination); s.start(); } catch (e) {} };   /* Keith's checkpoint sting (his YouTube pick, trimmed) through the game's own audio context */
+window.__skyFrac = function (d) { const dd = (typeof d === 'number') ? d : ((typeof dist === 'number') ? dist : 0); const gate = (window.__MAP_FT || 5000) * 15.24; return Math.max(0, Math.min(1, dd / gate)); };   /* DEV FORK 40: the run's fraction of the gate distance */
+window.__DAY_KEYS = [{ t: 0.00, c: [[52,40,92],[150,80,120],[240,130,90],[255,190,120]], star: 0.1 }, { t: 0.16, c: [[86,120,180],[140,170,215],[200,200,190],[255,214,150]], star: 0 }, { t: 0.42, c: [[52,110,205],[110,165,228],[168,205,238],[215,235,245]], star: 0 }, { t: 0.68, c: [[58,105,190],[120,160,215],[185,195,200],[250,215,160]], star: 0 }, { t: 0.86, c: [[70,70,130],[165,95,125],[245,145,85],[255,195,115]], star: 0 }, { t: 1.00, c: [[43,32,84],[178,74,116],[255,138,76],[255,196,110]], star: 0 }];   /* DEV FORK 40: Level 1's day — sunrise, morning, noon, afternoon, golden hour, sunset (the stop set Level 1 never had) */
+window.__dayAt = function (f) { const K = window.__DAY_KEYS; for (let i = 0; i < K.length - 1; i++) { const a = K[i], b = K[i + 1]; if (f >= a.t && f <= b.t) { const g = (f - a.t) / Math.max(0.0001, b.t - a.t); const c = a.c.map((col, k) => col.map((v, j) => Math.round(v + (b.c[k][j] - v) * g))); return { c, star: a.star + (b.star - a.star) * g }; } } return { c: K[0].c, star: 0 }; };
+window.__arcSky = function () { const f = window.__skyFrac(); if (window.__map === 'night') return skyAt(0.90 * f);   /* DEV FORK 40: Level 2 rides the loop's own body, sunset to sunrise */
+ return window.__dayAt(f); };   /* DEV FORK 40: Level 1 rides the new day arc, sunrise to sunset */
+window.__sunPos = function () { if (window.__map === 'night') return { x: W * 0.5, y: H * 0.80, g: 1 }; const f = window.__skyFrac(); const s = Math.sin(Math.PI * f); return { x: W * (0.16 + 0.68 * f), y: H * (0.82 - s * 0.54), g: 1 - s * 0.45 }; };   /* DEV FORK 40: the sun travels Level 1's arc — up from the left horizon, high at noon (glow eased so noon doesn't wash out), down to the right horizon at the gate */
+window.__moonPos = function (f) { const p = Math.max(0, Math.min(1, (f - 0.03) / 0.94)); const alt = Math.sin(Math.PI * p); return { p, alt, x: W * (0.88 - 0.64 * p), y: H * (0.50 - 0.31 * alt), a: Math.max(0, Math.min(1, Math.min(p, 1 - p) / 0.10)) }; };   /* DEV FORK 40: the moon comes and goes (Keith) — rises low right just after sunset, peaks mid-night, sets low left before the sunrise, fading at both horizons */
 window.__playLvl = function () { try { if (typeof actx === 'undefined' || !actx) return; if (!window.__lvlBuf) { if (window.__lvlBusy) return; window.__lvlBusy = true; fetch('levelup.mp3').then(r => r.arrayBuffer()).then(ab => actx.decodeAudioData(ab)).then(b => { window.__lvlBuf = b; window.__lvlBusy = false; window.__playLvl(); }).catch(() => { window.__lvlBusy = false; }); return; } const s = actx.createBufferSource(); s.buffer = window.__lvlBuf; const g = actx.createGain(); g.gain.value = 0.9; s.connect(g); g.connect(actx.destination); s.start(); } catch (e) {} };   /* DEV FORK 39: the level-up sting (Keith's YouTube pick, trimmed to the toast's 4.2 s) */
 window.__revF = function () { if (window.__holdT == null) return 1; if (window.__holdT > 0) return 0; const t = Math.min(1, (window.__easeT || 0) / 1.1); return t * t * (3 - 2 * t); };   /* the restart factor: 0 while he runs in place, a smoothstep back to full pace */
 window.__forkFrame = function () { if (window.__plantFlags) window.__plantFlags(); if (mode === 'run' && window.__flags) { for (const f of window.__flags) { if (!f.on && px >= f.x) { f.on = true; window.__spawn = f; f.actT = time; window.__playCkpt(); if (window.__AD) AD.log('CHECKPOINT — spawn set at ' + Math.round(f.plat.x / 15.24) + ' FT'); } } } if (window.__holdT != null) { if (window.__holdT > 0) window.__holdT -= 1 / 60; else if ((window.__easeT = (window.__easeT || 0) + 1 / 60) >= 1.1) window.__holdT = null; } };   /* DEV FORK 24: the START GAME tap in callable form — the button routes here, and so does forkcheck */
