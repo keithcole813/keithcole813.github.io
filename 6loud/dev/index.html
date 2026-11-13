@@ -246,7 +246,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 54</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 55</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -270,7 +270,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 54 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 55 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -594,7 +594,10 @@
    FORK 54: THE TALLY'S PLACES, on the top games' pattern —
    a NOTES box beside DISTANCE counts this run's haul live,
    and the wipeout itemizes it: notes this run + the balance.
-   Live game untouched.
+   FORK 55 (Keith): FULL BALANCE EVERY PLACE — the in-run box
+   shows the wallet, not the haul, so a player watches the gap
+   to the 3,000-note unlock close; the wipeout names the exact
+   notes left to a runner. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1961,7 +1964,7 @@ function gameOver() {
   const qualifies = qualifiesLocal || qualifiesGlobal;
   { const cbAll = charBests(); const prevBest = cbAll[selChar] || 0; pendingCharBest = 0; if (myFt > prevBest) { if (qualifies) { pendingCharBest = myFt; } else { cbAll[selChar] = myFt; try { localStorage.setItem('sixlouddev_char_bests', JSON.stringify(cbAll)); } catch (e) {} } } $('newRecord').style.display = (prevBest > 0 && myFt > prevBest) ? 'block' : 'none'; }   /* per-runner best (Keith v0.69.2) — v0.94: Keith's NEW RECORD! badge shows when an EXISTING best falls; a runner's first-ever run doesn't count. v0.99.7: a QUALIFYING run's best is held in pendingCharBest and only stamped when initials are entered; non-qualifying runs stamp as before (the initials row never shows for them) */
   $('overStats').textContent = runFt().toLocaleString('en-US') + ' FT';
-  { const on = $('overNotes'); if (on) on.textContent = '♪ +' + notesGot + ' THIS RUN · BALANCE ♪ ' + (window.__notes | 0).toLocaleString('en-US'); }   /* DEV FORK 54: the wipeout itemizes the haul — this run's notes beside the new balance (Temple Run's Score / Distance / Coins pattern) */   /* feet only — no score shown anywhere (Keith v0.48) */
+  { const on = $('overNotes'); if (on) { const bal = window.__notes | 0; on.textContent = '♪ ' + bal.toLocaleString('en-US') + ' BALANCE · +' + notesGot + ' THIS RUN' + (bal < 3000 ? ' · ' + (3000 - bal).toLocaleString('en-US') + ' TO A RUNNER' : ''); } }   /* DEV FORK 55 (Keith): the wipeout leads with the full balance; under the character price it names the exact distance left to a runner */   /* DEV FORK 54: the wipeout itemizes the haul — this run's notes beside the new balance (Temple Run's Score / Distance / Coins pattern) */   /* feet only — no score shown anywhere (Keith v0.48) */
   $('board').innerHTML = best.map((b, i) => boardRow(b.n, b.s, i, undefined, charOf(b.r))).join('') || 'NO SCORES YET';   /* the offline fallback wears the same rows (v0.54) */
   $('nameRow').style.display = qualifies ? 'flex' : 'none';
   $('pubRow').style.display = qualifiesGlobal ? 'flex' : 'none'; pubState = 'none'; $('pubBtn').style.display = ''; $('skipBtn').style.display = ''; $('pubDone').style.display = 'none';   /* DEV FORK: a fresh publish choice on every qualifying wipeout */
@@ -2385,7 +2388,7 @@ function update(dt) {
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
   $('dist').innerHTML = '<small>DISTANCE</small>' + runFt() + 'ft';
-  { const hn = $('hudNotes'); if (hn) hn.innerHTML = '<small>NOTES</small>♪ ' + notesGot; }   /* DEV FORK 54: this run's haul, counted live beside the distance — the top games' in-run pattern */
+  { const hn = $('hudNotes'); if (hn) hn.innerHTML = '<small>NOTES</small>♪ ' + (window.__notes | 0).toLocaleString('en-US'); }   /* DEV FORK 55 (Keith): FULL BALANCE in the run too — the player watches the gap to the 3,000-note unlock close as they play */   /* DEV FORK 54: this run's haul, counted live beside the distance — the top games' in-run pattern */
   if (window.__adGuardT > 0) { window.__adGuardT = Math.max(0, window.__adGuardT - (typeof dt === 'number' ? dt : 0.016)); if (vy > 90) vy = 90; } else if (py - camY > viewH / zoom + 260) gameOver();   /* DEV FORK 7: inside the 1.5 s revive float guard he sinks gently and cannot fall-die */
 }
 
@@ -2935,12 +2938,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK54 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK55 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK54 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK55 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
