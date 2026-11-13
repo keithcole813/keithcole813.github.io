@@ -206,7 +206,7 @@
     d.appendChild(rk); d.appendChild(who); if (ch) { var tg = document.createElement('span'); tg.className = 'tag'; tg.textContent = ch; d.appendChild(tg); } d.appendChild(f);
     return d;
   }
-  var NAMES = { blade: '6LADE', lash: 'LASHMOOVE', yoro: 'YOROKOBI', ivey: 'POISON IVEY', sayori: 'SAYORI' };
+  var NAMES = { blade: '6LADE', lash: 'LASHMOOVE', yoro: 'YOROKOBI', ivey: 'IVEY', sayori: 'SAYORI' };
   function repObj(rep){ if (!rep) return null; try { return typeof rep === 'string' ? JSON.parse(rep) : rep; } catch (e) { return null; } }
   function charOf(rep){ var o = repObj(rep); return (o && NAMES[o.char]) || ''; }
   /* the SAME rule the game ranks by (v0.99.5 board reset): only
