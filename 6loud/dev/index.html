@@ -221,7 +221,7 @@
   <div id="hud">
     <div class="hudbox" id="dist"><small>DISTANCE</small>0ft</div>
   </div>
-  <div id="pullup">PULL UP!!</div>
+  <div id="pullup"><img id="pullupImg" src="pullup.webp" alt="PULL UP!" style="width:172px;height:auto;display:block;"></div>   <!-- DEV FORK 36: Keith's blue PULL UP! badge art replaces the text helper -->
   <div id="dbl"><img src="../play/assets/airjump.webp" alt="AIR JUMP READY!"></div>
   <div id="center">
     <div id="tap"></div>
@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 35</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 36</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 35 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 36 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -430,6 +430,11 @@
    passing one sets your spawn (his checkpoint
    sound); a revive returns you there, running
    in place while the world holds, then eases in.
+   FORK 36: marker art by Keith's circles — the
+   HOLO FLAG is the checkpoint marker (checkered
+   flag retired), the GOLD MEDALLION floats as
+   the level marker over each world's start, and
+   his BLUE PULL UP! badge replaces the text.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2491,8 +2496,11 @@ function draw() {
     }
   }
   /* DEV FORK 35: the restart flags (Keith's circled checkered flag) stand on their stations through the map; the current spawn glows gold, a fresh activation pops */
-  if (!window.__flagImg) { window.__flagImg = new Image(); window.__flagImg.src = 'flag.webp'; }
+  if (!window.__flagImg) { window.__flagImg = new Image(); window.__flagImg.src = 'holoflag.webp';   /* DEV FORK 36: the HOLO FLAG is the checkpoint marker now (Keith) — the checkered flag retires */ }
   if (window.__flags && window.__flagImg.naturalWidth) { const fa = window.__flagImg.naturalWidth / window.__flagImg.naturalHeight; for (const f of window.__flags) { const fx = f.x - camX; if (fx < -260 || fx > viewW / zoom + 260) continue; const pop = f.actT > 0 ? Math.max(0, 1 - (time - f.actT) * 2) : 0; const sc = 1 + 0.22 * pop, fh3 = 190 * sc; ctx.save(); if (f === window.__spawn) { ctx.shadowColor = 'rgba(255,210,80,0.95)'; ctx.shadowBlur = 20; } ctx.drawImage(window.__flagImg, fx, f.plat.y - camY - fh3, 150 * fa * sc, fh3); ctx.restore(); } }
+  /* DEV FORK 36: the LEVEL MARKER (Keith) — the gold winged medallion floats over the starting cloud of the world, bobbing; it marks where the level begins */
+  if (!window.__medalImg) { window.__medalImg = new Image(); window.__medalImg.src = 'medal.webp'; }
+  if (window.__flags && window.__flags.length && window.__medalImg.naturalWidth) { const f0 = window.__flags[0]; const mx = f0.x + 330 - camX; if (mx > -220 && mx < viewW / zoom + 220) { const mw = 132, mh = mw * window.__medalImg.naturalHeight / window.__medalImg.naturalWidth; ctx.save(); ctx.shadowColor = 'rgba(255,205,80,0.55)'; ctx.shadowBlur = 22; ctx.drawImage(window.__medalImg, mx - mw / 2, f0.plat.y - camY - 348 + Math.sin(time * 1.7) * 9 - mh / 2, mw, mh); ctx.restore(); } }
   /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
     const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53;   /* the composition sits HIGHER (Keith v0.74, back to the original select mock): feet at 53% instead of 62%, so the name can live under the cloud and the bottom of the screen isn't carrying everything */
@@ -2756,12 +2764,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK35 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK36 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK35 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK36 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2984,7 +2992,7 @@ function loop(ts) { if (window.__forkFrame) window.__forkFrame();   /* DEV FORK 
   if (mode === 'title') titleFlow(dt);
   if (!window.__AD || !window.__AD.busy) update(dt);   /* DEV FORK 13: the world FREEZES while an ad is up — FORK 7 let gameplay run on underneath it (Keith) */
   const pu = mode === 'run' && !!hangPlat && !slipPlat;   /* PULL UP!! helper while he hangs (Keith v0.47) — DEV FORK 14: RUN-ONLY (its sibling helper always had this guard; the background sim behind the title could light this one mid-load, Keith's screenshot) */
-  if (pu !== puShown) { puShown = pu; const pe = $('pullup'); if (pu) { pe.style.cssText = 'position:fixed;left:50%;top:24%;transform:translateX(-50%);font:700 42px Fredoka,sans-serif;color:#00F5FF;z-index:7;pointer-events:none;white-space:nowrap;display:block;'; } else pe.style.display = 'none'; }   /* DEV FORK 17: the helper's whole presentation is written INLINE at show time — on Keith's phone the stylesheet rule alone left it small, white and parked at the layout origin; inline styles answer to no stylesheet */
+  if (pu !== puShown) { puShown = pu; const pe = $('pullup'); if (pu) { pe.style.cssText = 'position:fixed;left:50%;top:20%;transform:translateX(-50%);z-index:7;pointer-events:none;display:block;animation:puPop .3s ease-out,puBlink .42s steps(2,jump-none) infinite;';   /* DEV FORK 36: the badge art carries its own type — the inline write now only places + animates it (same FORK 17 lesson: presentation written at show time) */ } else pe.style.display = 'none'; }   /* DEV FORK 17: the helper's whole presentation is written INLINE at show time — on Keith's phone the stylesheet rule alone left it small, white and parked at the layout origin; inline styles answer to no stylesheet */
   const db = !pu && mode === 'run' && (coinT > 0 ||   /* !pu (v0.97): the two helpers never show at once — Keith's 1,720 FT screenshot had AIR JUMP READY lit while he hung from a lip (the coin clause bypassed the hang check) */ (!grounded && !hangPlat && !slipPlat && ((doubleArmed && !doubleUsed) || (wingT > 0 && doubleUsed && !tripleUsed))));   /* AIR JUMP READY helper: while a mid-air tap would fire the double (Keith v0.70.1) — flashing for the whole coin charge (Keith v0.85) — and, v0.96/v0.97, while the wings' triple still waits behind a spent double */
   if (db !== dbShown) { dbShown = db; $('dbl').style.display = db ? 'block' : 'none'; }
   const cu = mode === 'title' && loadState === 'done';   /* the character select shows ONLY on a loaded title (Keith v0.73.2: during loading it crowded the bottom of the screen against the loading text; the START GAME button already waited for 'done' — now the arrows, name, best line and strip wait with it). It keeps its OWN flag (v0.65: borrowing another feature's flag kept it on every screen once) */
