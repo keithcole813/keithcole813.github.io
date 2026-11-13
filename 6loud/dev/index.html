@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 34</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.7 · DEV FORK 35</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.7 — DEV FORK 34 ==============================
+/* ============================== 6LOUD demo v0.99.7 — DEV FORK 35 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -424,6 +424,12 @@
    S35 now steps real night frames as a guard.
    Loader sky: dawn colors rise from the bottom
    (Keith: too white and blue).
+   FORK 35: RESTART FLAGS — his checkered flag
+   stands on stations through the map (~every
+   2,000 FT, decks grown to first-cloud size);
+   passing one sets your spawn (his checkpoint
+   sound); a revive returns you there, running
+   in place while the world holds, then eases in.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1640,7 +1646,7 @@ const FEET = 16;            // his feet sit this deep in the cloud tops
 
 function startRun() {
   recStart();   /* record from the very first platform (v0.24) */
-  window.__revivesUsed = 0; window.__adGuardT = 0;   /* DEV FORK 25: a fresh run re-arms BOTH revives (free first, ad second) */   /* DEV FORK 7: a fresh run re-arms the one ad revive */
+  window.__revivesUsed = 0; window.__adGuardT = 0; window.__flags = []; window.__spawn = null; window.__holdT = null; if (window.__plantFlags) window.__plantFlags();   /* DEV FORK 35: fresh run, fresh flag line — the first cloud is station #0 and the spawn */   /* DEV FORK 25: a fresh run re-arms BOTH revives (free first, ad second) */   /* DEV FORK 7: a fresh run re-arms the one ad revive */
   prepRace();
   lastDarkX = -1e9;
   resetWorld();
@@ -1933,7 +1939,7 @@ function update(dt) {
   const frozen = !!(hangPlat || slipPlat);
   if (!frozen) runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
-  if (!frozen) dist += speed * spdF() * dt;
+  if (!frozen) dist += speed * spdF() * dt * (window.__revF ? window.__revF() : 1);   /* DEV FORK 35: the restart hold/ease scales the world's advance */
   /* THE CROWN MOMENT (Keith, v0.13): the instant this run's feet pass
      the reigning high score, the battle loop crossfades in — and keeps
      going: through the wipeout, into every later run this session. */
@@ -1972,7 +1978,7 @@ function update(dt) {
   const prevFeet = py;
   if (held) pressT += dt;
   /* horizontal: the world scrolls; player advances at speed */
-  if (!frozen) px += speed * spdF() * dt;   /* frozen on the ledge beat: he hangs on the lip, the lip hangs on the world */
+  if (!frozen) px += speed * spdF() * dt * (window.__revF ? window.__revF() : 1);   /* DEV FORK 35: same — he runs in place on the station while the factor is 0 */   /* frozen on the ledge beat: he hangs on the lip, the lip hangs on the world */
   /* vertical physics */
   if (hangPlat) {
     hangT -= dt;
@@ -2484,6 +2490,9 @@ function draw() {
       ctx.drawImage(gimg, fx - m.w * K / 2, fy - feetLine * K, m.w * K, m.h * K); ctx.restore();
     }
   }
+  /* DEV FORK 35: the restart flags (Keith's circled checkered flag) stand on their stations through the map; the current spawn glows gold, a fresh activation pops */
+  if (!window.__flagImg) { window.__flagImg = new Image(); window.__flagImg.src = 'flag.webp'; }
+  if (window.__flags && window.__flagImg.naturalWidth) { const fa = window.__flagImg.naturalWidth / window.__flagImg.naturalHeight; for (const f of window.__flags) { const fx = f.x - camX; if (fx < -260 || fx > viewW / zoom + 260) continue; const pop = f.actT > 0 ? Math.max(0, 1 - (time - f.actT) * 2) : 0; const sc = 1 + 0.22 * pop, fh3 = 190 * sc; ctx.save(); if (f === window.__spawn) { ctx.shadowColor = 'rgba(255,210,80,0.95)'; ctx.shadowBlur = 20; } ctx.drawImage(window.__flagImg, fx, f.plat.y - camY - fh3, 150 * fa * sc, fh3); ctx.restore(); } }
   /* player: rendered sequences; on the title he runs in place */
   if (mode === 'title') {
     const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53;   /* the composition sits HIGHER (Keith v0.74, back to the original select mock): feet at 53% instead of 62%, so the name can live under the cloud and the bottom of the screen isn't carrying everything */
@@ -2747,12 +2756,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK34 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK35 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK34 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK35 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2869,7 +2878,11 @@ $('reviveBtn').onclick = () => {
     else $('reviveNote').textContent = 'AD NOT FINISHED — NO REVIVE';
   });
 };
-window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } };   /* DEV FORK 24: the START GAME tap in callable form — the button routes here, and so does forkcheck */
+window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (window.__spawn) { px = window.__spawn.plat.x + 100; py = window.__spawn.plat.y; } if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } else { dist = px + 200; window.__holdT = 1.0; window.__easeT = 0; AD.log('REVIVE at the restart flag — ' + Math.round(runFt()) + ' FT, running in place, world eases in'); } };   /* DEV FORK 35 (Keith): the revive lands on the SPAWN STATION (the last flag passed), not the death cloud — dist rewinds to the spot (the checkpoint bargain), then he runs in place for a beat before the world moves */
+window.__plantFlags = function () { const F = window.__flags || (window.__flags = []); let lastX = F.length ? F[F.length - 1].plat.x : -30480; for (let i = 0; i < plats.length; i++) { const p = plats[i]; if (p.gone || p.len < 260 || p.x < lastX + 30480) continue; let nx = null; for (let j = i + 1; j < plats.length; j++) { if (!plats[j].gone) { nx = plats[j]; break; } } let target = Math.max(p.len, 900); if (nx) target = Math.min(target, nx.x - p.x - 120); if (target < 480) continue; p.len = target; F.push({ plat: p, x: p.x + 34, on: false, actT: -9 }); lastX = p.x; } if (!window.__spawn && F.length) { window.__spawn = F[0]; F[0].on = true; } };   /* stations ~every 2,000 FT: the deck grows to first-cloud size (900), capped so a real gap survives before the next deck; fork-only — a production build would plant at course-build time, before the recorder sees the plats */
+window.__playCkpt = function () { try { if (typeof actx === 'undefined' || !actx) return; if (!window.__ckBuf) { if (window.__ckBusy) return; window.__ckBusy = true; fetch('checkpoint.mp3').then(r => r.arrayBuffer()).then(ab => actx.decodeAudioData(ab)).then(b => { window.__ckBuf = b; window.__ckBusy = false; window.__playCkpt(); }).catch(() => { window.__ckBusy = false; }); return; } const s = actx.createBufferSource(); s.buffer = window.__ckBuf; const g = actx.createGain(); g.gain.value = 0.85; s.connect(g); g.connect(actx.destination); s.start(); } catch (e) {} };   /* Keith's checkpoint sting (his YouTube pick, trimmed) through the game's own audio context */
+window.__revF = function () { if (window.__holdT == null) return 1; if (window.__holdT > 0) return 0; const t = Math.min(1, (window.__easeT || 0) / 1.1); return t * t * (3 - 2 * t); };   /* the restart factor: 0 while he runs in place, a smoothstep back to full pace */
+window.__forkFrame = function () { if (window.__plantFlags) window.__plantFlags(); if (mode === 'run' && window.__flags) { for (const f of window.__flags) { if (!f.on && px >= f.x) { f.on = true; window.__spawn = f; f.actT = time; window.__playCkpt(); if (window.__AD) AD.log('CHECKPOINT — spawn set at ' + Math.round(f.plat.x / 15.24) + ' FT'); } } } if (window.__holdT != null) { if (window.__holdT > 0) window.__holdT -= 1 / 60; else if ((window.__easeT = (window.__easeT || 0) + 1 / 60) >= 1.1) window.__holdT = null; } };   /* DEV FORK 24: the START GAME tap in callable form — the button routes here, and so does forkcheck */
 /* DEV FORK 26: map state — 'mnt' (the mountain course) or 'city' (CITY NIGHTS). Map 2 unlocks crossing 5,000 FT in a run and persists; starting at the city is a fresh run there (beginner speed — his unlocked-area ruling). */
 window.__map = 'mnt'; window.__MAP_FT = 5000;
 try { window.__map2 = localStorage.getItem('sixlouddev_map2') === '1'; } catch (e) { window.__map2 = false; }
@@ -2964,7 +2977,7 @@ for (const [id, w] of [['tgMusic', 'm'], ['tgSfx', 's'], ['tgMusic2', 'm'], ['tg
 audUI();
 window.__audTest = { toggle: audToggle, state: () => ({ m: !!window.__musOff, s: !!window.__sfxOff }) };
 
-function loop(ts) {
+function loop(ts) { if (window.__forkFrame) window.__forkFrame();   /* DEV FORK 35: per-frame fork housekeeping — restart-flag planting/activation + the revive hold/ease timers */
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
   dbgTick(ts);   /* DEV FORK: the debug overlay rides the frame loop */
   tiltEase(dt);   /* the depth eases toward the phone's pose every frame, every mode (v0.83) */
