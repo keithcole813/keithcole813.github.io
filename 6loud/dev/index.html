@@ -159,7 +159,7 @@
   /* DEV FORK 14: PULL UP!! anchors to the viewport itself, never a container corner */
   #pullup { position:fixed; }
   /* DEV FORK 15: WIPEOUT top-anchored + scrollable at every height; tail padded clear of the debug strip */
-  #over { justify-content:flex-start; overflow-y:auto; touch-action:pan-y; padding:14px 0 96px; }
+  #over { justify-content:flex-start; overflow-y:auto; touch-action:pan-y; padding:calc(30px + env(safe-area-inset-top)) 0 96px; }   /* DEV FORK 59: the heading drops clear of the iPhone camera (Keith: the camera covers up that word) — the safe-area inset plus real air above YOU FELL! */
   /* DEV FORK 17: PULL UP!! re-declared plain — core geometry in one boring rule, the garnish in another, so no single exotic token can take the whole presentation down with it */
   #pullup { position:fixed; left:50%; top:24%; transform:translateX(-50%); font:700 42px 'Fredoka','Trebuchet MS',sans-serif; color:#00F5FF; z-index:7; }
   #pullup { letter-spacing:1.5px; -webkit-text-stroke:2px #120C28; filter:drop-shadow(0 4px 0 rgba(18,12,40,.8)); animation:puPop .3s ease-out, puBlink .42s steps(2,jump-none) infinite; }
@@ -171,7 +171,7 @@
   #adSimClaim { margin-top:12px; }
   /* SHORT SCREENS (landscape): the WIPEOUT page shrinks to fit — ONLY this page (Keith v0.70.3). Portrait and tall screens keep the approved sizes untouched; where a very short screen still runs long, the page scrolls from the top instead of clipping both ends the way centering did. */
   @media (max-height: 860px) {
-    #over { justify-content:flex-start; overflow-y:auto; padding:12px 0 16px; }
+    #over { justify-content:flex-start; overflow-y:auto; padding:calc(24px + env(safe-area-inset-top)) 0 16px; }   /* DEV FORK 59: same camera clearance on short screens */
     #over h1 { font-size:36px; }
     #overStats { font-size:18px; margin-bottom:7px; }
     #board { padding:9px 12px 11px; margin-bottom:10px; border-radius:14px; }
@@ -255,13 +255,13 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 58</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 59</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
   <div id="loadbar"><div id="loadpct">LOADING 0%</div></div>   <!-- text + % only, no bar (Keith v0.73.2) -->
   <div id="over">
-    <h1>WIPEOUT</h1>
+    <h1>YOU FELL!</h1>
     <div id="overStats"></div><div id="overNotes"></div>
     <img id="newRecord" src="../play/assets/newrecord.webp" alt="NEW RECORD!" style="display:none; width:min(300px, 72vw); margin:0 0 4px;">
     <div id="reviveRow"><button class="btn" id="reviveBtn">REVIVE — FREE</button><div id="reviveNote"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 58 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 59 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -618,7 +618,10 @@
    the title's MUSIC/SOUND pills are OFF the front: the audio
    controls live in Options now; FORK 58 takes the pair off
    the WIPEOUT screen too, on Keith's word — audio lives
-   only in Options. Live game untouched.
+   only in Options. FORK 59: the game-over heading is YOU
+   FELL! (Keith's pick — nobody wipes out, you fall), and
+   the over page's top spacing gains the safe-area inset so
+   the heading clears the iPhone camera. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2959,12 +2962,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK58 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK59 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK58 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK59 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
