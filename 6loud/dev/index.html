@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 64</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 65</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 64 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 65 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -642,7 +642,10 @@
    SEASON from its start. FORK 64: THE (2) WORLDS — beat
    STORM SEASON (20,000 FT) and every world gains a (2)
    entry in the MAP cycle, the full special-cloud
-   vocabulary from level 1 (Keith). Live game untouched.
+   vocabulary from level 1 (Keith). FORK 65: ALL SIX maps
+   show in the MAP cycle — locked picks wear a lock and
+   the START button speaks the feat (Keith: 'The fork only
+   has 2 maps not 6'). Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1864,7 +1867,7 @@ const FEET = 16;            // his feet sit this deep in the cloud tops
 
 /* ---------- game flow ---------- */
 
-function startRun() {
+function startRun() { if (window.__mapLocked) return;   /* DEV FORK 65: a locked pick never starts — the feat is written on the START button */
   recStart();   /* record from the very first platform (v0.24) */
   window.__revivesUsed = 0; window.__adGuardT = 0; window.__flags = []; window.__spawn = null; window.__holdT = null; if (window.__plantFlags) window.__plantFlags();   /* DEV FORK 35: fresh run, fresh flag line — the first cloud is station #0 and the spawn */   /* DEV FORK 25: a fresh run re-arms BOTH revives (free first, ad second) */   /* DEV FORK 7: a fresh run re-arms the one ad revive */
   prepRace();
@@ -2992,12 +2995,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK64 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK65 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK64 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK65 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3134,8 +3137,8 @@ try { window.__map2 = localStorage.getItem('sixlouddev_map2') === '1'; } catch (
 try { window.__map3 = localStorage.getItem('sixlouddev_map3') === '1'; } catch (e) { window.__map3 = false; }
 try { window.__loop2 = localStorage.getItem('sixlouddev_loop2') === '1'; } catch (e) { window.__loop2 = false; }   /* DEV FORK 64: the beaten-game unlock persists */   /* DEV FORK 61: the STORM SEASON unlock persists */
 try { if (!window.__map2 && !/[?&]maplock=1/.test(location.search || '')) window.__map2 = true; } catch (e) {}   /* DEV FORK: Keith starts UNLOCKED in the fork (his order) — ?maplock=1 starts locked so the unlock moment itself can be tested */
-window.__setMap = m => { window.__map = m; window.__moonT0 = (typeof time === 'number') ? time : 0;   /* DEV FORK 45: entering a map restarts the real moon's slide-in */ const b = $('mapBtn'); if (b) b.textContent = 'MAP: ' + (window.__MAPNAMES[m] || 'DAY BREAK'); };   /* DEV FORK 29: Map 2 is EXTENDED NIGHT */
-$('mapBtn').onclick = () => { if (!window.__map2 && !window.__map3 && !window.__loop2) return; const order = ['mnt', 'night', 'rain', 'mnt2', 'night2', 'rain2'].filter(m => m === 'mnt' || (m === 'night' ? window.__map2 : m === 'rain' ? window.__map3 : window.__loop2));   /* DEV FORK 64: the cycle gains the (2) worlds once the game is beaten */ const nx = order[(order.indexOf(window.__map) + 1) % order.length]; window.__setMap(nx); AD.log('start area: ' + (window.__MAPNAMES[nx] || nx)); };   /* DEV FORK 61: the toggle cycles every unlocked world */
+window.__setMap = m => { window.__map = m; window.__moonT0 = (typeof time === 'number') ? time : 0;   /* DEV FORK 45: entering a map restarts the real moon's slide-in */ const b = $('mapBtn'); if (b) b.textContent = 'MAP: ' + (window.__MAPNAMES[m] || 'DAY BREAK'); if (window.__mapLockSync) window.__mapLockSync(); };   /* DEV FORK 65: the lock state rides every pick */   /* DEV FORK 29: Map 2 is EXTENDED NIGHT */
+$('mapBtn').onclick = () => { const order = ['mnt', 'night', 'rain', 'mnt2', 'night2', 'rain2'];   /* DEV FORK 65: ALL SIX worlds show in the cycle, locked or not (Keith: 'The fork only has 2 maps not 6') — a locked pick wears its lock, like the locked runners in the chooser */ const nx = order[(order.indexOf(window.__map) + 1) % order.length]; window.__setMap(nx); AD.log('start area: ' + (window.__MAPNAMES[nx] || nx)); };   /* DEV FORK 61: the toggle cycles every unlocked world */
 window.__unlockMap2 = () => { if (window.__map2) return; window.__map2 = true; const __mt2 = document.getElementById('mapToastName'); if (__mt2) __mt2.textContent = 'MIDNIGHT RUN';   /* DEV FORK 61: the toast names the world just unlocked */ if (window.__playLvl) window.__playLvl();   /* DEV FORK 39: Keith's level-up sting rides the unlock moment */ try { localStorage.setItem('sixlouddev_map2', '1'); } catch (e) {} const t = $('mapToast'); if (t) { t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4200); } AD.log('NEW MAP UNLOCKED — MIDNIGHT RUN at ' + Math.round(runFt()) + ' FT'); };
 /* the between-runs interstitial rides the two exits: a capture-phase
    listener takes the tap BEFORE the button's own handler, holds it
@@ -3356,7 +3359,9 @@ window.__rainDraw = function () {
 window.__unlockMap3 = () => { if (window.__map3) return; window.__map3 = true; if (window.__playLvl) window.__playLvl(); try { localStorage.setItem('sixlouddev_map3', '1'); } catch (e) {} const __mt = document.getElementById('mapToastName'); if (__mt) __mt.textContent = 'STORM SEASON'; const t = $('mapToast'); if (t) { t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4200); } AD.log('NEW MAP UNLOCKED — STORM SEASON at ' + Math.round(runFt()) + ' FT'); };
 window.__map3Test = { unlocked: () => !!window.__map3, unlock: () => window.__unlockMap3(), names: window.__MAPNAMES };
 window.__unlockLoop2 = () => { if (window.__loop2) return; window.__loop2 = true; if (window.__playLvl) window.__playLvl(); try { localStorage.setItem('sixlouddev_loop2', '1'); } catch (e) {} const __mt = document.getElementById('mapToastName'); if (__mt) __mt.textContent = 'ALL WORLDS (2) OPEN'; const t = $('mapToast'); if (t) { t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4200); } AD.log('GAME BEATEN — the (2) worlds are open'); };
-window.__loop2Test = { unlocked: () => !!window.__loop2, unlock: () => window.__unlockLoop2() };   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
+window.__loop2Test = { unlocked: () => !!window.__loop2, unlock: () => window.__unlockLoop2() };
+window.__mapLockSync = () => { const id = window.__map || 'mnt'; window.__mapLocked = (id === 'night' && !window.__map2) || (id === 'rain' && !window.__map3) || (id.endsWith('2') && !window.__loop2); const mb = $('mapBtn'); if (mb) mb.textContent = 'MAP: ' + (window.__MAPNAMES[id] || 'DAY BREAK') + (window.__mapLocked ? ' 🔒' : ''); const sb = $('startBtn'); if (sb) sb.textContent = window.__mapLocked ? '🔒 ' + ({ night: '5,000 FT FROM DAY BREAK', rain: '10,000 FT FROM MIDNIGHT RUN' }[id] || 'BEAT THE GAME TO OPEN') : '▶ START GAME'; };
+window.__mapLockSync();   /* DEV FORK 65: sync once at boot, then on every pick */   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
 requestAnimationFrame(loop);
 </script>
 </body>
