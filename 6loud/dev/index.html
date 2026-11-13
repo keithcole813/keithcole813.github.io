@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 62</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 63</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 62 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 63 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -635,8 +635,11 @@
    the rhythm flip the same morning: special decks angle
    under the runner's weight and keep angling, the slope
    pulls him low-side; see-saws cap at ~49 degrees, flip
-   decks go all the way around and flip him off. Live
-   game untouched.
+   decks go all the way around and flip him off. FORK 63:
+   SHIVER + DROP CLOUDS (Keith) — they don't spin: one
+   trembles then gives way, one drops out from under him;
+   both debut halfway through MIDNIGHT RUN and ride STORM
+   SEASON from its start. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1615,7 +1618,7 @@ function addPlat(x, band, lenClass, storm) {
      early (past ~40 s and ~590 FT of course), never closer than 2800 units to the last one. */
   if (!storm && runTime > 40 && x - courseBase > 9000 && x - lastDarkX > 2800 && Math.random() < 0.14) { dark = true; img = rnd(STORMC); lastDarkX = x; }
   const __np = { x, y: BAND_Y[band], len, img, storm: !!storm, dark };
-  if (!storm && !dark && typeof mode !== 'undefined' && mode === 'run' && x - courseBase > 6000) { const h = Math.abs(Math.sin(x * 12.9898) * 43758.5453) % 1; if (window.__map === 'rain') { if (h < 0.14) __np.kind = 'flip'; else if (h < 0.30) __np.kind = 'saw'; } else if (window.__map === 'night') { if (h < 0.16) __np.kind = 'saw'; } if (__np.kind) __np.fph = h * 7; }   /* DEV FORK 61: deck kinds by a deterministic hash of x — STORM SEASON flips + see-saws, MIDNIGHT RUN see-saws (Keith's hazard map); storm and dark decks keep their own natures, and the opening stretch stays plain */
+  if (!storm && !dark && typeof mode !== 'undefined' && mode === 'run' && x - courseBase > 6000) { const h = Math.abs(Math.sin(x * 12.9898) * 43758.5453) % 1; if (window.__map === 'rain') { if (h < 0.12) __np.kind = 'flip'; else if (h < 0.24) __np.kind = 'saw'; else if (h < 0.34) __np.kind = 'shiv'; else if (h < 0.44) __np.kind = 'drop'; } else if (window.__map === 'night') { const dFt = (x - courseBase) / 15.24; if (dFt >= 5000) { if (h < 0.12) __np.kind = 'saw'; else if (h < 0.24) __np.kind = 'shiv'; else if (h < 0.34) __np.kind = 'drop'; } else if (h < 0.16) __np.kind = 'saw'; }   /* DEV FORK 63: shiver + drop clouds debut at MIDNIGHT RUN's halfway (Keith) and ride STORM SEASON from its start */ if (__np.kind) __np.fph = h * 7; }   /* DEV FORK 61: deck kinds by a deterministic hash of x — STORM SEASON flips + see-saws, MIDNIGHT RUN see-saws (Keith's hazard map); storm and dark decks keep their own natures, and the opening stretch stays plain */
   plats.push(__np);
   if (REC) REC.plats.push([x - courseBase, BAND_Y[band], len, img, storm ? 1 : 0, dark ? 1 : 0]);   /* the recorder keeps the course — in course space (v0.47); the 5th slot carries the storm flag (v0.83), the 6th the dark flag (v0.91) */
   return x + len;
@@ -2234,7 +2237,7 @@ function update(dt) {
     if (flipped) flipT += dt;
     /* a fall CAN land on a cloud (Keith v0.71 — retires the v0.4 jump-only landing rule and its v0.43 staircase exception, now just the general case). Every fall lands now — FORK 21 retired the ledge-slip plunge's never-lands exception (Keith, 2026-11-12). */
     if (!noLand) for (const p of plats) {
-      if (p.gone || p.flipOff) continue;   /* v0.91: a dark cloud that sank away catches no one */   /* DEV FORK 61: a flipped deck catches no one either */
+      if (p.gone || p.flipOff || p.dropping) continue;   /* v0.91: a dark cloud that sank away catches no one */   /* DEV FORK 61: a flipped deck catches no one either */   /* DEV FORK 63: nor a falling shiver/drop deck */
       if (px + 68 < p.x || px - 36 > p.x + p.len) continue;
       const top = p.y + (p.sink || 0);
       if (vy >= 0 && prevFeet <= top + 2 && py >= top) {
@@ -2261,7 +2264,7 @@ function update(dt) {
     }
     /* ledge grab: falling short at the left edge — off ANY fall since FORK 22 (Keith, 2026-11-12: 'Any cliff can be caught even if from another cliff. No matter how far falling from. No matter if with wings. You cant fall through clouds') — before this the grab demanded a jump (airMove), so a run-off, a hang drop or a slip fall could never catch a lower lip, only a top */
     if (!grounded) for (const p of plats) {
-      if (p.gone || p.flipOff) continue;   /* v0.91: no grabbing a cloud that already sank away */   /* DEV FORK 61: nor a flipped one */
+      if (p.gone || p.flipOff || p.dropping) continue;   /* v0.91: no grabbing a cloud that already sank away */   /* DEV FORK 61: nor a flipped one */   /* DEV FORK 63: nor a falling one */
       if (px + 70 < p.x || px - 40 > p.x + p.len) continue;
       const top = p.y;
       if (vy > (wingT > 0 ? (flutterT > 0 ? 0 : 90) : 260) && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {   /* DEV FORK 23: a FLUTTERING winged descent hangs at any sink speed — the flutter tap resets vy to ~40, under the v0.99.2 floor of 90, so Keith's sequence (jump -> flight -> triple -> flutter down) could cross a lip ineligible right after a tap; he ruled that sequence eligible to hang (2026-11-12) */   /* v0.99.2 (Keith: 'I should be able to hang while i have wings'): the grab demanded a fast fall (vy > 260), but a winged descent is a controlled one — fluttering down at ~150 he fell THROUGH the window slow and past it before speed built (probe-verified: no hang, fell at vy 1193). Winged, he can catch a lip at descent speed (90); the landing check still runs first, so a descent that can land still lands */
@@ -2810,12 +2813,13 @@ function draw() {
   for (const p of plats) {
     const _ci = IMG['cloud' + p.img], img = (_ci && _ci.naturalWidth) ? _ci : IMG['storm' + p.img], cd = CLOUDS[p.img];   /* v0.95 FIX (Keith never saw a dark cloud): queueImg stores the Image object BEFORE it loads, so a name with NO file (the S-names have no cloud-S*.webp — their art lives in storm-*.webp) leaves a BROKEN but truthy object at the cloud key, shadowing the loaded storm image — and the naturalWidth guard below then skipped the draw: every dark cloud was solid but invisible (the sink and the water walk with it). A cloud key now only wins when it actually has pixels. */   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
     if (!img || !img.naturalWidth) continue;
-    if (p.dark && (p.sink || 0) > 640) continue;   /* v0.91: a dark cloud that sank away is gone from the sky too */
-    const sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;
+    if ((p.dark || p.dropping) && (p.sink || 0) > 640) continue;   /* v0.91: a dark cloud that sank away is gone from the sky too */   /* DEV FORK 63: a dropped shiver/drop deck likewise */
+    let sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;   /* DEV FORK 63: let, so a shiver deck can tremble in place */
+    if (p.kind === 'shiv' && p.shivT > 0) { sx += Math.sin(time * 95 + p.x) * Math.min(3.5, p.shivT * 5); sy += Math.cos(time * 83 + p.x * 1.7) * Math.min(2.5, p.shivT * 4); }   /* DEV FORK 63: the tremble grows the longer he stands on it */
     if (sx + p.len < -200 || sx > viewW / zoom + 200) continue;
     const dh = p.len * cd.asp;
     ctx.save();
-    if (p.dark && (p.sink || 0) > 200) ctx.globalAlpha = Math.max(0, 1 - ((p.sink || 0) - 200) / 420);   /* v0.91: sinking away, it fades as it falls */
+    if ((p.dark || p.dropping) && (p.sink || 0) > 200) ctx.globalAlpha = Math.max(0, 1 - ((p.sink || 0) - 200) / 420);   /* v0.91: sinking away, it fades as it falls */   /* DEV FORK 63: falling shiver/drop decks fade the same way */
     ctx.shadowColor = (p.dark || p.storm) ? `rgba(148,170,226,${0.5 - 0.2 * sky.star})` : `rgba(255,255,255,${0.85 - 0.35 * sky.star})`; ctx.shadowBlur = (p.dark || p.storm) ? 12 : 24 - 10 * sky.star;   /* bloom tamed at night so the clouds keep their texture (v0.19) — v0.98: the white bloom washed the RAIN decks pale against Keith's source sheet; they keep a dim steel glow instead */
     if (p.kind === 'flip' && Math.abs(p.tilt || 0) > 0.002) {   /* DEV FORK 61: a flipping deck rotates around its own CENTRE (the hang-bend below pivots on the top edge) */
       const gx = sx + p.len / 2, gy = sy + dh * (0.5 - cd.surf) + 6;
@@ -2985,12 +2989,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK62 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK63 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK62 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK63 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3310,7 +3314,15 @@ window.__deckTick61 = function (p, dt) {   /* DEV FORK 62: FORK 61's rhythm flip
 };
 /* DEV FORK 62: THE WEIGHT PHYSICS (Keith, 2026-11-13) — one physics for both special decks: angle under his weight, keep angling, the slope pulls him low-side; see-saws cap, flips go all the way around. */
 window.__deckTick = function (p, dt) {
-  if (p.kind !== 'saw' && p.kind !== 'flip') return;
+  if (p.kind !== 'saw' && p.kind !== 'flip' && p.kind !== 'shiv' && p.kind !== 'drop') return;
+  if (p.kind === 'shiv' || p.kind === 'drop') {
+    if (p.dropping) { p.sinkV = (p.sinkV || 0) + 5200 * dt; p.sink = (p.sink || 0) + p.sinkV * dt; if (p.sink > 640) p.gone = true; return; }   /* falling away — the dark clouds' language: sink, fade, gone */
+    if (typeof grounded !== 'undefined' && grounded === p) {
+      if (p.kind === 'shiv') { p.shivT = (p.shivT || 0) + dt; if (p.shivT >= 0.9) { p.dropping = true; p.sinkV = 300; grounded = null; vy = 150; airMove = null; airT = 0; landMove = null; airGrav = 1; } }   /* it trembles, then gives way — a plain fall */
+      else { p.dropT = (p.dropT || 0) + dt; if (p.dropT >= 0.22) { p.dropping = true; p.sinkV = 60; grounded = null; vy = 60; airMove = null; airT = 0; landMove = null; airGrav = 1; } }   /* it barely waits, then drops out from under him */
+    } else { p.shivT = Math.max(0, (p.shivT || 0) - dt * 2); p.dropT = 0; }   /* left in time, the tremble settles and the cloud stays */
+    return;
+  }
   if (typeof hangPlat !== 'undefined' && hangPlat === p) return;   /* the hang bend owns the tilt while he dangles */
   let th = p.tilt || 0;
   if (p.kind === 'flip' && p.rolling) { th += p.rollDir * 2.2 * dt; if ((p.rollDir > 0 && th >= Math.PI * 2) || (p.rollDir < 0 && th <= -Math.PI * 2)) { th = 0; p.rolling = false; p.flipOff = false; } p.tilt = th; return; }   /* empty, it finishes the turn it started */
