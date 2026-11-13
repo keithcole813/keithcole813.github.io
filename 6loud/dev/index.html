@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 66</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 67</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 66 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 67 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -648,7 +648,11 @@
    has 2 maps not 6'). FORK 66: KEITH'S TEST SETUP —
    every map open in the fork, a one-time 20,000-note
    grant, and the chosen 3 reset to locked so he can buy
-   them. Fork only; live game untouched.
+   them. FORK 67: STORM SEASON IS ALL STORM — 100% storm
+   clouds, thunder clouds scattered through the map (step
+   on one: thunder + a whole-screen lightning flash), and
+   water footsteps on every cloud (Keith). Fork only;
+   live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -832,13 +836,13 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
   }
 }
 function gateSteps() {   /* footsteps sound only while his feet are on a cloud — checked every frame, acts on change */
-  const on = mScene === 'steps' && mode === 'run' && !!grounded && !(grounded && grounded.dark) && !hangPlat && !slipPlat;   /* v0.91: on a DARK cloud the snow steps stop — the water walk (gateDark) is the footstep there */
+  const on = mScene === 'steps' && mode === 'run' && !!grounded && !(grounded && (grounded.dark || window.__map === 'rain' || window.__map === 'rain2')) && !hangPlat && !slipPlat;   /* DEV FORK 67: no snow steps in STORM SEASON — every cloud there is water underfoot (Keith) */   /* v0.91: on a DARK cloud the snow steps stop — the water walk (gateDark) is the footstep there */
   if (on === stepsGateOn) return; stepsGateOn = on;
   if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
   else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on && !window.__sfxOff) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }   /* DEV FORK 12: same SOUND-bus respect in gateSteps */
 }
 function gateDark() {   /* Keith (v0.91): the water walk sounds 'when your feet are on a dark cloud only. not before or after. it doesnt continue' — a hard little gate on the dark chain, checked every frame next to gateSteps, fading at the steps' own snappy rate */
-  const on = mode === 'run' && !!grounded && !!grounded.dark && !hangPlat && !slipPlat;
+  const on = mode === 'run' && !!grounded && (!!grounded.dark || window.__map === 'rain' || window.__map === 'rain2') && !hangPlat && !slipPlat;   /* DEV FORK 67: the water walk is the footstep sound on EVERY cloud in STORM SEASON (Keith: 'use the other sound we have for rain clouds on every cloud') */
   if (on === darkGateOn) return; darkGateOn = on;
   if (actx && gainDk && actx.state === 'running') gainDk.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
 }
@@ -1620,13 +1624,14 @@ const rnd = a => a[Math.floor(Math.random() * a.length)];
 function addPlat(x, band, lenClass, storm) {
   const isIsle = lenClass === 'ISLE';
   const len = isIsle ? 330 : LEN[lenClass];
-  let img = isIsle ? rnd(ISLAND) : rnd(LONGC);   /* storm decks wear regular clouds now (Keith v0.83: the dark clouds are out) */
+  let img = isIsle ? rnd(ISLAND) : (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 67: STORM SEASON wears storm clouds on every deck (Keith: 100% storm clouds) */   /* storm decks wear regular clouds now (Keith v0.83: the dark clouds are out) */
   let dark = false;
   /* v0.91 THE DARK CLOUDS RETURN (Keith, 2026-11-10) — not as storm decks this time: SPREAD OUT singles
      through the regular course that SINK under you (see the spring loop). Never on storm steps, never
      early (past ~40 s and ~590 FT of course), never closer than 2800 units to the last one. */
   if (!storm && runTime > 40 && x - courseBase > 9000 && x - lastDarkX > 2800 && Math.random() < 0.14) { dark = true; img = rnd(STORMC); lastDarkX = x; }
-  const __np = { x, y: BAND_Y[band], len, img, storm: !!storm, dark };
+  const __np = { x, y: BAND_Y[band], len, img, storm: !!storm || window.__map === 'rain' || window.__map === 'rain2', dark };   /* DEV FORK 67: every STORM SEASON deck is a storm cloud (Keith) */
+  if ((window.__map === 'rain' || window.__map === 'rain2') && x - courseBase > 6000) { const hT = Math.abs(Math.sin(x * 3.7711) * 12543.21) % 1; if (hT < 0.09) __np.thunder = true; }   /* DEV FORK 67: thunder clouds scattered through the map (Keith) */
   if (!storm && !dark && typeof mode !== 'undefined' && mode === 'run' && x - courseBase > 6000) { const h = Math.abs(Math.sin(x * 12.9898) * 43758.5453) % 1; if (window.__map.endsWith('2')) { if (h < 0.12) __np.kind = 'flip'; else if (h < 0.24) __np.kind = 'saw'; else if (h < 0.34) __np.kind = 'shiv'; else if (h < 0.44) __np.kind = 'drop'; } else if (window.__map === 'rain') { if (h < 0.12) __np.kind = 'flip';   /* DEV FORK 64: in the (2) worlds the full vocabulary runs from level 1 (Keith) */ else if (h < 0.24) __np.kind = 'saw'; else if (h < 0.34) __np.kind = 'shiv'; else if (h < 0.44) __np.kind = 'drop'; } else if (window.__map === 'night') { const dFt = (x - courseBase) / 15.24; if (dFt >= 5000) { if (h < 0.12) __np.kind = 'saw'; else if (h < 0.24) __np.kind = 'shiv'; else if (h < 0.34) __np.kind = 'drop'; } else if (h < 0.16) __np.kind = 'saw'; }   /* DEV FORK 63: shiver + drop clouds debut at MIDNIGHT RUN's halfway (Keith) and ride STORM SEASON from its start */ if (__np.kind) __np.fph = h * 7; }   /* DEV FORK 61: deck kinds by a deterministic hash of x — STORM SEASON flips + see-saws, MIDNIGHT RUN see-saws (Keith's hazard map); storm and dark decks keep their own natures, and the opening stretch stays plain */
   plats.push(__np);
   if (REC) REC.plats.push([x - courseBase, BAND_Y[band], len, img, storm ? 1 : 0, dark ? 1 : 0]);   /* the recorder keeps the course — in course space (v0.47); the 5th slot carries the storm flag (v0.83), the 6th the dark flag (v0.91) */
@@ -1650,7 +1655,7 @@ function buildStormStep() {
   const b = Math.max(1, Math.min(4, exitBand + rnd([-1, 0, 0, 1])));
   const x = worldEnd + GAP.TAP;
   const lenT = rnd([LEN.LONG, LEN.MED, LEN.LONG]);
-  const imgT = rnd(LONGC);
+  const imgT = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 67: the storm-event decks in STORM SEASON wear storm clouds too */
   const tb = Math.max(0, b - 2);   /* v0.98 (Keith, 2026-11-10: 'rain clouds need to go lower still'): the through deck drops TWO bands now (v0.95 dropped it one) and the climb stands three bands over it (cb = tb + 3) — the pair is 510 apart, real sky between the rain deck and the climb. Missing the climb commits you to the low road: the fork's original v0.82 bargain, and the through-to-climb recovery hop goes with it */
   plats.push({ x, y: BAND_Y[tb], len: lenT, img: imgT, storm: true });
   if (REC) REC.plats.push([x - courseBase, BAND_Y[tb], lenT, imgT, 1]);
@@ -1679,9 +1684,9 @@ function buildStormEvent() {
     let colEnd = x;
     if (lo !== null) { const len = rnd([LEN.LONG, LEN.LONG, LEN.MED]), img = rnd(STORMC);
       plats.push({ x, y: E + lo, len, img, storm: true }); if (REC) REC.plats.push([x - courseBase, E + lo, len, img, 1]); colEnd = Math.max(colEnd, x + len); }
-    if (mid !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = rnd(LONGC), mx = x + 60;
+    if (mid !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC), mx = x + 60   /* DEV FORK 67: storm art in the rain worlds */;
       plats.push({ x: mx, y: E + mid, len, img }); if (REC) REC.plats.push([mx - courseBase, E + mid, len, img]); colEnd = Math.max(colEnd, mx + len); }
-    if (hi !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = rnd(LONGC), hx = x + 120;
+    if (hi !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC), hx = x + 120   /* DEV FORK 67: storm art in the rain worlds */;
       plats.push({ x: hx, y: E + hi, len, img }); if (REC) REC.plats.push([hx - courseBase, E + hi, len, img]); colEnd = Math.max(colEnd, hx + len); }
     x = colEnd + 380;
   }
@@ -2840,6 +2845,7 @@ function draw() {
       ctx.drawImage(img, sx - gx, sy - cd.surf * dh + 6 - gy, p.len, dh);
     } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
     ctx.restore();
+    if (p.thunder) { const __ph = (time * 1.4 + (p.x % 997) / 997 * 2.7) % 2.7; if (__ph < 0.13) { const __bx = sx + p.len * 0.5, __by = sy + (1 - cd.surf) * dh + 16; ctx.save(); ctx.strokeStyle = 'rgba(255,244,170,0.95)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(__bx, __by); ctx.lineTo(__bx - 9, __by + 20); ctx.lineTo(__bx + 2, __by + 20); ctx.lineTo(__bx - 8, __by + 44); ctx.stroke(); ctx.restore(); } }   /* DEV FORK 67: a thunder cloud shows its charge — a little bolt flickers under it now and then */
     if ((p.dark || p.storm) && !(p.dark && (p.sink || 0) > 200)) {   /* v0.98 RAIN SIMULATION (Keith: 'we should do rain simulation under the clouds because they dont look good'): animated streaks fall from a rain deck's underside and fade down the fall zone — the baked art never carried the rain like his source sheet does */
       const under = sy + (1 - cd.surf) * dh + 10, fallH = 150, nR = Math.max(4, Math.floor(p.len / 58));
       ctx.save(); ctx.strokeStyle = 'rgba(168,194,235,0.5)'; ctx.lineWidth = 2; ctx.beginPath();
@@ -2847,7 +2853,8 @@ function draw() {
       ctx.stroke(); ctx.restore();
     }
   }
-  if (window.__rainDraw) window.__rainDraw();   /* DEV FORK 61: STORM SEASON's rain (movement 1) falls over the world */
+  if (window.__rainDraw) window.__rainDraw();
+  if (window.__flashT > 0.01) { ctx.save(); ctx.globalAlpha = Math.min(0.55, window.__flashT * 0.55); ctx.fillStyle = '#dfe8ff'; ctx.fillRect(0, 0, W, H); ctx.restore(); window.__flashT = Math.max(0, window.__flashT - 0.045); }   /* DEV FORK 67: THE LIGHTNING FLASH — stepping on a thunder cloud lights the whole screen (Keith) */   /* DEV FORK 61: STORM SEASON's rain (movement 1) falls over the world */
   /* ===== ITEMS (v0.82): notes, the coin, the charge aura ===== */
   for (const n of notes) {
     if (n.got) continue;
@@ -2998,12 +3005,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK66 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK67 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK66 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK67 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3325,6 +3332,7 @@ window.__deckTick61 = function (p, dt) {   /* DEV FORK 62: FORK 61's rhythm flip
 };
 /* DEV FORK 62: THE WEIGHT PHYSICS (Keith, 2026-11-13) — one physics for both special decks: angle under his weight, keep angling, the slope pulls him low-side; see-saws cap, flips go all the way around. */
 window.__deckTick = function (p, dt) {
+  if (p.thunder) { if (!p.rumbled && p.x - camX < viewW + 260 && p.x > px) { p.rumbled = true; if (window.__thunderFar) window.__thunderFar(); } if (!p.thundered && typeof grounded !== 'undefined' && grounded === p) { p.thundered = true; if (typeof playThunder === 'function') playThunder(); window.__flashT = 1; } }   /* DEV FORK 67: a thunder cloud cracks softly as it rolls in; stepping on it is the lightning strike — full thunder + the whole screen flashes (Keith) */
   if (p.kind !== 'saw' && p.kind !== 'flip' && p.kind !== 'shiv' && p.kind !== 'drop') return;
   if (p.kind === 'shiv' || p.kind === 'drop') {
     if (p.dropping) { p.sinkV = (p.sinkV || 0) + 5200 * dt; p.sink = (p.sink || 0) + p.sinkV * dt; if (p.sink > 640) p.gone = true; return; }   /* falling away — the dark clouds' language: sink, fade, gone */
@@ -3363,6 +3371,8 @@ window.__unlockMap3 = () => { if (window.__map3) return; window.__map3 = true; i
 window.__map3Test = { unlocked: () => !!window.__map3, unlock: () => window.__unlockMap3(), names: window.__MAPNAMES };
 window.__unlockLoop2 = () => { if (window.__loop2) return; window.__loop2 = true; if (window.__playLvl) window.__playLvl(); try { localStorage.setItem('sixlouddev_loop2', '1'); } catch (e) {} const __mt = document.getElementById('mapToastName'); if (__mt) __mt.textContent = 'ALL WORLDS (2) OPEN'; const t = $('mapToast'); if (t) { t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4200); } AD.log('GAME BEATEN — the (2) worlds are open'); };
 window.__loop2Test = { unlocked: () => !!window.__loop2, unlock: () => window.__unlockLoop2() };
+window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') return; if (!window.__gainThF) { window.__gainThF = actx.createGain(); window.__gainThF.gain.value = 0.32; window.__gainThF.connect(audBusS()); } const src = actx.createBufferSource(); src.buffer = bufTh; src.playbackRate.value = 0.7; src.connect(window.__gainThF); src.start(); };   /* DEV FORK 67: the distant crack — same thunder, lower and slower, as a thunder cloud rolls in */
+window.__thunderTest = { mk: (x) => { const b = plats.length; addPlat(x, 2, 1, false); return plats[b]; } };
 window.__mapLockSync = () => { const id = window.__map || 'mnt'; window.__mapLocked = !window.__devOpen && ((id === 'night' && !window.__map2) || (id === 'rain' && !window.__map3) || (id.endsWith('2') && !window.__loop2));   /* DEV FORK 66: the fork's test door — the feat flags underneath stay honest */ const mb = $('mapBtn'); if (mb) mb.textContent = 'MAP: ' + (window.__MAPNAMES[id] || 'DAY BREAK') + (window.__mapLocked ? ' 🔒' : ''); const sb = $('startBtn'); if (sb) sb.textContent = window.__mapLocked ? '🔒 ' + ({ night: '5,000 FT FROM DAY BREAK', rain: '10,000 FT FROM MIDNIGHT RUN' }[id] || 'BEAT THE GAME TO OPEN') : '▶ START GAME'; };
 window.__mapLockSync();   /* DEV FORK 65: sync once at boot, then on every pick */
 /* DEV FORK 66: KEITH'S TEST SETUP (2026-11-13) — FORK ONLY, never ports to the real game: every map open for starting, a one-time grant of 20,000 notes, and the chosen 3 reset to locked so the buy flow can be run end to end. */
