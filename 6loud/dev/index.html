@@ -197,7 +197,15 @@
   #charL, #charR { position:absolute; top:53.5%; z-index:9; width:52px; height:74px; border:0; padding:0; cursor:pointer; pointer-events:auto; background:linear-gradient(180deg,#ffd94d,#ff9d2e); filter:drop-shadow(0 3px 0 rgba(20,8,0,.55)) drop-shadow(0 0 14px rgba(255,170,40,.35)); }
   #charL { left:8px; clip-path:polygon(0 50%, 100% 0, 100% 100%); }
   #charR { right:8px; clip-path:polygon(100% 50%, 0 0, 0 100%); }
-  #charName { text-align:center; font-family:'Luckiest Guy',cursive; font-size:26px; letter-spacing:1px; color:#ffd83d; -webkit-text-stroke:1.5px #1b1040; text-shadow:0 2px 14px rgba(10,4,28,.7); pointer-events:none; }   /* 26px (Keith v0.74: some of it was too small) with a halo shadow so it reads over bright sky */
+  #charName { text-align:center; font-family:'Luckiest Guy',cursive; font-size:26px; letter-spacing:1px; color:#ffd83d; -webkit-text-stroke:1.5px #1b1040; text-shadow:0 2px 14px rgba(10,4,28,.7); pointer-events:none; }
+  #charLock { text-align:center; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:14px; letter-spacing:1.5px; color:#ffe9a8; text-shadow:0 2px 10px rgba(10,4,28,.8); pointer-events:none; }
+  #unlockCard { position:absolute; inset:0; display:none; align-items:center; justify-content:center; background:rgba(8,4,20,.72); z-index:42; }
+  .ucBox { display:flex; flex-direction:column; align-items:center; gap:10px; background:rgba(12,6,28,.97); border:2px solid rgba(255,210,63,.8); border-radius:18px; padding:22px 26px; max-width:min(420px, 88vw); }
+  #ucName { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:24px; letter-spacing:2px; color:#ffdd67; }
+  #ucPrice { font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:14px; letter-spacing:1px; color:#ffe9a8; }
+  #ucBal { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:13px; color:#8be89a; }
+  .optBtn:disabled { opacity:.45; cursor:default; }
+  #ucMsg { min-height:16px; font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:13px; color:#8be89a; }   /* 26px (Keith v0.74: some of it was too small) with a halo shadow so it reads over bright sky */
   #charBest { text-align:center; font-family:'Luckiest Guy',cursive; font-size:15.5px; letter-spacing:1.5px; color:#fff0be; -webkit-text-stroke:1px #1b1040; text-shadow:0 2px 10px rgba(10,4,28,.75); pointer-events:none; }   /* best distance WITH THIS RUNNER — 15.5px and shadowed (Keith v0.74: the small words were hard to read) */
   #strip { position:absolute; top:12%; left:0; right:0; z-index:9; display:none; justify-content:center; gap:10px; pointer-events:none; }   /* the portraits' new home (Keith v0.77 swap): the top slot the button vacated — a roster bar under the plaque band */
   .scard { width:72px; height:80px; border-radius:12px; border:3px solid rgba(255,255,255,.18); background-size:cover; background-position:center 18%; padding:0; cursor:pointer; pointer-events:auto; filter:brightness(.6); }
@@ -244,9 +252,9 @@
   </div>
   <button id="charL" aria-label="Previous character"></button>
   <button id="charR" aria-label="Next character"></button>
-  <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
+  <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 55</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 56</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -266,11 +274,12 @@
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
   <div id="optPage"><div class="bpHead"><button id="optBack">‹ BACK</button><div class="bpTitle">OPTIONS</div></div><div class="optBody"><div class="optRow"><div class="optLab"><div class="optName">NOTE BALANCE</div><div class="optSub">Notes are the currency — characters cost 3,000.</div></div><div id="optNotes" class="optName">0</div></div><div class="optRow"><div class="optLab"><div class="optName">GHOST RUNNERS</div><div class="optSub">Race the best runs. Turn off to run alone.</div></div><button id="optGhosts" class="audTg">GHOSTS ON</button></div><div class="optRow"><div class="optLab"><div class="optName">MUSIC</div><div class="optSub">The game's beats, on or off.</div></div><button id="optMusic" class="audTg">MUSIC ON</button></div><div class="optRow"><div class="optLab"><div class="optName">SOUND</div><div class="optSub">Steps, pickups and booms.</div></div><button id="optSfx" class="audTg">SOUND ON</button></div><div class="optRow"><div class="optLab"><div class="optName">RESTORE PURCHASES</div><div class="optSub">On a new device? Bring back what you bought.</div></div><button id="optRestore" class="optBtn">RESTORE</button></div><div class="optRow"><div class="optLab"><div class="optName">RESET LOCAL SCORES</div><div class="optSub">Clears this device's scores, bests and ghost recordings. The world board is not touched.</div></div><button id="optReset" class="optBtn">RESET</button></div><div id="optMsg"></div><div class="optFoot"><div class="optCredit">A NINJA MUSIC RECORDS GAME</div><div id="optVer"></div><a id="optPriv" href="https://keithcole813.github.io/6loud/">PRIVACY POLICY</a></div></div></div>
+  <div id="unlockCard"><div class="ucBox"><div id="ucName">LASHMOOVE</div><div id="ucPrice">🔒 LOCKED — 3,000 ♪ OR $0.99</div><div id="ucBal"></div><button id="ucNotes" class="optBtn">UNLOCK — 3,000 ♪</button><button id="ucCash" class="optBtn">BUY $0.99 · SIM</button><button id="ucClose" class="audTg">NOT NOW</button><div id="ucMsg"></div></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 55 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 56 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -597,7 +606,13 @@
    FORK 55 (Keith): FULL BALANCE EVERY PLACE — the in-run box
    shows the wallet, not the haul, so a player watches the gap
    to the 3,000-note unlock close; the wipeout names the exact
-   notes left to a runner. Live game untouched.
+   notes left to a runner. FORK 56: PURCHASING IS WIRED —
+   LaShmoove, Yorokobi and Ivey are locked (Keith's roster);
+   START on a locked runner opens the unlock card: 3,000 notes
+   from the wallet, or $0.99 (a labeled SIM on the web fork —
+   real charges come with the store wrapper). Ownership is
+   written to the same record Restore Purchases reads.
+   Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1061,7 +1076,7 @@ const ORDER = ['blade', 'lash', 'yoro', 'ivey', 'sayori'];   /* the carousel/str
 const PHOTOS = { blade: '../play/assets/select-6lade.jpg', lash: '../play/assets/select-lashmoove.jpg', yoro: '../play/assets/select-yorokobi.jpg', ivey: '../play/assets/select-poisonivey.jpg', sayori: '../play/assets/select-sayori.jpg' };   /* the SHINOBI BRAWL select portraits (Keith v0.69.2) */
 function charBests() { try { return JSON.parse(localStorage.getItem('sixlouddev_char_bests') || '{}'); } catch (e) { return {}; } }
 function bestLine(c) { const b = charBests()[c] || 0; return b > 0 ? 'LOCAL BEST · ' + b.toLocaleString('en-US') + ' FT' : 'LOCAL BEST · —'; }
-function applyChar() { PSKIN = SKINS[selChar]; const cn = $('charName'); if (cn) cn.textContent = PSKIN.name;
+function applyChar() { PSKIN = SKINS[selChar]; const cn = $('charName'); if (cn) cn.textContent = PSKIN.name; if (window.__lockUI) window.__lockUI();   /* DEV FORK 56: the lock price line rides the chooser's own refresh */
   const cb = $('charBest'); if (cb) cb.textContent = bestLine(selChar);
   const st = $('strip'); if (st) st.innerHTML = ORDER.filter(c => SKINS[c]).map(c => '<button class="scard' + (c === selChar ? ' sel' : '') + '" data-char="' + c + '" aria-label="' + SKINS[c].name + '" style="background-image:url(\'' + PHOTOS[c] + '\')"></button>').join(''); }
 function setChar(c) { if (!SKINS[c]) return; selChar = c; try { localStorage.setItem('sixlouddev_char', selChar); } catch (e) {} applyChar(); kickDecode(); titleMusic(); }
@@ -2097,7 +2112,7 @@ $('strip').addEventListener('click', e => { const c = e.target && e.target.datas
 $('charR').addEventListener('pointerdown', e => { e.stopPropagation(); });
 $('charR').addEventListener('click', e => { e.stopPropagation(); cycleChar(1); });
 $('startBtn').addEventListener('pointerdown', e => { e.stopPropagation(); });
-$('startBtn').addEventListener('click', e => { e.stopPropagation(); if (window.__reviveArmed) { if (window.__reviveStart) window.__reviveStart(); return; } if (mode === 'title' && loadState === 'done') { kickDecode(); startRun(); } });   /* DEV FORK 24: an armed revive outranks the title branch — same button, same tap, but it resumes this run instead of starting a new one */
+$('startBtn').addEventListener('click', e => { e.stopPropagation(); if (window.__reviveArmed) { if (window.__reviveStart) window.__reviveStart(); return; } if (mode === 'title' && loadState === 'done') { if (!charOwned(selChar)) { openUnlock(selChar); return; } kickDecode(); startRun(); }   /* DEV FORK 56: START on a locked runner opens the unlock card, never a run */ });   /* DEV FORK 24: an armed revive outranks the title branch — same button, same tap, but it resumes this run instead of starting a new one */
 addEventListener('pointerup', () => release());
 addEventListener('pointercancel', () => release());
 
@@ -2938,12 +2953,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK55 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK56 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK55 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK56 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3218,7 +3233,24 @@ function noteSave() { try { localStorage.setItem('sixlouddev_notes', String(wind
 function noteUI() { const b = document.getElementById('noteBank'); if (b) b.textContent = '♪ ' + (window.__notes | 0).toLocaleString('en-US') + ' NOTES'; const o = document.getElementById('optNotes'); if (o) o.textContent = (window.__notes | 0).toLocaleString('en-US'); }
 function noteBank(n) { window.__notes = (window.__notes | 0) + (n | 0); noteSave(); noteUI(); }
 noteUI();
-window.__noteTest = { bal: () => window.__notes | 0, bank: noteBank };   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
+window.__noteTest = { bal: () => window.__notes | 0, bank: noteBank };
+/* DEV FORK 56: CHARACTER LOCKS + PURCHASING (Keith, 2026-11-13 — roster ruled: 6lade + Sayori free; LaShmoove, Yorokobi, Ivey locked at 3,000 notes or $0.99). Ownership lives in sixlouddev_ent, the record Restore Purchases reads. */
+const LOCKED_CHARS = ['lash', 'yoro', 'ivey'];
+const CHAR_PRICE_NOTES = 3000;
+function entLoad() { try { return JSON.parse(localStorage.getItem('sixlouddev_ent') || '{}'); } catch (e) { return {}; } }
+function entSave(ent) { try { localStorage.setItem('sixlouddev_ent', JSON.stringify(ent)); } catch (e) {} }
+function charOwned(c) { if (!LOCKED_CHARS.includes(c)) return true; const ent = entLoad(); if (ent.allaccess) return true; return Array.isArray(ent.chars) && ent.chars.includes(c); }
+function grantChar(c, how) { const ent = entLoad(); if (!Array.isArray(ent.chars)) ent.chars = []; if (!ent.chars.includes(c)) ent.chars.push(c); entSave(ent); if (typeof AD !== 'undefined' && AD.log) AD.log('SHOP: ' + c + ' granted (' + how + ')'); }
+window.__lockUI = function () { const el = document.getElementById('charLock'); if (!el) return; if (charOwned(selChar)) { el.textContent = ''; el.style.display = 'none'; } else { el.textContent = '🔒 3,000 ♪ OR $0.99'; el.style.display = 'block'; } };
+let ucChar = null;
+function openUnlock(c) { ucChar = c; const card = document.getElementById('unlockCard'); if (!card) return; const nm = document.getElementById('ucName'); if (nm) nm.textContent = (SKINS[c] && SKINS[c].name) || c.toUpperCase(); ucRefresh(); card.style.display = 'flex'; }
+function ucRefresh() { const bal = window.__notes | 0; const b = document.getElementById('ucBal'); if (b) b.textContent = 'YOUR BALANCE: ♪ ' + bal.toLocaleString('en-US'); const nb = document.getElementById('ucNotes'); if (nb) { nb.disabled = bal < CHAR_PRICE_NOTES; nb.textContent = bal >= CHAR_PRICE_NOTES ? 'UNLOCK — 3,000 ♪' : 'UNLOCK — 3,000 ♪ (NEED ' + (CHAR_PRICE_NOTES - bal).toLocaleString('en-US') + ' MORE)'; } const m = document.getElementById('ucMsg'); if (m) m.textContent = ''; }
+function closeUnlock() { const card = document.getElementById('unlockCard'); if (card) card.style.display = 'none'; ucChar = null; }
+function unlockWithNotes() { if (!ucChar) return; if ((window.__notes | 0) < CHAR_PRICE_NOTES) { ucRefresh(); return; } window.__notes -= CHAR_PRICE_NOTES; noteSave(); noteUI(); grantChar(ucChar, 'notes'); const m = document.getElementById('ucMsg'); if (m) m.textContent = 'UNLOCKED!'; if (window.__lockUI) window.__lockUI(); setTimeout(closeUnlock, 700); }
+function unlockWithCashSim() { if (!ucChar) return; grantChar(ucChar, 'cash SIM — no real charge on the web fork'); const m = document.getElementById('ucMsg'); if (m) m.textContent = 'UNLOCKED (SIM)'; if (window.__lockUI) window.__lockUI(); setTimeout(closeUnlock, 700); }
+{ const nb = document.getElementById('ucNotes'); if (nb) nb.addEventListener('click', e => { e.stopPropagation(); unlockWithNotes(); }); const cb = document.getElementById('ucCash'); if (cb) cb.addEventListener('click', e => { e.stopPropagation(); unlockWithCashSim(); }); const cl = document.getElementById('ucClose'); if (cl) cl.addEventListener('click', e => { e.stopPropagation(); closeUnlock(); }); }
+if (window.__lockUI) window.__lockUI();
+window.__shopTest = { owned: charOwned, unlockNotes: (c) => { ucChar = c; unlockWithNotes(); return charOwned(c); }, grant: grantChar, ent: entLoad, price: CHAR_PRICE_NOTES, locked: LOCKED_CHARS.slice() };   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
 requestAnimationFrame(loop);
 </script>
 </body>
