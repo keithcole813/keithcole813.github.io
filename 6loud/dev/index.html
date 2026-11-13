@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 49</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 50</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 49 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 50 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -548,7 +548,14 @@
    that used a revive saves its score but
    NO ghost, and stored recordings carrying
    the rewind never perform — the best
-   clean run is the ghost. Live game untouched.
+   clean run is the ghost. FORK 50 (Keith's
+   refinement): ghosts use the LONGEST
+   CONTINUOUS RUN — a revive run's
+   recording splits into lives at each
+   rewind and the longest life performs,
+   starting at its revive point and falling
+   where that life died; FORK 49's no-ghost
+   gate retires. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1172,7 +1179,7 @@ function recSample() {
   REC.lastDist = dist;
 }
 function recFinish() {
-  lastReplay = (REC && REC.frames.length > 10 && !(window.__revivesUsed > 0))   /* DEV FORK 49: THE GHOST RESET (Keith) — a run that used a revive saves its SCORE but no ghost recording: the recorder samples across the revive and the rewind poisons the replay (see builder section 51) */
+  lastReplay = (REC && REC.frames.length > 10)   /* DEV FORK 50: revive runs record WHOLE again — the ghost performs the run's LONGEST CONTINUOUS LIFE at race load (Keith), so the raw recording keeps every life; FORK 49's no-ghost gate is retired by his ruling */
     ? JSON.stringify({ v: 1, storm: 1, geo: 2, gv: 995, char: selChar, total: Math.max(0, Math.floor((dist - courseDist) / 15.24)), plats: REC.plats, frames: REC.frames }) : null;   /* total in course feet (v0.47; distance origin corrected v0.52). v0.99.5: the gv stamp is the global-winner era — the world ghost is picked only from runs made on this build onward (Keith) */
 }
 let G = null, gTarget = 0;   /* the bokeh sea-runner set is GONE (Keith v0.34): no record to beat = no LaShmoove at all */
@@ -1239,13 +1246,16 @@ function prepRace() {
      gv 995 stamp): the winner is a run made on this build or later. A lone record runs
      alone (a lone global record races in full from the start); no record = no ghost (v0.34). */
   let loc = null, glo = null;
-  for (const e of lb) { if (!e.r || !isRaceReplay(e.r) || (loc && e.s <= loc.total)) continue; let ok49 = true; try { const o49 = JSON.parse(e.r); if (!o49.frames || o49.frames.some(f => f[0] < 0)) ok49 = false; } catch (err) { ok49 = false; } if (ok49) loc = { total: e.s, replay: e.r }; }   /* DEV FORK 49: a negative distance delta marks a revive run's rewind — it never performs; the best CLEAN recording wins the ghost */
-  for (const e of gb) { if (!e.replay) continue; let o = null; try { o = JSON.parse(e.replay); } catch (err) { } if (o && o.gv === 995 && o.storm === 1 && o.geo === 2 && (!glo || e.dist_ft > glo.total)) glo = { total: e.dist_ft, replay: e.replay }; }
-  const parse = c => { if (!c) return null; try { const rp = JSON.parse(c.replay); if (rp && rp.geo === 2 && rp.frames && rp.frames.length > 10 && rp.plats && rp.plats.length && !rp.frames.some(f => f[0] < 0)) return alignReplay(rp);   /* DEV FORK 49: the rewind scan guards both ghost pools */ } catch (e) { } return null; };   /* geo-2 courses are born at the current standard — no re-spacing (its 170s are the Storm Run's own contour, not old forks) */
-  RACE = parse(loc); RACE2 = parse(glo);
+  /* DEV FORK 50: ghost selection moved under parse() below — performed (longest-life) totals decide, not raw scores */   /* DEV FORK 49: a negative distance delta marks a revive run's rewind — it never performs; the best CLEAN recording wins the ghost */
+  /* DEV FORK 50: the global pick also runs through parse() below (live-era runs are single-life, so its outcome is unchanged) */
+  const parse = c => { if (!c) return null; try { const rp = JSON.parse(c.replay); if (!rp || rp.geo !== 2 || !rp.frames || rp.frames.length <= 10 || !rp.plats || !rp.plats.length) return null; if (!rp.frames.some(f => f[0] < 0)) { const a = alignReplay(rp); if (a) a.baseU = 0; return a; } /* DEV FORK 50: a revive run performs its LONGEST CONTINUOUS LIFE (Keith) — lives split at the rewind; the winning life keeps its course position as baseU and its own plunge tail is cut the alignReplay way, so the ghost starts at that revive point and falls where that life died */ let best = null, cur = [], curBase = 0, cum = 0, curLen = 0; const flush = () => { if (cur.length > 10 && (!best || curLen > best.len)) best = { frames: cur, base: curBase, len: curLen }; }; for (const f of rp.frames) { if (f[0] < 0) { flush(); cur = [[0, f[1], f[2], f[3] || 0, f[4] || 0]]; cum += f[0]; curBase = cum; curLen = 0; } else { cur.push(f); cum += f[0]; curLen += f[0]; } } flush(); if (!best) return null; let fr = best.frames, tot = Math.round(best.len / 15.24); const maxTop = Math.max.apply(null, rp.plats.map(q => q[1])); let cum2 = 0, cut = -1; for (let i = 0; i < fr.length; i++) { cum2 += fr[i][0]; if (fr[i][1] > maxTop + 800 && fr[i][2] !== 0) { cut = i; break; } } if (cut > 10) { fr = fr.slice(0, cut); let c2 = 0; for (const f of fr) c2 += f[0]; tot = Math.round(c2 / 15.24); } if (tot <= 0) return null; return { v: 1, total: tot, plats: rp.plats, frames: fr, baseU: best.base };   /* DEV FORK 49: the rewind scan guards both ghost pools */ } catch (e) { } return null; };   /* geo-2 courses are born at the current standard — no re-spacing (its 170s are the Storm Run's own contour, not old forks) */
+  let locP = null, gloP = null, locS = -1, gloS = -1;
+  for (const e of lb) { if (!e.r || !isRaceReplay(e.r)) continue; const pr = parse({ replay: e.r }); if (pr && (!locP || pr.total > locP.total || (pr.total === locP.total && e.s > locS))) { locP = pr; locS = e.s; } }
+  for (const e of gb) { if (!e.replay) continue; let o = null; try { o = JSON.parse(e.replay); } catch (err) { } if (!o || o.gv !== 995 || o.storm !== 1 || o.geo !== 2) continue; const pr = parse({ replay: e.replay }); if (pr && (!gloP || pr.total > gloP.total || (pr.total === gloP.total && e.dist_ft > gloS))) { gloP = pr; gloS = e.dist_ft; } }
+  RACE = locP; RACE2 = gloP;   /* DEV FORK 50: both pools parsed + longest-life-selected above */
   if (!RACE && RACE2) { RACE = RACE2; RACE2 = null; race1Global = true; }
   GCHAR2 = CAST_ORDER.find(c => c !== selChar && c !== ghostChar()) || 'yoro';
-  if (RACE) gTarget = RACE.total;
+  if (RACE) gTarget = RACE.total + Math.round((RACE.baseU || 0) / 15.24);   /* DEV FORK 50: the mark is where the longest life DIED, in course feet */
 }
 /* v0.97 FORK RE-SPACING (Keith, 2026-11-10, on his 1,720 FT race screenshot: 'these clouds are
    still too close together'): solo forks have stood 340 apart since v0.95, but a stored course
@@ -1329,7 +1339,7 @@ function activateGhost(stage, entering) {
     const cum = []; let acc = 0;
     for (const f of rp.frames) { acc += f[0]; cum.push(acc); }
     GR = { frames: rp.frames, cum, spd: rp.frames.map((f, i) => (i < rp.frames.length - 1 ? rp.frames[i + 1][0] : f[0]) * REPLAY_HZ), st: 0, stT: 0, pyS: rp.frames[0][1], wng: 0, perfD: null, wasAhead: false, pick: 0, fireT: 0, passArm: false, phase: 'shadow', surgeT: 0, leadMusic: false,
-           base: stage === 2 ? RACE2_OFF : 0, totalFt: rp.total, totalU: rp.total * 15.24, style: stage === 2 || race1Global ? 'race' : 'pace' };   /* v0.99.5/6: the LOCAL ghost runs his honest recorded pace (no staged pass — but a misstep gets overtaken); the GLOBAL winner races in full */
+           base: stage === 2 ? RACE2_OFF : (rp.baseU || 0),   /* DEV FORK 50: a longest-life ghost samples at his own course position */ totalFt: rp.total, totalU: rp.total * 15.24, style: stage === 2 || race1Global ? 'race' : 'pace' };   /* v0.99.5/6: the LOCAL ghost runs his honest recorded pace (no staged pass — but a misstep gets overtaken); the GLOBAL winner races in full */
   }
   const oS = Math.max(0.25, Math.min(1, rp.total * 15.24 / 12000));
   G = { sx: entering ? -220 : viewW * 0.64, state: entering ? 'enter' : 'run', plane: 'race',
@@ -1349,7 +1359,7 @@ function ghostFall() {
 const RACE_SHADOW_O = -540, RACE_LEAD_O = 520, RACE_END_O = -350, RACE_CLOSE_O = -170;   /* CLOSE: right behind 6lade, on screen (Keith v0.35) */
 const SURGE_P = 0.52, SURGE_CHARGE_DUR = 0.85;
 function ghostUpdate(dt) {
-  if (!G) { if (GSKIN.ready && mode === 'run' && runTime < 2.5) ghostReset(true); return; }
+  if (!G) { if (GSKIN.ready && mode === 'run' && ((RACE && RACE.baseU > 0) ? (raceStage === 1 && dist - courseDist >= RACE.baseU) : runTime < 2.5)) { ghostReset(true); if (RACE && RACE.baseU > 0) RACE.baseU = 0; } return; }   /* DEV FORK 50: a longest-life ghost waits off-stage and enters when you reach his revive point (his base is then consumed so he enters once — the running GR keeps its own copy); whole-run ghosts enter at the start as always */
   G.animT += dt;
   if (G.state === 'fall') {   /* his fall finishes even if 6lade wipes out during it */
     G.fallVy += 3400 * dt; G.fallY += G.fallVy * dt;
@@ -1368,7 +1378,7 @@ function ghostUpdate(dt) {
     const distC = dist - courseDist;   /* the race clock runs in course space (v0.47; distance origin v0.52): the staircase and seam in front change nothing about his run */
     const p = Math.max(0, Math.min(1.12, (distC - GR.base) / totalU));   /* progress along HIS course (the winner's starts RACE2_OFF in) */
     const oS = Math.max(0.25, Math.min(1, totalU / 12000));   /* short records run a tighter race — the lead can't swallow the course */
-    if (GR.perfD === null || GR.perfD === undefined) GR.perfD = GR.style === 'pace' ? 0 : distC + G.oArc;   /* the pace ghost starts on his own start line, with the course (v0.99.6) */
+    if (GR.perfD === null || GR.perfD === undefined) GR.perfD = GR.style === 'pace' ? (GR.base || 0) : distC + G.oArc;   /* DEV FORK 50: a segmented pace ghost starts his clock at his revive point */   /* the pace ghost starts on his own start line, with the course (v0.99.6) */
     if (GR.style === 'pace') {
       /* v0.99.6 THE LOCAL GHOST, Keith's refinement (2026-11-11, on playing the v0.99.5
          trail cap): no UNNATURAL pass — no surge, no staging, no teleport — but his
@@ -1462,7 +1472,7 @@ function ghostUpdate(dt) {
     if (GR.st === 0 && GR.perfD >= 0) { const gp = plats.find(q => GR.perfD + courseBase + 580 >= q.x - 20 && GR.perfD + courseBase + 580 <= q.x + q.len && Math.abs(q.y - GR.pyS) < 60); if (gp) gp.ghostOn = true; }   /* his weight dips his cloud too (v0.29; his feet in world x, v0.52) */
     GR.prevSt = GR.st;
     if (GR.perfD >= GR.base + totalU) ghostFall();   /* he reaches the end of his high score — and falls */
-    if (GR.style === 'pace' && distC >= totalU) ghostFall();   /* v0.99.6: or YOU pass your best first — he falls on your stride, not his */
+    if (GR.style === 'pace' && distC >= (GR.base || 0) + totalU) ghostFall();   /* DEV FORK 50: you pass his mark at his death point, not at his life's length */   /* v0.99.6: or YOU pass your best first — he falls on your stride, not his */
     return;
   }
 }
@@ -2883,12 +2893,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK49 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK50 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK49 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK50 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
