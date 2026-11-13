@@ -106,6 +106,7 @@
   #optPriv { pointer-events:auto; font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; letter-spacing:1px; color:#9aa3c7; }
   .bpHead { display:flex; align-items:center; gap:12px; padding:calc(12px + env(safe-area-inset-top)) 14px 8px; }
   #bpBack { pointer-events:auto; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:15px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:7px 16px; cursor:pointer; }
+  #optBack { pointer-events:auto; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:15px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:7px 16px; cursor:pointer; }   /* DEV FORK 57: Options' BACK carries the board back-button's full styling under its own id */
   .bpTitle { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; color:#ffdd67; font-size:19px; letter-spacing:3px; }
   #bpCount { color:rgba(245,239,220,.65); font-size:12px; font-weight:700; letter-spacing:1px; padding:0 16px 6px; }
   #bpList { flex:1; overflow-y:auto; width:min(92vw,430px); margin:0 auto; padding:2px 4px 22px; box-sizing:border-box; }
@@ -254,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 56</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 57</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -279,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 56 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 57 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -611,8 +612,11 @@
    START on a locked runner opens the unlock card: 3,000 notes
    from the wallet, or $0.99 (a labeled SIM on the web fork —
    real charges come with the store wrapper). Ownership is
-   written to the same record Restore Purchases reads.
-   Live game untouched.
+   written to the same record Restore Purchases reads. FORK 57:
+   Keith's field fixes — Options BACK rewired on every tap
+   path (it did not answer) with the board back's styling, and
+   the title's MUSIC/SOUND pills are OFF the front: the audio
+   controls live in Options now. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2953,12 +2957,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK56 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK57 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK56 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK57 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3223,7 +3227,7 @@ function openOptions() { optUI(); optMsg(''); const p = document.getElementById(
 function optToggleGhosts() { window.__optGhostsOff = !window.__optGhostsOff; optSave(); optUI(); optMsg(window.__optGhostsOff ? 'Ghost runners OFF — you run alone.' : 'Ghost runners ON.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS ghosts ' + (window.__optGhostsOff ? 'OFF' : 'ON')); }
 window.__restorePurchases = function () { let ent = {}; try { ent = JSON.parse(localStorage.getItem('sixlouddev_ent') || '{}'); } catch (e) {} const got = []; if (ent.noads) got.push('NO-ADS PACK'); if (ent.allaccess) got.push('ALL-ACCESS'); if (Array.isArray(ent.chars)) for (const c of ent.chars) got.push('CHARACTER: ' + String(c).toUpperCase()); optMsg(got.length ? 'Restored: ' + got.join(' · ') : 'No purchases found on this device yet.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS restore purchases: ' + (got.length ? got.join(', ') : 'none')); return got; };   /* the store bridge: at the 1.0 wrapper stage the store's receipts are written into sixlouddev_ent and this button applies them — on the web fork it honestly reports what the device holds */
 window.__optResetScores = function () { try { localStorage.setItem('sixlouddev_scores_ft', '[]'); localStorage.setItem('sixlouddev_char_bests', '{}'); } catch (e) {} optMsg('Local scores cleared. The world board is untouched.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS local scores reset'); };
-{ const b = document.getElementById('optBtn'); if (b) b.addEventListener('click', e => { e.stopPropagation(); openOptions(); }); const bk = document.getElementById('optBack'); if (bk) bk.addEventListener('click', e => { e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }); const gh = document.getElementById('optGhosts'); if (gh) gh.addEventListener('click', e => { e.stopPropagation(); optToggleGhosts(); }); const mu2 = document.getElementById('optMusic'); if (mu2) mu2.addEventListener('click', e => { e.stopPropagation(); audToggle('m'); optUI(); }); const sf2 = document.getElementById('optSfx'); if (sf2) sf2.addEventListener('click', e => { e.stopPropagation(); audToggle('s'); optUI(); }); const rs = document.getElementById('optRestore'); if (rs) rs.addEventListener('click', e => { e.stopPropagation(); window.__restorePurchases(); }); const rx = document.getElementById('optReset'); if (rx) rx.addEventListener('click', e => { e.stopPropagation(); if (rx.dataset.arm) { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); window.__optResetScores(); } else { rx.dataset.arm = '1'; rx.textContent = 'ARE YOU SURE?'; rx.classList.add('armed'); setTimeout(() => { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); }, 3500); } }); }
+{ const b = document.getElementById('optBtn'); if (b) b.addEventListener('click', e => { e.stopPropagation(); openOptions(); }); const bk = document.getElementById('optBack'); if (bk) { bk.addEventListener('pointerdown', e => { e.stopPropagation(); }); bk.onclick = e => { if (e) e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }; bk.addEventListener('click', e => { e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }); }   /* DEV FORK 57: BACK answers on every tap path — pointerdown stopped (the arrows' pattern), onclick (the board back's own wiring), click as before; Keith's FORK 56 test found it dead */ const gh = document.getElementById('optGhosts'); if (gh) gh.addEventListener('click', e => { e.stopPropagation(); optToggleGhosts(); }); const mu2 = document.getElementById('optMusic'); if (mu2) mu2.addEventListener('click', e => { e.stopPropagation(); audToggle('m'); optUI(); }); const sf2 = document.getElementById('optSfx'); if (sf2) sf2.addEventListener('click', e => { e.stopPropagation(); audToggle('s'); optUI(); }); const rs = document.getElementById('optRestore'); if (rs) rs.addEventListener('click', e => { e.stopPropagation(); window.__restorePurchases(); }); const rx = document.getElementById('optReset'); if (rx) rx.addEventListener('click', e => { e.stopPropagation(); if (rx.dataset.arm) { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); window.__optResetScores(); } else { rx.dataset.arm = '1'; rx.textContent = 'ARE YOU SURE?'; rx.classList.add('armed'); setTimeout(() => { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); }, 3500); } }); }
 window.__optTest = { state: () => ({ ghostsOff: !!window.__optGhostsOff, m: !!window.__musOff, s: !!window.__sfxOff }), toggleGhosts: optToggleGhosts, resetScores: window.__optResetScores, restore: window.__restorePurchases, open: openOptions };
 if (new URLSearchParams(location.search).has('options')) setTimeout(openOptions, 2000);
 /* DEV FORK 53: THE NOTE WALLET (Keith, 2026-11-13 — notes are the currency; characters cost 3,000 notes or $0.99). The running tally lives in sixlouddev_notes on the device. */
@@ -3248,7 +3252,7 @@ function ucRefresh() { const bal = window.__notes | 0; const b = document.getEle
 function closeUnlock() { const card = document.getElementById('unlockCard'); if (card) card.style.display = 'none'; ucChar = null; }
 function unlockWithNotes() { if (!ucChar) return; if ((window.__notes | 0) < CHAR_PRICE_NOTES) { ucRefresh(); return; } window.__notes -= CHAR_PRICE_NOTES; noteSave(); noteUI(); grantChar(ucChar, 'notes'); const m = document.getElementById('ucMsg'); if (m) m.textContent = 'UNLOCKED!'; if (window.__lockUI) window.__lockUI(); setTimeout(closeUnlock, 700); }
 function unlockWithCashSim() { if (!ucChar) return; grantChar(ucChar, 'cash SIM — no real charge on the web fork'); const m = document.getElementById('ucMsg'); if (m) m.textContent = 'UNLOCKED (SIM)'; if (window.__lockUI) window.__lockUI(); setTimeout(closeUnlock, 700); }
-{ const nb = document.getElementById('ucNotes'); if (nb) nb.addEventListener('click', e => { e.stopPropagation(); unlockWithNotes(); }); const cb = document.getElementById('ucCash'); if (cb) cb.addEventListener('click', e => { e.stopPropagation(); unlockWithCashSim(); }); const cl = document.getElementById('ucClose'); if (cl) cl.addEventListener('click', e => { e.stopPropagation(); closeUnlock(); }); }
+{ const nb = document.getElementById('ucNotes'); if (nb) nb.addEventListener('click', e => { e.stopPropagation(); unlockWithNotes(); }); const cb = document.getElementById('ucCash'); if (cb) cb.addEventListener('click', e => { e.stopPropagation(); unlockWithCashSim(); }); const cl = document.getElementById('ucClose'); if (cl) { cl.addEventListener('pointerdown', e => { e.stopPropagation(); }); cl.onclick = e => { if (e) e.stopPropagation(); closeUnlock(); }; cl.addEventListener('click', e => { e.stopPropagation(); closeUnlock(); }); }   /* DEV FORK 57: NOT NOW gets the same every-tap-path wiring as BACK */ }
 if (window.__lockUI) window.__lockUI();
 window.__shopTest = { owned: charOwned, unlockNotes: (c) => { ucChar = c; unlockWithNotes(); return charOwned(c); }, grant: grantChar, ent: entLoad, price: CHAR_PRICE_NOTES, locked: LOCKED_CHARS.slice() };   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
 requestAnimationFrame(loop);
