@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 45</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 46</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 45 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 46 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -516,7 +516,18 @@
    moon starts to come in, then full night
    — and then we are in Level 2. Level 1's
    arc lands on the same full-night stop
-   Level 2 pins to, so the stages meet. Live game untouched.
+   Level 2 pins to, so the stages meet.
+   FORK 46 (Keith's video pass): the manga
+   planet is OUT of the night sky; the gold
+   wings pickup is RETIRED (gold wings are
+   the deathless feat now, not a course
+   pickup); a revive restarts your body, not
+   your buffs — the charge, wings, magnet
+   and armed double end with the death, and
+   the crown drops when the rewind puts you
+   back behind your best; the dead keep
+   falling, so the board no longer sits on
+   a frozen body. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -892,7 +903,7 @@ let notes = [], noteFt = 0, notesGot = 0, noteCharge = false;
 let noteNextT = 6, noteLane = 0;   /* the note drip (Keith v0.88): about 4 notes every 10 seconds, at low / high / in-between jump heights, never below the clouds */   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
 let coin = null, nextCoinFt = 1000, coinT = 0;
 let wing = null, nextWingFt = 1500, wingT = 0, wingPhase = 0, flutterT = 0;   /* flutterT (v0.93): the tapped flutter's hold timer — while it runs, the wings hold a slow sink */
-let gwing = null, nextGWingFt = 4500, gwingGap = 4500, wingKind = null, wingMax = 10;   /* the GOLD wings (Keith v0.88): rarer, 15 seconds, Lashmoove-fire glow */
+let gwing = null, nextGWingFt = 1e9, gwingGap = 4500, wingKind = null, wingMax = 10;   /* DEV FORK 46: the gold milestone is parked at a billion (Keith) — the GOLD PICKUP IS RETIRED; gold wings are the deathless-10,000 FT feat, offered every 1,000 FT once earned, never a course pickup */   /* the GOLD wings (Keith v0.88): rarer, 15 seconds, Lashmoove-fire glow */
 let bwing = null, nextBWingFt = 3000, bwingGap = 3000;   /* the BLUE wings (Keith v0.94): his lightning pair — the middle tier, 12 seconds: more than the white pair's 10, less than the gold pair's 15 */
 let magnet = null, nextMagFt = 2000, magGap = 2000, magT = 0, magFlashT = 0;   /* THE MAGNET (Keith v0.94): a hazard pickup — touch it and gravity runs 1.6x for 7 seconds; jumping while magnetized sparks + strobes (magFlashT) */
 let coinGap = 1000, wingGap = 1500;   /* the power-up spacing GROWS as the run does (Keith v0.86): at top speed a flat 1000 FT coin gap leaves almost no un-charged running — back-to-back blue doubles, his 5,367 FT run called it */
@@ -1755,7 +1766,7 @@ function startRun() {
   targetFt = lb.length ? lb[0].s : 0;
   crownFlash = 0; bannerT = 0; motes = []; flareT = 0; surgeFlash = 0; doubleArmed = false; doubleUsed = false; tripleUsed = false;
   notes = []; noteFt = 0; notesGot = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
-  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 4500; gwingGap = 4500; wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0; rainHeard = false;   /* blue wings + magnet + thunder latch reset per run (v0.94/v0.95) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
+  wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 1e9; gwingGap = 4500;   /* DEV FORK 46: gold pickup retired (Keith) */ wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0; rainHeard = false;   /* blue wings + magnet + thunder latch reset per run (v0.94/v0.95) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
   stormAt = 800 * 15.24; stormSteps = 0; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
@@ -2018,6 +2029,7 @@ addEventListener('pointercancel', () => release());
 /* ---------- update ---------- */
 function update(dt) {
   time += dt;
+  if (mode === 'over' && dead) { vy += GRAV * dt; py += vy * dt; }   /* DEV FORK 46: the dead keep falling — the wipeout board no longer sits on his frozen body at the bottom of the screen (Keith's video: the character at the bottom, stuck) */
   if (mode !== 'run') return;
   /* LEDGE BEAT (Keith, v0.27): on a catch the screen STOPS and the camera
      zooms in on him dangling, handy-cam alive; save or slip zooms back out
@@ -2418,10 +2430,10 @@ function draw() {
     }
     if (window.__map === 'night') {   /* DEV FORK 29: the EXTENDED NIGHT sky dressing (Keith's comment pass, 2026-11-12) — drawn with the stars, so the dress clouds still cross in front of everything */
       window.__moonImg = window.__moonImg || (() => { const i = new Image(); i.src = 'moonreal.webp'; return i; })();   /* DEV FORK 45: Keith's REAL moon — his own green-screen photo, keyed by code; the manga moon retires from the sky (the art stays in his sheets) */
-      window.__planetImg = window.__planetImg || (() => { const i = new Image(); i.src = 'planet.webp'; return i; })();
+      /* DEV FORK 46: the planet loader is GONE with the planet (Keith: 'remove that Manga planet to the left') */
       /* DEV FORK 45: the satellite loader is GONE with the satellite (Keith) */
       const __rm0 = window.__realMoon ? window.__realMoon(sky.star) : { x: W * 0.8, y: H * 0.17, a: 0, r: Math.min(W, H) * 0.085 }, __me = window.__moonT0 == null ? 1 : Math.max(0, Math.min(1, (time - window.__moonT0) / 2.5)), __ee = __me * __me * (3 - 2 * __me), __rm = { x: W * 1.10 + (__rm0.x - W * 1.10) * __ee, y: __rm0.y, a: __rm0.a * __ee, r: __rm0.r }, mX = __rm.x - skyOX, mY = __rm.y - skyOY, mR = __rm.r;   /* DEV FORK 45: on entering the night the moon SLIDES IN over ~2.5 s; in Level 1 it arrives by darkness instead (below) */   /* DEV FORK 45: the moon answers to the DARKNESS (sky.star) now — nothing at sunset; at full dark the real moon has slid in, small and distant; the shared sky drift still applies */   /* DEV FORK 40: the moon rides its come-and-go arc (the shared sky drift still applies on top) */   /* DEV FORK 33: the moon takes the sky's shared drift — its private tilt factors and breathing sway are gone; the sheet is rigid */
-      if (window.__planetImg.naturalWidth) { ctx.save(); ctx.globalAlpha = 0.88; const pw = Math.min(W, H) * 0.17; ctx.drawImage(window.__planetImg, W * 0.15 - pw / 2 - skyOX, H * 0.14 - pw / 2 - skyOY, pw, pw); ctx.restore(); }   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 33: same sheet, same drift as everything up there */
+      /* DEV FORK 46: the planet draw is OUT — the real moon holds the night sky alone */   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 33: same sheet, same drift as everything up there */
       if (window.__moonImg.naturalWidth && __rm.a > 0.01) { ctx.save(); ctx.globalAlpha = __rm.a; ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2); ctx.restore(); }   /* DEV FORK 45: the real moon fades and slides with the darkness itself */   /* DEV FORK 40: the moon fades in at its rising and out at its setting */   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
       /* DEV FORK 45: the satellite transit across the moon is REMOVED (Keith: it doesn't match) */
       /* DEV FORK 45: (transit draw removed with the satellite) */
@@ -2850,12 +2862,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK45 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK46 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK45 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK46 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -2972,7 +2984,7 @@ $('reviveBtn').onclick = () => {
     else $('reviveNote').textContent = 'AD NOT FINISHED — NO REVIVE';
   });
 };
-window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (window.__spawn) { px = window.__spawn.plat.x + 100; py = window.__spawn.plat.y; } if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } else { dist = px + 200; window.__holdT = 1.0; window.__easeT = 0; AD.log('REVIVE at the restart flag — ' + Math.round(runFt()) + ' FT, running in place, world eases in'); } };   /* DEV FORK 35 (Keith): the revive lands on the SPAWN STATION (the last flag passed), not the death cloud — dist rewinds to the spot (the checkpoint bargain), then he runs in place for a beat before the world moves */
+window.__reviveStart = () => { if (!window.__reviveArmed) return; window.__reviveArmed = false; kickDecode(); if (window.__spawn) { px = window.__spawn.plat.x + 100; py = window.__spawn.plat.y; } if (!AD.revive()) { $('over').style.display = 'flex'; $('reviveNote').textContent = 'NO SAFE CLOUD FOUND — REVIVE FAILED'; } else { dist = px + 200; window.__holdT = 1.0; window.__easeT = 0; AD.log('REVIVE at the restart flag — ' + Math.round(runFt()) + ' FT, running in place, world eases in'); coinT = 0; noteCharge = false; wingT = 0; wingKind = null; magT = 0; doubleArmed = false; if (champMode && targetFt > 0 && runFt() <= targetFt) { champMode = false; heatOn = false; } playTrack(); AD.log('DEV FORK 46: the revive restarts your body, not your buffs — the coin charge, wings, magnet and armed double end with the death, and the crown drops when the rewind puts you back behind your best'); } };   /* DEV FORK 35 (Keith): the revive lands on the SPAWN STATION (the last flag passed), not the death cloud — dist rewinds to the spot (the checkpoint bargain), then he runs in place for a beat before the world moves */
 window.__plantFlags = function () { const F = window.__flags || (window.__flags = []); for (let i = F.length - 1; i >= 0; i--) { if (!plats.includes(F[i].plat)) F.splice(i, 1); } if (window.__spawn && window.__spawn.plat && !plats.includes(window.__spawn.plat)) window.__spawn = null; if (window.__startPlat && !plats.includes(window.__startPlat)) window.__startPlat = null;   /* DEV FORK 43: purge stations/spawn anchored to a discarded course (TRY AGAIN planted on the outgoing course) */ let lastX = F.length ? F[F.length - 1].plat.x : 0;   /* DEV FORK 43: no station at the very beginning (Keith) — the first checkpoint plants at the first 1,000 FT interval */   /* DEV FORK 37: checkpoints every 1,000 FT (Keith: closer — going back 1,999 FT is a lot) */ for (let i = 0; i < plats.length; i++) { const p = plats[i]; if (p.gone || p.len < 260 || p.x < lastX + 15240) continue; let nx = null; for (let j = i + 1; j < plats.length; j++) { if (!plats[j].gone) { nx = plats[j]; break; } } let target = Math.max(p.len, 900); if (nx) target = Math.min(target, nx.x - p.x - 120); if (target < 480) continue; p.len = target; F.push({ plat: p, x: p.x + p.len * 0.5, on: false, actT: -9 });   /* FORK 45 (Keith's standing rule): a stated number means the MIDDLE of the closest cloud to it — the station sits at its deck's middle, not its edge */ lastX = p.x; } if (!window.__spawn && plats.length) { window.__startPlat = plats[0]; window.__spawn = { plat: plats[0], x: plats[0].x + plats[0].len * 0.5, on: true, actT: -9 }   /* FORK 45: the birth spawn follows the same middle rule */; }   /* DEV FORK 43: the birth spawn is the opening deck itself — no flag stands on it */ };   /* stations ~every 2,000 FT: the deck grows to first-cloud size (900), capped so a real gap survives before the next deck; fork-only — a production build would plant at course-build time, before the recorder sees the plats */
 window.__playCkpt = function () { try { if (typeof actx === 'undefined' || !actx) return; if (!window.__ckBuf) { if (window.__ckBusy) return; window.__ckBusy = true; fetch('checkpoint.mp3').then(r => r.arrayBuffer()).then(ab => actx.decodeAudioData(ab)).then(b => { window.__ckBuf = b; window.__ckBusy = false; window.__playCkpt(); }).catch(() => { window.__ckBusy = false; }); return; } const s = actx.createBufferSource(); s.buffer = window.__ckBuf; const g = actx.createGain(); g.gain.value = 0.85; s.connect(g); g.connect(actx.destination); s.start(); } catch (e) {} };   /* Keith's checkpoint sting (his YouTube pick, trimmed) through the game's own audio context */
 window.__skyFrac = function (d) { const dd = (typeof d === 'number') ? d : ((typeof dist === 'number') ? dist : 0); const gate = (window.__MAP_FT || 5000) * 15.24; return Math.max(0, Math.min(1, dd / gate)); };   /* DEV FORK 40: the run's fraction of the gate distance */
