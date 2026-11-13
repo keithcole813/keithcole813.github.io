@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 70</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 71</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 70 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 71 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -660,7 +660,8 @@
    range, and the 20 mound-shaped rain clouds eliminated
    (Keith). FORK 70: KEITH'S OWN CULL — his 17 yellow
    X's off the QC sheet are out too; 63 rain clouds stay.
-   Fork only; live game untouched.
+   FORK 71: his second cull — five more X'd (13, 23, 82,
+   91, 92); 58 rain clouds stay. Fork only; live untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -3018,12 +3019,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK70 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK71 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK70 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK71 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3389,7 +3390,7 @@ window.__thunderTest = { mk: (x) => { const b = plats.length; addPlat(x, 2, 1, f
 window.__RAINKEYS = [ { t: 0, c: [[74,84,108],[104,112,132],[138,140,152],[168,164,158]], star: 0 }, { t: 0.30, c: [[52,56,84],[76,76,104],[104,96,116],[128,110,118]], star: 0.25 }, { t: 0.42, c: [[16,20,38],[28,34,58],[44,50,74],[60,64,88]], star: 0.85 }, { t: 0.68, c: [[12,16,34],[24,30,54],[38,44,70],[54,58,84]], star: 1 }, { t: 0.80, c: [[30,36,60],[56,60,88],[84,84,104],[110,104,110]], star: 0.45 }, { t: 0.90, c: [[62,66,92],[104,102,118],[146,134,124],[178,158,128]], star: 0.08 }, { t: 1.00, c: [[74,84,108],[104,112,132],[138,140,152],[168,164,158]], star: 0 } ];   /* DEV FORK 69: the storm palette — slate, bruised mauve, ink; the cycle's shape is the base sky's, the weather never leaves */
 window.__skyRain = function (ph) { const K = window.__RAINKEYS; for (let i = 0; i < K.length - 1; i++) { const a = K[i], b = K[i + 1]; if (ph >= a.t && ph <= b.t) { const f = (ph - a.t) / Math.max(0.0001, b.t - a.t); const c = a.c.map((col, k) => col.map((v, j) => Math.round(v + (b.c[k][j] - v) * f))); return { c, star: a.star + (b.star - a.star) * f }; } } return { c: K[0].c, star: 0 }; };
 window.__rainDeck = (x) => (window.__map === 'rain' || window.__map === 'rain2') ? { storm: true, rain: window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)] } : {};   /* DEV FORK 69: one dresser for every non-addPlat deck (staircase, climb, event lines) */
-window.__RAINKEEP = [3,4,5,6,7,9,10,12,13,14,15,17,18,19,22,23,24,25,27,28,29,32,33,34,35,36,37,38,39,40,42,43,44,45,47,48,49,53,56,57,58,59,63,64,67,68,69,72,73,74,78,80,81,82,83,84,88,90,91,92,94,96,99];   /* DEV FORK 69: the 80 rain clouds that stay — the 20 mound-shaped ones are eliminated (Keith) */
+window.__RAINKEEP = [3,4,5,6,7,9,10,13,14,15,17,18,19,23,24,25,27,28,29,32,33,34,35,36,37,38,39,40,42,43,44,45,47,48,49,53,56,57,58,59,63,64,67,68,69,72,73,74,78,80,82,83,84,88,92,94,96,99];   /* DEV FORK 69: the 80 rain clouds that stay — the 20 mound-shaped ones are eliminated (Keith) */
 window.__RAINCD = [[0.578,0.18],[0.656,0.164],[0.594,0.093],[0.443,0.157],[0.368,0.094],[0.586,0.131],[0.591,0.109],[0.518,0.089],[0.343,0.2],[0.409,0.116],[0.342,0.133],[0.595,0.099],[0.734,0.118],[0.708,0.123],[0.444,0.204],[0.302,0.135],[0.584,0.17],[0.599,0.138],[0.628,0.074],[0.404,0.158],[0.315,0.128],[0.691,0.106],[0.573,0.077],[0.599,0.068],[0.401,0.088],[0.281,0.2],[0.47,0.182],[0.502,0.138],[0.572,0.174],[0.632,0.157],[0.43,0.109],[0.649,0.143],[0.554,0.105],[0.632,0.093],[0.388,0.113],[0.438,0.05],[0.554,0.117],[0.459,0.133],[0.623,0.115],[0.513,0.098],[0.497,0.092],[0.512,0.094],[0.645,0.171],[0.442,0.152],[0.51,0.14],[0.391,0.077],[0.631,0.177],[0.557,0.071],[0.411,0.091],[0.472,0.074],[0.396,0.065],[0.769,0.136],[0.496,0.205],[0.629,0.134],[0.395,0.233],[0.394,0.144],[0.765,0.107],[0.532,0.195],[0.482,0.203],[0.582,0.142],[0.442,0.228],[0.799,0.116],[0.533,0.197],[0.593,0.157],[0.412,0.126],[0.389,0.112],[0.749,0.179],[0.635,0.101],[0.449,0.104],[0.432,0.152],[0.429,0.085],[0.75,0.153],[0.475,0.207],[0.614,0.19],[0.489,0.072],[0.359,0.067],[0.677,0.182],[0.539,0.163],[0.453,0.117],[0.419,0.183],[0.326,0.143],[0.491,0.138],[0.466,0.189],[0.516,0.073],[0.388,0.106],[0.338,0.124],[0.533,0.149],[0.578,0.22],[0.612,0.109],[0.433,0.301],[0.333,0.169],[0.568,0.147],[0.479,0.143],[0.446,0.154],[0.393,0.12],[0.348,0.21],[0.612,0.216],[0.48,0.142],[0.528,0.097],[0.377,0.221]];   /* DEV FORK 68: per-cloud measurements (aspect, surface line) for Keith's rain clouds, scanned from their alpha */
 for (const __ri of window.__RAINKEEP) loadImg('rain' + __ri,   /* DEV FORK 69: only the keepers load */ 'rainreal/rainreal' + String(__ri + 1).padStart(2, '0') + '.webp');   /* DEV FORK 68: the rainreal pool, fork-local beside the page */
 window.__mapLockSync = () => { const id = window.__map || 'mnt'; window.__mapLocked = !window.__devOpen && ((id === 'night' && !window.__map2) || (id === 'rain' && !window.__map3) || (id.endsWith('2') && !window.__loop2));   /* DEV FORK 66: the fork's test door — the feat flags underneath stay honest */ const mb = $('mapBtn'); if (mb) mb.textContent = 'MAP: ' + (window.__MAPNAMES[id] || 'DAY BREAK') + (window.__mapLocked ? ' 🔒' : ''); const sb = $('startBtn'); if (sb) sb.textContent = window.__mapLocked ? '🔒 ' + ({ night: '5,000 FT FROM DAY BREAK', rain: '10,000 FT FROM MIDNIGHT RUN' }[id] || 'BEAT THE GAME TO OPEN') : '▶ START GAME'; };
