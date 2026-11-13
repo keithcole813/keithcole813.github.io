@@ -230,7 +230,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 43</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 44</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -253,7 +253,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 43 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 44 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -488,6 +488,14 @@
    re-planting (TRY AGAIN restarts). The same
    review's other findings ride as their own
    forks on Keith's rulings. Live game untouched.
+   FORK 44: spawn separation (Keith's ruling
+   on the review's magnet+wings finding):
+   pickups never land together — a spawn waits
+   unless its spot sits 600 FT clear of every
+   live pickup, so the magnet and the wings
+   can no longer share a cloud (600 FT is ~8 s
+   at top speed, past the magnet's 7 s burn).
+   Collect rules unchanged. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1520,6 +1528,7 @@ function buildStormEvent() {
   }
   worldEnd = x - 380;   /* the frontier is the last column's end; exitBand is untouched — the event leaves on the level it entered (the middle line's promise) */
 }
+function pickupClear(x) { for (const o of [wing, gwing, bwing, magnet, coin]) { if (o && Math.abs(o.x - x) < 9144) return false; } return true; }   /* DEV FORK 44: spawn separation (Keith) — a pickup never lands within 600 FT of a live one; a blocked spawn waits, milestone unadvanced, until the sky ahead clears */
 function pickupDeck(ahead = 1000) {
   /* LAYOUT PASS v0.99.3 (ChatGPT's pass on Keith's brief — hybrid generation + progressive
      difficulty — with Amy's two adjustments, approved by Keith 2026-11-10): pickups belong to
@@ -2174,22 +2183,22 @@ function update(dt) {
   if (magFlashT > 0) magFlashT = Math.max(0, magFlashT - dt);
   if (!wing && Math.floor(dist / 15.24) >= nextWingFt) {
     const q = pickupDeck(1000);
-    if (q) { wing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextWingFt += wingGap; wingGap = Math.round(wingGap * 1.35); if (nextCoinFt > nextWingFt && nextCoinFt - nextWingFt < 500) nextCoinFt = nextWingFt + 500; }   /* the wing pickup floats at the COIN's height (Keith v0.88); their gap grows 1500 -> 2025 -> 2735... with the same 500 FT separation from the coin (Keith v0.86) */
+    if (q && pickupClear(q.x + q.len * 0.5)) { wing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextWingFt += wingGap; wingGap = Math.round(wingGap * 1.35); if (nextCoinFt > nextWingFt && nextCoinFt - nextWingFt < 500) nextCoinFt = nextWingFt + 500; }   /* the wing pickup floats at the COIN's height (Keith v0.88); their gap grows 1500 -> 2025 -> 2735... with the same 500 FT separation from the coin (Keith v0.86) */
   }
   if (wing && wing.x < px - 460) wing = null;
   if (!gwing && Math.floor(dist / 15.24) >= nextGWingFt) {   /* the GOLD wings ride a slower milestone (Keith v0.88): first at 4,500 FT, then growing gaps like the rest */
     const q = pickupDeck(1000);
-    if (q) { gwing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextGWingFt += gwingGap; gwingGap = Math.round(gwingGap * 1.35); if (nextCoinFt > nextGWingFt && nextCoinFt - nextGWingFt < 500) nextCoinFt = nextGWingFt + 500; if (nextWingFt > nextGWingFt && nextWingFt - nextGWingFt < 500) nextWingFt = nextGWingFt + 500; }
+    if (q && pickupClear(q.x + q.len * 0.5)) { gwing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextGWingFt += gwingGap; gwingGap = Math.round(gwingGap * 1.35); if (nextCoinFt > nextGWingFt && nextCoinFt - nextGWingFt < 500) nextCoinFt = nextGWingFt + 500; if (nextWingFt > nextGWingFt && nextWingFt - nextGWingFt < 500) nextWingFt = nextGWingFt + 500; }
   }
   if (gwing && gwing.x < px - 460) gwing = null;
   if (!bwing && Math.floor(dist / 15.24) >= nextBWingFt) {   /* the BLUE wings (Keith v0.94): first at 3,000 FT — between the white pair (1,500) and the gold (4,500) — gaps growing the same way, same 500 FT separation from its neighbours */
     const q = pickupDeck(1000);
-    if (q) { bwing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextBWingFt += bwingGap; bwingGap = Math.round(bwingGap * 1.35); if (nextCoinFt > nextBWingFt && nextCoinFt - nextBWingFt < 500) nextCoinFt = nextBWingFt + 500; if (nextWingFt > nextBWingFt && nextWingFt - nextBWingFt < 500) nextWingFt = nextBWingFt + 500; if (nextGWingFt > nextBWingFt && nextGWingFt - nextBWingFt < 500) nextGWingFt = nextBWingFt + 500; if (nextMagFt > nextBWingFt && nextMagFt - nextBWingFt < 500) nextMagFt = nextBWingFt + 500; }
+    if (q && pickupClear(q.x + q.len * 0.5)) { bwing = { x: q.x + q.len * 0.5, y: q.y - 340 }; nextBWingFt += bwingGap; bwingGap = Math.round(bwingGap * 1.35); if (nextCoinFt > nextBWingFt && nextCoinFt - nextBWingFt < 500) nextCoinFt = nextBWingFt + 500; if (nextWingFt > nextBWingFt && nextWingFt - nextBWingFt < 500) nextWingFt = nextBWingFt + 500; if (nextGWingFt > nextBWingFt && nextGWingFt - nextBWingFt < 500) nextGWingFt = nextBWingFt + 500; if (nextMagFt > nextBWingFt && nextMagFt - nextBWingFt < 500) nextMagFt = nextBWingFt + 500; }
   }
   if (bwing && bwing.x < px - 460) bwing = null;
   if (!magnet && Math.floor(dist / 15.24) >= nextMagFt) {   /* THE MAGNET (Keith v0.94): first at 2,000 FT, gaps growing, same separation — it floats at the pickups' height, so running its column or jumping into it sets it off */
     const q = pickupDeck(1000);
-    if (q) { magnet = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextMagFt += magGap; magGap = Math.round(magGap * 1.35); if (nextCoinFt > nextMagFt && nextCoinFt - nextMagFt < 500) nextCoinFt = nextMagFt + 500; if (nextWingFt > nextMagFt && nextWingFt - nextMagFt < 500) nextWingFt = nextMagFt + 500; if (nextBWingFt > nextMagFt && nextBWingFt - nextMagFt < 500) nextBWingFt = nextMagFt + 500; if (nextGWingFt > nextMagFt && nextGWingFt - nextMagFt < 500) nextGWingFt = nextMagFt + 500; }
+    if (q && pickupClear(q.x + q.len * 0.5)) { magnet = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextMagFt += magGap; magGap = Math.round(magGap * 1.35); if (nextCoinFt > nextMagFt && nextCoinFt - nextMagFt < 500) nextCoinFt = nextMagFt + 500; if (nextWingFt > nextMagFt && nextWingFt - nextMagFt < 500) nextWingFt = nextMagFt + 500; if (nextBWingFt > nextMagFt && nextBWingFt - nextMagFt < 500) nextBWingFt = nextMagFt + 500; if (nextGWingFt > nextMagFt && nextGWingFt - nextMagFt < 500) nextGWingFt = nextMagFt + 500; }
   }
   if (magnet && magnet.x < px - 460) magnet = null;
   if (gwing && Math.abs(px - gwing.x) < 80 && Math.abs((py - 110) - gwing.y) < 150) {
@@ -2231,7 +2240,7 @@ function update(dt) {
   if (floaters.length) floaters = floaters.filter(f => f.t < 0.9);
   if (!coin && Math.floor(dist / 15.24) >= nextCoinFt) {
     const q = pickupDeck(1000);
-    if (q) { coin = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextCoinFt += coinGap; coinGap = Math.round(coinGap * 1.35); if (nextWingFt > nextCoinFt && nextWingFt - nextCoinFt < 500) nextWingFt = nextCoinFt + 500; }   /* raised (Keith v0.83); the gap grows 1000 -> 1350 -> 1820... and a wings milestone never sits within 500 FT of a coin (Keith v0.86) */
+    if (q && pickupClear(q.x + q.len * 0.5)) { coin = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextCoinFt += coinGap; coinGap = Math.round(coinGap * 1.35); if (nextWingFt > nextCoinFt && nextWingFt - nextCoinFt < 500) nextWingFt = nextCoinFt + 500; }   /* raised (Keith v0.83); the gap grows 1000 -> 1350 -> 1820... and a wings milestone never sits within 500 FT of a coin (Keith v0.86) */
     else if (Math.floor(dist / 15.24) > nextCoinFt + 250) nextCoinFt += 1000;
   }
   if (coin) {
@@ -2819,12 +2828,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK43 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK44 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK43 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK44 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
