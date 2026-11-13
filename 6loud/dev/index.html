@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="noteBank"></div><div id="ver">v0.99.8 · DEV FORK 59</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 60</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -280,7 +280,7 @@
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 59 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 60 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -621,7 +621,11 @@
    only in Options. FORK 59: the game-over heading is YOU
    FELL! (Keith's pick — nobody wipes out, you fall), and
    the over page's top spacing gains the safe-area inset so
-   the heading clears the iPhone camera. Live game untouched.
+   the heading clears the iPhone camera. FORK 60: CLEAN
+   GAMEPLAY — the OPTIONS button and version line ride the
+   title-chrome flag out of the run (Keith caught them on
+   the gameplay screen), and the bottom notes chip is gone:
+   it duplicated the HUD tally. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -2962,12 +2966,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK59 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK60 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK59 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK60 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3205,7 +3209,7 @@ function loop(ts) { if (window.__forkFrame) window.__forkFrame();   /* DEV FORK 
   if (cu !== charUiShown) { charUiShown = cu; $('charL').style.display = cu ? 'block' : 'none'; $('charR').style.display = cu ? 'block' : 'none'; $('selectStack').style.display = cu ? 'flex' : 'none'; $('strip').style.display = cu ? 'flex' : 'none'; }
   const sb = (mode === 'title' && loadState === 'done') || !!window.__reviveArmed;   /* DEV FORK 24: START GAME also rises while a revive waits on it (Keith) */
   if (!window.__map2 && mode === 'run' && runFt() >= (window.__MAP_FT || 5000)) window.__unlockMap2();   /* DEV FORK 26: crossing 5,000 FT unlocks CITY NIGHTS (Keith) */   /* START GAME shows only when the title is ready (v0.57) */
-  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; const mb = $('mapBtn'); if (mb) mb.style.display = (sb && window.__map2) ? 'block' : 'none'; }   /* DEV FORK 26: the MAP toggle rides START's flag too, and only once Map 2 is unlocked */   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
+  if (sb !== sbShown) { sbShown = sb; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; const mb = $('mapBtn'); if (mb) mb.style.display = (sb && window.__map2) ? 'block' : 'none'; const ob = $('optBtn'); if (ob) ob.style.display = sb ? 'block' : 'none'; const vr = $('ver'); if (vr) vr.style.display = sb ? 'block' : 'none'; }   /* DEV FORK 60: OPTIONS + the version line ride the title-chrome flag too — the gameplay screen stays clean (Keith) */   /* DEV FORK 26: the MAP toggle rides START's flag too, and only once Map 2 is unlocked */   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; const hn2 = $('hudNotes'); if (hn2) hn2.style.display = hd ? 'block' : 'none'; }   /* DEV FORK 54: the notes box rides the same visibility gate as the distance box */
   if (!window.__AD || !window.__AD.busy) ghostUpdate(dt);   /* DEV FORK 13: the ghost freezes with the world while an ad is up */   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark();
