@@ -90,6 +90,19 @@
   .pubDone { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:16px; letter-spacing:1px; color:#ffd94d; }
   .pubDone.dim { color:rgba(245,239,220,.6); }
   #boardPage { position:absolute; inset:0; display:none; flex-direction:column; background:rgba(12,6,28,.97); z-index:40; }
+  #optPage { position:absolute; inset:0; display:none; flex-direction:column; background:rgba(12,6,28,.97); z-index:41; }
+  .optBody { display:flex; flex-direction:column; gap:14px; padding:18px 18px 24px; overflow-y:auto; }
+  .optRow { display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .optLab { display:flex; flex-direction:column; gap:2px; }
+  .optName { font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:16px; letter-spacing:1px; color:#ffe9a8; }
+  .optSub { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; color:#9aa3c7; max-width:52vw; }
+  .optBtn { pointer-events:auto; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:13px; letter-spacing:1.5px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:99px; padding:8px 18px; cursor:pointer; white-space:nowrap; }
+  .optBtn.armed { background:linear-gradient(#ff7a5c,#e83c2a); color:#fff; }
+  #optMsg { min-height:18px; text-align:center; font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:13px; color:#8be89a; }
+  .optFoot { margin-top:8px; text-align:center; display:flex; flex-direction:column; gap:6px; align-items:center; }
+  #optVer { font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; color:#9aa3c7; }
+  .optCredit { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:12px; letter-spacing:2px; color:#ffdd67; }
+  #optPriv { pointer-events:auto; font-family:'Fredoka','Trebuchet MS',sans-serif; font-size:12px; letter-spacing:1px; color:#9aa3c7; }
   .bpHead { display:flex; align-items:center; gap:12px; padding:calc(12px + env(safe-area-inset-top)) 14px 8px; }
   #bpBack { pointer-events:auto; font-family:'Luckiest Guy','Trebuchet MS',sans-serif; font-size:15px; color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; border-radius:999px; padding:7px 16px; cursor:pointer; }
   .bpTitle { font-family:'Luckiest Guy','Trebuchet MS',sans-serif; color:#ffdd67; font-size:19px; letter-spacing:3px; }
@@ -231,7 +244,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><div id="ver">v0.99.8 · DEV FORK 51</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2">EXTENDED NIGHT</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: MOUNTAINS</button>   <!-- DEV FORK 26: the start-area toggle --><div id="audRow"><button id="tgMusic" class="audTg">MUSIC ON</button><button id="tgSfx" class="audTg">SOUND ON</button></div><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 52</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -250,11 +263,12 @@
     <div id="pubNote"></div>
   </div>
   <div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
+  <div id="optPage"><div class="bpHead"><button id="optBack">‹ BACK</button><div class="bpTitle">OPTIONS</div></div><div class="optBody"><div class="optRow"><div class="optLab"><div class="optName">GHOST RUNNERS</div><div class="optSub">Race the best runs. Turn off to run alone.</div></div><button id="optGhosts" class="audTg">GHOSTS ON</button></div><div class="optRow"><div class="optLab"><div class="optName">MUSIC</div><div class="optSub">The game's beats, on or off.</div></div><button id="optMusic" class="audTg">MUSIC ON</button></div><div class="optRow"><div class="optLab"><div class="optName">SOUND</div><div class="optSub">Steps, pickups and booms.</div></div><button id="optSfx" class="audTg">SOUND ON</button></div><div class="optRow"><div class="optLab"><div class="optName">RESTORE PURCHASES</div><div class="optSub">On a new device? Bring back what you bought.</div></div><button id="optRestore" class="optBtn">RESTORE</button></div><div class="optRow"><div class="optLab"><div class="optName">RESET LOCAL SCORES</div><div class="optSub">Clears this device's scores, bests and ghost recordings. The world board is not touched.</div></div><button id="optReset" class="optBtn">RESET</button></div><div id="optMsg"></div><div class="optFoot"><div class="optCredit">A NINJA MUSIC RECORDS GAME</div><div id="optVer"></div><a id="optPriv" href="https://keithcole813.github.io/6loud/">PRIVACY POLICY</a></div></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
 <script>
 'use strict';
-/* ============================== 6LOUD demo v0.99.8 — DEV FORK 51 ==============================
+/* ============================== 6LOUD demo v0.99.8 — DEV FORK 52 ==============================
    Keith's test fork (2026-11-11): PUBLISH/SKIP choice on the WIPEOUT page,
    the fit-in-all-views pass, the stronger 3D depth ladder, the scrolling
    billboard page, the debug overlay, the Option 1 ads test (rewarded
@@ -563,7 +577,15 @@
    capped interstitial call Google's live
    ads; SIM still covers no-fill. The ad
    watchdog rises 15 s to 45 s so a full
-   real rewarded ad can finish. Live game untouched.
+   real rewarded ad can finish. FORK 52:
+   THE OPTIONS PAGE (Keith, for the store
+   push) — an OPTIONS button on the title
+   opens it: ghost runners on/off, music
+   and sound (the FORK 12 buses), restore
+   purchases (the store bridge's hook),
+   reset local scores (two-tap confirm;
+   the world board is untouched), version,
+   credit, privacy policy. Live game untouched.
    Posting is hard-off and storage keys are fork-local. NOT the live game.
    One-button endless runner. 6lade first, animated with true 30 fps rendered
    sequences from the UPDATED model (Keith's rulings 2026-11-05/06: cel look,
@@ -1242,6 +1264,7 @@ function alignReplay(rp) {
 function prepRace() {
   RACE = null; RACE2 = null; RACE2_OFF = 0; raceStage = 1; race1Global = false;
   GSKIN = GSKINS[ghostChar()];   /* the runner you didn't pick performs the local record (v0.56) */
+  if (window.__optGhostsOff) { gTarget = 0; if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS: ghost runners OFF — running solo'); return; }   /* DEV FORK 52: the options page's ghost toggle — no ghost performs (the crown reads the boards in startRun either way; only the runners stand down) */
   const gb = (typeof gBoard !== 'undefined' && gBoard) ? gBoard : [];
   const lb = JSON.parse(localStorage.getItem('sixlouddev_scores_ft') || '[]');
   gTarget = Math.max(gb.length ? gb[0].dist_ft : 0, lb.length ? lb[0].s : 0);
@@ -2901,12 +2924,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK51 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK52 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK51 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK52 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3160,7 +3183,20 @@ resize();
    on the wipeout screen; the front stays clean. */
 fetchBoard();
 if (new URLSearchParams(location.search).has('over')) { $('over').style.display = 'flex'; $('nameRow').style.display = 'flex'; $('pubRow').style.display = 'flex'; }   /* DEV FORK layout hook: ?over=1 pins the WIPEOUT panel open so it can be checked at any window size / rotation */
-if (new URLSearchParams(location.search).has('board')) setTimeout(openBoardPage, 2000);   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
+if (new URLSearchParams(location.search).has('board')) setTimeout(openBoardPage, 2000);
+/* DEV FORK 52: THE OPTIONS PAGE (Keith, 2026-11-13 — for the store push: restore purchases, ghost runners, sound settings, reset local scores) */
+window.__optGhostsOff = false;
+try { const o52 = JSON.parse(localStorage.getItem('sixlouddev_options') || '{}'); window.__optGhostsOff = !!o52.g; } catch (e) {}
+function optSave() { try { localStorage.setItem('sixlouddev_options', JSON.stringify({ g: window.__optGhostsOff ? 1 : 0 })); } catch (e) {} }
+function optMsg(t) { const m = document.getElementById('optMsg'); if (m) m.textContent = t; }
+function optUI() { const g = document.getElementById('optGhosts'); if (g) { g.textContent = window.__optGhostsOff ? 'GHOSTS OFF' : 'GHOSTS ON'; g.classList.remove('off'); if (window.__optGhostsOff) g.classList.add('off'); } const mu = document.getElementById('optMusic'); if (mu) { mu.textContent = window.__musOff ? 'MUSIC OFF' : 'MUSIC ON'; mu.classList.remove('off'); if (window.__musOff) mu.classList.add('off'); } const sf = document.getElementById('optSfx'); if (sf) { sf.textContent = window.__sfxOff ? 'SOUND OFF' : 'SOUND ON'; sf.classList.remove('off'); if (window.__sfxOff) sf.classList.add('off'); } const v = document.getElementById('optVer'); const vv = document.getElementById('ver'); if (v && vv) v.textContent = vv.textContent; }
+function openOptions() { optUI(); optMsg(''); const p = document.getElementById('optPage'); if (p) p.style.display = 'flex'; }
+function optToggleGhosts() { window.__optGhostsOff = !window.__optGhostsOff; optSave(); optUI(); optMsg(window.__optGhostsOff ? 'Ghost runners OFF — you run alone.' : 'Ghost runners ON.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS ghosts ' + (window.__optGhostsOff ? 'OFF' : 'ON')); }
+window.__restorePurchases = function () { let ent = {}; try { ent = JSON.parse(localStorage.getItem('sixlouddev_ent') || '{}'); } catch (e) {} const got = []; if (ent.noads) got.push('NO-ADS PACK'); if (ent.allaccess) got.push('ALL-ACCESS'); if (Array.isArray(ent.chars)) for (const c of ent.chars) got.push('CHARACTER: ' + String(c).toUpperCase()); optMsg(got.length ? 'Restored: ' + got.join(' · ') : 'No purchases found on this device yet.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS restore purchases: ' + (got.length ? got.join(', ') : 'none')); return got; };   /* the store bridge: at the 1.0 wrapper stage the store's receipts are written into sixlouddev_ent and this button applies them — on the web fork it honestly reports what the device holds */
+window.__optResetScores = function () { try { localStorage.setItem('sixlouddev_scores_ft', '[]'); localStorage.setItem('sixlouddev_char_bests', '{}'); } catch (e) {} optMsg('Local scores cleared. The world board is untouched.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS local scores reset'); };
+{ const b = document.getElementById('optBtn'); if (b) b.addEventListener('click', e => { e.stopPropagation(); openOptions(); }); const bk = document.getElementById('optBack'); if (bk) bk.addEventListener('click', e => { e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }); const gh = document.getElementById('optGhosts'); if (gh) gh.addEventListener('click', e => { e.stopPropagation(); optToggleGhosts(); }); const mu2 = document.getElementById('optMusic'); if (mu2) mu2.addEventListener('click', e => { e.stopPropagation(); audToggle('m'); optUI(); }); const sf2 = document.getElementById('optSfx'); if (sf2) sf2.addEventListener('click', e => { e.stopPropagation(); audToggle('s'); optUI(); }); const rs = document.getElementById('optRestore'); if (rs) rs.addEventListener('click', e => { e.stopPropagation(); window.__restorePurchases(); }); const rx = document.getElementById('optReset'); if (rx) rx.addEventListener('click', e => { e.stopPropagation(); if (rx.dataset.arm) { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); window.__optResetScores(); } else { rx.dataset.arm = '1'; rx.textContent = 'ARE YOU SURE?'; rx.classList.add('armed'); setTimeout(() => { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); }, 3500); } }); }
+window.__optTest = { state: () => ({ ghostsOff: !!window.__optGhostsOff, m: !!window.__musOff, s: !!window.__sfxOff }), toggleGhosts: optToggleGhosts, resetScores: window.__optResetScores, restore: window.__restorePurchases, open: openOptions };
+if (new URLSearchParams(location.search).has('options')) setTimeout(openOptions, 2000);   /* DEV FORK 52 layout hook: ?options=1 opens the options page once it has loaded */   /* DEV FORK layout hook: ?board=1 opens the full board once it has loaded */
 requestAnimationFrame(loop);
 </script>
 </body>
