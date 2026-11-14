@@ -2861,7 +2861,7 @@ function draw() {
   }
   /* platforms */
   for (const p of plats) {
-    const _ci = p.rain !== undefined ? (IMG['raind' + p.rain] || IMG['rain' + p.rain]) : IMG['cloud' + p.img]   /* DEV FORK 76: the darkened twin draws when it has baked */, img = (_ci && _ci.naturalWidth) ? _ci : IMG['storm' + p.img], cd = p.rain !== undefined && window.__RAINCD[p.rain] ? { asp: window.__RAINCD[p.rain][0], surf: window.__RAINCD[p.rain][1] } : CLOUDS[p.img];   /* DEV FORK 68: STORM SEASON decks draw Keith's rain clouds, each with its own measured shape; the built-in storm sprite stands in until the art loads */   /* v0.95 FIX (Keith never saw a dark cloud): queueImg stores the Image object BEFORE it loads, so a name with NO file (the S-names have no cloud-S*.webp — their art lives in storm-*.webp) leaves a BROKEN but truthy object at the cloud key, shadowing the loaded storm image — and the naturalWidth guard below then skipped the draw: every dark cloud was solid but invisible (the sink and the water walk with it). A cloud key now only wins when it actually has pixels. */   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
+    const _ci = p.rain !== undefined ? (IMG['raind' + p.rain] || IMG['rain' + p.rain]) : IMG['cloud' + p.img]   /* DEV FORK 76: the darkened twin draws when it has baked */, img = (_ci && _ci.naturalWidth) ? _ci : (window.__fgBase && window.__fgBase[p.img] && IMG['cloud' + window.__fgBase[p.img]] && IMG['cloud' + window.__fgBase[p.img]].naturalWidth) ? IMG['cloud' + window.__fgBase[p.img]] : IMG['storm' + p.img]   /* DEV FORK 79: an unbaked twin stands in with its bright base art, never with nothing */, cd = p.rain !== undefined && window.__RAINCD[p.rain] ? { asp: window.__RAINCD[p.rain][0], surf: window.__RAINCD[p.rain][1] } : CLOUDS[p.img];   /* DEV FORK 68: STORM SEASON decks draw Keith's rain clouds, each with its own measured shape; the built-in storm sprite stands in until the art loads */   /* v0.95 FIX (Keith never saw a dark cloud): queueImg stores the Image object BEFORE it loads, so a name with NO file (the S-names have no cloud-S*.webp — their art lives in storm-*.webp) leaves a BROKEN but truthy object at the cloud key, shadowing the loaded storm image — and the naturalWidth guard below then skipped the draw: every dark cloud was solid but invisible (the sink and the water walk with it). A cloud key now only wins when it actually has pixels. */   /* v0.90.1 FIX (Keith's invisible clouds): since v0.84 storm decks wear REGULAR cloud art, but this lookup asked for 'storm'+img ('storm01') — a key that was never loaded — so the no-image guard skipped the draw and every storm deck (phase-in singles + fork through-decks, live and in races) was SOLID BUT INVISIBLE. The regular key resolves first now; the storm key stays as a fallback for any legacy S-named plat. */
     if (!img || !img.naturalWidth) continue;
     if ((p.dark || p.dropping) && (p.sink || 0) > 640) continue;   /* v0.91: a dark cloud that sank away is gone from the sky too */   /* DEV FORK 63: a dropped shiver/drop deck likewise */
     let sx = p.x - camX, sy = p.y + (p.sink || 0) - camY;   /* DEV FORK 63: let, so a shiver deck can tremble in place */
@@ -3041,12 +3041,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK78 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK79 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK78 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK79 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3445,12 +3445,13 @@ window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') r
      the LONGC foreground set, one twin per storm sprite. */
   window.__FGSTORM = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6'];
   window.__fgMap = { S05: 'K1', S13: 'K2', S14: 'K3', S15: 'K4', S17: 'K5', S19: 'K6' };
+  window.__fgBase = { K1: '14', K2: '01', K3: '17', K4: '11', K5: '24', K6: '16' };   /* DEV FORK 79: each twin's foreground base, for the draw fallback */
   window.__fg = im => window.__fgMap[im] || im;
   window.__darkBake = function () {
     const pairs = [['14', 'K1'], ['01', 'K2'], ['17', 'K3'], ['11', 'K4'], ['24', 'K5'], ['16', 'K6']];
     let made = 0;
     for (const [base, key] of pairs) {
-      if (IMG['cloud' + key] || !IMG['cloud' + base] || !IMG['cloud' + base].naturalWidth) continue;
+      const cur = IMG['cloud' + key]; if ((cur && cur.naturalWidth) || !IMG['cloud' + base] || !IMG['cloud' + base].naturalWidth) continue;   /* DEV FORK 79: the loader parks a broken image at the K keys — a twin counts only when it has pixels */
       try {
         const im = IMG['cloud' + base];
         const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
@@ -3464,7 +3465,7 @@ window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') r
     }
     return made;
   };
-  window.__fgTest = { bad: () => plats.filter(p => STORMC.includes(p.img)).length, dark: () => plats.filter(p => window.__FGSTORM.includes(p.img)).length, baked: () => window.__FGSTORM.filter(k => !!IMG['cloud' + k]).length };
+  window.__fgTest = { bad: () => plats.filter(p => STORMC.includes(p.img)).length, dark: () => plats.filter(p => window.__FGSTORM.includes(p.img)).length, baked: () => window.__FGSTORM.filter(k => IMG['cloud' + k] && IMG['cloud' + k].naturalWidth).length   /* DEV FORK 79: pixels, not keys */ };
   try { const __dbT = setInterval(() => { if (window.__fgTest.baked() >= 6) clearInterval(__dbT); else window.__darkBake(); }, 600); if (__dbT.unref) __dbT.unref(); setTimeout(() => clearInterval(__dbT), 45000); } catch (e) {}
 window.__thunderTest = { mk: (x) => { const b = plats.length; addPlat(x, 2, 1, false); return plats[b]; } };
 window.__RAIN_TINT = 0.34;   /* DEV FORK 76: how far the rain clouds are pulled toward dark slate (Keith: 'tint the rain clouds darker with code') */
