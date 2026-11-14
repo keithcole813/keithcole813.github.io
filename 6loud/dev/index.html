@@ -977,7 +977,9 @@ window.__BGRAIN_D = [0, 1, 2, 6, 8, 9, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26, 2
 window.__BGRAIN_N = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35];   /* night pool */
 window.__BGRAIN_D.forEach(i => queueImg(im => { BGIMG['rd' + i] = im; }, 'bgrain/d' + i + '.webp', false));
 window.__BGRAIN_N.forEach(i => queueImg(im => { BGIMG['rn' + i] = im; }, 'bgrain/n' + i + '.webp', false));
-window.__dressOne = function (d, star, dx, dy, ox, txm, tym) { if (window.__map !== 'rain' && window.__map !== 'rain2') return false; const a = ctx.globalAlpha; const idx = Math.abs(Math.round(d.x * 7 + d.y * 13)); if (star < 0.98) { const im = BGIMG['rd' + window.__BGRAIN_D[idx % window.__BGRAIN_D.length]]; if (im && im.naturalWidth) { ctx.globalAlpha = a * (1 - star); ctx.drawImage(im, dx + ox - tiltX * txm, dy - tiltY * tym, d.w, d.w * im.naturalHeight / im.naturalWidth); } } if (star > 0.02) { const im = BGIMG['rn' + window.__BGRAIN_N[idx % window.__BGRAIN_N.length]]; if (im && im.naturalWidth) { ctx.globalAlpha = a * star; ctx.drawImage(im, dx + ox - tiltX * txm, dy - tiltY * tym, d.w, d.w * im.naturalHeight / im.naturalWidth); } } ctx.globalAlpha = a; return true; };   /* DEV FORK 83: in the rain worlds a dress sprite wears Keith's rain clouds — day art by day, night art by night, crossfaded on the sky's star; returns true so the standard cloud never draws there */
+window.__STORMBG = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];   /* DEV FORK 84: the storm first set (Keith's Nov 9 sheet) — DAY-RAIN background (Keith) */
+window.__STORMBG.forEach(i => queueImg(im => { BGIMG['rs' + i] = im; }, 'stormbg/s' + i + '.webp', false));
+window.__dressOne = function (d, star, dx, dy, ox, txm, tym) { if (window.__map !== 'rain' && window.__map !== 'rain2') return false; const a = ctx.globalAlpha; const idx = Math.abs(Math.round(d.x * 7 + d.y * 13)); if (star < 0.98) { const im = BGIMG['rs' + window.__STORMBG[idx % window.__STORMBG.length]];   /* DEV FORK 84: by day the rain background is the storm first set (Keith) */ if (im && im.naturalWidth) { ctx.globalAlpha = a * (1 - star); ctx.drawImage(im, dx + ox - tiltX * txm, dy - tiltY * tym, d.w, d.w * im.naturalHeight / im.naturalWidth); } } if (star > 0.02) { const im = BGIMG['rn' + window.__BGRAIN_N[idx % window.__BGRAIN_N.length]]; if (im && im.naturalWidth) { ctx.globalAlpha = a * star; ctx.drawImage(im, dx + ox - tiltX * txm, dy - tiltY * tym, d.w, d.w * im.naturalHeight / im.naturalWidth); } } ctx.globalAlpha = a; return true; };   /* DEV FORK 83: in the rain worlds a dress sprite wears Keith's rain clouds — day art by day, night art by night, crossfaded on the sky's star; returns true so the standard cloud never draws there */
 pumpQ();
 
 /* ---------- world constants (measured) ---------- */
@@ -2659,7 +2661,7 @@ function draw() {
       let sx = (i * sw * 0.66 - camX * 0.58 * S) % span; if (sx < -sw) sx += span;
       if (window.__map === 'rain' || window.__map === 'rain2') {   /* DEV FORK 83: THEMES TRUE — the cloud sea wears Keith's rain clouds in the rain worlds, day set by day, night set by night */
         const __sp = (pool, pre, wgt) => { if (wgt <= 0.02) return; const im = BGIMG[pre + pool[(i * 7 + 3) % pool.length]]; if (!im || !im.naturalWidth) return; const sh2 = sw * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star) * wgt; ctx.drawImage(im, sx - sw * 0.1 - tiltX * 22, billow(sx + camX * 0.58 * S + sw * 0.4) - sh2 * 0.52, sw, sh2); ctx.restore(); };
-        __sp(window.__BGRAIN_D, 'rd', 1 - sky.star); __sp(window.__BGRAIN_N, 'rn', sky.star);
+        __sp(window.__STORMBG, 'rs', 1 - sky.star);   /* DEV FORK 84: the sea's day slot too */ __sp(window.__BGRAIN_N, 'rn', sky.star);
         continue;
       }
       if (!img || !img.naturalWidth) continue;
@@ -3051,12 +3053,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK83 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK84 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK83 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK84 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
