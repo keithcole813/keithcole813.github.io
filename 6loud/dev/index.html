@@ -1746,7 +1746,7 @@ function pickupDeck(ahead = 1000) {
   });
 }
 function nextSegment() {
-  if (dist >= stormAt) { stormAt = dist + (950 + Math.random() * 500) * 15.24; buildStormEvent(); lastSeg = -2; return; }   /* a storm arrives: the whole STORM RUN contour is built at once (v0.99), then the course is the generator's again. The old five-step fork bank (buildStormStep/stormSteps) is retired */
+  if (dist >= stormAt) { stormAt = dist + (950 + Math.random() * 500) * 15.24; buildStormEvent(); if (window.__mergeStacks) window.__mergeStacks(); lastSeg = -2; return; }   /* DEV FORK 77: storm decks merge like any others */   /* a storm arrives: the whole STORM RUN contour is built at once (v0.99), then the course is the generator's again. The old five-step fork bank (buildStormStep/stormSteps) is retired */
   /* chain on PHYSICAL bands: next segment's first platform may climb at
      most 2 bands (a charged leap) or drop any amount (a lower cloud saves
      you). The old e-code match could never leave the entry tier — most of
@@ -1770,6 +1770,7 @@ function nextSegment() {
   let o = weighted.find(o => (roll -= o.weight) <= 0);
   if (!o) o = pool.length ? rnd(pool) : { s: SEGMENTS[0], i: 0 };
   lastSeg = o.i; buildSegment(o.s);
+  if (window.__mergeStacks) window.__mergeStacks();   /* DEV FORK 77: merge this segment's stacks before anything plays on them */
 }
 /* place ONE recorded course into the world at world-x shift (v0.99.5: shared by both race
    sections — the local champion's and the global winner's). Tail-trim repairs only; the
@@ -1824,6 +1825,7 @@ function placeCourse(rp, shift, recOff) {
       }
     }
   }
+  for (const p of placed) p.__placed = true;   /* DEV FORK 77: a placed course is a recording's floor — the stack merge never touches it */
   return placed;
 }
 
@@ -3038,12 +3040,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK76 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK77 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK76 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK77 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3408,6 +3410,35 @@ window.__map3Test = { unlocked: () => !!window.__map3, unlock: () => window.__un
 window.__unlockLoop2 = () => { if (window.__loop2) return; window.__loop2 = true; if (window.__playLvl) window.__playLvl(); try { localStorage.setItem('sixlouddev_loop2', '1'); } catch (e) {} const __mt = document.getElementById('mapToastName'); if (__mt) __mt.textContent = 'ALL WORLDS (2) OPEN'; const t = $('mapToast'); if (t) { t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4200); } AD.log('GAME BEATEN — the (2) worlds are open'); };
 window.__loop2Test = { unlocked: () => !!window.__loop2, unlock: () => window.__unlockLoop2() };
 window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') return; if (!window.__gainThF) { window.__gainThF = actx.createGain(); window.__gainThF.gain.value = 0.32; window.__gainThF.connect(audBusS()); } const src = actx.createBufferSource(); src.buffer = bufTh; src.playbackRate.value = 0.7; src.connect(window.__gainThF); src.start(); };   /* DEV FORK 67: the distant crack — same thunder, lower and slower, as a thunder cloud rolls in */
+  /* DEV FORK 77: THE STACK MERGE (Keith, 2026-11-13): the larger deck of
+     every stacked pair splits the difference — moves to the midpoint height
+     between the two — and the smaller deck is deleted. */
+  window.__mergeLog = [];
+  window.__mergeStacks = function () {
+    const hor = worldEnd - 60000;
+    for (let guard = 0; guard < 500; guard++) {
+      const C = plats.filter(p => !p.__placed && p.x + p.len > hor);
+      let a = null, b = null;
+      scan:
+      for (let i = 0; i < C.length; i++) for (let j = i + 1; j < C.length; j++) {
+        if (C[i].y === C[j].y) continue;
+        if (Math.min(C[i].x + C[i].len, C[j].x + C[j].len) - Math.max(C[i].x, C[j].x) < 40) continue;
+        a = C[i]; b = C[j]; break scan;
+      }
+      if (!a) return;
+      let keep, drop;
+      if (a.len !== b.len) { keep = a.len > b.len ? a : b; drop = keep === a ? b : a; }
+      else { keep = a.y > b.y ? a : b; drop = keep === a ? b : a; }
+      window.__mergeLog.push({ x: Math.round(keep.x + keep.len / 2), from: keep.y, to: (a.y + b.y) / 2, len: keep.len, dropLen: drop.len, gap: Math.abs(a.y - b.y) });
+      if (window.__mergeLog.length > 300) window.__mergeLog.shift();
+      keep.y = (a.y + b.y) / 2;
+      plats.splice(plats.indexOf(drop), 1);
+    }
+  };
+  window.__mergeTest = {
+    log: () => window.__mergeLog,
+    pairs: () => { let n = 0; for (let i = 0; i < plats.length; i++) for (let j = i + 1; j < plats.length; j++) { const a = plats[i], b = plats[j]; if (!a.__placed && !b.__placed && a.y !== b.y && Math.min(a.x + a.len, b.x + b.len) - Math.max(a.x, b.x) >= 40) n++; } return n; }
+  };
 window.__thunderTest = { mk: (x) => { const b = plats.length; addPlat(x, 2, 1, false); return plats[b]; } };
 window.__RAIN_TINT = 0.34;   /* DEV FORK 76: how far the rain clouds are pulled toward dark slate (Keith: 'tint the rain clouds darker with code') */
 window.__rainTintBake = function () { let n = 0; try { for (const id of window.__RAINKEEP) { if (IMG['raind' + id]) { n++; continue; } const im = IMG['rain' + id]; if (!im || !im.naturalWidth) continue; const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const cx2 = cv.getContext && cv.getContext('2d'); if (!cx2) continue; cx2.drawImage(im, 0, 0); cx2.globalCompositeOperation = 'source-atop'; cx2.fillStyle = 'rgba(38,46,62,' + window.__RAIN_TINT + ')'; cx2.fillRect(0, 0, cv.width, cv.height); Object.defineProperty(cv, 'naturalWidth', { value: im.naturalWidth }); Object.defineProperty(cv, 'naturalHeight', { value: im.naturalHeight }); IMG['raind' + id] = cv; n++; } } catch (e) {} return n; };   /* DEV FORK 76: the dark twin — baked once per cloud as its art lands; the stamp keeps it an image to every consumer (the canvas-as-image rule) */
