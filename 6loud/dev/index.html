@@ -3041,12 +3041,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK80 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK81 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK80 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK81 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3458,7 +3458,7 @@ window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') r
         const cx = cv.getContext('2d');
         cx.drawImage(im, 0, 0);
         let __px = false;
-        try { const id = cx.getImageData(0, 0, cv.width, cv.height), d = id.data; for (let i = 0; i < d.length; i += 4) { d[i] = d[i] * 0.20; d[i + 1] = d[i + 1] * 0.215; d[i + 2] = d[i + 2] * 0.29; } cx.putImageData(id, 0, 0); __px = true; } catch (e) {}
+        try { const id = cx.getImageData(0, 0, cv.width, cv.height), d = id.data; for (let i = 0; i < d.length; i += 4) { d[i] = d[i] * 0.25; d[i + 1] = d[i + 1] * 0.265; d[i + 2] = d[i + 2] * 0.34;   /* DEV FORK 81: 5 points lighter across the board (Keith) */ } cx.putImageData(id, 0, 0); __px = true; } catch (e) {}
         if (!__px) { cx.globalCompositeOperation = 'source-atop'; cx.fillStyle = 'rgba(38,44,64,0.86)'; cx.fillRect(0, 0, cv.width, cv.height); }   /* DEV FORK 80: per-pixel darkening keeps the silhouette — a blend fill paints the whole rectangle */
         cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
         IMG['cloud' + key] = cv; made++;
