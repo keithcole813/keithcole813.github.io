@@ -954,6 +954,7 @@ for (const mv of Object.keys(SAYORI_MANIFEST)) {
 const CLOUDS = {
   '01':{surf:0.251, asp:0.264}, '11':{surf:0.371, asp:0.276}, '14':{surf:0.228, asp:0.262},
   '16':{surf:0.312, asp:0.295}, '17':{surf:0.352, asp:0.274}, '24':{surf:0.301, asp:0.324},
+  'K1':{surf:0.228, asp:0.262}, 'K2':{surf:0.251, asp:0.264}, 'K3':{surf:0.352, asp:0.274}, 'K4':{surf:0.371, asp:0.276}, 'K5':{surf:0.301, asp:0.324}, 'K6':{surf:0.312, asp:0.295},   /* DEV FORK 78: dark foreground twins (K1<-'14, K2<-'01, K3<-'17, K4<-'11, K5<-'24, K6<-'16) */
   '02':{surf:0.352, asp:0.378}, '12':{surf:0.261, asp:0.538}, '18':{surf:0.288, asp:0.434},
   'S05':{surf:0.358, asp:0.513}, 'S13':{surf:0.333, asp:0.378}, 'S14':{surf:0.325, asp:0.350},
   'S15':{surf:0.419, asp:0.353}, 'S17':{surf:0.345, asp:0.302}, 'S19':{surf:0.353, asp:0.428},   /* the storm deck set (v0.82): Keith's storm sheet, component-cleaned, measured like the others */
@@ -1652,12 +1653,12 @@ const rnd = a => a[Math.floor(Math.random() * a.length)];
 function addPlat(x, band, lenClass, storm) {
   const isIsle = lenClass === 'ISLE';
   const len = isIsle ? 330 : LEN[lenClass];
-  let img = isIsle ? rnd(ISLAND) : (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 67: STORM SEASON wears storm clouds on every deck (Keith: 100% storm clouds) */   /* storm decks wear regular clouds now (Keith v0.83: the dark clouds are out) */
+  let img = isIsle ? rnd(ISLAND) : (window.__map === 'rain' || window.__map === 'rain2') ? rnd(window.__FGSTORM) : rnd(LONGC);   /* DEV FORK 67: STORM SEASON wears storm clouds on every deck (Keith: 100% storm clouds) */   /* storm decks wear regular clouds now (Keith v0.83: the dark clouds are out) */
   let dark = false;
   /* v0.91 THE DARK CLOUDS RETURN (Keith, 2026-11-10) — not as storm decks this time: SPREAD OUT singles
      through the regular course that SINK under you (see the spring loop). Never on storm steps, never
      early (past ~40 s and ~590 FT of course), never closer than 2800 units to the last one. */
-  if (!storm && runTime > 40 && x - courseBase > 9000 && x - lastDarkX > 2800 && Math.random() < 0.14) { dark = true; img = rnd(STORMC); lastDarkX = x; }
+  if (!storm && runTime > 40 && x - courseBase > 9000 && x - lastDarkX > 2800 && Math.random() < 0.14) { dark = true; img = rnd(window.__FGSTORM); lastDarkX = x; }
   const __np = { x, y: BAND_Y[band], len, img, storm: !!storm || window.__map === 'rain' || window.__map === 'rain2', dark };   /* DEV FORK 67: every STORM SEASON deck is a storm cloud (Keith) */
   if ((window.__map === 'rain' || window.__map === 'rain2') && x - courseBase > 6000) { const hT = Math.abs(Math.sin(x * 3.7711) * 12543.21) % 1; if (hT < 0.09) __np.thunder = true; }
   if (window.__map === 'rain' || window.__map === 'rain2') __np.rain = window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)];   /* DEV FORK 68: every STORM SEASON deck wears one of Keith's rain clouds */   /* DEV FORK 67: thunder clouds scattered through the map (Keith) */
@@ -1684,11 +1685,11 @@ function buildStormStep() {
   const b = Math.max(1, Math.min(4, exitBand + rnd([-1, 0, 0, 1])));
   const x = worldEnd + GAP.TAP;
   const lenT = rnd([LEN.LONG, LEN.MED, LEN.LONG]);
-  const imgT = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 67: the storm-event decks in STORM SEASON wear storm clouds too */
+  const imgT = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(window.__FGSTORM) : rnd(LONGC);   /* DEV FORK 67: the storm-event decks in STORM SEASON wear storm clouds too */
   const tb = Math.max(0, b - 2);   /* v0.98 (Keith, 2026-11-10: 'rain clouds need to go lower still'): the through deck drops TWO bands now (v0.95 dropped it one) and the climb stands three bands over it (cb = tb + 3) — the pair is 510 apart, real sky between the rain deck and the climb. Missing the climb commits you to the low road: the fork's original v0.82 bargain, and the through-to-climb recovery hop goes with it */
   plats.push({ x, y: BAND_Y[tb], len: lenT, img: imgT, storm: true, rain: (window.__map === 'rain' || window.__map === 'rain2') ? window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)] : undefined });   /* DEV FORK 68: storm-event decks wear rain clouds too */
   if (REC) REC.plats.push([x - courseBase, BAND_Y[tb], lenT, imgT, 1]);
-  const cx = x + Math.round(lenT * 0.6), cl = rnd([LEN.SHORT, LEN.MED]), imgC = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC)   /* DEV FORK 69: the climb deck's stand-in art matches the world */, cb = Math.min(5, tb + 3);   /* v0.93 (Keith: 'there are still clouds stacked on top of clouds'): the climb deck used to start 150 in and run LONG — up to 83% of it sat directly over the through deck, a stack with a choice painted on. It now starts 60% along the through deck and runs SHORT/MED, so the pair reads as a step up at the fork's end; the through line still runs beneath its start, so the choice can never strand you */
+  const cx = x + Math.round(lenT * 0.6), cl = rnd([LEN.SHORT, LEN.MED]), imgC = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(window.__FGSTORM) : rnd(LONGC)   /* DEV FORK 69: the climb deck's stand-in art matches the world */, cb = Math.min(5, tb + 3);   /* v0.93 (Keith: 'there are still clouds stacked on top of clouds'): the climb deck used to start 150 in and run LONG — up to 83% of it sat directly over the through deck, a stack with a choice painted on. It now starts 60% along the through deck and runs SHORT/MED, so the pair reads as a step up at the fork's end; the through line still runs beneath its start, so the choice can never strand you */
   plats.push({ x: cx, y: BAND_Y[cb], len: cl, img: imgC, ...window.__rainDeck(cx) });   /* DEV FORK 69: the storm-step climb deck wears rain clouds in STORM SEASON */
   if (REC) REC.plats.push([cx - courseBase, BAND_Y[cb], cl, imgC]);
   worldEnd = Math.max(x + lenT, cx + cl); exitBand = tb;   /* the course frontier covers the climb deck too — the next segment used to start under its tail and stack clouds; the course continues from the THROUGH band (v0.95: tb) */
@@ -1711,11 +1712,11 @@ function buildStormEvent() {
   let x = worldEnd + GAP.HOLD;
   for (const [lo, mid, hi] of COLS) {
     let colEnd = x;
-    if (lo !== null) { const len = rnd([LEN.LONG, LEN.LONG, LEN.MED]), img = rnd(STORMC);
+    if (lo !== null) { const len = rnd([LEN.LONG, LEN.LONG, LEN.MED]), img = rnd(window.__FGSTORM);
       plats.push({ x, y: E + lo, len, img, storm: true, rain: (window.__map === 'rain' || window.__map === 'rain2') ? window.__RAINKEEP[Math.floor(Math.abs(Math.sin(x * 0.9137) * 43758.5453) % 1 * window.__RAINKEEP.length)] : undefined });   /* DEV FORK 68: storm-event decks wear rain clouds too */ if (REC) REC.plats.push([x - courseBase, E + lo, len, img, 1]); colEnd = Math.max(colEnd, x + len); }
-    if (mid !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC), mx = x + 60   /* DEV FORK 67: storm art in the rain worlds */;
+    if (mid !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(window.__FGSTORM) : rnd(LONGC), mx = x + 60   /* DEV FORK 67: storm art in the rain worlds */;
       plats.push({ x: mx, y: E + mid, len, img, ...window.__rainDeck(mx) });   /* DEV FORK 69: the storm event's middle line wears rain clouds in STORM SEASON */ if (REC) REC.plats.push([mx - courseBase, E + mid, len, img]); colEnd = Math.max(colEnd, mx + len); }
-    if (hi !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC), hx = x + 120   /* DEV FORK 67: storm art in the rain worlds */;
+    if (hi !== null) { const len = rnd([LEN.LONG, LEN.MED]), img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(window.__FGSTORM) : rnd(LONGC), hx = x + 120   /* DEV FORK 67: storm art in the rain worlds */;
       plats.push({ x: hx, y: E + hi, len, img, ...window.__rainDeck(hx) });   /* DEV FORK 69: the storm event's high line wears rain clouds in STORM SEASON */ if (REC) REC.plats.push([hx - courseBase, E + hi, len, img]); colEnd = Math.max(colEnd, hx + len); }
     x = colEnd + 380;
   }
@@ -1787,7 +1788,7 @@ function placeCourse(rp, shift, recOff) {
   const placed = [];
   for (const p of champ) {
     const simg = String(p[3]);   /* v0.97 (Keith: 'still no storm clouds' in races): the v0.87 whitewash is REVERSED — it dated from the era when the dark storm art was removed from the game entirely; since v0.91 the storm decks wear their storm art in solo runs, and a race now keeps the recorded art too, so a storm deck looks like one on both sides of the game */
-    const np = p[5] === 1 ? { x: p[0] + shift, y: p[1], len: p[2], img: p[3], dark: true } : { x: p[0] + shift, y: p[1], len: p[2], img: p[3], storm: p[4] === 1 || simg.charAt(0) === 'S' };   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
+    const np = p[5] === 1 ? { x: p[0] + shift, y: p[1], len: p[2], img: window.__fg ? window.__fg(p[3]) : p[3]   /* DEV FORK 78: recorded background art lands as its dark foreground twin */, dark: true } : { x: p[0] + shift, y: p[1], len: p[2], img: window.__fg ? window.__fg(p[3]) : p[3]   /* DEV FORK 78: recorded background art lands as its dark foreground twin */, storm: p[4] === 1 || simg.charAt(0) === 'S' };   /* storm flag from the 5th slot (v0.83), or the old S-art names on v0.82-era runs; the 6th slot (v0.91) marks a true DARK cloud, which keeps its dark art and its sink */
     plats.push(np); placed.push(np);
     if (REC) REC.plats.push(recOff ? [p[0] + recOff, p[1], p[2], p[3], p[4], p[5]] : p);   /* course space: the recording keeps the original coordinates (the second course rides at its offset) */
   }
@@ -1850,7 +1851,7 @@ function resetWorld() {
     const stairs = [[30, 130, 800], [30, 260, 800], [90, 340, 700]];
     for (const [gap, y, len] of stairs) {
       sx += gap;
-      const img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(STORMC) : rnd(LONGC);   /* DEV FORK 69: the staircase's stand-in art matches the world */
+      const img = (window.__map === 'rain' || window.__map === 'rain2') ? rnd(window.__FGSTORM) : rnd(LONGC);   /* DEV FORK 69: the staircase's stand-in art matches the world */
       plats.push({ x: sx, y, len, img, ...window.__rainDeck(sx) });   /* DEV FORK 69: the opening staircase wears rain clouds in STORM SEASON — the first decks a player sees (Keith's screenshot) */
       sx += len;
     }
@@ -3040,12 +3041,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK77 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK78 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK77 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK78 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3439,6 +3440,32 @@ window.__thunderFar = () => { if (!actx || !bufTh || actx.state !== 'running') r
     log: () => window.__mergeLog,
     pairs: () => { let n = 0; for (let i = 0; i < plats.length; i++) for (let j = i + 1; j < plats.length; j++) { const a = plats[i], b = plats[j]; if (!a.__placed && !b.__placed && a.y !== b.y && Math.min(a.x + a.len, b.x + b.len) - Math.max(a.x, b.x) >= 40) n++; } return n; }
   };
+  /* DEV FORK 78: the storm sprites are BACKGROUND art (Keith, 2026-11-13) —
+     decks wear dark foreground clouds instead: six twins baked dark from
+     the LONGC foreground set, one twin per storm sprite. */
+  window.__FGSTORM = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6'];
+  window.__fgMap = { S05: 'K1', S13: 'K2', S14: 'K3', S15: 'K4', S17: 'K5', S19: 'K6' };
+  window.__fg = im => window.__fgMap[im] || im;
+  window.__darkBake = function () {
+    const pairs = [['14', 'K1'], ['01', 'K2'], ['17', 'K3'], ['11', 'K4'], ['24', 'K5'], ['16', 'K6']];
+    let made = 0;
+    for (const [base, key] of pairs) {
+      if (IMG['cloud' + key] || !IMG['cloud' + base] || !IMG['cloud' + base].naturalWidth) continue;
+      try {
+        const im = IMG['cloud' + base];
+        const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+        const cx = cv.getContext('2d');
+        cx.drawImage(im, 0, 0);
+        cx.globalCompositeOperation = 'multiply'; cx.fillStyle = 'rgb(52,58,80)'; cx.fillRect(0, 0, cv.width, cv.height);
+        cx.globalCompositeOperation = 'source-atop'; cx.fillStyle = 'rgba(26,32,50,0.20)'; cx.fillRect(0, 0, cv.width, cv.height);
+        cv.naturalWidth = cv.width; cv.naturalHeight = cv.height;
+        IMG['cloud' + key] = cv; made++;
+      } catch (e) {}
+    }
+    return made;
+  };
+  window.__fgTest = { bad: () => plats.filter(p => STORMC.includes(p.img)).length, dark: () => plats.filter(p => window.__FGSTORM.includes(p.img)).length, baked: () => window.__FGSTORM.filter(k => !!IMG['cloud' + k]).length };
+  try { const __dbT = setInterval(() => { if (window.__fgTest.baked() >= 6) clearInterval(__dbT); else window.__darkBake(); }, 600); if (__dbT.unref) __dbT.unref(); setTimeout(() => clearInterval(__dbT), 45000); } catch (e) {}
 window.__thunderTest = { mk: (x) => { const b = plats.length; addPlat(x, 2, 1, false); return plats[b]; } };
 window.__RAIN_TINT = 0.34;   /* DEV FORK 76: how far the rain clouds are pulled toward dark slate (Keith: 'tint the rain clouds darker with code') */
 window.__rainTintBake = function () { let n = 0; try { for (const id of window.__RAINKEEP) { if (IMG['raind' + id]) { n++; continue; } const im = IMG['rain' + id]; if (!im || !im.naturalWidth) continue; const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight; const cx2 = cv.getContext && cv.getContext('2d'); if (!cx2) continue; cx2.drawImage(im, 0, 0); cx2.globalCompositeOperation = 'source-atop'; cx2.fillStyle = 'rgba(38,46,62,' + window.__RAIN_TINT + ')'; cx2.fillRect(0, 0, cv.width, cv.height); Object.defineProperty(cv, 'naturalWidth', { value: im.naturalWidth }); Object.defineProperty(cv, 'naturalHeight', { value: im.naturalHeight }); IMG['raind' + id] = cv; n++; } } catch (e) {} return n; };   /* DEV FORK 76: the dark twin — baked once per cloud as its art lands; the stamp keeps it an image to every consumer (the canvas-as-image rule) */
