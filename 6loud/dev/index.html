@@ -2656,9 +2656,14 @@ function draw() {
     const sw = W * 0.52, span = sw * 0.66 * seaSet.length;
     for (let i = 0; i < seaSet.length; i++) {
       const img = BGIMG['m' + seaSet[i]];
+      let sx = (i * sw * 0.66 - camX * 0.58 * S) % span; if (sx < -sw) sx += span;
+      if (window.__map === 'rain' || window.__map === 'rain2') {   /* DEV FORK 83: THEMES TRUE — the cloud sea wears Keith's rain clouds in the rain worlds, day set by day, night set by night */
+        const __sp = (pool, pre, wgt) => { if (wgt <= 0.02) return; const im = BGIMG[pre + pool[(i * 7 + 3) % pool.length]]; if (!im || !im.naturalWidth) return; const sh2 = sw * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star) * wgt; ctx.drawImage(im, sx - sw * 0.1 - tiltX * 22, billow(sx + camX * 0.58 * S + sw * 0.4) - sh2 * 0.52, sw, sh2); ctx.restore(); };
+        __sp(window.__BGRAIN_D, 'rd', 1 - sky.star); __sp(window.__BGRAIN_N, 'rn', sky.star);
+        continue;
+      }
       if (!img || !img.naturalWidth) continue;
       const sh = sw * img.naturalHeight / img.naturalWidth;
-      let sx = (i * sw * 0.66 - camX * 0.58 * S) % span; if (sx < -sw) sx += span;
       ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star);
       ctx.drawImage(img, sx - sw * 0.1 - tiltX * 22, billow(sx + camX * 0.58 * S + sw * 0.4) - sh * 0.52, sw, sh); ctx.restore();
     }
