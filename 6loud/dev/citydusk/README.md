@@ -1,4 +1,21 @@
-# CITY DUSK demo plates (DEV FORK 87; retuned FORK 88, Keith 2026-11-14)
+# CITY DUSK demo plates (DEV FORK 87; retuned FORK 88, Keith 2026-11-14; BUILT OUT FORK 99, Keith 2026-11-15)
+
+FORK 99 ("Build out golden hour" + "With bokeh"): three NEW masters
+from the same generator in the same style/bands (set 2: glass slabs
++ domed capitol + diagonal avenue; set 3: old-town spires + clock
+tower + market square; set 4: flat-roof grid district + twin
+towers), baked with the FORK 88 lighter bake by
+`tools/bake_citydusk_sets.py` into `{far,mid,near}{2,3,4}.webp` at
+the demo plates' exact pixel sizes (grade within ±5% per plane;
+set 2's near slice carries a documented 0.93 brightness trim from
+grade QC). The draw sequences each plane through its four sets
+along the run (`__citySeq`: seeded per-cycle permutation, no
+identical set back-to-back; seed re-rolled every run) — true
+repeat ≈ 9,600 units ≈ 630 FT per plane, up from 2,400. With
+BOKEH on, each plane's plates also take the graded bokeh pass
+(far /10, mid /7, near /3, keyed on the plane); off, the FORK 88
+base look is untouched. The fog band stays shared and unrouted.
+Still a DEBUG-only demo, default OFF, assigned to no world.
 
 Demo art for the CITY DUSK (DEMO) Options toggle. Fork-local; never ports
 to the live game without Keith's separate ruling.
