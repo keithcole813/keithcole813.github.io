@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;pointer-events:auto;cursor:pointer;"></div>   <!-- DEV FORK 74: the price line is a tap target — it opens the buy card --></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 104</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 105</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -3076,12 +3076,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK104 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK105 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK104 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK105 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3461,28 +3461,31 @@ window.__deckTick = function (p, dt) {
   }
   if (typeof hangPlat !== 'undefined' && hangPlat === p) return;   /* the hang bend owns the tilt while he dangles */
   let th = p.tilt || 0, tv = p.tiltV || 0;   /* DEV FORK 103: tiltV — the deck's spin, carried across exits (the exit law) */
+  const LF = Math.max(0.6, Math.min(2.6, 560 / p.len));   /* DEV FORK 105: LF and the follow stiffness are hoisted — the empty settle's soft stop reads them too */
+  const K = 66 * LF;
   if (p.kind === 'flip' && p.rolling) { th += p.rollDir * 2.2 * dt; if ((p.rollDir > 0 && th >= Math.PI * 2) || (p.rollDir < 0 && th <= -Math.PI * 2)) { th = 0; p.rolling = false; p.flipOff = false; } p.tilt = th; p.tiltV = 0; return; }   /* empty, it finishes the turn it started */
   if (typeof grounded !== 'undefined' && grounded === p) {
     const c = p.x + p.len / 2;
     const off = Math.max(-1, Math.min(1, ((px + 16) - c) / (p.len / 2)));
     /* DEV FORK 103 — THE UNIFIED WEIGHT-TILT LAW (Keith, 2026-11-15): the angle CHASES a balance set by where he stands, like a real seesaw following his weight — no spring back to level while he is aboard. The balance point sits forward of centre (FULCRUM 0.4 of the half-length): stepping on at the back drops the deck and it keeps dropping until he is well past halfway, then seesaws over. LF scales the follow by deck length: short decks chase much faster. */
-    const LF = Math.max(0.6, Math.min(2.6, 560 / p.len));
     const FULCRUM = 0.4;
     const eo = off - FULCRUM, en = eo >= 0 ? eo / (1 - FULCRUM) : eo / (1 + FULCRUM);
-    const bal = en * (p.kind === 'flip' ? 1.45 * Math.pow(LF, 0.35) : 3.8);   /* the plank's gain slams it onto its stops; the spinner's gain grows on short decks, so a tip landing spins a short cloud fast */
-    const K = 110 * LF, C = 2 * 0.68 * Math.sqrt(K);
+    const ens = Math.tanh(en * 1.5) / Math.tanh(1.5);   /* DEV FORK 105: the balance itself moves fluidly — a smooth saturating curve of the same reach in place of FORK 103's linear saturation */
+    const bal = ens * (p.kind === 'flip' ? 1.45 * Math.pow(LF, 0.35) : 3.8);   /* the plank's gain presses it onto its stops; the spinner's gain grows on short decks, so a tip landing spins a short cloud fast */
+    const C = 2 * 0.9 * Math.sqrt(K);   /* DEV FORK 105 — FLUIDITY (Keith, 2026-11-15: seesaw and 360 need more fluidity): the follow is softened to K = 66 * LF (hoisted above; FORK 103 ran 110-per-LF) at near-critical damping (zeta 0.9, was 0.68) — the deck flows into its angle with a smooth carry: no snap, no springy overshoot */
+    const tvIn = tv;   /* DEV FORK 105: the spin this tick started with — the soft stop's damper reads it, not the follow's fresh velocity (taxing the fresh push every tick dragged the stop's rest point to ~0.80) */
     tv += (K * (bal - th) - C * tv) * dt;
+    if (p.kind === 'saw') { const sd = Math.abs(th) - 0.73; if (sd > 0) tv += (-Math.sign(th) * 24.6 * K * sd - 6.0 * Math.sqrt(K) * (Math.min(sd, 0.12) / 0.12) * tvIn) * dt; }   /* DEV FORK 105: SOFT STOPS — progressive resistance across the last 0.12 rad before the +/-0.85 stop (49 deg, Keith): spring pressure rises steeply as the deck nears the stop, so it rounds onto it and rests (under full balance the spring's rest point is exactly 0.85), and leaving is equally soft. FORK 103's hard clamp (the pin that froze the tilt at the stop and zeroed the spin — the snap) is gone */
     th += tv * dt;
-    if (p.kind === 'saw') { if (th > 0.85) { th = 0.85; tv = 0; } else if (th < -0.85) { th = -0.85; tv = 0; } }   /* the plank's stops: bottomed out at +/-49 deg (Keith), held while he stays on that half — see-saws never flip all the way */
     px += Math.sin(th) * 340 * dt;   /* the slope pulls him toward the low side — he has to keep running up it and jump in time */
     if (p.kind === 'flip') { p.flipOff = Math.abs(th) > 0.9; if (p.flipOff) p.rollDir = Math.sign(th) || 1; if (Math.abs(th) >= 1.15) { p.rolling = true; p.rollDir = Math.sign(th) || 1; grounded = null; vy = 150; airMove = null; airT = 0; landMove = null; airGrav = 1; } }   /* flipped off: a plain fall — a lower cloud can still catch him. FORK 103: the latch is tracked and signed, so a latched deck finishes its turn in the direction his weight sent it — counter-clockwise off the back included — even after he jumps off */
     p.tilt = th; p.tiltV = tv;
   } else if (p.kind === 'flip' && p.flipOff) {
     p.rolling = true; if (!p.rollDir) p.rollDir = Math.sign(th) || 1; p.tiltV = 0;   /* FORK 103: latched is latched — leaving does not cancel the turn; the roll branch above finishes it empty */
   } else {
-    tv += (-2.5 * th - 2.4 * tv) * dt;   /* FORK 103: NO snap-back (Keith: the rotation after you jump off matters where you jumped off) — the deck keeps the tilt and spin he left it with and plays them out as a damped seesaw settle: it can overshoot and rock, decaying to rest at level */
+    tv += (-2.0 * th - 2.4 * tv) * dt;   /* FORK 103: NO snap-back (Keith: the rotation after you jump off matters where you jumped off) — the deck keeps the tilt and spin he left it with and plays them out as a damped seesaw settle: it can overshoot and rock, decaying to rest at level. DEV FORK 105: softened with the rest (spring 2.5 -> 2.0, zeta ~0.85) — a sway, not a spring-back */
+    if (p.kind === 'saw') { const sd = Math.abs(th) - 0.73; if (sd > 0 && Math.sign(tv) === Math.sign(th)) tv += (-Math.sign(th) * 24.6 * K * sd - 6.0 * Math.sqrt(K) * (Math.min(sd, 0.12) / 0.12) * tv) * dt; }   /* DEV FORK 105: the settle reads the same soft stop, one-sided — it only resists motion INTO the stop, so a deck left resting on its stop sways home on the settle spring alone, never flung off it */
     th += tv * dt;
-    if (p.kind === 'saw') { if (th > 0.85) { th = 0.85; tv = 0; } else if (th < -0.85) { th = -0.85; tv = 0; } }
     if (p.kind === 'flip' && Math.abs(th) > 0.9) { p.flipOff = true; p.rollDir = Math.sign(th) || 1; p.rolling = true; tv = 0; }   /* an exit spin that honestly carries an unlatched 360 over the line still completes the turn empty */
     if (Math.abs(th) < 0.004 && Math.abs(tv) < 0.02) { th = 0; tv = 0; }
     p.tilt = th; p.tiltV = tv;
