@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;pointer-events:auto;cursor:pointer;"></div>   <!-- DEV FORK 74: the price line is a tap target — it opens the buy card --></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 94</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 95</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -981,6 +981,7 @@ window.__STORMBG = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1
 window.__STORMBG.forEach(i => queueImg(im => { BGIMG['rs' + i] = im; }, 'stormbg/s' + i + '.webp', false));
 window.__dressDay = function (idx) { return window.__bokPlane === 'mid' ? BGIMG['rd' + window.__BGRAIN_D[idx % window.__BGRAIN_D.length]] : BGIMG['rs' + window.__STORMBG[idx % window.__STORMBG.length]]; };   /* DEV FORK 89: the DAY dressing, picked by plane (Keith) — the FAR background keeps the storm first set (FORK 84); the MID layer wears the bgrain DAY pool instead: up close, the storm set's baked-rain clouds read as jellyfish */
 window.__CITYDUSK = {}; ['far', 'mid', 'near', 'fogband'].forEach(k => queueImg(im => { window.__CITYDUSK[k] = im; }, 'citydusk/' + k + '.webp', false));   /* DEV FORK 87: the CITY DUSK demo plates — image-generated art, fog + bokeh baked in by code (Keith) */
+window.__SEASTRIP = null; queueImg(im => { window.__SEASTRIP = im; }, 'seastrip.webp', false);   /* DEV FORK 95: THE SEA STRIP — one baked cloud-top field (tools/bake_seastrip.py, from Keith's realistic cloud photos), mirror-tiled by the sea draw in the standard worlds */
 window.__dressOne = function (d, star, dx, dy, ox, txm, tym) { if (window.__map !== 'rain' && window.__map !== 'rain2') return false; const a = ctx.globalAlpha; const idx = Math.abs(Math.round(d.x * 7 + d.y * 13)); if (star < 0.98) { const im = window.__bokPick ? window.__bokPick(window.__dressDay(idx)) : window.__dressDay(idx);   /* DEV FORK 87: BOKEH demo — the rain worlds' far dressing takes the pass too (far plane only; __bokPick checks the plane) */   /* DEV FORK 89: by day the FAR background is the storm first set (FORK 84) but the MID layer wears the bgrain day pool — jellyfish out of the near background (Keith) */ if (im && im.naturalWidth) { ctx.globalAlpha = a * (1 - star); ctx.drawImage(im, dx + ox - tiltX * txm, dy - tiltY * tym, d.w, d.w * im.naturalHeight / im.naturalWidth); } } if (star > 0.02) { const im = window.__bokPick ? window.__bokPick(BGIMG['rn' + window.__BGRAIN_N[idx % window.__BGRAIN_N.length]]) : BGIMG['rn' + window.__BGRAIN_N[idx % window.__BGRAIN_N.length]];   /* DEV FORK 87: BOKEH demo — same for the night set */ if (im && im.naturalWidth) { ctx.globalAlpha = a * star; ctx.drawImage(im, dx + ox - tiltX * txm, dy - tiltY * tym, d.w, d.w * im.naturalHeight / im.naturalWidth); } } ctx.globalAlpha = a; return true; };   /* DEV FORK 83: in the rain worlds a dress sprite wears Keith's rain clouds — day art by day, night art by night, crossfaded on the sky's star; returns true so the standard cloud never draws there */
 pumpQ();
 
@@ -2650,12 +2651,13 @@ function draw() {
       ctx.drawImage(img, dx - wPx * 0.5 - tiltX * 30, H * d.fy - tiltY * 10, wPx, wPx * img.naturalHeight / img.naturalWidth); ctx.restore();
     }
   }
-  if (!(window.__cityDusk && window.__cityDusk())) {   /* DEV FORK 87: CITY DUSK demo — the cloud sea stands down; the city lies below instead (Keith) */
+  const __seaVis = 1 - Math.max(0, Math.min(1, (altSm - 0.16) / 0.36));   /* DEV FORK 95: THE SEA GATE (Keith: 'it should be altitude driven') — fully present at altSm <= 0.16 (the lowest deck bands, measured on both aspects), gone by 0.52 (the upper bands); the title keeps altSm 0, so the start page keeps its sea */
+  if (!(window.__cityDusk && window.__cityDusk()) && __seaVis > 0.01) {   /* DEV FORK 87: CITY DUSK demo — the cloud sea stands down; the city lies below instead (Keith) */   /* DEV FORK 95: and the altitude gate stands it down up high — from this angle the sea is only there when he is LOW (Keith) */
     const seaSet = ['17', '27', '26', '28', '18'];
-    const base = H * (0.90 - 0.07 * altSm);
+    const base = H * (0.90 - 0.07 * altSm) + (1 - __seaVis) * H * 0.18;   /* DEV FORK 95: as the gate closes, the whole sea slides down off the bottom while it dissolves */
     const billow = wx => base + (18 * Math.sin(wx * 0.006 + 1.3) + 12 * Math.sin(wx * 0.0137 + 4.1) + 7 * Math.sin(wx * 0.031 + 0.7)) * S;
     const mixc2 = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
-    ctx.save(); ctx.globalAlpha = 0.98 * (1 - 0.35 * sky.star);
+    ctx.save(); ctx.globalAlpha = 0.98 * (1 - 0.35 * sky.star) * __seaVis;   /* DEV FORK 95: the blanket fades with the gate */
     const dg = ctx.createLinearGradient(0, base - 30 * S, 0, H);
     dg.addColorStop(0, `rgb(${mixc2(sky.c[3], [255, 255, 255], 0.22)})`);
     dg.addColorStop(0.5, `rgb(${mixc2(sky.c[2], sky.c[3], 0.4)})`);
@@ -2665,18 +2667,22 @@ function draw() {
     for (let sx = -60; sx <= W + 60; sx += 30) ctx.lineTo(sx, billow(sx + camX * 0.58 * S));
     ctx.lineTo(W + 60, H + 80); ctx.closePath(); ctx.fill(); ctx.restore();
     const sw = W * 0.52, span = sw * 0.66 * seaSet.length;
-    for (let i = 0; i < seaSet.length; i++) {
-      const img = BGIMG['m' + seaSet[i]];
-      let sx = (i * sw * 0.66 - camX * 0.58 * S) % span; if (sx < -sw) sx += span;
-      if (window.__map === 'rain' || window.__map === 'rain2') {   /* DEV FORK 83: THEMES TRUE — the cloud sea wears Keith's rain clouds in the rain worlds, day set by day, night set by night */
-        const __sp = (pool, pre, wgt) => { if (wgt <= 0.02) return; const im = BGIMG[pre + pool[(i * 7 + 3) % pool.length]]; if (!im || !im.naturalWidth) return; const sh2 = sw * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star) * wgt; ctx.drawImage(im, sx - sw * 0.1 - tiltX * 22, billow(sx + camX * 0.58 * S + sw * 0.4) - sh2 * 0.52, sw, sh2); ctx.restore(); };
+    if (window.__map === 'rain' || window.__map === 'rain2') {   /* DEV FORK 83: THEMES TRUE — the cloud sea wears Keith's rain clouds in the rain worlds, day set by day, night set by night */   /* DEV FORK 95: this path keeps its realistic sets untouched — only the gate rides its alpha */
+      for (let i = 0; i < seaSet.length; i++) {
+        let sx = (i * sw * 0.66 - camX * 0.58 * S) % span; if (sx < -sw) sx += span;
+        const __sp = (pool, pre, wgt) => { if (wgt <= 0.02) return; const im = BGIMG[pre + pool[(i * 7 + 3) % pool.length]]; if (!im || !im.naturalWidth) return; const sh2 = sw * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star) * wgt * __seaVis; ctx.drawImage(im, sx - sw * 0.1 - tiltX * 22, billow(sx + camX * 0.58 * S + sw * 0.4) - sh2 * 0.52, sw, sh2); ctx.restore(); };
         __sp(window.__STORMBG, 'rs', 1 - sky.star);   /* DEV FORK 84: the sea's day slot too */ __sp(window.__BGRAIN_N, 'rn', sky.star);
-        continue;
       }
-      if (!img || !img.naturalWidth) continue;
-      const sh = sw * img.naturalHeight / img.naturalWidth;
-      ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star);
-      ctx.drawImage(img, sx - sw * 0.1 - tiltX * 22, billow(sx + camX * 0.58 * S + sw * 0.4) - sh * 0.52, sw, sh); ctx.restore();
+    } else if (window.__SEASTRIP && window.__SEASTRIP.naturalWidth) {   /* DEV FORK 95: THE SEA STRIP (Keith, with aerial reference) — the standard worlds' sea is ONE baked cloud-top field drawn as a continuous band along the billow line, mirror-tiled like the city plates with the parity anchored to a world tile index; the five spaced sunset billboards are retired */
+      const simg = window.__SEASTRIP, sh3 = H * 0.34, sw3 = sh3 * simg.naturalWidth / simg.naturalHeight, scroll = camX * 0.58 * S;
+      const k0 = Math.floor(scroll / sw3);
+      ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star) * __seaVis;
+      for (let sx = -(scroll - k0 * sw3) - sw3, k = k0 - 1; sx < W + sw3; sx += sw3, k++) {
+        const by = billow(sx + sw3 * 0.5 + scroll) - sh3 * 0.62;
+        if (k % 2 === 0) ctx.drawImage(simg, sx - tiltX * 22, by, sw3, sh3);
+        else { ctx.save(); ctx.translate(sx + sw3 - tiltX * 22, by); ctx.scale(-1, 1); ctx.drawImage(simg, 0, 0, sw3, sh3); ctx.restore(); }
+      }
+      ctx.restore();
     }
   }
   ctx.save();
@@ -3067,12 +3073,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK94 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK95 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK94 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK95 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
