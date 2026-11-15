@@ -1278,11 +1278,12 @@ window.__drawCity = drawCitySkyline;
    so climbing reveals clouds above AND below. */
 let dressFar = [], dressMid = [];
 for (let i = 0; i < 6; i++) dressFar.push({ img: BGFAR[(i * 2 + 1) % BGFAR.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1750, w: 640 + Math.random() * 360 });
-for (let i = 0; i < 8; i++) dressMid.push({ img: BGMID[(i * 2) % BGMID.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1900, w: 340 + Math.random() * 280 });
+for (let i = 0; i < 6; i++) dressMid.push({ img: BGMID[(i * 2) % BGMID.length], x: Math.random() * 2600, y: -1500 + Math.random() * 1900, w: 340 + Math.random() * 280 });   /* DEV FORK 90: the mid field THINS 8 -> 6 (Keith: too many clouds going by fast) */
 /* the depths below (Keith v0.17): when he rises above the clouds, the
    lower view shouldn't empty out — a far-below cloud layer fades in
    with altitude and fills the bottom of the frame */
 let dressLow = [];
+for (let i = 0; i < 5; i++) dressLow.push({ img: BGFAR[(i * 3 + 2) % BGFAR.length], x: Math.random() * 2600, w: 800 + Math.random() * 400, fy: 0.60 + Math.random() * 0.18 });   /* DEV FORK 90: the low plane is POPULATED at last — five big faint far-clouds low on the screen, a true horizon step between the far plane and the sea (Keith: more depth). It stood declared-but-empty since v0.17, in the live game too — the draw below ran over zero clouds */
 /* ---------- the ghost racer: LaShmoove (Keith's design, v0.22) -------
    An NPC in the distant field, running a choreographed lane of the far
    clouds. Entrance (Keith): at the start he sprints in from the LEFT,
@@ -2632,13 +2633,13 @@ function draw() {
      inherit the handy-cam ZOOM (which breathes on floats and grabs) and
      any residual camera coupling. Out here they answer only to the
      run's scroll and the smoothed altitude: a hop cannot move them. */
-  if (!(window.__cityDusk && window.__cityDusk())) {   /* DEV FORK 87: CITY DUSK demo — the low deep dress stands down with the rest of the scenery (Keith) */
-    const lowA = Math.max(0, Math.min(1, (altSm - 0.086) / 0.714));
+  if (!(window.__cityDusk && window.__cityDusk()) && window.__map !== 'rain' && window.__map !== 'rain2') {   /* DEV FORK 87: CITY DUSK demo — the low deep dress stands down with the rest of the scenery (Keith) */   /* DEV FORK 90: THEMES TRUE — the low plane wears standard BGFAR photos, so in STORM SEASON it stands down too rather than leak them (Storm Season's depth keeps its far storm dressing, the bgrain mid, the hills and the sea) */
+    const lowA = Math.max(0, Math.min(1, (altSm - 0.02) / 0.48));   /* DEV FORK 90: the low plane enters earlier (altSm 0.02) and is fully in by ~0.50 (was 0.086 in, full at 0.80) */
     if (lowA > 0.01) for (const d of dressLow) {
       const img = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(BGIMG['f' + d.img]) || BGIMG['f' + d.img]) : BGIMG['f' + d.img];   /* DEV FORK 87: BOKEH demo — the low deep layer takes the same downscale pass (Keith) */
       if (!img || !img.naturalWidth) continue;
       const wPx = d.w * S;
-      let dx = (d.x * S - camX * 0.36 * S) % (W + wPx + 120); if (dx < -wPx - 120) dx += W + wPx + 120;
+      let dx = (d.x * S - camX * 0.24 * S) % (W + wPx + 120); if (dx < -wPx - 120) dx += W + wPx + 120;   /* DEV FORK 90: the low plane drifts at 0.24 — its own rung, between the far plane (0.08) and the mid (0.32) */
       ctx.save(); ctx.globalAlpha = 0.34 * lowA * (1 - 0.55 * sky.star);
       ctx.drawImage(img, dx - wPx * 0.5 - tiltX * 30, H * d.fy - tiltY * 10, wPx, wPx * img.naturalHeight / img.naturalWidth); ctx.restore();
     }
@@ -2687,9 +2688,9 @@ function draw() {
   for (const d of (window.__cityDusk && window.__cityDusk()) ? [] : dressFar) {   /* DEV FORK 87: CITY DUSK stands the far dress down (Keith) */
     const img = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(BGIMG['f' + d.img]) || BGIMG['f' + d.img]) : BGIMG['f' + d.img];   /* DEV FORK 87: BOKEH demo — the far plane draws through the downscale pass (Keith) */
     if ((!img || !img.naturalWidth) && window.__map !== 'rain' && window.__map !== 'rain2') continue;   /* DEV FORK 83: in STORM SEASON the far layer wears the rain background clouds instead */
-    let dx = (((d.x - camX * 0.12) % 3450) + 3450) % 3450 - 1150;   /* FIXED wrap period (v0.39): the old span divided by zoom, so every zoom breath dragged these clouds sideways — Keith's circled cloud sweeping in his video */
-    const dy = d.y - camBgY * 0.12 + viewH / zoom * 0.55;   /* slow background camera (v0.41) — was instant camY: these clouds hopped at 84% strength */
-    ctx.save(); ctx.globalAlpha = (0.34 + 0.24 * warmBg) * nightDim   /* DEV FORK 29: the FORK 28 city haze-thinning retired with the city — both worlds get the full weather */;   /* DEV FORK 28: the far haze thins over the city */
+    let dx = (((d.x - camX * 0.08) % 3450) + 3450) % 3450 - 1150;   /* DEV FORK 90: DEPTH PASS — the far plane slows 0.12 -> 0.08 (Keith: spread the ladder) */   /* FIXED wrap period (v0.39): the old span divided by zoom, so every zoom breath dragged these clouds sideways — Keith's circled cloud sweeping in his video */
+    const dy = d.y - camBgY * 0.08 + viewH / zoom * 0.55;   /* DEV FORK 90: the far plane's vertical drift follows its scroll (0.12 -> 0.08) */   /* slow background camera (v0.41) — was instant camY: these clouds hopped at 84% strength */
+    ctx.save(); ctx.globalAlpha = (0.28 + 0.24 * warmBg) * nightDim   /* DEV FORK 90: the far plane sits FAINTER (base 0.34 -> 0.28) — paleness is part of its distance */   /* DEV FORK 29: the FORK 28 city haze-thinning retired with the city — both worlds get the full weather */;   /* DEV FORK 28: the far haze thins over the city */
     if (!(window.__dressOne && window.__dressOne(d, sky.star, dx, dy, -575, 7, 3))) ctx.drawImage(img, dx - 575 - tiltX * 7, dy - tiltY * 3, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();   /* DEV FORK 83: rain worlds draw the day/night rain dressing */
   }
   /* mountain ridges — Gemini's art direction (via Keith), built our
@@ -2704,13 +2705,13 @@ function draw() {
     if (mFade > 0.01 && (window.__map === 'night' || window.__map === 'night2')) { drawOcean(mFade, sky); }   /* DEV FORK 64: the (2) night keeps its ocean */ else if (mFade > 0.01) {   /* DEV FORK 32: in EXTENDED NIGHT the world-below is the OCEAN (Keith: flatten the range) — the ridges keep Level 1 */
       const mixc = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));   /* DEV FORK 26: in the city the skyline takes the ridges' place — same slot, same fade */
       const RIDGES = (window.__map === 'rain' || window.__map === 'rain2') ? [   /* DEV FORK 69: STORM SEASON's own range (Keith) — taller, sharper, different peaks than the day range */
-        { par: 0.05, pv: 0.07, base: 262, amp: 96, f1: 0.0016, p1: 8.4, p2: 2.2, col: mixc(sky.c[3], [34, 46, 40], 0.45), a: 0.55 },   /* DEV FORK 73: hills, not mountains, behind Storm Season (Keith) — low slow swells in storm green-greys */
-        { par: 0.10, pv: 0.12, base: 232, amp: 78, f1: 0.0021, p1: 1.3, p2: 6.1, col: mixc(sky.c[2], [30, 42, 36], 0.50), a: 0.78 },
-        { par: 0.17, pv: 0.18, base: 198, amp: 58, f1: 0.0028, p1: 5.5, p2: 0.9, col: mixc(sky.c[1], [24, 34, 28], 0.55), a: 0.95 }
+        { par: 0.04, pv: 0.07, base: 262, amp: 96, f1: 0.0016, p1: 8.4, p2: 2.2, col: mixc(mixc(sky.c[3], [34, 46, 40], 0.45), sky.c[3], 0.25), a: 0.55 },   /* DEV FORK 73: hills, not mountains, behind Storm Season (Keith) — low slow swells in storm green-greys */   /* DEV FORK 90: DEPTH PASS — par trimmed 0.05 -> 0.04 and the tint takes +0.25 more of the horizon sky: the far hills sit paler, farther (Keith) */
+        { par: 0.08, pv: 0.12, base: 232, amp: 78, f1: 0.0021, p1: 1.3, p2: 6.1, col: mixc(mixc(sky.c[2], [30, 42, 36], 0.50), sky.c[3], 0.18), a: 0.78 },   /* DEV FORK 90: par 0.10 -> 0.08, tint +0.18 toward the horizon */
+        { par: 0.14, pv: 0.18, base: 198, amp: 58, f1: 0.0028, p1: 5.5, p2: 0.9, col: mixc(mixc(sky.c[1], [24, 34, 28], 0.55), sky.c[3], 0.10), a: 0.95 }   /* DEV FORK 90: par 0.17 -> 0.14, tint +0.10 toward the horizon */
       ] : [
-        { par: 0.05, pv: 0.07, base: 235, amp: 210, f1: 0.0038, p1: 1.7, p2: 0.4, col: mixc(sky.c[3], sky.c[0], 0.38), a: 0.50 },
-        { par: 0.10, pv: 0.12, base: 195, amp: 158, f1: 0.0052, p1: 4.2, p2: 2.9, col: mixc(sky.c[2], sky.c[0], 0.45), a: 0.72 },
-        { par: 0.17, pv: 0.18, base: 160, amp: 112, f1: 0.0068, p1: 0.6, p2: 5.1, col: mixc(sky.c[1], [10, 6, 20], 0.55), a: 0.92 }
+        { par: 0.04, pv: 0.07, base: 235, amp: 210, f1: 0.0038, p1: 1.7, p2: 0.4, col: mixc(mixc(sky.c[3], sky.c[0], 0.38), sky.c[3], 0.25), a: 0.50 },   /* DEV FORK 90: par 0.05 -> 0.04, tint +0.25 toward the horizon — the far range is the palest */
+        { par: 0.08, pv: 0.12, base: 195, amp: 158, f1: 0.0052, p1: 4.2, p2: 2.9, col: mixc(mixc(sky.c[2], sky.c[0], 0.45), sky.c[3], 0.18), a: 0.72 },   /* DEV FORK 90: par 0.10 -> 0.08, tint +0.18 toward the horizon */
+        { par: 0.14, pv: 0.18, base: 160, amp: 112, f1: 0.0068, p1: 0.6, p2: 5.1, col: mixc(mixc(sky.c[1], [10, 6, 20], 0.55), sky.c[3], 0.10), a: 0.92 }   /* DEV FORK 90: par 0.17 -> 0.14, tint +0.10 toward the horizon — the near range pales least */
       ];
       const vw2 = viewW / zoom, vh2 = viewH / zoom;
       for (const r of RIDGES) {
@@ -2732,6 +2733,7 @@ function draw() {
         }
         ctx.lineTo(vw2 + 60, vh2 + 80); ctx.closePath(); ctx.fill(); ctx.restore();
       }
+      { const hzR = RIDGES[RIDGES.length - 1]; const hzY = hzR.base - camSmY * hzR.pv + vh2 * 0.55 - tiltY * hzR.par * 30; const hc = sky.c[3]; const hg = ctx.createLinearGradient(0, hzY - vh2 * 0.15, 0, hzY); hg.addColorStop(0, `rgba(${hc[0]},${hc[1]},${hc[2]},0)`); hg.addColorStop(1, `rgba(${hc[0]},${hc[1]},${hc[2]},${(0.35 * mFade * (1 - 0.35 * sky.star)).toFixed(3)})`); ctx.save(); ctx.fillStyle = hg; ctx.fillRect(-60, hzY - vh2 * 0.15, vw2 + 120, vh2 * 0.15 + 12); ctx.restore(); }   /* DEV FORK 90: HAZE pooled at the ridge base — a band of the sky's own horizon colour, strongest at the near ridge's ground line and fading up over 15% of the view; its alpha rides mFade, so it sinks and vanishes with the range itself. The mountains get atmosphere, not blur — fills have no detail to soften (Keith) */
     }
   }
   /* middle layer (ChatGPT: ~75%, crisp, slow) */
@@ -2739,8 +2741,8 @@ function draw() {
   for (const d of (window.__cityDusk && window.__cityDusk()) ? [] : dressMid) {   /* DEV FORK 87: CITY DUSK stands the mid dress down too (Keith) */
     const img = BGIMG['m' + d.img];
     if ((!img || !img.naturalWidth) && window.__map !== 'rain' && window.__map !== 'rain2') continue;   /* DEV FORK 83: same for the mid layer */
-    let dx = (((d.x - camX * 0.46) % 3450) + 3450) % 3450 - 820;   /* same fixed wrap — the mid layer was the worst sweeper (72 units of drag across the normal speed zoom-out alone) */
-    const dy = d.y - camBgY * 0.44 + viewH / zoom * 0.55;   /* slow background camera (v0.41) — was instant camY: the mid clouds hopped with every jump */
+    let dx = (((d.x - camX * 0.32) % 3450) + 3450) % 3450 - 820;   /* DEV FORK 90: the mid plane slows 0.46 -> 0.32 */   /* same fixed wrap — the mid layer was the worst sweeper (72 units of drag across the normal speed zoom-out alone) */
+    const dy = d.y - camBgY * 0.30 + viewH / zoom * 0.55;   /* DEV FORK 90: mid vertical drift 0.44 -> 0.30, with its scroll */   /* slow background camera (v0.41) — was instant camY: the mid clouds hopped with every jump */
     ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim;   /* DEV FORK 28: the mid haze was washing the skyline out (Keith's shot) — city only; the mountains keep their weather */
     if (!(window.__dressOne && window.__dressOne(d, sky.star, dx, dy, -410, 20, 8))) ctx.drawImage(img, dx - 410 - tiltX * 20, dy - tiltY * 8, d.w, d.w * img.naturalHeight / img.naturalWidth); ctx.restore();   /* DEV FORK 83: rain worlds draw the day/night rain dressing */
   }
@@ -3059,12 +3061,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK89 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK90 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK89 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK90 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
@@ -3344,16 +3346,16 @@ window.__optResetScores = function () { try { localStorage.setItem('sixlouddev_s
 window.__optTest = { state: () => ({ ghostsOff: !!window.__optGhostsOff, m: !!window.__musOff, s: !!window.__sfxOff, city: !!window.__cityDuskOpt, bokeh: !!window.__bokehOpt }), toggleGhosts: optToggleGhosts, toggleCity: optToggleCity, toggleBokeh: optToggleBokeh, resetScores: window.__optResetScores, restore: window.__restorePurchases, open: openOptions };   /* DEV FORK 87: the demo toggles join the test surface */
 /* DEV FORK 87 — the demo machinery (Keith, 2026-11-14). CITY DUSK draws
    its three baked plates + fog bands in the stood-down scenery slot (FORK 88: lighter bake, gentler climb fade — Keith);
-   BOKEH runs the far plane through a 1/6 downscale canvas (re-rendered
+   BOKEH runs the far plane through a 1/10 downscale canvas (re-rendered
    only when the sky bucket changes) and lays a sky-following fog wash
    over the distance. Both read their Options state through the two
    predicates below; with both off, none of this runs. */
 window.__cityDusk = function () { return !!window.__cityDuskOpt; };
 window.__bokehOn = function () { return !!window.__bokehOpt; };
 window.__bokCache = new Map(); window.__bokBucketNow = 0; window.__bokPlane = 'far';
-window.__bokSrc = function (img) { if (!img || !img.naturalWidth) return img; const bucket = window.__bokBucketNow || 0; const hit = window.__bokCache.get(img); if (hit && hit.b === bucket) return hit.c; try { const c = document.createElement('canvas'); c.width = Math.max(2, Math.round(img.naturalWidth / 6)); c.height = Math.max(2, Math.round(img.naturalHeight / 6)); const g2 = c.getContext('2d'); if (!g2) return img; g2.drawImage(img, 0, 0, c.width, c.height); c.naturalWidth = img.naturalWidth; c.naturalHeight = img.naturalHeight; window.__bokCache.set(img, { c: c, b: bucket }); return c; } catch (err) { return img; } };   /* DEV FORK 87: the downscale pass — the small canvas keeps the source's aspect stamps so every draw site sizes it exactly like the original */
+window.__bokSrc = function (img) { if (!img || !img.naturalWidth) return img; const bucket = window.__bokBucketNow || 0; const hit = window.__bokCache.get(img); if (hit && hit.b === bucket) return hit.c; try { const c = document.createElement('canvas'); c.width = Math.max(2, Math.round(img.naturalWidth / 10) /* DEV FORK 90: the downscale DEEPENS 1/6 -> 1/10 — the far plane must visibly soften (Keith: with bokeh on he could barely tell) */); c.height = Math.max(2, Math.round(img.naturalHeight / 10) /* DEV FORK 90: with its width */); const g2 = c.getContext('2d'); if (!g2) return img; g2.drawImage(img, 0, 0, c.width, c.height); c.naturalWidth = img.naturalWidth; c.naturalHeight = img.naturalHeight; window.__bokCache.set(img, { c: c, b: bucket }); return c; } catch (err) { return img; } };   /* DEV FORK 87: the downscale pass — the small canvas keeps the source's aspect stamps so every draw site sizes it exactly like the original */
 window.__bokPick = function (im) { if (!im) return im; if (window.__bokehOn() && window.__bokPlane === 'far') return window.__bokSrc(im) || im; return im; };   /* DEV FORK 87: __dressOne serves both planes — the pass applies on the far plane only */
-window.__bokWash = function (sky) { const vw2 = viewW / zoom, vh2 = viewH / zoom; const st = Math.max(0, Math.min(1, sky.star || 0)); const warm = [255, 183, 102]; const fog = sky.c[3].map((v, i) => Math.round(v + (warm[i] - v) * (1 - st) * 0.30)); const a = 0.10 + 0.22 * st; const gr = ctx.createLinearGradient(0, -vh2 * 0.15, 0, vh2 * 0.86); gr.addColorStop(0, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',0)'); gr.addColorStop(0.5, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',' + (a * 0.6).toFixed(3) + ')'); gr.addColorStop(0.78, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',' + a.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',0)');   /* DEV FORK 87: the wash fades back out at its bottom — the first proof showed a hard lower edge reading as a line across the sea */ ctx.save(); ctx.fillStyle = gr; ctx.fillRect(-80, -vh2 * 0.15, vw2 + 160, vh2 * 1.01); ctx.restore(); };   /* DEV FORK 87: the fog wash — its colour chases the sky's horizon warmed toward sunset gold, its strength follows the darkness (sky.star) modestly */
+window.__bokWash = function (sky) { const vw2 = viewW / zoom, vh2 = viewH / zoom; const st = Math.max(0, Math.min(1, sky.star || 0)); const warm = [255, 183, 102]; const fog = sky.c[3].map((v, i) => Math.round(v + (warm[i] - v) * (1 - st) * 0.30)); const a = 0.16 + 0.30 * st;   /* DEV FORK 90: the fog wash strengthens (0.10 + 0.22*star -> 0.16 + 0.30*star) */ const gr = ctx.createLinearGradient(0, -vh2 * 0.15, 0, vh2 * 0.86); gr.addColorStop(0, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',0)'); gr.addColorStop(0.5, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',' + (a * 0.6).toFixed(3) + ')'); gr.addColorStop(0.78, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',' + a.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + fog[0] + ',' + fog[1] + ',' + fog[2] + ',0)');   /* DEV FORK 87: the wash fades back out at its bottom — the first proof showed a hard lower edge reading as a line across the sea */ ctx.save(); ctx.fillStyle = gr; ctx.fillRect(-80, -vh2 * 0.15, vw2 + 160, vh2 * 1.01); ctx.restore(); };   /* DEV FORK 87: the fog wash — its colour chases the sky's horizon warmed toward sunset gold, its strength follows the darkness (sky.star) modestly */
 window.__cityDraw = function (sky) { const C = window.__CITYDUSK || {}; const far = C.far, mid = C.mid, near = C.near, band = C.fogband; if (!far || !far.naturalWidth) return; const vw2 = viewW / zoom, vh2 = viewH / zoom; const climb = Math.max(0, -camSmY - vh2 * 0.42); const fade = Math.max(0.55, Math.min(1, 1.15 - climb / 3900));   /* DEV FORK 88: the altitude fade TURNED DOWN for the city only — FORK 87 borrowed the ridges' law (gone by ~750 climb) and Keith watched the city fade away as he climbed. Range x6 + a 0.55 floor: plainly visible at altitude, only a whisper of fade at the extremes. The ridges keep their own law */ if (fade <= 0.01) return; const shiftY = (vh2 + 70) - ((44 - camSmY * 0.20 + vh2 * 0.55 - tiltY * 0.20 * 30) + vh2 * 0.34);   /* DEV FORK 88: COVER-FIT (Keith) — shift the whole stack so the near plate's bottom lands 70 past the canvas bottom on any screen shape; no blank band under the city, ever */ const plane = (img, topBase, pv, par, hgt, alpha) => { if (!img || !img.naturalWidth) return; const topY = topBase - camSmY * pv + vh2 * 0.55 - tiltY * par * 30 + shiftY; const tw = hgt * img.naturalWidth / img.naturalHeight; let off = (camX * par + tiltX * par * 90) % tw; if (off < 0) off += tw; ctx.save(); ctx.globalAlpha = alpha * fade; let ti = 0; for (let x = -off - tw; x < vw2 + tw; x += tw, ti++) { if (ti % 2 === 0) ctx.drawImage(img, x, topY, tw, hgt); else { ctx.save(); ctx.translate(x + tw, topY); ctx.scale(-1, 1); ctx.drawImage(img, 0, 0, tw, hgt); ctx.restore(); } } ctx.restore(); };   /* DEV FORK 87: alternate tiles mirror — a photo's left edge never meets its own right edge, so the tiling carries no seams */ const fogB = (topBase, pv, par, hgt, alpha) => { if (!band || !band.naturalWidth) return; const topY = topBase - camSmY * pv + vh2 * 0.55 - tiltY * par * 30 + shiftY; ctx.save(); ctx.globalAlpha = alpha * fade; for (let x = -80; x < vw2 + 80; x += 512) ctx.drawImage(band, x, topY, 512, hgt); ctx.restore(); }; plane(far, -185, 0.05, 0.05, vh2 * 0.35, 0.92); fogB(-128, 0.08, 0.08, vh2 * 0.175, 0.85); plane(mid, -58, 0.11, 0.11, vh2 * 0.31, 0.96); fogB(-10, 0.15, 0.15, vh2 * 0.16, 0.7); fogB(-16, 0.20, 0.20, vh2 * 0.16, 0.8);   /* DEV FORK 88: a fog band across the near plate's top boundary, riding the near plate's own drift — the skyline emerges through fog, no straight edge under the cloud (Keith) */ plane(near, 44, 0.20, 0.20, vh2 * 0.34, 1); };   /* DEV FORK 87: CITY DUSK — far plate (slowest drift), fog band, mid plate, fog band, near plate along the bottom; the city sinks as he climbs and fades only gently, on its own turned-down law, and the stack is cover-fit to the frame's bottom (FORK 88) */
 if (new URLSearchParams(location.search).has('options')) setTimeout(openOptions, 2000);
 /* DEV FORK 53: THE NOTE WALLET (Keith, 2026-11-13 — notes are the currency; characters cost 3,000 notes or $0.99). The running tally lives in sixlouddev_notes on the device. */
