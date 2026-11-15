@@ -255,7 +255,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;pointer-events:auto;cursor:pointer;"></div>   <!-- DEV FORK 74: the price line is a tap target — it opens the buy card --></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 96</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 97</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -2618,7 +2618,7 @@ function draw() {
       /* DEV FORK 45: the satellite loader is GONE with the satellite (Keith) */
       const __rm0 = window.__realMoon ? window.__realMoon(sky.star) : { x: W * 0.8, y: H * 0.17, a: 0, r: Math.min(W, H) * 0.085 }, __me = window.__moonT0 == null ? 1 : Math.max(0, Math.min(1, (time - window.__moonT0) / 2.5)), __ee = __me * __me * (3 - 2 * __me), __rm = { x: W * 1.10 + (__rm0.x - W * 1.10) * __ee, y: __rm0.y, a: __rm0.a * __ee, r: __rm0.r }, mX = __rm.x - skyOX, mY = __rm.y - skyOY, mR = __rm.r;   /* DEV FORK 45: on entering the night the moon SLIDES IN over ~2.5 s; in Level 1 it arrives by darkness instead (below) */   /* DEV FORK 45: the moon answers to the DARKNESS (sky.star) now — nothing at sunset; at full dark the real moon has slid in, small and distant; the shared sky drift still applies */   /* DEV FORK 40: the moon rides its come-and-go arc (the shared sky drift still applies on top) */   /* DEV FORK 33: the moon takes the sky's shared drift — its private tilt factors and breathing sway are gone; the sheet is rigid */
       /* DEV FORK 46: the planet draw is OUT — the real moon holds the night sky alone */   /* a planet in the distance — the purple-blue giant keyed from Keith's sheet; DEV FORK 33: same sheet, same drift as everything up there */
-      if (window.__moonImg.naturalWidth && __rm.a > 0.01) { ctx.save(); ctx.globalAlpha = __rm.a; ctx.drawImage(window.__moonImg, mX - mR, mY - mR, mR * 2, mR * 2); ctx.restore(); }   /* DEV FORK 45: the real moon fades and slides with the darkness itself */   /* DEV FORK 40: the moon fades in at its rising and out at its setting */   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
+      if (window.__moonImg.naturalWidth && __rm.a > 0.01) { const __mi = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(window.__moonImg, 10) || window.__moonImg) : window.__moonImg; ctx.save(); ctx.globalAlpha = __rm.a; ctx.drawImage(__mi, mX - mR, mY - mR, mR * 2, mR * 2); ctx.restore(); }   /* DEV FORK 97: BOKEH THE MOON (Keith) — the night sky's real moon draws through the bokeh pass at the far grade (/10) when BOKEH is on; raw when off */   /* DEV FORK 45: the real moon fades and slides with the darkness itself */   /* DEV FORK 40: the moon fades in at its rising and out at its setting */   /* DEV FORK 31: Keith's Copilot moon carries its own golden halo — Amy's cool glow gradient is retired so they don't double up */
       /* DEV FORK 45: the satellite transit across the moon is REMOVED (Keith: it doesn't match) */
       /* DEV FORK 45: (transit draw removed with the satellite) */
       /* DEV FORK 31: Amy's ambient sky-rocket REMOVED (Keith: 'The rocket launch was better in level 1, mimic that') — the game's own v0.96 launch already fires in Extended Night runs: 55 s in, ignition flash, the runner's own puffs as its smoke trailer, behind the clouds. Identical, not imitated. */
@@ -2634,7 +2634,7 @@ function draw() {
       if (meteor.x > W + 120) meteor = null;
     }
   }
-  if (window.__map !== 'night') { const __dm = window.__realMoon ? window.__realMoon(sky.star) : { a: 0 }; if (__dm.a > 0.01) { window.__moonImg = window.__moonImg || (() => { const i = new Image(); i.src = 'moonreal.webp'; return i; })(); if (window.__moonImg.naturalWidth) { ctx.save(); ctx.globalAlpha = __dm.a; ctx.drawImage(window.__moonImg, __dm.x - tiltX * 5 - __dm.r, __dm.y - (tiltY * 3 - altSm * H * 0.045) - __dm.r, __dm.r * 2, __dm.r * 2); ctx.restore(); } } }   /* DEV FORK 45: the real moon comes in during LEVEL 1 too (Keith) — as the arc darkens past sunset the same darkness law slides it in, small and distant; the night map's own draw (above) covers Level 2 */
+  if (window.__map !== 'night') { const __dm = window.__realMoon ? window.__realMoon(sky.star) : { a: 0 }; if (__dm.a > 0.01) { window.__moonImg = window.__moonImg || (() => { const i = new Image(); i.src = 'moonreal.webp'; return i; })(); if (window.__moonImg.naturalWidth) { const __mi = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(window.__moonImg, 10) || window.__moonImg) : window.__moonImg; ctx.save(); ctx.globalAlpha = __dm.a; ctx.drawImage(__mi, __dm.x - tiltX * 5 - __dm.r, __dm.y - (tiltY * 3 - altSm * H * 0.045) - __dm.r, __dm.r * 2, __dm.r * 2); ctx.restore(); }   /* DEV FORK 97: BOKEH THE MOON (Keith) — the Level 1 real-moon draw takes the same far-grade pass (/10) when BOKEH is on; raw when off */ } }   /* DEV FORK 45: the real moon comes in during LEVEL 1 too (Keith) — as the arc darkens past sunset the same darkness law slides it in, small and distant; the night map's own draw (above) covers Level 2 */
   /* SCREEN-SPACE DEEP LAYERS (v0.21) — Keith's second video: the bottom
      clouds STILL moved with the jump, because inside the world pass they
      inherit the handy-cam ZOOM (which breathes on floats and grabs) and
@@ -2887,7 +2887,7 @@ function draw() {
       const rp3 = rocket.t / rocket.dur, rh = viewH / zoom * 0.88;
       const rx = (viewW / zoom * 0.82 + Math.sin(rocket.t * 0.7) * 8) * S, ry = (rh * (1 - rp3) - 90 * rp3) * S;
       if (rocket.t < 1.4) { const gr = ctx.createRadialGradient(rx, H * 0.88, 2, rx, H * 0.88, 60 * S); gr.addColorStop(0, 'rgba(255,166,66,0.7)'); gr.addColorStop(1, 'rgba(255,166,66,0)'); ctx.fillStyle = gr; ctx.fillRect(rx - 70 * S, H * 0.88 - 70 * S, 140 * S, 140 * S); }
-      const rImg = IMG.rocket;
+      const rImg = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(IMG.rocket, 3) || IMG.rocket) : IMG.rocket;   /* DEV FORK 97: BOKEH THE ROCKET (Keith) — the flying rocket takes the LIGHT grade (/3, the dressMid divisor): nearest of the three sky objects, softened least; raw when BOKEH is off. Its launch glow (a gradient) and smoke puffs (the soft puff sprite) are untouched */
       if (rImg && rImg.naturalWidth) { const w = 36 * S, h = w * rImg.naturalHeight / rImg.naturalWidth; ctx.drawImage(rImg, rx - w / 2, ry - h / 2, w, h); }
     }
   }
@@ -3010,9 +3010,9 @@ function draw() {
   }
   /* ===== SKY DRESSING + THE PLANE (v0.82, screen space) ===== */
   const satImg = null;   /* DEV FORK 45: the parked satellite is REMOVED (Keith: 'that satellite needs to go — it doesn't match') — null here kills its draw and glint below in the fork; the live game keeps it until he calls it there */
-  if (satImg && satImg.naturalWidth) {   /* the satellite just sits way out there (Keith) */
+  if (satImg && satImg.naturalWidth) { const __si = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(satImg, 7) || satImg) : satImg;   /* DEV FORK 97: BOKEH THE SATELLITE (Keith) — the parked satellite's draw source resolves through the pass at the MIDDLE grade (/7, the dressLow divisor); satImg stays null in the fork (FORK 45 removed it), so this block still never draws — the routing is wired so a restored satellite softens with the sky */   /* the satellite just sits way out there (Keith) */
     const sx = W * 0.80 + Math.sin(time * 0.05) * 6 - tiltX * 5, sy = H * 0.08 + Math.sin(time * 0.11) * 4 - tiltY * 3, w = 64 * S;   /* pushed farther out (Keith v0.83): smaller, higher, deeper in the sky */
-    ctx.drawImage(satImg, sx - w / 2, sy - w * satImg.naturalHeight / satImg.naturalWidth / 2, w, w * satImg.naturalHeight / satImg.naturalWidth);
+    ctx.drawImage(__si, sx - w / 2, sy - w * satImg.naturalHeight / satImg.naturalWidth / 2, w, w * satImg.naturalHeight / satImg.naturalWidth);   /* DEV FORK 97: draws the bokeh-resolved source (__si); the geometry still reads satImg's stamps — __bokSrc stamps its canvas with the source's own natural size, so the two agree */
     const gt = time % 6.5;   /* now and then a panel catches a glint */
     if (gt < 0.7) { const a = Math.sin(gt / 0.7 * Math.PI), gx = sx + w * 0.44, gy = sy - 2, r = 13 * S * a;
       ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.shadowColor = '#cfe8ff'; ctx.shadowBlur = 8;
@@ -3073,12 +3073,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK96 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK97 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK96 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK97 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
