@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.4.0</title>
+<title>Shinobi Brawl — Story Dev 0.4.1</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.4.0</b> — three levels, pick in OPTIONS<br>LaShmoove (ALT) — Coastal Street · Japanese Forest · Gaslamp District</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.4.1</b> — three levels, pick in OPTIONS<br>LaShmoove (ALT) — Coastal Street · Japanese Forest · Gaslamp District</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -71,12 +71,16 @@ const IMG = {};
 function loadSet(key, cb){
   const a = ASSETS[key];
   if (Array.isArray(a)) { IMG[key] = a.map(f => { const i = new Image(); i.src = 'data:image/webp;base64,' + f.img; return { im: i, bb: f.bb }; }); }
-  else { const i = new Image(); i.src = 'data:image/' + (['ocean_strip','beach_strip','ground_strip'].includes(key) ? 'jpeg' : 'png') + ';base64,' + a.img; IMG[key] = { im: i, w: a.w, h: a.h }; }
+  else { const i = new Image(); i.src = 'data:image/' + (key.endsWith('_night') || WEBP_KEYS.includes(key) ? 'webp' : ['ocean_strip','beach_strip','ground_strip'].includes(key) ? 'jpeg' : 'png') + ';base64,' + a.img; IMG[key] = { im: i, w: a.w, h: a.h }; }
 }
+const WEBP_KEYS = ['real_sakura','real_pine','real_lamp','tree_sakura_mid','tree_pine_mid','tree_sakura_far','tree_pine_far','fg_tree','ridge_strip','forest_ground','skyline_strip','fg_lamp'];
 ['run','walk','flip','roll','jump','idle','bld_grocery','bld_house','bld_apartment','bld_storefront-awning',
  'prop_palm','prop_shade-tree','prop_planter','prop_fence','prop_street-lamp','prop_bench','prop_trash-can',
  'prop_dumpster','prop_crates','prop_hydrant','prop_utility-pole','prop_fruit-stand','prop_taxi','prop_pickup','prop_sedan','prop_steps',
- 'fg_palm','cloud_a','cloud_b','cloud_c','cloud_d','cloud_e','cloud_f','ocean_strip','beach_strip','ground_strip'].forEach(k => loadSet(k));
+ 'fg_palm','cloud_a','cloud_b','cloud_c','cloud_d','cloud_e','cloud_f','ocean_strip','beach_strip','ground_strip',
+ 'real_sakura','real_pine','real_lamp','tree_sakura_mid','tree_pine_mid','tree_sakura_far','tree_pine_far','fg_tree','ridge_strip','forest_ground',
+ 'skyline_strip','fg_lamp','bld_grocery_night','bld_house_night','bld_apartment_night','bld_storefront-awning_night','ground_strip_night',
+ 'prop_trash-can_night','prop_dumpster_night','prop_bench_night','prop_hydrant_night','prop_crates_night'].forEach(k => loadSet(k));
 
 // ---- world layout (view units; view height is scaled to SH=540 design units) ----
 const WORLD_W = 6800;
