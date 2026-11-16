@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.6.1</title>
+<title>Shinobi Brawl — Story Dev 0.6.2</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.6.1</b> — three levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.6.2</b> — three levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -305,6 +305,7 @@ function draw(){
   let u = Math.min(VH / 460, VW / 960); // design-unit scale: view height 460 (bumped up 2026-11-15, Keith: overall game needed a bump in size)
   if (VW < VH) u = Math.max(u, VW / 640); // portrait phones: zoom in so the world fills the frame (Keith 2026-11-16: character submerged in the world)
   const yOff = Math.max(0, VH - 540 * u); // bottom-anchored: road meets the screen bottom, sky fills the top
+  const visTop = 540 - VH / u; // design y of the visible top edge (0 in landscape, very negative in portrait) — sky-anchored layers hang from THIS, not from design 0
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.clearRect(0, 0, VW, VH);
   const viewW = VW / u;
@@ -369,6 +370,7 @@ function draw(){
     { k:'cloud_b', x:300, y:16, h:94 }, { k:'cloud_e', x:1150, y:48, h:108 },
     { k:'cloud_d', x:1850, y:10, h:86 }, { k:'cloud_a', x:2300, y:60, h:90 },
   ];
+  const cloudLift = Math.min(0, visTop + 24); // clouds ride up to the visible top in portrait
   const cloudField = (items, f, drift) => {
     const PER = 2600;
     const off = (camX * f + drift) % PER;
@@ -376,7 +378,7 @@ function draw(){
       const a = IMG[it.k]; if (!a || !a.im.complete) continue;
       const w = a.w * (it.h / a.h);
       for (let r = -1; r <= 1; r++) {
-        const sx = (it.x - off + r * PER) * u, sy = it.y * u;
+        const sx = (it.x - off + r * PER) * u, sy = (it.y + cloudLift) * u;
         if (sx + w * u < -40 || sx > VW + 40) continue;
         ctx.drawImage(a.im, sx, sy, w * u, it.h * u);
       }
@@ -399,14 +401,15 @@ function draw(){
     ctx.fillStyle = gr; ctx.fillRect(0, y0 * u, VW, (y1 - y0) * u);
   };
   if (FOREST) {
-    strip(IMG.sheet_wall_far, HORIZON - 52, SIDE_TOP - HORIZON + 52, 0.12, 0);
-    strip(IMG.sheet_wall_mid, HORIZON - 34, SIDE_TOP - HORIZON + 34, 0.20, 0);
+    const wfY = Math.min(HORIZON - 52, visTop + 130), wmY = Math.min(HORIZON - 34, visTop + 210);
+    strip(IMG.sheet_wall_far, wfY, SIDE_TOP + 52 - wfY, 0.12, 0);
+    strip(IMG.sheet_wall_mid, wmY, SIDE_TOP + 34 - wmY, 0.20, 0);
     layer(FOREST_FAR, 0.30, SIDE_TOP + 2);
     fog(SIDE_TOP - 92, SIDE_TOP + 2, 0.11);
     if (opt.street) { layer(FOREST_MID, 0.55, SIDE_TOP); }
     fog(SIDE_TOP - 46, SIDE_TOP + 2, 0.07);
     strip(IMG.sheet_floor, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
-    strip(IMG.sheet_canopy, -70, 268, 0.85, 0); // canopy hangs into the frame from the top
+    strip(IMG.sheet_canopy, visTop - 60, 268, 0.85, 0); // canopy hangs from the VISIBLE top, any aspect
     // god rays through the canopy (the plate's golden shafts)
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (let i = 0; i < 3; i++) {
@@ -418,13 +421,14 @@ function draw(){
     }
     ctx.restore();
   } else if (GASLAMP) {
-    strip(IMG.skyline_strip, HORIZON - 60, SIDE_TOP - HORIZON + 60, 0.10, 0);
-    strip(IMG.bld_row_far, HORIZON - 118, SIDE_TOP - HORIZON + 118, 0.18, 0);
-    strip(IMG.bld_row_mid, HORIZON - 84, SIDE_TOP - HORIZON + 84, 0.35, 0);
+    const skY = Math.min(HORIZON - 60, visTop + 10), bfY = Math.min(HORIZON - 118, visTop + 90), bmY = Math.min(HORIZON - 84, visTop + 150);
+    strip(IMG.skyline_strip, skY, SIDE_TOP - skY, 0.10, 0);
+    strip(IMG.bld_row_far, bfY, SIDE_TOP - bfY, 0.18, 0);
+    strip(IMG.bld_row_mid, bmY, SIDE_TOP - bmY, 0.35, 0);
     if (opt.street) layer(GASLAMP_MID, opt.streetF, SIDE_TOP);
     strip(IMG.ground_gaslamp, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
   } else {
-    if (opt.ocean) strip(IMG.ocean_strip, HORIZON, SIDE_TOP - HORIZON - 18, opt.oceanF, 0);
+    if (opt.ocean) { const ocY = Math.min(HORIZON, visTop + 210); strip(IMG.ocean_strip, ocY, SIDE_TOP - 18 - ocY, opt.oceanF, 0); }
     if (opt.beach) strip(IMG.beach_strip, SIDE_TOP - 20, 22, 0.30, 0);
     if (opt.street) layer(STREET, opt.streetF, SIDE_TOP);
     strip(IMG.ground_strip, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
