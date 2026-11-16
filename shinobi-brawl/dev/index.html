@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.4</title>
+<title>Shinobi Brawl — Story Dev 0.7.5</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -17,16 +17,12 @@
   #panel input[type=range] { width:118px; vertical-align:middle; }
   #panel .val { color:#ffd65a; }
   #panel .split { margin-top:8px; border-top:1px solid #4a4f42; padding-top:6px; color:#c9c4b4; font-size:11px; }
-  #touch { position:fixed; z-index:6; bottom:12px; right:10px; display:none; gap:8px; }
-  #touchL { position:fixed; z-index:6; bottom:12px; left:10px; display:none; gap:8px; }
-  .tbtn { touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; width:58px; height:58px; border-radius:50%; border:1px solid #6a7060; background:rgba(20,22,20,.72); color:#f2ede3; font-size:12px; font-weight:bold; }
-  .tbtn.on { background:rgba(255,214,90,.85); color:#191b16; }
-  @media (pointer:coarse) { #touch { display:flex; } #touchL { display:flex; } }
+
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.4</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.5</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -49,15 +45,6 @@
     ARTWORK: clouds (from 6loud), painted ground strips per level, buildings, trees, sprites.<br>
     CSS/CANVAS: gradient underlay + this panel/UI only.</div>
   </div>
-</div>
-<div id="touchL">
-  <button class="tbtn" id="btnL">&#9664;</button>
-  <button class="tbtn" id="btnR">&#9654;</button>
-</div>
-<div id="touch">
-  <button class="tbtn" id="btnRun">RUN</button>
-  <button class="tbtn" id="btnRoll">ROLL</button>
-  <button class="tbtn" id="btnJump">JUMP</button>
 </div>
 <script>
 "use strict";
@@ -126,8 +113,7 @@ const keys = {};
 let attract = true;
 window.addEventListener('keydown', e => { keys[e.code] = true; attract = false; G.dir = 0; G.level = 0; if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)) e.preventDefault(); });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
-function bindBtn(id, code){ const b = $(id); const on = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch(_){} keys[code] = true; attract = false; b.classList.add('on'); }; const off = e => { e.preventDefault(); keys[code] = false; b.classList.remove('on'); }; b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); }
-bindBtn('btnL','ArrowLeft'); bindBtn('btnR','ArrowRight'); bindBtn('btnRun','ShiftLeft'); bindBtn('btnJump','Space'); bindBtn('btnRoll','ArrowDown');
+
 
 // ---- car platforms (Keith 2026-11-15): walk through at street level, jump on top ----
 const CARS = PROPS.filter(pr => pr.front).map(it => {
@@ -242,18 +228,34 @@ function applySwipe(dx, dy){
     else { P.state = 'crouch'; P.crouchLatch = true; G.level = 0; }
   }
 }
-let pDown = null;
+// ---- SLIDE controls (Keith 2026-11-15 scheme; onscreen buttons REMOVED by his ruling
+// 2026-11-16 — the whole screen is the control surface). A slide fires the moment the
+// finger crosses the threshold, finger still down — never on lift-off — then re-anchors:
+// sliding further the same way fires again (walk -> run), sliding back turns, up jumps
+// (flips while running), down rolls/crouches. One vertical command per touch. A touch
+// that never slides is a tap = attack.
+let gPtr = null;
+const SLIDE_PX = 26;
 const cvEl = $('game');
-cvEl.addEventListener('pointerdown', e => { pDown = { x: e.clientX, y: e.clientY, t: performance.now() }; });
-cvEl.addEventListener('pointerup', e => {
-  if (!pDown) return;
-  const dx = e.clientX - pDown.x, dy = e.clientY - pDown.y, dt = performance.now() - pDown.t;
-  pDown = null;
-  const dist = Math.hypot(dx, dy);
-  if (dist < 14 && dt < 350) { attract = false; doAttack(); }
-  else if (dist >= 24) applySwipe(dx, dy);
+cvEl.addEventListener('pointerdown', e => {
+  if (gPtr) return;
+  gPtr = { id: e.pointerId, ax: e.clientX, ay: e.clientY, t: performance.now(), fired: false, vDone: false };
 });
-cvEl.addEventListener('pointercancel', () => { pDown = null; });
+cvEl.addEventListener('pointermove', e => {
+  if (!gPtr || e.pointerId !== gPtr.id) return;
+  const dx = e.clientX - gPtr.ax, dy = e.clientY - gPtr.ay;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < SLIDE_PX) return;
+  const horiz = Math.abs(dx) > Math.abs(dy);
+  if (horiz || !gPtr.vDone) { applySwipe(dx, dy); gPtr.fired = true; if (!horiz) gPtr.vDone = true; }
+  gPtr.ax = e.clientX; gPtr.ay = e.clientY;
+});
+cvEl.addEventListener('pointerup', e => {
+  if (!gPtr || e.pointerId !== gPtr.id) return;
+  const dt = performance.now() - gPtr.t, fired = gPtr.fired;
+  gPtr = null;
+  if (!fired && dt < 350) { attract = false; doAttack(); }
+});
+cvEl.addEventListener('pointercancel', () => { gPtr = null; });
 
 const STAND_H = 396;
 function step(){
