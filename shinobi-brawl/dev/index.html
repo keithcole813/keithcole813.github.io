@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.2.2</title>
+<title>Shinobi Brawl — Story Dev 0.2.3</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -19,14 +19,14 @@
   #panel .split { margin-top:8px; border-top:1px solid #4a4f42; padding-top:6px; color:#c9c4b4; font-size:11px; }
   #touch { position:fixed; z-index:6; bottom:12px; right:10px; display:none; gap:8px; }
   #touchL { position:fixed; z-index:6; bottom:12px; left:10px; display:none; gap:8px; }
-  .tbtn { width:58px; height:58px; border-radius:50%; border:1px solid #6a7060; background:rgba(20,22,20,.72); color:#f2ede3; font-size:12px; font-weight:bold; }
+  .tbtn { touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; width:58px; height:58px; border-radius:50%; border:1px solid #6a7060; background:rgba(20,22,20,.72); color:#f2ede3; font-size:12px; font-weight:bold; }
   .tbtn.on { background:rgba(255,214,90,.85); color:#191b16; }
   @media (pointer:coarse) { #touch { display:flex; } #touchL { display:flex; } }
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.2.2</b> — roads first<br>6loud LaShmoove (ALT) — coastal street, Mario-style parallax</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.2.3</b> — roads first<br>6loud LaShmoove (ALT) — coastal street, Mario-style parallax</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">DEV PANEL &#9662;</h3>
@@ -112,7 +112,7 @@ const keys = {};
 let attract = true;
 window.addEventListener('keydown', e => { keys[e.code] = true; attract = false; G.dir = 0; G.level = 0; if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code)) e.preventDefault(); });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
-function bindBtn(id, code){ const b = $(id); const on = e => { e.preventDefault(); keys[code] = true; attract = false; b.classList.add('on'); }; const off = e => { e.preventDefault(); keys[code] = false; b.classList.remove('on'); }; b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointerleave', off); b.addEventListener('pointercancel', off); }
+function bindBtn(id, code){ const b = $(id); const on = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch(_){} keys[code] = true; attract = false; b.classList.add('on'); }; const off = e => { e.preventDefault(); keys[code] = false; b.classList.remove('on'); }; b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); }
 bindBtn('btnL','ArrowLeft'); bindBtn('btnR','ArrowRight'); bindBtn('btnRun','ShiftLeft'); bindBtn('btnJump','Space'); bindBtn('btnRoll','ArrowDown');
 
 // ---- car platforms (Keith 2026-11-15): walk through at street level, jump on top ----
