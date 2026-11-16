@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.0</title>
+<title>Shinobi Brawl — Story Dev 0.7.1</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.0</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.1</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -192,9 +192,10 @@ const GASLAMP_NEAR = [
 // facade blocks + storefronts form the street wall (x0.55); vending machines, lamps,
 // poles and the sedan dress the walk plane (x1.00).
 const TOKYO_MID = [
-  { k:'tk_facade', x:0, h:336 }, { k:'tk_store', x:1090, h:262 }, { k:'tk_facade', x:1470, h:336 },
-  { k:'tk_shutter', x:2560, h:250 }, { k:'tk_facade', x:2895, h:336 }, { k:'tk_store', x:3985, h:262 },
-  { k:'tk_facade', x:4365, h:336 }, { k:'tk_shutter', x:5455, h:250 }, { k:'tk_facade', x:5790, h:336 },
+  { k:'tk_facade', x:0, h:262 }, { k:'tk_store', x:855, h:226 }, { k:'tk_facade', x:1245, h:262 },
+  { k:'tk_shutter', x:2085, h:214 }, { k:'tk_facade', x:2425, h:262 }, { k:'tk_store', x:3270, h:226 },
+  { k:'tk_facade', x:3660, h:262 }, { k:'tk_shutter', x:4500, h:214 }, { k:'tk_facade', x:4840, h:262 },
+  { k:'tk_store', x:5685, h:226 }, { k:'tk_facade', x:6075, h:262 },
 ];
 const TOKYO_NEAR = [
   { k:'tk_lamp', x:420, h:300, base:373 }, { k:'tk_vend_b', x:760, h:168, base:373 },
@@ -453,11 +454,8 @@ function draw(){
     if (opt.street) layer(GASLAMP_MID, opt.streetF, SIDE_TOP);
     strip(IMG.ground_gaslamp, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
   } else if (TOKYO) {
-    const tkY = Math.max(Math.min(HORIZON - 64, visTop + 16), SIDE_TOP - 900);
-    strip(IMG.tk_skyline, tkY, SIDE_TOP - tkY, 0.10, 0);
-    const tfY = Math.max(Math.min(HORIZON - 40, visTop + 150), SIDE_TOP - 700);
-    strip(IMG.tk_facade_far, tfY, SIDE_TOP - tfY, 0.20, 0);
-    strip(IMG.tk_train, SIDE_TOP - 252, 150, 0.45, 0); // the elevated line crosses behind the street wall
+    strip(IMG.tk_skyline, visTop - 10, SIDE_TOP + 60 - visTop, 0.10, 0); // hazy neon city mass fills the upper frame at any aspect
+    strip(IMG.tk_train, SIDE_TOP - 268, 132, 0.45, 0); // elevated line: passes behind the tall facades, across the lower shopfronts
     if (opt.street) layer(TOKYO_MID, opt.streetF, SIDE_TOP);
     strip(IMG.tk_ground, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
   } else {
