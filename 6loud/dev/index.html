@@ -237,6 +237,41 @@
   #loadpct { font-weight:900; letter-spacing:2px; color:#ffe9a8; font-size:19px; margin-bottom:8px;
              text-shadow:0 2px 10px rgba(0,0,0,.55); }
   @keyframes pulse { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.07); opacity:.85; } }
+  /* DEV FORK 130: THE GAME-OVER PAGE FITS (Keith, 2026-11-16 13:11 ET: "Make this page fit without scrolling. Show top 8 with option to pop out.") -- a no-scroll flex column: every vertical size below is declared in px/vh with an explicit line-height so the stacked height is computable; forkcheck S108 and renders/stack-shots/fork130-fit-log.txt carry the proof at 428x879 / 390x844 / 360x740 in both ruled states, safe-area insets budgeted at the iPhone maxima (59 top / 34 bottom). Layout only. */
+  #over { overflow:hidden; padding-top:calc(6px + env(safe-area-inset-top)); padding-bottom:calc(6px + env(safe-area-inset-bottom)); }
+  #over h1 { font-size:min(10.5vw, 5.4vh); line-height:1.05; margin-top:0; margin-bottom:2px; }
+  #overStats { font-size:min(5.8vw, 2.75vh); line-height:1.1; margin-bottom:4px; }
+  #overNotes { font-size:min(3.6vw, 1.9vh); line-height:1.15; }
+  #reviveRow { margin-top:6px; }
+  #over #reviveBtn { font-size:min(5.2vw, 2.6vh); line-height:1.1; padding-top:1.15vh; padding-bottom:1.15vh; }
+  #reviveNote { font-size:11.5px; line-height:1.15; margin-top:3px; min-height:13px; }
+  #board { margin-top:6px; margin-bottom:8px; padding-top:1.1vh; padding-bottom:.9vh; }
+  #board .boardTitle { font-size:min(4.2vw, 2vh); line-height:1.1; margin-bottom:.3vh; }
+  #board .onlineLine { font-size:min(3.7vw, 1.75vh); line-height:1.1; margin-bottom:.3vh; }
+  #over .rowMedal { padding-top:.4vh; padding-bottom:.4vh; margin-top:.4vh; margin-bottom:.4vh; }
+  #over .rowMedal .rName { font-size:min(4.7vw, 2.35vh); line-height:1.1; }
+  #over .rowMedal .rFeet { font-size:min(4.7vw, 2.35vh); line-height:1.1; }
+  #over .medal { width:4.3vh; height:4.3vh; }
+  #over .medal .crown { top:-12px; font-size:16px; }
+  #over .rowPill { padding-top:.3vh; padding-bottom:.3vh; }
+  #over .rowPill .rLine { font-size:min(4.4vw, 2vh); line-height:1.1; }
+  #over .rowPill .pill { font-size:11.5px; line-height:1.15; padding-top:2px; padding-bottom:2px; }
+  #board .bpHint { font-size:10.5px; line-height:1.2; padding-top:.5vh; }
+  #over .yb { margin-top:.4vh; padding-top:.7vh; padding-bottom:.8vh; }
+  #over .ybCap { font-size:10.5px; line-height:1.1; }
+  #over .ybLine { margin-top:2px; }
+  #over .ybMain { font-size:min(4.4vw, 2.05vh); line-height:1.1; }
+  #over .ybRank { font-size:min(4vw, 1.8vh); line-height:1.1; }
+  #nameRow { margin-bottom:.6vh; }
+  #nameRow span { font-size:min(3.9vw, 1.85vh); line-height:1.1; }
+  #ini { font-size:min(6vw, 2.8vh); line-height:1.1; padding-top:.45vh; padding-bottom:.45vh; }
+  #pubRow { margin-bottom:.7vh; }
+  #over .btn { font-size:min(5vw, 2.4vh); line-height:1.1; padding-top:1vh; padding-bottom:1vh; }
+  #pubNote { margin-top:5px; min-height:15px; font-size:12px; line-height:1.2; }
+  #nbCard .nbIn { padding-top:1.4vh; padding-bottom:.8vh; }
+  #nbCard .nbTitle { font-size:min(6.5vw, 3.2vh); line-height:1.1; }
+  #nbCard .nbRank { font-size:min(4vw, 1.8vh); line-height:1.1; margin-top:.4vh; margin-bottom:.6vh; }
+  #nbCard .nbHint { font-size:11px; line-height:1.15; margin-top:.5vh; margin-bottom:.8vh; }
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4943888817754092" crossorigin="anonymous"></script>
   <!-- DEV FORK 51: REAL ADS (Keith, 2026-11-13: the AdSense approval landed) — test mode is OFF in the fork; the rewarded revive and the capped interstitial now call Google's live adBreak, SIM still covers no-fill -->
@@ -257,7 +292,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;pointer-events:auto;cursor:pointer;"></div>   <!-- DEV FORK 74: the price line is a tap target — it opens the buy card --></div>
   <div id="strip"></div>
-  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 129</div></div>
+  <div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · DEV FORK 130</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -2167,9 +2202,9 @@ function renderBoard() {
   $('board').classList.add('global');
   let local = [];
   try { local = JSON.parse(localStorage.getItem('sixlouddev_scores_ft') || '[]'); } catch (e) { }
-  const entries = gBoard.slice(0, 10).map(b => ({ n: b.initials, s: b.dist_ft, ch: charOf(b.replay) }));
-  while (entries.length < 10) entries.push({ n: '—', s: 0, z: 1 });   /* the board always shows 10 rows: real scores, then ZERO rows — never dummy scores (Keith v0.48) */
-  $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 10</div>' +
+  const entries = gBoard.slice(0, 8).map(b => ({ n: b.initials, s: b.dist_ft, ch: charOf(b.replay) }));   /* DEV FORK 130: the inline card renders the TOP 8 (Keith, 2026-11-16) -- the full list lives one tap away on the board page */
+  while (entries.length < 8) entries.push({ n: '—', s: 0, z: 1 });   /* the board always shows 8 rows: real scores, then ZERO rows — never dummy scores (Keith v0.48) */
+  $('board').innerHTML = '<div class="boardTitle">GLOBAL TOP 8</div>' +
     (onlineNow ? '<div class="onlineLine"><span class="odot"></span>' + onlineNow + ' PLAYING NOW</div>' : '') +
     entries.map((e, i) => boardRow(e.n, e.s, i, e.z, e.ch)).join('') + '<div class="bpHint">TAP FOR THE FULL BOARD ›</div>' +
     (local.length ? '<div class="yb"><div class="ybCap">YOUR BEST</div><div class="ybLine"><span class="ybMain">' +
@@ -3207,12 +3242,12 @@ function dbgTick(ts) {
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
     el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
-    el.textContent = 'FORK129 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
+    el.textContent = 'FORK130 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
-    'FORK129 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
+    'FORK130 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
     'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
     'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
