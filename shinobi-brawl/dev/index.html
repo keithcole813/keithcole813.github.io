@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.1</title>
+<title>Shinobi Brawl — Story Dev 0.7.2</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.1</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.2</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -192,17 +192,20 @@ const GASLAMP_NEAR = [
 // facade blocks + storefronts form the street wall (x0.55); vending machines, lamps,
 // poles and the sedan dress the walk plane (x1.00).
 const TOKYO_MID = [
-  { k:'tk_facade', x:0, h:262 }, { k:'tk_store', x:855, h:226 }, { k:'tk_facade', x:1245, h:262 },
-  { k:'tk_shutter', x:2085, h:214 }, { k:'tk_facade', x:2425, h:262 }, { k:'tk_store', x:3270, h:226 },
-  { k:'tk_facade', x:3660, h:262 }, { k:'tk_shutter', x:4500, h:214 }, { k:'tk_facade', x:4840, h:262 },
-  { k:'tk_store', x:5685, h:226 }, { k:'tk_facade', x:6075, h:262 },
+  { k:'tk_facade', x:0, h:262 }, { k:'tk_store', x:810, h:226 }, { k:'tk_facade', x:1100, h:262 },
+  { k:'tk_shutter', x:1910, h:214 }, { k:'tk_facade', x:2150, h:262 }, { k:'tk_store', x:2960, h:226 },
+  { k:'tk_facade', x:3250, h:262 }, { k:'tk_shutter', x:4060, h:214 }, { k:'tk_facade', x:4300, h:262 },
+  { k:'tk_store', x:5110, h:226 }, { k:'tk_facade', x:5400, h:262 }, { k:'tk_shutter', x:6210, h:214 },
+  { k:'tk_facade', x:6450, h:262 },
 ];
 const TOKYO_NEAR = [
   { k:'tk_lamp', x:420, h:300, base:373 }, { k:'tk_vend_b', x:760, h:168, base:373 },
   { k:'tk_pole', x:1250, h:330, base:373 }, { k:'tk_car', x:1750, h:92, base:373 },
-  { k:'tk_lamp', x:2380, h:300, base:373 }, { k:'tk_vend_r', x:2760, h:168, base:373 },
+  { k:'tk_vend_r', x:2050, h:168, base:373 }, { k:'tk_lamp', x:2380, h:300, base:373 },
+  { k:'tk_pole', x:2620, h:330, base:373 }, { k:'tk_vend_r', x:2760, h:168, base:373 },
   { k:'tk_pole', x:3300, h:330, base:373 }, { k:'tk_car', x:3950, h:92, base:373 },
-  { k:'tk_lamp', x:4480, h:300, base:373 }, { k:'tk_vend_b', x:4860, h:168, base:373 },
+  { k:'tk_vend_b', x:4200, h:168, base:373 }, { k:'tk_lamp', x:4480, h:300, base:373 },
+  { k:'tk_pole', x:4580, h:330, base:373 }, { k:'tk_vend_b', x:4860, h:168, base:373 },
   { k:'tk_pole', x:5400, h:330, base:373 }, { k:'tk_car', x:5900, h:92, base:373 },
   { k:'tk_lamp', x:6380, h:300, base:373 },
 ];
@@ -454,8 +457,9 @@ function draw(){
     if (opt.street) layer(GASLAMP_MID, opt.streetF, SIDE_TOP);
     strip(IMG.ground_gaslamp, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
   } else if (TOKYO) {
-    strip(IMG.tk_skyline, visTop - 10, SIDE_TOP + 60 - visTop, 0.10, 0); // hazy neon city mass fills the upper frame at any aspect
-    strip(IMG.tk_train, SIDE_TOP - 268, 132, 0.45, 0); // elevated line: passes behind the tall facades, across the lower shopfronts
+    const skH = (SIDE_TOP + 60) - visTop + 120; // skyline always spans from above the visible top to the street
+    strip(IMG.tk_skyline, SIDE_TOP + 60 - skH, skH, 0.10, 0);
+    strip(IMG.tk_train, SIDE_TOP - 268, 170, 0.45, 0); // elevated line: behind the tall facades, across the lower shopfronts; pillar feet hide behind the street wall
     if (opt.street) layer(TOKYO_MID, opt.streetF, SIDE_TOP);
     strip(IMG.tk_ground, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
   } else {
@@ -527,7 +531,7 @@ function draw(){
   }
   if (TOKYO && opt.fg && IMG.tk_fg && IMG.tk_fg.im.complete) { // foreground law: dark pole + hanging sign between camera and action
     const fa = IMG.tk_fg;
-    for (let bx = -200; bx < viewW + 800; bx += 2600) {
+    for (let bx = -600; bx < viewW + 800; bx += 1750) {
       const sx = (bx - camX * 1.3) * u;
       ctx.drawImage(fa.im, sx, (540 - 560) * u, fa.w * (560 / fa.h) * u, 560 * u);
     }
