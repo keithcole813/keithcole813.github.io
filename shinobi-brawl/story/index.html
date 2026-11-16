@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.2.3</title>
+<title>Shinobi Brawl — Story Dev 0.2.4</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.2.3</b> — roads first<br>6loud LaShmoove (ALT) — coastal street, Mario-style parallax</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.2.4</b> — roads first<br>6loud LaShmoove (ALT) — coastal street, Mario-style parallax</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -40,6 +40,7 @@
     <label><input type="checkbox" id="lyFg"> FG bokeh &#215;1.30</label>
     <label><input type="checkbox" id="lyBand"> Walk band overlay</label>
     <label>Height <input type="range" id="rngH" min="140" max="320" value="200"> <span class="val" id="valH">200</span>px</label>
+    <label>Speed <input type="range" id="rngSpd" min="40" max="200" value="100"> <span class="val" id="valSpd">1.00</span>&#215;</label>
     <label>Ocean &#215; <input type="range" id="rngOcean" min="5" max="40" value="18"> <span class="val" id="valOcean">0.18</span></label>
     <label>Street &#215; <input type="range" id="rngStreet" min="30" max="90" value="55"> <span class="val" id="valStreet">0.55</span></label>
     <div class="split"><b style="color:#ffd65a">ART vs CSS</b><br>
@@ -79,10 +80,11 @@ function loadSet(key, cb){
 const WORLD_W = 6800;
 const FEET_Y = 373, SIDE_TOP = 340, HORIZON = 238;
 const $ = id => document.getElementById(id);
-const opt = { sky:true, clouds:true, ocean:true, beach:true, street:true, props:false, fg:false, band:false, charH:200, oceanF:0.18, streetF:0.55 };
+const opt = { sky:true, clouds:true, ocean:true, beach:true, street:true, props:false, fg:false, band:false, charH:200, spd:1, oceanF:0.18, streetF:0.55 };
 function bindChk(id, key){ $(id).addEventListener('change', e => opt[key] = e.target.checked); }
 bindChk('lySky','sky'); bindChk('lyClouds','clouds'); bindChk('lyOcean','ocean'); bindChk('lyBeach','beach'); bindChk('lyStreet','street'); bindChk('lyProps','props'); bindChk('lyFg','fg'); bindChk('lyBand','band');
 $('rngH').addEventListener('input', e => { opt.charH = +e.target.value; $('valH').textContent = opt.charH; });
+$('rngSpd').addEventListener('input', e => { opt.spd = +e.target.value / 100; $('valSpd').textContent = opt.spd.toFixed(2); });
 $('rngOcean').addEventListener('input', e => { opt.oceanF = +e.target.value / 100; $('valOcean').textContent = opt.oceanF.toFixed(2); });
 $('rngStreet').addEventListener('input', e => { opt.streetF = +e.target.value / 100; $('valStreet').textContent = opt.streetF.toFixed(2); });
 $('panelHead').addEventListener('click', () => { const b = $('panelBody'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
@@ -177,14 +179,14 @@ function step(){
   const downKey = keys['ArrowDown'] || keys['KeyS'];
   const jumpKey = keys['Space'] || keys['ArrowUp'] || keys['KeyW'];
   if (P.state === 'roll') {
-    P.rollT += 1.3;
-    P.x += P.dir * 6.4;
+    P.rollT += 1.3 * opt.spd;
+    P.x += P.dir * 6.4 * opt.spd;
     if (P.onCar && !carAt(P.x)) { P.state = 'jump'; P.vy = 0.5; P.airT = 0; P.onCar = null; P.rollT = 0; }
     else if (P.rollT >= ASSETS.roll.length) { P.state = 'idle'; P.rollT = 0; }
   } else if (P.state === 'jump' || P.state === 'flip') {
     const prevFeet = FEET_Y + P.yOff;
     P.vy += 0.72; P.yOff += P.vy; P.airT += 1; if (P.state === 'flip') P.flipT += 1;
-    P.x += P.dir * (running ? 5.2 : 3.4);
+    P.x += P.dir * (running ? 5.2 : 3.4) * opt.spd;
     const feet = FEET_Y + P.yOff;
     let landed = false;
     if (P.vy > 0) {
@@ -204,9 +206,9 @@ function step(){
     else if (wantMove !== 0) {
       P.dir = wantMove;
       P.state = running ? 'run' : 'walk';
-      P.speed = running ? 5.4 : 3.4;
+      P.speed = (running ? 5.4 : 3.4) * opt.spd;
       P.x += P.dir * P.speed;
-      P.frame += 1;
+      P.frame += opt.spd;
       if (jumpKey) { running ? startFlip() : startJump(); keys['Space'] = false; }
       else if (downKey) { if (running) { P.state = 'roll'; P.rollT = 0; } else { P.state = 'crouch'; P.crouchLatch = false; } }
     } else {
@@ -218,7 +220,7 @@ function step(){
   if (P.onCar && !['jump','flip','roll'].includes(P.state)) P.yOff = P.onCar.roof - FEET_Y;
   P.x = Math.max(70, Math.min(WORLD_W - 70, P.x));
   if (attract && (P.x > WORLD_W - 420 || P.x < 420 && P.dir < 0)) P.dir *= -1;
-  if (attract && P.state !== 'jump' && P.state !== 'roll' && P.state !== 'flip') { P.state = running ? 'run' : 'walk'; P.frame += 1; }
+  if (attract && P.state !== 'jump' && P.state !== 'roll' && P.state !== 'flip') { P.state = running ? 'run' : 'walk'; P.frame += opt.spd; }
 }
 
 function drawTile(img, y, h, camX, u){
