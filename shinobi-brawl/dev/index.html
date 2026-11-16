@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.5.3</title>
+<title>Shinobi Brawl — Story Dev 0.5.4</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.5.3</b> — three levels, pick in OPTIONS<br>Forest rebuilt after the stage plate · Gaslamp = F Street, layered buildings</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.5.4</b> — three levels, pick in OPTIONS<br>Forest rebuilt after the stage plate · Gaslamp = F Street, layered buildings</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -402,9 +402,9 @@ function draw(){
     strip(IMG.ridge_strip, HORIZON - 44, SIDE_TOP - HORIZON + 44, 0.12, 0);
     strip(IMG.treeline_strip, HORIZON - 26, SIDE_TOP - HORIZON + 26, 0.18, 0);
     layer(FOREST_FAR, 0.30, SIDE_TOP + 2);
-    fog(SIDE_TOP - 150, SIDE_TOP + 2, 0.20);
+    fog(SIDE_TOP - 92, SIDE_TOP + 2, 0.11);
     if (opt.street) { strip(IMG.mid_foliage, 96, 244, 0.55, 0); layer(FOREST_MID, 0.55, SIDE_TOP); }
-    fog(SIDE_TOP - 70, SIDE_TOP + 2, 0.10);
+    fog(SIDE_TOP - 46, SIDE_TOP + 2, 0.07);
     strip(IMG.forest_ground2, SIDE_TOP, 540 - SIDE_TOP, 1.0, 0);
     strip(IMG.ground_edge, SIDE_TOP - 54, 88, 1.0, 0); // undergrowth breaks the ground's straight top edge
     strip(IMG.canopy_strip, -70, 268, 0.85, 0); // canopy hangs into the frame from the top
@@ -505,6 +505,13 @@ function draw(){
 
 function drawPlayer(camX, u){
   const s = opt.charH / STAND_H;
+  { // contact shadow: grounds him in the world (shrinks/fades as he leaves the surface)
+    const airH = P.onCar ? 0 : Math.max(0, -P.yOff);
+    const shS = Math.max(0.38, 1 - airH / 320);
+    const shY = (P.onCar ? FEET_Y + P.yOff : FEET_Y) + 5;
+    ctx.fillStyle = `rgba(8,10,6,${0.34 * shS})`;
+    ctx.beginPath(); ctx.ellipse((P.x - camX) * u, shY * u, opt.charH * 0.30 * shS * u, 7 * shS * u + 2, 0, 0, 7); ctx.fill();
+  }
   let set, idx, canvasAnchor = false;
   if (P.state === 'roll') { set = IMG.roll; idx = Math.min(ASSETS.roll.length - 1, Math.floor(P.rollT)); }
   else if (P.state === 'jump') { set = IMG.jump; idx = Math.min(ASSETS.jump.length - 1, Math.floor(P.airT * 1.55)); }
