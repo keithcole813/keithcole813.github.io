@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.3</title>
+<title>Shinobi Brawl — Story Dev 0.7.4</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -26,7 +26,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.3</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.4</b> — four levels, pick in OPTIONS<br>Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -624,10 +624,16 @@ for (const [id, k] of [['lySky','sky'],['lyClouds','clouds'],['lyOcean','ocean']
 $('rngH').value = opt.charH; $('valH').textContent = opt.charH;
 if (VW < 760) $('panelBody').style.display = 'none';
 const FREEZE = Q.has('freeze');
-let last = 0;
+let last = 0, acc = 0;
 function loop(t){
   perfT = t;
-  if (!FREEZE) { step(); }
+  if (!FREEZE) { // fixed 60 ticks/sec simulation on ANY display (Keith's 60fps standard):
+    // rAF follows the screen (60Hz, 120Hz ProMotion...), so accumulate real time and
+    // step the game at exactly 60Hz — otherwise a 120Hz phone runs everything double-speed.
+    if (last) acc += Math.min(t - last, 250);
+    last = t;
+    while (acc >= 1000 / 60) { step(); acc -= 1000 / 60; }
+  }
   draw();
   if (!FREEZE) requestAnimationFrame(loop);
   else setTimeout(() => requestAnimationFrame(loop), 400); // a few frames so images decode, then keep redrawing same state
