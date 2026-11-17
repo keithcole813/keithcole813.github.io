@@ -1010,6 +1010,19 @@ for (const mv of Object.keys(YORO_MANIFEST)) {
   for (let i = 0; i < YORO_MANIFEST[mv].n; i++)
     queueImg(im => { YORO_ANIM[mv][i] = im; }, '../play/assets/yoro/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));
 }
+/* RC1.2: Yorokobi's ALT set (charcoal gi, burgundy trim, braided top-bun,
+   forearm + shin guards — Keith approved the model 2026-11-17) — her
+   owned upgrade, staged byte-identical into rc1/yoroalt/. The manifest
+   is the ALT capture's OWN (renders/cast60/yorokobi-alt/manifest.json):
+   its cells differ slightly from base, and like lashalt it rides its
+   own numbers, never the base set's. */
+const YOROALT_MANIFEST = {"run":{"n":37,"w":289,"h":412,"offset":12,"gaps":[9,10,16,24,25,23,23,24,22,19,16,12,7,5,6,6,6,5,4,4,10,25,35,29,23,21,20,21,20,14,9,6,6,7,6,6,7]},"armsopen":{"n":61,"w":291,"h":527,"offset":16,"gaps":[4,4,5,5,6,8,10,15,22,30,38,47,57,68,80,94,108,123,137,151,162,170,176,182,185,187,189,190,190,190,188,185,180,174,167,159,151,141,132,121,111,100,89,79,67,54,44,34,22,13,10,8,8,9,10,11,12,13,14,15,15]},"basic":{"n":61,"w":291,"h":527,"offset":16,"gaps":[11,11,11,11,11,11,11,12,13,14,15,16,18,19,21,23,25,27,28,29,30,32,35,37,40,43,45,44,43,42,40,38,35,31,27,25,23,21,20,19,17,16,15,13,11,9,7,6,5,4,4,4,4,4,5,5,6,8,10,15,22]},"runjump":{"n":97,"w":478,"h":511,"offset":56,"gaps":[67,73,80,87,94,101,108,115,123,130,138,147,156,166,177,189,202,216,232,250,269,290,298,290,280,271,261,252,242,231,222,212,201,189,178,165,151,136,121,107,92,80,70,60,49,38,26,17,9,3,4,7,15,29,49,64,66,69,74,81,89,84,80,76,74,70,67,64,62,59,56,54,52,50,48,47,46,46,46,45,45,45,45,45,45,46,46,47,47,48,49,50,51,52,54,54,55]},"flip":{"n":31,"w":478,"h":511,"offset":56,"gaps":[177,189,202,216,232,250,269,290,298,290,280,271,261,252,242,231,222,212,201,189,178,165,151,136,121,107,92,80,70,60,49]},"diveroll":{"n":129,"w":439,"h":521,"offset":72,"gaps":[74,75,77,79,82,87,93,101,109,117,126,137,150,162,162,163,164,165,166,167,169,172,178,188,203,225,251,270,263,257,251,245,243,242,244,249,258,271,282,293,298,303,308,302,292,283,262,237,215,196,175,153,132,113,96,82,70,65,67,68,68,69,68,69,71,73,76,79,83,86,90,79,66,57,50,44,37,29,21,15,11,8,6,5,6,4,4,7,15,29,46,66,82,89,92,95,98,100,98,97,95,90,84,80,77,72,68,66,63,61,60,59,59,60,61,63,64,65,66,66,67,67,68,68,69,69,69,70,70]},"diveflip":{"n":35,"w":439,"h":521,"offset":72,"gaps":[164,165,166,167,169,172,178,188,203,225,251,270,263,257,251,245,243,242,244,249,258,271,282,293,298,303,308,302,292,283,262,237,215,196,175]},"roll3":{"n":79,"w":416,"h":427,"offset":9,"gaps":[16,16,16,16,19,23,32,45,61,63,65,55,42,30,20,12,8,10,15,24,35,45,55,64,69,73,77,81,82,79,75,71,64,56,52,48,43,39,31,23,21,20,18,17,12,10,10,10,10,10,9,8,7,6,4,4,4,4,4,4,5,6,6,7,8,9,10,11,12,14,14,14,13,13,13,13,14,16,18]},"roll4":{"n":157,"w":323,"h":379,"offset":14,"gaps":[7,6,6,5,5,4,5,11,17,20,18,17,16,15,14,14,14,14,14,14,15,16,18,21,24,27,30,32,35,36,39,42,46,52,60,71,87,94,87,84,82,81,82,82,84,86,88,89,90,91,92,91,86,80,73,68,64,61,58,56,51,47,43,41,40,39,39,39,37,30,24,21,21,22,23,23,23,23,22,21,21,21,21,22,22,22,23,23,23,23,23,24,24,24,24,25,25,26,27,28,29,29,30,31,24,19,16,14,13,12,12,13,13,14,14,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14]},"front":{"n":37,"w":289,"h":412,"offset":12,"gaps":[9,10,16,24,25,23,23,24,22,19,16,12,7,5,6,6,6,5,4,4,10,25,35,28,23,21,20,21,20,14,9,6,6,7,6,6,9]},"turn":{"n":35,"w":289,"h":412,"offset":12,"gaps":[9,10,16,24,25,23,23,24,22,20,16,12,7,5,6,6,6,5,4,4,10,25,35,28,23,21,20,21,20,14,9,6,6,7,9]}};
+const YOROALT_ANIM = {};
+for (const mv of Object.keys(YOROALT_MANIFEST)) {
+  YOROALT_ANIM[mv] = new Array(YOROALT_MANIFEST[mv].n);
+  for (let i = 0; i < YOROALT_MANIFEST[mv].n; i++)
+    queueImg(im => { YOROALT_ANIM[mv][i] = im; }, 'yoroalt/' + mv + '/f' + String(i).padStart(3, '0') + '.webp', CORE_MOVES.includes(mv));   /* RC1.2: the ALT set is RC-local (rc1/yoroalt/) — the path dodges the isolation rewrite on purpose, exactly like lashalt/ */
+}
 /* Ivey's player set (v0.78): her approved 60 fps pool, through the
    same queue and core gate. The sisters ghost for each other (Keith). */
 const IVEY_MANIFEST = {"run": {"n": 37, "w": 295, "h": 408, "offset": 13, "gaps": [9, 11, 18, 24, 25, 23, 23, 22, 19, 16, 13, 9, 5, 3, 4, 5, 5, 6, 6, 6, 14, 27, 36, 29, 24, 22, 21, 22, 21, 15, 10, 6, 6, 6, 4, 4, 6]}, "armsopen": {"n": 61, "w": 338, "h": 502, "offset": 9, "gaps": [5, 5, 5, 4, 4, 4, 6, 10, 17, 25, 34, 43, 53, 64, 77, 92, 109, 125, 140, 155, 168, 178, 186, 193, 198, 201, 204, 206, 206, 206, 204, 200, 194, 188, 180, 171, 161, 151, 140, 129, 117, 105, 93, 82, 69, 55, 44, 34, 23, 15, 11, 10, 11, 13, 14, 16, 18, 19, 20, 20, 20]}, "basic": {"n": 61, "w": 338, "h": 502, "offset": 9, "gaps": [7, 6, 6, 7, 6, 6, 6, 6, 7, 8, 10, 11, 13, 14, 16, 18, 20, 22, 24, 25, 27, 29, 31, 34, 37, 40, 40, 39, 38, 37, 35, 33, 30, 26, 24, 22, 21, 21, 21, 21, 20, 18, 18, 16, 14, 12, 11, 10, 8, 7, 6, 5, 5, 5, 5, 4, 4, 4, 6, 10, 17]}, "runjump": {"n": 97, "w": 478, "h": 505, "offset": 9, "gaps": [14, 19, 26, 33, 40, 47, 55, 63, 70, 79, 87, 96, 106, 117, 129, 141, 155, 170, 187, 206, 211, 202, 194, 185, 176, 167, 157, 147, 137, 126, 116, 107, 98, 89, 77, 66, 55, 45, 37, 30, 22, 13, 6, 3, 4, 6, 10, 12, 13, 20, 32, 29, 25, 22, 20, 19, 20, 19, 19, 25, 33, 37, 35, 33, 31, 29, 17, 14, 18, 22, 23, 21, 19, 18, 16, 15, 14, 14, 13, 12, 12, 11, 11, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10]}, "flip": {"n": 31, "w": 478, "h": 505, "offset": 9, "gaps": [129, 141, 155, 170, 187, 206, 211, 202, 194, 185, 176, 167, 157, 147, 137, 126, 116, 107, 98, 89, 77, 66, 55, 45, 37, 30, 22, 13, 6, 3, 4]}, "diveroll": {"n": 129, "w": 446, "h": 456, "offset": 9, "gaps": [11, 12, 13, 15, 16, 18, 23, 30, 38, 45, 53, 64, 77, 95, 95, 94, 94, 94, 93, 92, 93, 96, 101, 111, 126, 147, 172, 200, 220, 215, 212, 209, 208, 207, 206, 208, 212, 215, 220, 225, 231, 237, 240, 237, 230, 224, 209, 184, 161, 141, 120, 97, 74, 53, 35, 22, 12, 6, 8, 7, 8, 9, 10, 11, 13, 15, 16, 17, 19, 20, 20, 21, 17, 13, 13, 15, 17, 19, 20, 21, 21, 22, 23, 19, 15, 11, 9, 9, 9, 9, 11, 11, 11, 12, 15, 21, 27, 31, 30, 28, 28, 27, 26, 23, 21, 17, 14, 13, 11, 9, 8, 8, 8, 8, 9, 10, 11, 11, 12, 12, 12, 12, 12, 12, 11, 11, 11, 10, 10]}, "diveflip": {"n": 35, "w": 446, "h": 456, "offset": 9, "gaps": [94, 94, 93, 92, 93, 96, 101, 111, 126, 147, 172, 200, 220, 215, 212, 209, 208, 207, 206, 208, 212, 215, 220, 225, 231, 237, 240, 237, 230, 224, 209, 184, 161, 141, 120]}, "roll3": {"n": 79, "w": 462, "h": 412, "offset": 20, "gaps": [4, 4, 4, 4, 5, 10, 19, 32, 29, 22, 18, 17, 20, 23, 28, 33, 33, 36, 43, 48, 50, 55, 61, 66, 70, 73, 76, 79, 80, 80, 74, 65, 56, 49, 43, 37, 32, 27, 22, 20, 20, 21, 21, 23, 25, 27, 27, 26, 25, 25, 24, 23, 23, 22, 21, 19, 18, 16, 15, 15, 15, 17, 19, 20, 20, 20, 20, 20, 20, 20, 18, 14, 12, 11, 12, 13, 13, 14, 14]}, "roll4": {"n": 157, "w": 359, "h": 347, "offset": 12, "gaps": [4, 4, 4, 5, 6, 7, 7, 9, 15, 14, 12, 10, 8, 8, 8, 7, 7, 7, 6, 5, 5, 4, 4, 4, 5, 6, 7, 7, 8, 8, 7, 7, 8, 10, 14, 21, 30, 44, 64, 86, 104, 103, 103, 103, 102, 102, 102, 102, 101, 101, 96, 87, 77, 68, 59, 52, 46, 42, 39, 36, 32, 29, 26, 24, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 23, 23, 23, 23, 22, 22, 22, 20, 18, 17, 15, 15, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 13, 15, 15, 16, 16, 17, 17, 18, 19, 19, 18, 16, 15, 14, 14, 15, 15, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12]}, "front": {"n": 37, "w": 295, "h": 408, "offset": 13, "gaps": [10, 12, 19, 25, 26, 24, 24, 23, 20, 16, 14, 10, 6, 4, 5, 6, 6, 7, 7, 7, 14, 28, 37, 30, 25, 23, 22, 23, 22, 16, 11, 7, 7, 7, 5, 5, 10]}, "turn": {"n": 35, "w": 295, "h": 408, "offset": 13, "gaps": [10, 12, 19, 25, 26, 24, 24, 23, 20, 16, 14, 10, 6, 4, 5, 6, 6, 7, 7, 7, 14, 28, 37, 30, 25, 23, 22, 23, 22, 16, 11, 7, 7, 7, 10]}};
@@ -1496,6 +1509,7 @@ const HANG_SEAT = { ivey: [-16, 16] };   /* RC1.1 (Keith, 2026-11-17): IVEY'S HA
 const HANDS_DANGLE = { 3: 269, 4: 269, 5: 269, 6: 269, 7: 281, 8: 292, 9: 304, 10: 315, 11: 320, 12: 324, 13: 324, 14: 323 };   /* 60 fps (v0.79): his measured 30 fps hand heights interpolated onto the doubled frame indices */   /* hand height per dangle frame, measured off the shipped art */
 const LASH_DANGLE = { 10: 323, 11: 332 };   /* DEV FORK 16: the hang sway reads idx 10/11 at rate 2 — the old grip heights carried at doubled indices for the ALT, Keith's to steer */   /* LaShmoove's dangle: 6lade's table scaled per-frame by his measured figure extent (v0.56) */
 const YORO_DANGLE = { 3: 295, 4: 299, 5: 302, 6: 306, 7: 309, 8: 312, 9: 315, 10: 309, 11: 314, 12: 317, 13: 321, 14: 324, 15: 325, 16: 325 };   /* v0.89: hang/slip keys RE-MEASURED off her shipped frames on the v0.81 yardstick (hand height above the drawn feet line x PX2U, same +7 as the validated girls' tables) — the v0.80 interpolation hung her ~10 too low (Keith: 'hangs off too far while climbing') */
+const YOROALT_DANGLE = { 3: 295, 4: 299, 5: 302, 6: 306, 7: 309, 8: 312, 9: 315, 10: 309, 11: 314, 12: 317, 13: 321, 14: 324, 15: 325, 16: 325 };   /* RC1.2: her ALT dangle = her base table carried whole — dangle reads in game units (hand height above the drawn feet line), the ALT capture is scaler-matched to her base stature and the hang frames are the same motion at the same indices, so her measured base heights are the ALT's start (the LASH_DANGLE precedent: a carried table, Keith's to steer) */
 const IVEY_DANGLE = { 3: 226, 4: 231, 5: 238, 6: 254, 7: 269, 8: 283, 9: 295, 10: 304, 11: 308, 12: 310, 13: 310, 14: 307, 15: 301, 16: 293 };   /* v0.81 RE-MEASURED off the shipped frames (hand height x PX2U - 10 grip allowance, the 6lade-validated method): the v0.78 probe table overstated her hands by ~75 units and she hung that far too low (Keith's video, 2026-11-09) */   /* Ivey (v0.78): probe-measured on her baked arms-open (323/352/378/402/423/443 at source positions 3-8), interpolated onto her 60 fps indices */
 const SAYORI_DANGLE = { 3: 227, 4: 233, 5: 239, 6: 245, 7: 251, 8: 263, 9: 275, 10: 285, 11: 290, 12: 293, 13: 292, 14: 289, 15: 290, 16: 293 };   /* v0.81 RE-MEASURED, same fix as Ivey: her probe table was inflated the same way */   /* Sayori (v0.78): same method (304/330/356/380/401/420 at source positions 3-8) */   /* RE-DERIVED for the v0.72 arm repair (bigger cells, arms truly overhead): same measured method as v0.70 (per-frame factors idx3 .646, idx4 .657, idx5 .677, idx6 .702, idx7 .746 — method re-validated against her old set first, reproducing 391/402/404/403/392 vs the recorded 390/400/403/401/391); new armsopen extents 457/467/468/460/449 x the factors */
 /* character select (Keith v0.56): two runners, identical physics and
@@ -3778,7 +3792,7 @@ function optToggleZeusTempo() { const steps = [1, 1.1, 1.255, 1.4]; const i = st
 window.__zeusTest = { get on() { return !!window.__zeusOpt; }, set: b => { window.__zeusOpt = !!b; optSave(); }, toggle: optToggleZeus, tempo: () => window.__zeusTempo || 1, setTempo: v => { window.__zeusTempo = [1, 1.1, 1.255, 1.4].includes(v) ? v : 1; }, phase: () => ZS.phase, fall: o => { px = o.px; py = o.py; vy = o.vy || 0; grounded = null; hangPlat = null; slipPlat = null; }, state: () => window.__zeusState(),   /* DEV FORK 117: the tempo surface, the phase reader and the audit's fall hand (forkcheck S93's hang drive) */ player: () => ({ px: Math.round(px), py: Math.round(py), grounded: !!grounded, mode, dead }), setup: o => { plats = o.plats; px = o.px || 0; py = o.py || 0; vy = 0; grounded = o.ground || null; hangPlat = null; slipPlat = null; dist = o.dist || 0; runTime = o.runTime || 0; dead = false; worldEnd = 1e12; stormAt = 1e12; notes = []; coin = null; wing = null; bwing = null; magnet = null; gwing = null; noteNextT = runTime + 1e9; nextCoinFt = 1e9; nextWingFt = 1e9; nextBWingFt = 1e9; nextMagFt = 1e9; nextGWingFt = 1e9; wingT = 0; coinT = 0; magT = 0; noteCharge = false; champMode = false; held = false; pressT = 0; flipped = false; flipArmed = false; rollArmed = false; doubleArmed = false; mode = 'run'; if (window.__zeusReset) window.__zeusReset(); }, rescue: () => { const t = plats.find(p => !p.gone && p.x + p.len > px + 400) || plats[plats.length - 1]; if (t) { px = t.x + 120; py = t.y; vy = 0; grounded = t; hangPlat = null; slipPlat = null; dead = false; } } };   /* DEV FORK 107: the Zeus test surface (forkcheck S93 + the proof renderers) — setup/rescue mirror the zoom audit's hands: a synthetic course in, the real tick driven over it */
 function applyDbgVis() { const d = document.getElementById('dbg'); if (d) d.style.display = window.__dbgReadout ? '' : 'none'; const v = document.getElementById('ver'); if (v) v.style.display = window.__dbgReadout ? '' : 'none'; }   /* DEV FORK 135: the readout's DOM faces -- the state line + the version footer */ function optToggleReadout() { window.__dbgReadout = !window.__dbgReadout; optSave(); optUI(); applyDbgVis(); optMsg(window.__dbgReadout ? 'Readout on -- the state line and version footer show.' : 'Readout off -- screenshots come out clean.'); } function optToggleDebug() { window.__debugOpt = !window.__debugOpt; optSave(); optUI(); optMsg(window.__debugOpt ? 'DEBUG on — START GAME opens the map review: no runner, no auto-scroll, drag to look around, BACK returns here.' : 'DEBUG off — START GAME runs as normal.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS debug ' + (window.__debugOpt ? 'ON' : 'OFF')); }
 function optToggleGhosts() { window.__optGhostsOff = !window.__optGhostsOff; optSave(); optUI(); optMsg(window.__optGhostsOff ? 'Ghost runners OFF — you run alone.' : 'Ghost runners ON.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS ghosts ' + (window.__optGhostsOff ? 'OFF' : 'ON')); }
-window.__restorePurchases = function () { let ent = {}; try { ent = JSON.parse(localStorage.getItem('sixloudrc1_ent') || '{}'); } catch (e) {} const got = []; if (ent.noads) got.push('NO-ADS PACK'); if (ent.allaccess) got.push('ALL-ACCESS'); if (Array.isArray(ent.chars)) for (const c of ent.chars) got.push('CHARACTER: ' + String(c).toUpperCase()); if (ent.upg && ent.upg.zeus) got.push('ZEUS'); if (ent.upg && ent.upg.spark) got.push('SPARKLES'); if (ent.upg && ent.upg.lalt) got.push('LASHMOOVE ALT OUTFIT'); if (ent.tokens) got.push(ent.tokens + ' REVIVE TOKEN' + (ent.tokens > 1 ? 'S' : '')); if ((ent.colors || []).length > 1) got.push('CHARGE COLORS'); if (ent.gold) got.push('GOLD WINGS (HELD)'); optMsg(got.length ? 'Restored: ' + got.join(' · ') : 'No purchases found on this device yet.');   /* RC1: the restore report covers the upgrade shelf too */ if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS restore purchases: ' + (got.length ? got.join(', ') : 'none')); return got; };   /* the store bridge: at the 1.0 wrapper stage the store's receipts are written into sixloudrc1_ent and this button applies them — on the web fork it honestly reports what the device holds */
+window.__restorePurchases = function () { let ent = {}; try { ent = JSON.parse(localStorage.getItem('sixloudrc1_ent') || '{}'); } catch (e) {} const got = []; if (ent.noads) got.push('NO-ADS PACK'); if (ent.allaccess) got.push('ALL-ACCESS'); if (Array.isArray(ent.chars)) for (const c of ent.chars) got.push('CHARACTER: ' + String(c).toUpperCase()); if (ent.upg && ent.upg.zeus) got.push('ZEUS'); if (ent.upg && ent.upg.spark) got.push('SPARKLES'); if (ent.upg && ent.upg.lalt) got.push('LASHMOOVE ALT OUTFIT'); if (ent.upg && ent.upg.yalt) got.push('YOROKOBI ALT OUTFIT'); if (ent.tokens) got.push(ent.tokens + ' REVIVE TOKEN' + (ent.tokens > 1 ? 'S' : '')); if ((ent.colors || []).length > 1) got.push('CHARGE COLORS'); if (ent.gold) got.push('GOLD WINGS (HELD)'); optMsg(got.length ? 'Restored: ' + got.join(' · ') : 'No purchases found on this device yet.');   /* RC1: the restore report covers the upgrade shelf too */ if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS restore purchases: ' + (got.length ? got.join(', ') : 'none')); return got; };   /* the store bridge: at the 1.0 wrapper stage the store's receipts are written into sixloudrc1_ent and this button applies them — on the web fork it honestly reports what the device holds */
 window.__optResetScores = function () { try { localStorage.setItem('sixloudrc1_scores_ft', '[]'); localStorage.setItem('sixloudrc1_char_bests', '{}'); } catch (e) {} optMsg('Local scores cleared. The world board is untouched.'); if (typeof AD !== 'undefined' && AD.log) AD.log('OPTIONS local scores reset'); };
 { const b = document.getElementById('optBtn'); if (b) b.addEventListener('click', e => { e.stopPropagation(); openOptions(); }); const bk = document.getElementById('optBack'); if (bk) { bk.addEventListener('pointerdown', e => { e.stopPropagation(); }); bk.onclick = e => { if (e) e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }; bk.addEventListener('click', e => { e.stopPropagation(); document.getElementById('optPage').style.display = 'none'; }); }   /* DEV FORK 57: BACK answers on every tap path — pointerdown stopped (the arrows' pattern), onclick (the board back's own wiring), click as before; Keith's FORK 56 test found it dead */ const gh = document.getElementById('optGhosts'); if (gh) gh.addEventListener('click', e => { e.stopPropagation(); optToggleGhosts(); }); const dg2 = document.getElementById('optDebug'); if (dg2) dg2.addEventListener('click', e => { e.stopPropagation(); optToggleDebug(); }); const db2 = document.getElementById('optDbg'); if (db2) db2.addEventListener('click', e => { e.stopPropagation(); optToggleReadout(); });   /* DEV FORK 135: the readout toggle answers taps like its neighbours */ applyDbgVis();   /* DEV FORK 135: a persisted OFF greets a clean screen from the first frame */ const ct3 = document.getElementById('optCity'); if (ct3) ct3.addEventListener('click', e => { e.stopPropagation(); optToggleCity(); }); const bk3 = document.getElementById('optBokeh'); if (bk3) bk3.addEventListener('click', e => { e.stopPropagation(); optToggleBokeh(); }); const tw4 = document.getElementById('optTkWings'); if (tw4) tw4.addEventListener('click', e => { e.stopPropagation(); optToggleTkWings(); }); const ts4 = document.getElementById('optTkSaw'); if (ts4) ts4.addEventListener('click', e => { e.stopPropagation(); optToggleTkKind('saw'); }); const tf4 = document.getElementById('optTkFlip'); if (tf4) tf4.addEventListener('click', e => { e.stopPropagation(); optToggleTkKind('flip'); }); const th4 = document.getElementById('optTkShiv'); if (th4) th4.addEventListener('click', e => { e.stopPropagation(); optToggleTkKind('shiv'); });   /* DEV FORK 101 TEST KIT: the kit buttons answer taps like their neighbours */ const zu4 = document.getElementById('optZeus'); if (zu4) zu4.addEventListener('click', e => { e.stopPropagation(); optToggleZeus(); });   /* DEV FORK 107: the Zeus toggle answers taps like its neighbours */ const zt4 = document.getElementById('optZeusTempo'); if (zt4) zt4.addEventListener('click', e => { e.stopPropagation(); optToggleZeusTempo(); });   /* DEV FORK 117: the tempo dial answers taps like its neighbours */ const sp4 = document.getElementById('optSpark'); if (sp4) sp4.addEventListener('click', e => { e.stopPropagation(); optToggleSparkles(); });   /* DEV FORK 139: the Sparkles toggle answers taps like its neighbours */   /* DEV FORK 87: the demo toggles answer taps like their neighbours */   /* DEV FORK 73: the DEBUG toggle answers taps like its neighbours */ const mu2 = document.getElementById('optMusic'); if (mu2) mu2.addEventListener('click', e => { e.stopPropagation(); audToggle('m'); optUI(); }); const sf2 = document.getElementById('optSfx'); if (sf2) sf2.addEventListener('click', e => { e.stopPropagation(); audToggle('s'); optUI(); }); const rs = document.getElementById('optRestore'); if (rs) rs.addEventListener('click', e => { e.stopPropagation(); window.__restorePurchases(); }); const rx = document.getElementById('optReset'); if (rx) rx.addEventListener('click', e => { e.stopPropagation(); if (rx.dataset.arm) { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); window.__optResetScores(); } else { rx.dataset.arm = '1'; rx.textContent = 'ARE YOU SURE?'; rx.classList.add('armed'); setTimeout(() => { delete rx.dataset.arm; rx.textContent = 'RESET'; rx.classList.remove('armed'); }, 3500); } }); }
 window.__optTest = { state: () => ({ ghostsOff: !!window.__optGhostsOff, m: !!window.__musOff, s: !!window.__sfxOff, city: !!window.__cityDuskOpt, bokeh: !!window.__bokehOpt, tkWings: !!window.__tkWings, tkKind: window.__tkKind || null }), toggleGhosts: optToggleGhosts, toggleCity: optToggleCity, toggleBokeh: optToggleBokeh, toggleTkWings: optToggleTkWings, toggleTkKind: optToggleTkKind, resetScores: window.__optResetScores, restore: window.__restorePurchases, open: openOptions };   /* DEV FORK 87: the demo toggles join the test surface */
@@ -4165,8 +4179,8 @@ var __entLoad0 = entLoad;
 entLoad = function () {
   var e = __entLoad0() || {};
   e.chars = e.chars || [];
-  e.upg = e.upg || {}; e.upg.zeus = e.upg.zeus || 0; e.upg.spark = e.upg.spark || 0; e.upg.lalt = e.upg.lalt || 0;
-  e.eq = e.eq || {}; e.eq.zeus = e.eq.zeus || 0; e.eq.spark = e.eq.spark || 0; e.eq.lalt = e.eq.lalt || 0;
+  e.upg = e.upg || {}; e.upg.zeus = e.upg.zeus || 0; e.upg.spark = e.upg.spark || 0; e.upg.lalt = e.upg.lalt || 0; e.upg.yalt = e.upg.yalt || 0;
+  e.eq = e.eq || {}; e.eq.zeus = e.eq.zeus || 0; e.eq.spark = e.eq.spark || 0; e.eq.lalt = e.eq.lalt || 0; e.eq.yalt = e.eq.yalt || 0;
   e.tokens = e.tokens || 0;
   e.colors = (e.colors && e.colors.length) ? e.colors : ['classic'];
   e.charge = e.charge || {};
@@ -4316,6 +4330,32 @@ function __rcApplyLash(alt) {
   if (typeof selChar !== 'undefined' && selChar === 'lash' && typeof applyChar === 'function') applyChar();
 }
 
+/* --- Yorokobi: the ALT outfit is an owned, equippable upgrade (RC1.2) ---
+   The mirror of LaShmoove's lalt, reversed: his SKINS entry SHIPPED as
+   the ALT and his standard set is the literal (LASHSTD_CFG); hers ships
+   as the BASE, so her base config is the one captured at first apply
+   and the ALT config is the literal. The ALT fit table starts from her
+   BASE numbers verbatim — wingM/hang/fall/fly and Keith's whole steered
+   wfix133 included: the ALT manifest's own offset/gaps self-anchor the
+   body draw (drawAnim's refRow math) and the fly sway reads the ACTIVE
+   manifest's diveroll gaps, so no per-motion deltas are owed — the
+   mount rides the runner anchor, and her ALT stature is
+   scaler-matched to base. */
+const YOROALT_CFG = { man: YOROALT_MANIFEST, anim: YOROALT_ANIM, dangle: YOROALT_DANGLE, name: 'YOROKOBI', rate: 2, ready: true, wingM: [-1, -232], hangOff: [-24, 32], hangR: 20, wingR: 32, fallOff: [[38, 40, -24], [42, 8, 24], [999, 16, 32]], fallOffD: {30: [32, -24]}, flyC: 17, flyH: 4, flyM: [79, -153], flyR: 109, flyLate: 16, flyCDrop: 32, flyEDrop: 32, flyTail: 10, flyTailD: [16, 8], wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 16, 80, 30]] }, slip: { 16: [[0, 16, -16, 0]] }, hang: { 10: [[27, -16, 0, -5]] }, fall: { '*': [[0, -32, 32, 0]], 5: [[0, 16, 32, 0]], 40: [[0, 0, 16, 0]], 41: [[0, 0, 16, 0]], 42: [[0, 0, 16, 0]], 43: [[0, 0, 16, 0]], 44: [[0, 0, 16, 0]], 46: [[0, -16, 32, 0]], 47: [[0, -16, 32, 0]], 48: [[0, -16, 32, 0]], 55: [[0, 32, 80, 10]] } } };
+function __rcApplyYoro(alt) {
+  if (!window.__yoroBaseCfg) {
+    var c = {};
+    for (var i = 0; i < CFGKEYS.length; i++) { var k = CFGKEYS[i]; if (k in SKINS.yoro) c[k] = SKINS.yoro[k]; }
+    window.__yoroBaseCfg = c;
+  }
+  var cfg = alt ? YOROALT_CFG : window.__yoroBaseCfg;
+  for (var j = 0; j < CFGKEYS.length; j++) delete SKINS.yoro[CFGKEYS[j]];
+  for (var k2 in cfg) SKINS.yoro[k2] = cfg[k2];
+  SKINS.yoro.rate = cfg.rate || 1;
+  window.__yoroAltApplied = !!alt;
+  if (typeof selChar !== 'undefined' && selChar === 'yoro' && typeof applyChar === 'function') applyChar();
+}
+
 /* --- upgrade sync: ownership + equip drive the fork's Zeus/Sparkles flags --- */
 function __rcSyncUpgrades() {
   var e = __rcEntView();   /* RC1.1: equip flags read the EFFECTIVE entitlements — the Developer Mode overlay included, so the bite-hang (and gallop/leap) answer to the overlay exactly as they answer to a real owned+equipped Zeus */
@@ -4324,6 +4364,7 @@ function __rcSyncUpgrades() {
   if (window.__zeusSet) window.__zeusSet(window.__zeusOpt);
   if (window.__sparkSet) window.__sparkSet(window.__sparkOpt);
   __rcApplyLash(!!(e.upg.lalt && e.eq.lalt));
+  __rcApplyYoro(!!(e.upg.yalt && e.eq.yalt));   /* RC1.2: Yorokobi's ALT answers the same hand — real record or Developer Mode overlay, one law */
   if (typeof buildStrip === 'function') buildStrip();
 }
 
@@ -4341,7 +4382,10 @@ function __rcChipDef(id, e) {
     if (!e.upg.lalt) return { t: 'ALT 🔒 1,500♪', cls: '', act: 'cust' };
     return e.eq.lalt ? { t: 'ALT ✓ ON', cls: 'on', act: 'toggle:lalt' } : { t: 'ALT + EQUIP', cls: '', act: 'toggle:lalt' };
   }
-  if (id === 'yoro') return { t: 'ALT · SOON', cls: 'soon', act: 'cust' };
+  if (id === 'yoro') {
+    if (!e.upg.yalt) return { t: 'ALT 🔒 1,500♪', cls: '', act: 'cust' };
+    return e.eq.yalt ? { t: 'ALT ✓ ON', cls: 'on', act: 'toggle:yalt' } : { t: 'ALT + EQUIP', cls: '', act: 'toggle:yalt' };
+  }   /* RC1.2: her ALT is real — the chip speaks the same three states as LaShmoove's */
   return { t: 'COSTUME · SOON', cls: 'soon', act: 'cust' };
 }
 function __rcChips() {
@@ -4441,7 +4485,7 @@ function buyChar(id) {
   return true;
 }
 function buyUpgrade(key) {
-  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt') return false;   /* only the three real upgrades exist — Yorokobi's and 6lade's slots are placeholders, nothing to sell yet */
+  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt' && key !== 'yalt') return false;   /* only the four real upgrades exist — 6lade's costume slot is the placeholder now, nothing to sell there yet */
   var e = entLoad();
   if (e.upg[key]) return false;
   if (window.__devMode) { __rcMsg('custMsg', 'DEVELOPER MODE — ALREADY UNLOCKED'); return false; }   /* RC1.1: the overlay never transacts — the entitlement record stays exactly as it was */
@@ -4456,7 +4500,7 @@ function buyUpgrade(key) {
   return true;
 }
 function toggleEquip(key) {
-  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt') return false;
+  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt' && key !== 'yalt') return false;
   if (window.__devMode) { var dq = __rcDmEq(); dq[key] = dq[key] ? 0 : 1; __rcSyncUpgrades(); renderCust(); return true; }   /* RC1.1: under DEVELOPER MODE the equip flips in the session only — sixloudrc1_ent is never written */
   var e = entLoad();
   if (!e.upg[key]) return false;
@@ -4529,7 +4573,7 @@ function renderCust() {
     ivey: { key: 'zeus', name: 'ZEUS — BOUND COMPANION', sub: 'Runs and leaps beside Ivey, deck to deck' },
     sayori: { key: 'spark', name: 'SPARKLES — THE RIDE', sub: 'Sayori rides; the pair is the playable unit' },
     lash: { key: 'lalt', name: 'ALT OUTFIT — WHITE ROBE', sub: 'The white-robe set at 60 fps' },
-    yoro: { key: null, name: 'ALT OUTFIT — CHARCOAL GI', sub: 'ART IN PRODUCTION — the slot and plumbing are live; the frames are not yet captured' },
+    yoro: { key: 'yalt', name: 'ALT OUTFIT — CHARCOAL GI', sub: 'The charcoal-gi set at 60 fps' },
     blade: { key: null, name: 'COSTUME', sub: 'LOOK NOT YET NAMED — ART IN PRODUCTION' }
   };
   ORDER.forEach(function (id) {
@@ -4716,7 +4760,7 @@ window.__rcReady = true;
 /* ================= RC1.1: DEVELOPER MODE (Keith, 2026-11-17) =================
    "Give me an option that says 'developer mode' that unlocks everything" —
    an ownership OVERLAY, never a purchase: while ON, charOwned() reads true
-   for every runner, zeus/spark/lalt count as owned AND equippable, every
+   for every runner, zeus/spark/lalt/yalt count as owned AND equippable, every
    level reads open, and all ECONOMY colors + FX count as owned. The overlay
    NEVER writes sixloudrc1_ent: the honest buy paths refuse to transact
    while it is up, equips/colors/FX flip in session variables only, and
@@ -4735,7 +4779,8 @@ function __rcDmEq() {
     window.__dmEq = {
       zeus: e.upg.zeus ? (e.eq.zeus ? 1 : 0) : 1,
       spark: e.upg.spark ? (e.eq.spark ? 1 : 0) : 1,
-      lalt: e.upg.lalt ? (e.eq.lalt ? 1 : 0) : 1
+      lalt: e.upg.lalt ? (e.eq.lalt ? 1 : 0) : 1,
+      yalt: e.upg.yalt ? (e.eq.yalt ? 1 : 0) : 1
     };   /* a virtual ownership auto-equips, exactly like a real buyUpgrade; a runner's real unequip is respected */
   }
   return window.__dmEq;
@@ -4752,7 +4797,7 @@ function __rcEntView() {
   if (!window.__devMode) return e;
   var v = {}, k;
   for (k in e) v[k] = e[k];
-  v.upg = { zeus: 1, spark: 1, lalt: 1 };
+  v.upg = { zeus: 1, spark: 1, lalt: 1, yalt: 1 };
   v.eq = __rcDmEq();
   v.colors = ECONOMY.colors.map(function (c) { return c.id; });
   v.charge = {}; for (k in e.charge) v.charge[k] = e.charge[k];
@@ -4802,6 +4847,7 @@ window.__rcTest = {
   notes: function () { return window.__notes || 0; },
   sync: __rcSyncUpgrades,
   applyLash: __rcApplyLash,
+  applyYoro: __rcApplyYoro,
   buyPack: buyPack, buyToken: buyToken, buyChar: buyChar, buyUpgrade: buyUpgrade, toggleEquip: toggleEquip,
   buySkip: buySkip, buyColor: buyColor, toggleFx: toggleFx,
   gold: function () { return { held: !!entLoad().gold, deathless: !!window.__deathless }; },
