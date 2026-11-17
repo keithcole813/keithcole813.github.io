@@ -46,7 +46,7 @@
   .sub{margin:10px auto 0; max-width:620px; color:var(--dim); font-size:1.02rem; line-height:1.55}
   .strip{display:block; width:100vw; max-width:none; margin:26px calc(50% - 50vw) 0; height:auto}
   section{background:var(--panel); border:1px solid var(--line); border-radius:18px;
-    padding:26px 26px 22px; margin-top:22px; backdrop-filter:blur(6px)}
+    padding:20px 20px 16px; margin-top:16px; backdrop-filter:blur(6px)}
   h2{color:var(--gold2); font-size:1.28rem; letter-spacing:.02em; margin-bottom:12px}
   p{color:var(--text); line-height:1.65; font-size:1rem}
   p + p{margin-top:10px}
@@ -67,6 +67,22 @@
     font-family:"Luckiest Guy","Avenir Next",sans-serif; font-size:1.15rem; letter-spacing:.06em;
     background:rgba(0,0,0,.35)}
   .buybtn:hover{background:rgba(247,181,0,.16)}
+  .noteic{height:1.15em; width:auto; vertical-align:-0.22em}
+  .dontfall{font-family:"Luckiest Guy","Avenir Next",sans-serif; color:var(--gold2);
+    font-size:clamp(1.9rem,7vw,2.7rem); letter-spacing:.05em; margin-top:22px;
+    text-shadow:0 3px 0 #7a4a00, 0 8px 24px rgba(0,0,0,.45)}
+  .wingshero{display:block; margin:14px auto 0; width:min(330px,84%); height:auto;
+    border-radius:18px; outline:1px solid rgba(255,255,255,.16); box-shadow:0 18px 44px rgba(0,0,0,.4)}
+  .ldtip{display:inline-block; margin-top:16px; padding:10px 20px; border-radius:999px;
+    background:rgba(20,14,40,.82); border:1px solid var(--line); color:#ffe9a8;
+    font-weight:700; letter-spacing:.05em; font-size:.92rem}
+  .ldtip b{color:var(--gold2)}
+  .cloudband{width:100vw; max-width:none; margin:24px calc(50% - 50vw) 0; height:84px;
+    background:url(gallery/game-cloud.png) repeat-x center; background-size:auto 84px; opacity:.95}
+  .shots{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px}
+  .shots figure{margin:0}
+  .shots img{display:block; width:100%; height:auto; border-radius:14px; border:1px solid rgba(255,255,255,.10)}
+  .shots figcaption{color:var(--dim); font-size:.88rem; margin-top:7px; text-align:center}
   .rankings .rrow{display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:12px;
     background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.08); margin-top:8px}
   .rankings .rrow .rk{font-weight:900; color:var(--dim); min-width:34px; text-align:center; font-size:1.05rem}
@@ -117,22 +133,26 @@
     <div class="tagline">The Shinobi Brawl cast. Shrunk down.<br>Running on <span class="g">cloud 9</span>.</div>
     <p class="sub">6loud is an endless runner played in the browser. Your fighter sprints across
     real clouds on their own — all you control is the jump. No levels, no finish line:
-    the run just gets faster the longer you stay in it.</p>
+    the run just gets faster the longer you stay in it. The game is named for the song
+    “6loud” — Keith Cole and 6lade, rapping about being on cloud 9.</p>
     <div><a class="playbtn" href="play/">▶ &nbsp;PLAY 6LOUD</a></div>
-    <div style="margin-top:14px"><a class="buybtn" href="#packs">♪ &nbsp;BUY NOTES</a></div>
+    <div style="margin-top:14px"><a class="buybtn" href="#packs"><img class="noteic" src="gallery/game-note.png" alt=""> &nbsp;BUY NOTES</a></div>
+    <div class="dontfall">DON'T FALL!</div>
+    <img class="wingshero" src="gallery/wings-hero.jpg" alt="Yorokobi sprinting with her wings spread wide — the game's own pixels">
+    <div class="ldtip" id="ldtip"><b>TIP:</b> COLLECT NOTES TO BANK +25 FT</div>
     <p class="dim" style="margin-top:12px; font-size:.92rem">Runs right in your browser — no download, no install.
     On iPhone: open it in Safari, tap Share, then “Add to Home Screen” to play it like an app.</p>
   </div>
 
-  <img class="strip" src="clouds-strip.png" alt="A row of real clouds — the platforms of 6loud">
+  <div class="cloudband" role="img" aria-label="A cloud deck straight from the game"></div>
 
   <section id="packs">
     <h2>Notes &amp; packs</h2>
     <p class="dim" style="margin-bottom:14px">Notes (♪) are the game's money — collect them in every run, or stock up
     with a pack. Notes buy runners, level skips, revive tokens, charge colors and sky effects.
     Nothing sold gives you power — gold wings are earned, never bought.</p>
-    <p style="text-align:center;font-size:1.08em;margin-bottom:10px">$0.99 → 3,000 ♪ &nbsp;·&nbsp; $2.99 → 10,000 ♪ &nbsp;·&nbsp; $4.99 → 18,000 ♪ &nbsp;·&nbsp; $9.99 → 40,000 ♪</p>
-    <p class="dim" style="text-align:center">Revive tokens — 250 ♪ each, or 5 for 1,000 ♪ · RC testers start with 8,000 ♪ on the house.</p>
+    <p style="text-align:center;font-size:1.08em;margin-bottom:10px">$0.99 → 3,000 <img class="noteic" src="gallery/game-note.png" alt="notes"> &nbsp;·&nbsp; $2.99 → 10,000 <img class="noteic" src="gallery/game-note.png" alt="notes"> &nbsp;·&nbsp; $4.99 → 18,000 <img class="noteic" src="gallery/game-note.png" alt="notes"> &nbsp;·&nbsp; $9.99 → 40,000 <img class="noteic" src="gallery/game-note.png" alt="notes"></p>
+    <p class="dim" style="text-align:center">Revive tokens — 250 <img class="noteic" src="gallery/game-note.png" alt="notes"> each, or 5 for 1,000 <img class="noteic" src="gallery/game-note.png" alt="notes"> · RC testers start with 8,000 <img class="noteic" src="gallery/game-note.png" alt="notes"> on the house.</p>
   </section>
 
 
@@ -142,13 +162,6 @@
     <div id="rrows"><p class="dim" style="margin-top:10px">Loading the board…</p></div>
     <p class="dim" style="margin-top:12px; font-size:.9rem">Pulled live from the game's global leaderboard — every run that makes the top 20 posts here.</p>
   </section>
-  <section>
-    <h2>Named for the song</h2>
-    <p>Keith Cole and 6lade have a song called <strong>“6loud”</strong> — 6lade rapping about
-    being on cloud 9. The game takes its name from the song, and its whole world from the idea:
-    a crew of chibi shinobi racing across the tops of real clouds, high above everything.</p>
-  </section>
-
   <section>
     <h2>How it plays</h2>
     <div class="cards">
@@ -165,10 +178,7 @@
       <div class="card"><h3><span class="ic">⚡</span>Faster, forever</h3>
         <p>There are no levels. One endless run that keeps speeding up until it ends you. How long can you stay in?</p></div>
     </div>
-  </section>
-
-  <section>
-    <h2>Power-ups</h2>
+    <h2 style="margin-top:22px">Power-ups</h2>
     <div class="cards">
       <div class="card"><h3><span class="ic">♪</span>Music notes</h3>
         <p>Gold notes drift over the decks. Grab one and it flashes <strong>+25 FT</strong> straight onto your run. Bank eight and your next jump fires at full charge.</p></div>
@@ -179,17 +189,6 @@
       <div class="card"><h3><span class="ic">↔</span>Earn them</h3>
         <p>Power-ups are spaced wider the longer you survive — the deeper the run, the harder they're earned.</p></div>
     </div>
-  </section>
-
-  <section>
-    <h2>The world</h2>
-    <ul>
-      <li><strong>Real clouds.</strong> The platforms are real-looking clouds in all shapes — long runners and short islands, at different heights, with gaps between them.</li>
-      <li><strong>Built from segments.</strong> The run is chained together from a database of hand-designed segments, so every jump is fair and every stretch can be learned — even though no two runs come in the same order.</li>
-      <li><strong>Mountains on the horizon.</strong> Ridge lines roll behind the cloud sea, tinted by the sky itself — and as you climb into the high bands, you rise above them and leave them below.</li>
-      <li><strong>A sky on its own clock.</strong> The background fades sunset → night → sunrise as your run goes on, all on its own timer. At night: shooting stars and a sparkling sky.</li>
-      <li><strong>Handy-cam feel.</strong> The camera zooms in and out and shakes like a handheld shot — punching in on a ledge grab, easing out as the speed climbs.</li>
-    </ul>
   </section>
 
   <section id="cast">
@@ -203,7 +202,6 @@
         <div class="cap">
           <h3>LASHMOOVE</h3>
           <p>The headliner — the DJ himself, first into the clouds.</p>
-          <span class="soon">3,000 ♪</span>
         </div>
       </div>
       <div class="runner">
@@ -211,7 +209,6 @@
         <div class="cap">
           <h3>6LADE</h3>
           <p>The other half of the song — 6lade, on cloud 9.</p>
-          <span class="soon">FREE</span>
         </div>
       </div>
       <div class="runner">
@@ -219,7 +216,6 @@
         <div class="cap">
           <h3>YOROKOBI</h3>
           <p>The poet of Ninja Music Records, running her verses across the sky.</p>
-          <span class="soon">3,000 ♪</span>
         </div>
       </div>
       <div class="runner">
@@ -227,7 +223,6 @@
         <div class="cap">
           <h3>IVEY &amp; ZEUS</h3>
           <p>Ivey never runs alone — Zeus, her white Doberman, gallops every course at her side and leaps cloud to cloud behind her.</p>
-          <span class="soon">3,000 ♪</span>
         </div>
       </div>
       <div class="runner">
@@ -235,7 +230,6 @@
         <div class="cap">
           <h3>SAYORI</h3>
           <p>The youngest runner in the crew — and the only one with a unicorn.</p>
-          <span class="soon">FREE</span>
         </div>
       </div>
       <div class="runner">
@@ -243,7 +237,6 @@
         <div class="cap">
           <h3>SPARKLES</h3>
           <p>Sparkles the unicorn, with Sayori in the saddle. Her wings are built in — a charged jump is a double, and with wings she's good for three.</p>
-          <span class="soon">Bonus character — coming soon</span>
         </div>
       </div>
     </div>
@@ -252,7 +245,8 @@
   <section id="worlds">
     <h2>The worlds</h2>
     <p class="dim" style="margin-bottom:14px">One endless course, eight worlds over it. Finish the distance in one
-    world and the next unlocks — the run never stops, the world changes around you.</p>
+    world and the next unlocks — the run never stops, the world changes around you. The sky cycles dawn to dusk
+    to night over the run, and every world wears it differently.</p>
     <div class="worlds">
       <div class="world">
         <img src="gallery/level-1-day-break.jpg" alt="Day Break — sunrise sky over the desert mountain range floor" loading="lazy" decoding="async">
@@ -404,6 +398,18 @@
       });
   }
   load(); setInterval(load, 60000);
+})();
+</script>
+<script>
+(function(){
+  var TIPS = [
+    '<b>TIP:</b> COLLECT NOTES TO BANK +25 FT',
+    '<b>TIP:</b> GRAB THE WINGS — TAP TO FLUTTER, RIDE THE WIND',
+    '<b>WARNING:</b> THE MAGNET DRAGS YOU DOWN AT 1.6X GRAVITY',
+    '<b>TIP:</b> HOLD A JUMP TO CHARGE IT — RELEASE TO FLY',
+    '<b>TIP:</b> OUTRUN THE STORM — IT NEVER STOPS'
+  ], i = 0, el = document.getElementById('ldtip');
+  if (el) setInterval(function(){ i = (i + 1) % TIPS.length; el.innerHTML = TIPS[i]; }, 2600);
 })();
 </script>
 </body>
