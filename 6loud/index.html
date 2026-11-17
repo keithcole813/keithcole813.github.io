@@ -10,6 +10,7 @@
 <meta property="og:image" content="logo.png">
 <link rel="icon" type="image/png" href="icon.png">
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
   :root{
     --gold:#f7b500; --gold2:#ffd23f; --ink:#0b1030; --panel:rgba(16,22,58,.72);
     --line:rgba(247,181,0,.35); --text:#eef1ff; --dim:#b9c2e8;
@@ -61,6 +62,11 @@
     background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#3a1503; text-decoration:none;
     font-size:1.3rem; font-weight:900; letter-spacing:.06em; box-shadow:0 10px 30px rgba(247,181,0,.35)}
   .playbtn:hover{filter:brightness(1.07)}
+  .buybtn{display:inline-block; padding:14px 38px; border-radius:999px;
+    border:2px solid var(--gold); color:var(--gold2); text-decoration:none;
+    font-family:"Luckiest Guy","Avenir Next",sans-serif; font-size:1.15rem; letter-spacing:.06em;
+    background:rgba(0,0,0,.35)}
+  .buybtn:hover{background:rgba(247,181,0,.16)}
   .rankings .rrow{display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:12px;
     background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.08); margin-top:8px}
   .rankings .rrow .rk{font-weight:900; color:var(--dim); min-width:34px; text-align:center; font-size:1.05rem}
@@ -79,6 +85,25 @@
   footer{text-align:center; color:var(--dim); font-size:.9rem; padding:30px 16px 36px}
   footer a{color:var(--gold2); text-decoration:none}
   footer a:hover{text-decoration:underline}
+  h2, .tagline, .playbtn, .world h3, .runner h3{font-family:"Luckiest Guy","Avenir Next",sans-serif; font-weight:400; letter-spacing:.045em}
+  h2{font-size:1.45rem}
+  .worlds{display:grid; grid-template-columns:1fr; gap:18px; margin-top:6px}
+  @media (min-width:700px){ .worlds{grid-template-columns:1fr 1fr} }
+  .world{background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.10); border-radius:14px; overflow:hidden}
+  .world img{display:block; width:100%; height:auto; aspect-ratio:8/5; object-fit:cover; background:#1a2150}
+  .world .cap{padding:13px 16px 14px}
+  .world h3{color:#fff; font-size:1.12rem}
+  .world h3 .n{color:var(--gold2); margin-right:7px}
+  .world p{font-size:.93rem; color:var(--dim); line-height:1.55; margin-top:6px}
+  .world .gate{font-size:.85rem; color:var(--text); margin-top:7px; font-weight:600}
+  .cast{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-top:14px}
+  .runner{background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.10); border-radius:14px; overflow:hidden}
+  .runner img{display:block; width:100%; height:auto; aspect-ratio:1/1; object-fit:cover; background:#1a2150}
+  .runner .cap{padding:11px 13px 12px}
+  .runner h3{color:#fff; font-size:1rem}
+  .runner p{font-size:.88rem; color:var(--dim); line-height:1.5; margin-top:4px}
+  .soon{display:inline-block; margin-top:7px; padding:3px 10px; border-radius:999px;
+    border:1px solid var(--line); color:var(--gold2); font-weight:700; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -94,11 +119,22 @@
     real clouds on their own — all you control is the jump. No levels, no finish line:
     the run just gets faster the longer you stay in it.</p>
     <div><a class="playbtn" href="play/">▶ &nbsp;PLAY 6LOUD</a></div>
+    <div style="margin-top:14px"><a class="buybtn" href="#packs">♪ &nbsp;BUY NOTES</a></div>
     <p class="dim" style="margin-top:12px; font-size:.92rem">Runs right in your browser — no download, no install.
     On iPhone: open it in Safari, tap Share, then “Add to Home Screen” to play it like an app.</p>
   </div>
 
   <img class="strip" src="clouds-strip.png" alt="A row of real clouds — the platforms of 6loud">
+
+  <section id="packs">
+    <h2>Notes &amp; packs</h2>
+    <p class="dim" style="margin-bottom:14px">Notes (♪) are the game's money — collect them in every run, or stock up
+    with a pack. Notes buy runners, level skips, revive tokens, charge colors and sky effects.
+    Nothing sold gives you power — gold wings are earned, never bought.</p>
+    <p style="text-align:center;font-size:1.08em;margin-bottom:10px">$0.99 → 3,000 ♪ &nbsp;·&nbsp; $2.99 → 10,000 ♪ &nbsp;·&nbsp; $4.99 → 18,000 ♪ &nbsp;·&nbsp; $9.99 → 40,000 ♪</p>
+    <p class="dim" style="text-align:center">Revive tokens — 250 ♪ each, or 5 for 1,000 ♪ · RC testers start with 8,000 ♪ on the house.</p>
+  </section>
+
 
   <section class="rankings" id="rankings">
     <h2>♛ Global Rankings — Live</h2>
@@ -156,21 +192,148 @@
     </ul>
   </section>
 
-  <section>
+  <section id="cast">
     <h2>The cast</h2>
     <p>The fighters of <a href="https://keithcole813.github.io/shinobi-brawl/" style="color:var(--gold2)">Shinobi Brawl</a>,
     shrunk down to chibi size. They run with their own run cycles and jumps from the fighting game —
     nothing redrawn, the same fighters in a whole new kind of fight: against the fall.</p>
+    <div class="cast">
+      <div class="runner">
+        <img src="gallery/char-lashmoove.jpg" alt="LaShmoove — select portrait" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3>LASHMOOVE</h3>
+          <p>The headliner — the DJ himself, first into the clouds.</p>
+          <span class="soon">3,000 ♪</span>
+        </div>
+      </div>
+      <div class="runner">
+        <img src="gallery/char-6lade.jpg" alt="6lade — select portrait" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3>6LADE</h3>
+          <p>The other half of the song — 6lade, on cloud 9.</p>
+          <span class="soon">FREE</span>
+        </div>
+      </div>
+      <div class="runner">
+        <img src="gallery/char-yorokobi.jpg" alt="Yorokobi — select portrait" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3>YOROKOBI</h3>
+          <p>The poet of Ninja Music Records, running her verses across the sky.</p>
+          <span class="soon">3,000 ♪</span>
+        </div>
+      </div>
+      <div class="runner">
+        <img src="gallery/char-ivey-zeus.jpg" alt="Ivey with Zeus reaching up beside her — select portrait" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3>IVEY &amp; ZEUS</h3>
+          <p>Ivey never runs alone — Zeus, her white Doberman, gallops every course at her side and leaps cloud to cloud behind her.</p>
+          <span class="soon">3,000 ♪</span>
+        </div>
+      </div>
+      <div class="runner">
+        <img src="gallery/char-sayori.jpg" alt="Sayori — select portrait" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3>SAYORI</h3>
+          <p>The youngest runner in the crew — and the only one with a unicorn.</p>
+          <span class="soon">FREE</span>
+        </div>
+      </div>
+      <div class="runner">
+        <img src="gallery/char-sparkles.jpg" alt="Sparkles mid-leap with Sayori in the saddle, over the Tokyo stage" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3>SPARKLES</h3>
+          <p>Sparkles the unicorn, with Sayori in the saddle. Her wings are built in — a charged jump is a double, and with wings she's good for three.</p>
+          <span class="soon">Bonus character — coming soon</span>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section>
-    <h2>The worlds &amp; the cast — the gallery</h2>
-    <p>Day Break is only the first of <strong>eight worlds</strong> — Golden Hour's endless dusk, Midnight Run's
-    moonlit night, the storm world Above the Clouds, Flower Field's sunset, and the remix shifts after them —
-    each with its own sky and its own dangers. The full roster is in release-candidate preparation now, and
-    <strong>Sparkles the unicorn</strong> just joined the cast, with Sayori in the saddle.
-    <a href="gallery.html" style="color:var(--gold2); font-weight:700">See all eight worlds, the whole cast, and the price points →</a></p>
+  <section id="worlds">
+    <h2>The worlds</h2>
+    <p class="dim" style="margin-bottom:14px">One endless course, eight worlds over it. Finish the distance in one
+    world and the next unlocks — the run never stops, the world changes around you.</p>
+    <div class="worlds">
+      <div class="world">
+        <img src="gallery/level-1-day-break.jpg" alt="Day Break — sunrise sky over the desert mountain range floor" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">1</span>DAY BREAK</h3>
+          <p>The Journey sky runs its whole arc overhead — sunrise, noon, gold, and a moonless night.
+          The trap here is patience: sinking clouds give way under your feet, so keep moving.</p>
+          <div class="gate">Where every run begins.</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-2-golden-hour.jpg" alt="Golden Hour — the dusk city below the clouds" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">2</span>GOLDEN HOUR</h3>
+          <p>Six to nine in the evening, forever — a dusk city glowing through the haze while the sky
+          holds its gold. Only the sinking clouds mean you harm; the rest is the prettiest cruise in the game.</p>
+          <div class="gate">Unlock — 5,000 FT in Day Break · or 500 ♪</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-3-midnight-run.jpg" alt="Midnight Run — deep night over the open ocean" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">3</span>MIDNIGHT RUN</h3>
+          <p>The deepest night in the game — shooting stars, and a real moon riding over the run.
+          Seesaw clouds tip under your weight, sharp clouds wait in the dark, and the storm tail
+          at the end throws everything at once.</p>
+          <div class="gate">Unlock — 8,000 FT in Golden Hour · or 750 ♪</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-4-above-the-clouds.jpg" alt="Above the Clouds — the storm world over a sea of cloud" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">4</span>ABOVE THE CLOUDS</h3>
+          <p>The storm world — bruised purple skies, rain on the wind, and lightning living in the
+          clouds themselves. Every trick cloud is here: seesaws, 360 spinners, shiver clouds that
+          shake you loose, and thunder clouds that strike the moment you land on them.</p>
+          <div class="gate">Unlock — 13,000 FT in Midnight Run · or 1,000 ♪</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-5-flower-field.jpg" alt="Flower Field — golden notes standing in a sunflower field at sunset" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">5</span>FLOWER FIELD</h3>
+          <p>Giant golden notes stand in a sunflower field under a sunset sky, and a single rainbow
+          rides far behind it all. The gentlest world in the game — only the sinking clouds can drop you.</p>
+          <div class="gate">Unlock — 15,000 FT in Above the Clouds · or 1,250 ♪</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-6-overtime.jpg" alt="Overtime, second half — Day Break's course under Midnight Run's moon and ocean" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">6</span>OVERTIME</h3>
+          <p>One shift, two skies: Day Break's long day runs its course, then the light goes out and
+          Midnight Run's moon takes over. The night stretch adds seesaw clouds to the sinking
+          ones — stay sharp after dark.</p>
+          <div class="gate">Unlock — 8,000 FT in Flower Field · or 1,500 ♪</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-7-sun-shower.jpg" alt="Sun Shower — golden light over the rolling plains" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">7</span>SUN SHOWER</h3>
+          <p>Storm rain first — then the rain turns to gold, falling through the same light as
+          Golden Hour. The storm stretch throws the full trick-cloud set at you before the gold
+          lets you breathe.</p>
+          <div class="gate">Unlock — 9,000 FT in Overtime · or 1,750 ♪</div>
+        </div>
+      </div>
+      <div class="world">
+        <img src="gallery/level-8-night-shift.jpg" alt="Night Shift — the snow-capped ridge under a star field" loading="lazy" decoding="async">
+        <div class="cap">
+          <h3><span class="n">8</span>NIGHT SHIFT</h3>
+          <p>The last shift: the deep night runs first, then hands the course back to Day Break with
+          dawn coming up behind it. Seesaw clouds in the dark, sinking clouds throughout — the
+          full gauntlet, one more time.</p>
+          <div class="gate">Unlock — 10,000 FT in Sun Shower · or 2,000 ♪ · Clear it and every world is open.</div>
+        </div>
+      </div>
+    </div>
   </section>
+
 
   <section>
     <h2>Beat your best — take the crown</h2>
@@ -191,7 +354,7 @@
 
   <footer>
     © Keith Cole · Ninja Music Records<br>
-    <a href="gallery.html">Gallery — the worlds &amp; the cast</a> ·
+    <a href="#worlds">The worlds</a> · <a href="#cast">The cast</a> ·
     <a href="https://keithcole813.github.io/">keithcole813.github.io</a> ·
     <a href="https://keithcole813.github.io/shinobi-brawl/">Shinobi Brawl</a>
   </footer>
