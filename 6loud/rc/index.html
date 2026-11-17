@@ -114,7 +114,7 @@
   #bpList { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; width:min(92vw,430px); margin:0 auto; padding:2px 4px 22px; box-sizing:border-box; }   /* DEV FORK 114: momentum touch scrolling + the pan owned by the scroller — flex:1 + overflow-y:auto are unchanged (the sizing was always right; the missing pieces were this and the hit-test layer on #boardPage, see its rule) */
   .bpHint { text-align:center; font-size:11px; font-weight:800; letter-spacing:2px; color:rgba(255,217,77,.75); padding-top:8px; }
   #board { cursor:pointer; }
-  #dbg { position:absolute; top:calc(64px + env(safe-area-inset-top)); left:10px; z-index:25; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; line-height:1.5; color:#aef2a6; background:rgba(0,0,0,.48); padding:6px 8px; border-radius:8px; white-space:pre; pointer-events:none; }
+  #dbg { position:absolute; top:calc(64px + env(safe-area-inset-top)); left:10px; z-index:25; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:8.5px; line-height:1.3; color:#aef2a6; background:rgba(0,0,0,.38); padding:4px 6px;   /* RC1.1: the compact strip — smaller type, tighter leading, a lighter veil */ border-radius:8px; white-space:pre; pointer-events:none; }
   #reviveRow { display:none; margin-top:14px; text-align:center; }
   #reviveBtn { background:linear-gradient(#ffe259,#ffa751); color:#3a1503; }
   #mapBtn { display:none; margin:10px auto 0; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:14px; letter-spacing:1px; color:#eaf2ff; background:linear-gradient(#2b3a67,#16224a); border:2px solid #ffd94d; border-radius:999px; padding:8px 20px; cursor:pointer; }   /* DEV FORK 26: the start-area toggle (title only, unlocked only) */
@@ -289,10 +289,15 @@
   .rcNote { font-size:12px; color:#ffd94d; text-align:center; min-height:16px; margin-top:8px; }
   .rcGold { background:linear-gradient(90deg, rgba(255,217,77,.16), rgba(255,157,60,.10)); border:1px solid #ffd94d; border-radius:12px; padding:10px 12px; font-family:'Luckiest Guy',cursive; font-size:13px; color:#ffd94d; text-align:center; }
   .rcSw { width:34px; height:34px; border-radius:50%; border:2px solid #3a1503; cursor:pointer; pointer-events:auto; }
-  .rcChip { position:absolute; left:2px; right:2px; bottom:2px; z-index:3; font-family:'Luckiest Guy',cursive; font-size:8px; letter-spacing:.4px; color:#ffd94d; background:rgba(10,4,24,.82); border:1px solid rgba(255,217,77,.55); border-radius:6px; padding:2px 1px; cursor:pointer; pointer-events:auto; white-space:nowrap; overflow:hidden; }
+  .rcChip { position:absolute; left:2px; right:2px; bottom:2px; z-index:3; font-family:'Luckiest Guy',cursive; font-size:8px; letter-spacing:.4px; line-height:1.25; color:#ffd94d; background:rgba(10,4,24,.82); border:1px solid rgba(255,217,77,.55); border-radius:6px; padding:2px 1px; cursor:pointer; pointer-events:auto; white-space:normal; overflow:hidden; }   /* RC1.1: chips WRAP to two short lines — SPARKLES — IN CUSTOMIZE reads whole on a 72px card instead of clipping */
   .rcChip.on { color:#3a1503; background:linear-gradient(#ffd94d,#ff9d3c); }
   .rcChip.soon { color:#9d8fc4; border-color:rgba(255,255,255,.25); }
+  /* RC1.1: the NOTE BALANCE row's clean layout — the value sits in its own chip box (flex:none, never wraps) and the label column may shrink (min-width:0), so no word of this row can spill down into the SHOP row's zone at 428px (Keith's RC playtest video, 2026-11-17) */
+  .optRowBal .optLab { flex:1 1 auto; min-width:0; }
+  .optRowBal .optSub { max-width:100%; }
+  .optBal { flex:none; white-space:nowrap; font-family:'Fredoka','Trebuchet MS',sans-serif; font-weight:700; font-size:16px; letter-spacing:1px; color:#ffd94d; background:rgba(20,24,64,.82); border:2px solid rgba(255,210,63,.55); border-radius:10px; padding:6px 12px; }
   .scard { position:relative; }
+  .scard.fitwhole { background-size:contain; background-repeat:no-repeat; background-position:center; background-color:#171238; }   /* RC1.1 (Keith, 2026-11-17: 'The landscape cuts off the girls photos'): Sayori's and Ivey's portraits are landscape photos — cover chopped them into tight face crops; contain shows the portrait WHOLE, the leftover space filled with the panel tone. The class rides the card, so their pair portraits take the same fit. The other runners' cards keep cover. */
   .devRow { display:none !important; }
   body.devOpen .devRow { display:flex !important; }   /* RC1: dev rows are hidden, never deleted — the City Dusk flag stays load-bearing behind ?dev=1 */
   #goldToast { position:absolute; left:50%; top:16%; transform:translateX(-50%); z-index:45; font-family:'Luckiest Guy',cursive; font-size:22px; color:#ffd94d; text-shadow:0 2px 0 #3a1503, 0 0 18px rgba(255,217,77,.8); pointer-events:none; text-align:center; }
@@ -335,7 +340,7 @@
     <div id="pubNote"></div>
   </div>
   <div id="shopPage" class="rcPage"><div class="bpHead"><button id="shopBack" class="rcBack">‹ BACK</button><div class="bpTitle">SHOP</div></div><div class="rcBody"><div class="rcWallet">♪ <span id="shopBal">0</span> NOTES</div><div class="rcNote" id="shopGrant"></div><div class="rcSec">NOTE PACKS — CASH</div><div id="packList"></div><div class="rcSec">REVIVE TOKENS — NOTES</div><div id="tokenList"></div><div class="rcSec">GOLD WINGS</div><div class="rcGold" id="goldState">EARNED ONLY · DEATHLESS 10,000 FT · NEVER SOLD</div><div class="rcNote" id="shopMsg"></div></div></div><div id="custPage" class="rcPage"><div class="bpHead"><button id="custBack" class="rcBack">‹ BACK</button><div class="bpTitle">CUSTOMIZE</div></div><div class="rcBody"><div class="rcWallet">♪ <span id="custBal">0</span> NOTES</div><div class="rcSec">RUNNERS &amp; THEIR UPGRADES</div><div id="custList"></div><div class="rcSec">LEVEL SKIPS — OR CLEAR THE PATH ON FOOT</div><div id="skipList"></div><div class="rcSec">CHARGE COLORS</div><div id="colorRow"></div><div class="rcSec">EFFECTS — STYLE ONLY, NO POWER FOR SALE</div><div id="fxList"></div><div class="rcNote" id="custMsg"></div></div></div><div id="boardPage"><div class="bpHead"><button id="bpBack">‹ BACK</button><div class="bpTitle">WORLD BOARD</div></div><div id="bpCount"></div><div id="bpList"></div></div>
-  <div id="optPage"><div class="bpHead"><button id="optBack">‹ BACK</button><div class="bpTitle">OPTIONS</div></div><div class="optBody"><div class="optRow"><div class="optLab"><div class="optName">NOTE BALANCE</div><div class="optSub">Notes are the currency — characters cost 3,000.</div></div><div id="optNotes" class="optName">0</div></div><div class="optRow"><div class="optLab"><div class="optName">SHOP</div><div class="optSub">Note packs and revive tokens</div></div><button class="optBtn" id="optShop">OPEN ›</button></div><div class="optRow"><div class="optLab"><div class="optName">CUSTOMIZE</div><div class="optSub">Runners, upgrades, charge colors, effects, level skips</div></div><button class="optBtn" id="optCust">OPEN ›</button></div><div class="optRow"><div class="optLab"><div class="optName">GHOST RUNNERS</div><div class="optSub">Race the best runs. Turn off to run alone.</div></div><button id="optGhosts" class="audTg">GHOSTS ON</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">DEBUG</div><div class="optSub">Map review — START GAME opens the course with no runner: drag to scroll, BACK returns here.</div></div><button id="optDebug" class="audTg off">DEBUG OFF</button></div><div class="optRow"><div class="optLab"><div class="optName">DEBUG READOUT</div><div class="optSub">The fork's live state readout and version footer. Turn it off for clean screenshots.</div></div><button id="optDbg" class="audTg">READOUT ON</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — ENDLESS WINGS</div><div class="optSub">Dev testing only — every run starts with white wings on and they never run out. A magnet still strips them; landing on a cloud brings them back.</div></div><button id="optTkWings" class="audTg off">ENDLESS OFF</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — FORCE SEESAW</div><div class="optSub">Dev testing only — generated clouds come up as see-saws in any world, from the first deck of the run. One force at a time.</div></div><button id="optTkSaw" class="audTg off">SEESAW OFF</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — FORCE 360</div><div class="optSub">Dev testing only — generated clouds come up as 360 flipping clouds in any world, from the first deck of the run. One force at a time.</div></div><button id="optTkFlip" class="audTg off">360 OFF</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — FORCE SHIVER</div><div class="optSub">Dev testing only — generated clouds come up as shiver clouds in any world, from the first deck of the run. One force at a time.</div></div><button id="optTkShiv" class="audTg off">SHIVER OFF</button></div><!-- RC1: the Zeus toggle RETIRES here — Zeus is Ivey’s owned upgrade now, equipped in CUSTOMIZE / on her select card. The guarded wiring below simply finds no button. --><div class="optRow devRow"><div class="optLab"><div class="optName">ZEUS TEMPO</div><div class="optSub">Dev option only — how fast Zeus's gallop cycles, judged in game (Keith, 2026-11-15: the tempo is checked on game, not out). ×1.0 is the clip's authored cadence (1.0667 s a cycle); ×1.255 is the previewed chase tempo. His leap is not dialed. Only matters with ZEUS WITH IVEY on.</div></div><button id="optZeusTempo" class="audTg">TEMPO ×1.0</button></div><!-- RC1: the Sparkles toggle RETIRES here — Sparkles is Sayori’s owned upgrade now, equipped in CUSTOMIZE / on her select card. --><div class="optRow devRow"><div class="optLab"><div class="optName">GOLDEN HOUR (DEMO)</div>   <!-- DEV FORK 89: Keith named the city-below backdrop GOLDEN HOUR --><div class="optSub">Demo backdrop — a hazy city far below at sunset, fog and bokeh baked into the art. Works in any world; that world's scenery stands down while it is on.</div></div><button id="optCity" class="audTg off">CITY DUSK OFF</button></div><div class="optRow"><div class="optLab"><div class="optName">DEPTH BLUR</div><div class="optSub">Depth-of-field softness — distance softens through a graded pass; decks, runner and pickups stay sharp.</div></div><button id="optBokeh" class="audTg off">BOKEH OFF</button></div><div class="optRow"><div class="optLab"><div class="optName">MUSIC</div><div class="optSub">The game's beats, on or off.</div></div><button id="optMusic" class="audTg">MUSIC ON</button></div><div class="optRow"><div class="optLab"><div class="optName">SOUND</div><div class="optSub">Steps, pickups and booms.</div></div><button id="optSfx" class="audTg">SOUND ON</button></div><div class="optRow"><div class="optLab"><div class="optName">RESTORE PURCHASES</div><div class="optSub">On a new device? Bring back what you bought.</div></div><button id="optRestore" class="optBtn">RESTORE</button></div><div class="optRow"><div class="optLab"><div class="optName">RESET LOCAL SCORES</div><div class="optSub">Clears this device's scores, bests and ghost recordings. The world board is not touched.</div></div><button id="optReset" class="optBtn">RESET</button></div><div id="optMsg"></div><div class="optFoot"><div class="optCredit">A NINJA MUSIC RECORDS GAME</div><div id="optVer"></div><a id="optPriv" href="privacy.html">PRIVACY POLICY</a>   <!-- RC1: the footer link lands on the candidate’s real privacy page --></div></div></div>
+  <div id="optPage"><div class="bpHead"><button id="optBack">‹ BACK</button><div class="bpTitle">OPTIONS</div></div><div class="optBody"><div class="optRow optRowBal"><div class="optLab"><div class="optName">NOTE BALANCE</div><div class="optSub">Notes are the currency — characters cost 3,000.</div></div><div id="optNotes" class="optBal">0</div></div>   <!-- RC1.1: the balance row's clean layout — the value rides in its own chip box (see .optBal), so no word of this row can spill into the SHOP row's zone --><div class="optRow" id="optDevModeRow"><div class="optLab"><div class="optName">DEVELOPER MODE</div><div class="optSub">Unlocks everything — every runner, upgrade and level, every color and effect — and shows the data readout for screenshots. Testing only: your real purchases underneath stay exactly as they are.</div></div><button id="optDevMode" class="audTg off">DEV MODE OFF</button></div><div class="optRow"><div class="optLab"><div class="optName">SHOP</div><div class="optSub">Note packs and revive tokens</div></div><button class="optBtn" id="optShop">OPEN ›</button></div><div class="optRow"><div class="optLab"><div class="optName">CUSTOMIZE</div><div class="optSub">Runners, upgrades, charge colors, effects, level skips</div></div><button class="optBtn" id="optCust">OPEN ›</button></div><div class="optRow"><div class="optLab"><div class="optName">GHOST RUNNERS</div><div class="optSub">Race the best runs. Turn off to run alone.</div></div><button id="optGhosts" class="audTg">GHOSTS ON</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">DEBUG</div><div class="optSub">Map review — START GAME opens the course with no runner: drag to scroll, BACK returns here.</div></div><button id="optDebug" class="audTg off">DEBUG OFF</button></div><!-- RC1.1: the DEBUG READOUT row RETIRES into DEVELOPER MODE (the row above) — the switch owns the strip now. optToggleReadout + applyDbgVis stay defined below, guarded and uncalled by any row, so the dr plumbing stays harmless. --><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — ENDLESS WINGS</div><div class="optSub">Dev testing only — every run starts with white wings on and they never run out. A magnet still strips them; landing on a cloud brings them back.</div></div><button id="optTkWings" class="audTg off">ENDLESS OFF</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — FORCE SEESAW</div><div class="optSub">Dev testing only — generated clouds come up as see-saws in any world, from the first deck of the run. One force at a time.</div></div><button id="optTkSaw" class="audTg off">SEESAW OFF</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — FORCE 360</div><div class="optSub">Dev testing only — generated clouds come up as 360 flipping clouds in any world, from the first deck of the run. One force at a time.</div></div><button id="optTkFlip" class="audTg off">360 OFF</button></div><div class="optRow devRow"><div class="optLab"><div class="optName">TEST KIT — FORCE SHIVER</div><div class="optSub">Dev testing only — generated clouds come up as shiver clouds in any world, from the first deck of the run. One force at a time.</div></div><button id="optTkShiv" class="audTg off">SHIVER OFF</button></div><!-- RC1: the Zeus toggle RETIRES here — Zeus is Ivey’s owned upgrade now, equipped in CUSTOMIZE / on her select card. The guarded wiring below simply finds no button. --><div class="optRow devRow"><div class="optLab"><div class="optName">ZEUS TEMPO</div><div class="optSub">Dev option only — how fast Zeus's gallop cycles, judged in game (Keith, 2026-11-15: the tempo is checked on game, not out). ×1.0 is the clip's authored cadence (1.0667 s a cycle); ×1.255 is the previewed chase tempo. His leap is not dialed. Only matters with ZEUS WITH IVEY on.</div></div><button id="optZeusTempo" class="audTg">TEMPO ×1.0</button></div><!-- RC1: the Sparkles toggle RETIRES here — Sparkles is Sayori’s owned upgrade now, equipped in CUSTOMIZE / on her select card. --><div class="optRow devRow"><div class="optLab"><div class="optName">GOLDEN HOUR (DEMO)</div>   <!-- DEV FORK 89: Keith named the city-below backdrop GOLDEN HOUR --><div class="optSub">Demo backdrop — a hazy city far below at sunset, fog and bokeh baked into the art. Works in any world; that world's scenery stands down while it is on.</div></div><button id="optCity" class="audTg off">CITY DUSK OFF</button></div><div class="optRow"><div class="optLab"><div class="optName">DEPTH BLUR</div><div class="optSub">Depth-of-field softness — distance softens through a graded pass; decks, runner and pickups stay sharp.</div></div><button id="optBokeh" class="audTg off">BOKEH OFF</button></div><div class="optRow"><div class="optLab"><div class="optName">MUSIC</div><div class="optSub">The game's beats, on or off.</div></div><button id="optMusic" class="audTg">MUSIC ON</button></div><div class="optRow"><div class="optLab"><div class="optName">SOUND</div><div class="optSub">Steps, pickups and booms.</div></div><button id="optSfx" class="audTg">SOUND ON</button></div><div class="optRow"><div class="optLab"><div class="optName">RESTORE PURCHASES</div><div class="optSub">On a new device? Bring back what you bought.</div></div><button id="optRestore" class="optBtn">RESTORE</button></div><div class="optRow"><div class="optLab"><div class="optName">RESET LOCAL SCORES</div><div class="optSub">Clears this device's scores, bests and ghost recordings. The world board is not touched.</div></div><button id="optReset" class="optBtn">RESET</button></div><div id="optMsg"></div><div class="optFoot"><div class="optCredit">A NINJA MUSIC RECORDS GAME</div><div id="optVer"></div><a id="optPriv" href="privacy.html">PRIVACY POLICY</a>   <!-- RC1: the footer link lands on the candidate’s real privacy page --></div></div></div>
   <div id="unlockCard"><div class="ucBox"><div id="ucName">LASHMOOVE</div><div id="ucPrice">🔒 LOCKED — 3,000 ♪</div><div id="ucBal"></div><button id="ucNotes" class="optBtn">UNLOCK — 3,000 ♪</button><!-- RC1: no cash door for runners — notes only (Keith’s ruled model). unlockWithCashSim stays defined below, uncalled. --><button id="ucClose" class="audTg">NOT NOW</button><div id="ucMsg"></div></div></div>
 </div>
 <audio id="music" src="../play/assets/daylight.mp3" loop preload="auto"></audio>
@@ -926,13 +931,13 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
   }
 }
 function gateSteps() {   /* footsteps sound only while his feet are on a cloud — checked every frame, acts on change */
-  const on = mScene === 'steps' && mode === 'run' && !!grounded && !(grounded && (grounded.dark || window.__map === 'rain' || window.__map === 'rain2')) && !hangPlat && !slipPlat;   /* DEV FORK 67: no snow steps in STORM SEASON — every cloud there is water underfoot (Keith) */   /* v0.91: on a DARK cloud the snow steps stop — the water walk (gateDark) is the footstep there */
+  const on = mScene === 'steps' && mode === 'run' && !!grounded && !(grounded.dark && window.__map !== 'rain' && window.__map !== 'rain2') && !hangPlat && !slipPlat;   /* RC1.1 (Keith, 2026-11-17: 'On the rain clouds go back to running in snow sound — the water puddles wasn't working for me'): the SNOW steps play on the rain worlds too — only a dark cloud OUTSIDE the rain worlds keeps them off (the water walk owns that one) */   /* DEV FORK 67: no snow steps in STORM SEASON — every cloud there is water underfoot (Keith) */   /* v0.91: on a DARK cloud the snow steps stop — the water walk (gateDark) is the footstep there */
   if (on === stepsGateOn) return; stepsGateOn = on;
   if (actx && gainS && actx.state === 'running') gainS.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
   else if (mScene === 'steps' && (music.src || '').includes('steps')) { if (on && !window.__sfxOff) { const p = music.play(); if (p && p.catch) p.catch(() => {}); } else music.pause(); }   /* DEV FORK 12: same SOUND-bus respect in gateSteps */
 }
 function gateDark() {   /* Keith (v0.91): the water walk sounds 'when your feet are on a dark cloud only. not before or after. it doesnt continue' — a hard little gate on the dark chain, checked every frame next to gateSteps, fading at the steps' own snappy rate */
-  const on = mode === 'run' && !!grounded && (!!grounded.dark || window.__map === 'rain' || window.__map === 'rain2') && !hangPlat && !slipPlat;   /* DEV FORK 67: the water walk is the footstep sound on EVERY cloud in STORM SEASON (Keith: 'use the other sound we have for rain clouds on every cloud') */
+  const on = mode === 'run' && !!grounded && !!grounded.dark && window.__map !== 'rain' && window.__map !== 'rain2' && !hangPlat && !slipPlat;   /* RC1.1 (Keith, 2026-11-17): the water-puddle run sound is OUT of the rain worlds entirely — dark clouds there run on snow steps now; the water walk keeps only the dark clouds of the other worlds (the v0.91 law) */   /* DEV FORK 67: the water walk is the footstep sound on EVERY cloud in STORM SEASON (Keith: 'use the other sound we have for rain clouds on every cloud') */
   if (on === darkGateOn) return; darkGateOn = on;
   if (actx && gainDk && actx.state === 'running') gainDk.gain.setTargetAtTime(on ? stpV() : 0, actx.currentTime, 0.045);
 }
@@ -1026,6 +1031,8 @@ for (const mv of Object.keys(SAYORI_MANIFEST)) {
 const ZEUS_GALLOP = new Array(64), ZEUS_JUMP = new Array(144);
 for (let i = 0; i < 64; i++) queueImg(im => { ZEUS_GALLOP[i] = im; }, 'zeus/gallop/f' + String(i).padStart(3, '0') + '.webp', false);
 for (let i = 0; i < 144; i++) queueImg(im => { ZEUS_JUMP[i] = im; }, 'zeus/jump/f' + String(i).padStart(3, '0') + '.webp', false);
+const ZEUS_BITEUP = new Array(96);
+for (let i = 0; i < 96; i++) queueImg(im => { ZEUS_BITEUP[i] = im; }, 'zeus/biteup/f' + String(i).padStart(3, '0') + '.webp', false);   /* DEV FORK 141: the Bite_Up clip (96 frames @ 60), baked by tools/bake_zeus_bite.py — flip at bake, WebP q86, the FORK 107 pipeline; lazy like his other sets. The plain Bite clip stays on the shelf, unbaked */
 /* cloud platform art: measured surface line (fraction of drawn height) + aspect */
 const CLOUDS = {
   '01':{surf:0.251, asp:0.264}, '11':{surf:0.371, asp:0.276}, '14':{surf:0.228, asp:0.262},
@@ -1117,10 +1124,17 @@ const ZEUS_JTRV = [0.0000,0.0318,0.0931,0.1433,0.1854,0.2304,0.2776,0.3240,0.369
 const ZEUS_TC = 0.6882 * ZEUS_UPM, ZEUS_TT = 6.0935 * ZEUS_UPM, ZEUS_TE = 7.1354 * ZEUS_UPM;   /* the clip's landmarks in world units: last contact (frame 16), fronts-first touchdown (frame 118), the chain pose (frame 141) */
 const ZEUS_LEAP_MAXGAP = 1475;   /* DEV FORK 131: THE HONEST ENVELOPE — FARTHER (Keith, 2026-11-16: "He should be able to honestly jump alot farther than her. And alot higher. So he should be able to jump cloud to cloud with no problems."): the widest gap the leap solve will attempt — 2.5x Ivey's FULL gap (590), ~97 FT. A deck dealt past it is OUT OF RANGE, and out of range is the refusal law's other face (Keith's corrected rule, 2026-11-16: never a leap into the void): no leap is planned toward it and he waits at the lip, exactly as when no deck is dealt at all. Spans past the capture's natural airborne span (ZEUS_TT - ZEUS_TC = 1,176 units) time-stretch the clip — the travel solve maps any span onto the clip, so the frame rate scales with the span and the touchdown still reads the clip's own fronts-first frame */
 const ZEUS_ARC_MIN = 86, ZEUS_ARC_MAX = 202;   /* DEV FORK 131: HIGHER — the arc added to the leap's ground line, in world units, peaking where the capture peaks: ZEUS_ARC_MIN at the 240 minimum span, rising linearly to ZEUS_ARC_MAX at the natural span. The clip's own drawn apex (his hips 221 units over the takeoff line) plus the full arc reads 465 in capture units — 1.5x Ivey's 310 full-charge apex; the 80 floor keeps the shortest hop at ~442 capture units, a proud arc at every span instead of a flattened one. DEV FORK 132: Keith's eye called 465 too low ("more more height in his jump, more arc", 2026-11-16) — the constants are now 86 / 202: the full-span apex reads ~620 capture units (2x her 310) and the floor keeps the shortest hop at ~450 */
-const ZEUS_LIFT_IN = 70;   /* DEV FORK 132: TAKEOFF BEFORE THE END (Keith, 2026-11-16: "he needs to jump before the end of a cloud") — the plan's contact anchor sits this far BEFORE the takeoff deck's end, so the capture's ground phase (the frames before the airborne start, f17) plays ON the deck and he leaves the surface here, never past the edge */
+const ZEUS_LIFT_IN = 70;
+const ZEUS_BITE_PTS = [[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.4,152.1],[616.3,151.9],[617.6,151.5],[619.0,150.9],[620.4,150.3],[621.6,149.7],[622.7,149.3],[623.5,149.1],[624.2,149.2],[624.6,149.6],[624.8,150.0],[624.9,150.6],[624.9,151.3],[624.9,152.4],[624.7,154.0],[624.5,155.8],[624.2,158.1],[623.9,161.1],[623.6,165.1],[623.2,169.7],[622.6,174.0],[622.0,176.3],[621.5,176.3],[621.2,175.1],[621.0,173.3],[620.7,171.6],[620.2,170.6],[619.6,169.8],[619.3,169.1],[619.2,168.5],[619.1,168.0],[618.9,167.1],[618.8,165.3],[618.8,163.4],[618.7,162.5],[618.4,160.6],[618.5,157.3],[618.7,154.4],[618.8,152.0],[618.8,150.6],[618.7,150.9],[618.7,152.0],[618.7,153.2],[618.6,153.8],[618.6,153.4],[618.7,152.7],[618.8,151.7],[619.0,150.2],[619.2,148.6],[619.5,147.1],[619.8,145.3],[620.1,143.4],[620.3,141.6],[620.3,140.1],[620.3,139.1],[620.2,138.5],[620.0,138.4],[619.7,138.7],[619.4,139.2],[619.1,139.9],[618.8,140.8],[618.6,141.6],[618.4,142.5],[618.2,143.4],[618.0,144.3],[617.7,145.2],[617.5,146.1],[617.2,147.0],[616.9,147.9],[616.6,148.7],[616.3,149.4],[616.0,150.1],[615.7,150.7],[615.5,151.2],[615.3,151.6],[615.1,151.9],[615.0,152.1],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2],[615.0,152.2]];   /* DEV FORK 141: the Bite_Up clip's bite points, flipped-capture px (zeus-bite-hang/frames.csv via the MANIFEST's flip rule: bx = 768 - bite_x_px, by = bite_y_px) — the draw pins this point to the lip and the rotation pivots on it */
+const ZEUS_BITE_SUP = [[207.2,209.4,210.1,209.3,207.1],[207.8,210.0,210.7,209.8,207.5],[208.4,210.6,211.1,210.2,207.9],[208.9,211.0,211.5,210.7,208.3],[209.3,211.3,211.8,210.9,208.5],[209.1,211.2,211.7,210.8,208.4],[208.8,210.9,211.4,210.5,208.2],[208.5,210.6,211.2,210.4,208.1],[208.3,210.5,211.0,210.3,207.9],[208.4,210.6,211.1,210.3,208.0],[208.6,210.8,211.3,210.5,208.1],[208.9,211.0,211.5,210.7,208.3],[209.7,211.7,212.2,211.1,208.6],[210.2,212.1,212.4,211.4,208.8],[210.9,212.7,212.9,211.6,209.0]];   /* DEV FORK 141: the grip window's (frames 40-54) rotated lowest-point reach, units below the bite point, alpha-scanned off the SHIPPED webps at pitch 50/55/60/65/70 deg (the scan lives in tools/bake_zeus_bite.py) — a measured-off-the-art table like ZEUS_GROW/ZEUS_JROW; forkcheck S119 reads the held dangle's true drop from it at the live pitch */
+const ZEUS_BITE_LATCH = 46, ZEUS_BITE_WIN0 = 40, ZEUS_BITE_WIN1 = 54;   /* DEV FORK 141: the clip's landmarks, 0-based (MANIFEST, 1-based: latch 47, grip hold 41-55, dangle 55): the entry plays 0 -> WIN1 through the latch; the hold loops WIN0..WIN1 */
+const ZEUS_BITE_ROT = 60;   /* DEV FORK 141: THE DANGLE PITCH, degrees (Keith: "Rotate him and loop the frame as he dangles") — the raw clip holds him at 12.8 deg below horizontal, 121.7 units lip->lowest (the alignment proof); +60 about the bite point lands the held drop at ~235 units. ONE constant — Keith steers it by eye */
+const ZEUS_BITE_SWAY = 3, ZEUS_BITE_SWAY_T = 1.4;   /* DEV FORK 141: the held dangle's pendulum — +-3 deg on a 1.4 s sine, so the loop never reads frozen. The period is sized to the hang law (1.05 s hang + 0.75 s slip, the entry eating ~0.9 s of it): the hold lives ~0.9 s, and a 1.4 s rock completes its swing, up through the peak and back below level, inside a single hang */
+const ZEUS_BITE_OFF_X = 32, ZEUS_BITE_OFF_Y = 279;   /* DEV FORK 141: THE SEAT (Keith, steering 2026-11-17: "he will need to be lower and to the right") — the pin sits this far right of and below gripOf(deck): his teeth grip lower on the cloud's face and further along the lip, and the rotated body follows. Working values for the proof — Keith re-calls them by eye. DEV FORK 142: RE-SEATED 235 LOWER (OFF_Y 24 -> 259) on Keith's verdict on the FORK 141 proof ("From the looks of it he needs another 235 units down") — the held dangle's lip->lowest drop goes ~235 -> ~470 and the body hangs clear below the deck instead of against its face; OFF_X, ROT and the sway stand as FORK 141 left them */
+function zeusBiteRot(v, deg) { const a = -deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return { x: v.x * c - v.y * s, y: v.x * s + v.y * c }; }   /* DEV FORK 141: rotate a frame-space offset by the dangle pitch, canvas sense — positive pitch swings the tail DOWN around the bite point */   /* DEV FORK 132: TAKEOFF BEFORE THE END (Keith, 2026-11-16: "he needs to jump before the end of a cloud") — the plan's contact anchor sits this far BEFORE the takeoff deck's end, so the capture's ground phase (the frames before the airborne start, f17) plays ON the deck and he leaves the surface here, never past the edge */
 const ZEUS_JROW_C = 493.5, ZEUS_JROW_A = 725.0;   /* DEV FORK 131: the leap clip's ground-row landmarks for the arc's shape: the mean of the two contact rows (501.4 at last contact, 504.4 at touchdown) and the apex row (725.0 at the clip's highest frame). DEV FORK 136: C is re-derived from the CORRECTED contact rows (493 at last contact, 494 at touchdown — mean 493.5) so the arc's zero sits on the line his paws now meet; the apex row is untouched */
 const ZEUS_LEAP_PARKED = false;   /* DEV FORK 117: THE LEAP IS UN-PARKED — Keith approved the chase leap in the Blender chat (2026-11-15 22:33 ET, his thumbs-up on the zeus-complete-v5 leap preview) and the v2 chase capture is baked into dev/zeus/, so both leap entries below engage again and the frame block's leap-era ground line owns his line; the bridge ground rule stands down. DEV FORK 111: THE LEAP IS PARKED — Keith's hold (2026-11-15: "I dont want him to jump. I want to work on his motions, he doesn't look like he is running and leaping. He doesn't look enthusiastic.") — his motions are being reworked in Blender, and until fresh captures arrive the leap planner NEVER engages: both entries into mode 'leap' in the tick below are gated on this flag, and the leap code stays in place, unreachable — parked, not deleted. While parked, the BRIDGE GROUND RULE in the tick owns his line (the deck under his own x; over a void, Ivey's deck line while she's grounded; if she's airborne too, his last line held). Flip to false only when the reworked leap capture lands. */
-const ZS = { on: false, zx: 0, deck: null, plan: null, phase: 0, mode: 'off', frame: 0, grow: 0, planeY: 0, img: null, drawn: false, tdrawn: false, tframe: 0, leaps: 0, prevPx: 0 };
+const ZS = { on: false, zx: 0, deck: null, plan: null, phase: 0, mode: 'off', frame: 0, grow: 0, planeY: 0, img: null, drawn: false, tdrawn: false, tframe: 0, leaps: 0, prevPx: 0, bmode: null, bframe: 0, brot: 0, bdeck: null, bpin: null, bhips: null, bstart: null, bholdT: 0, bimg: null, brot0: 0, bexitF: 0 };   /* DEV FORK 141: the b* fields are the bite-hang's (sub-phase, clip frame, live pitch, the deck he bites, the pin, his hips, the entry's origin, the hold clock, the drawn frame, the exit's captured pitch/frame) */
 function zeusSurf(p, x) { return p.y + (p.sink || 0) + 6 + (p.tilt ? Math.sin(p.tilt) * (x - (p.x + p.len * 0.5)) : 0); }   /* DEV FORK 107: a deck's drawn surface line at x — the +6 is the deck draw's own inset; a tilted deck's line leans with it, so his paws ride see-saws too */
 function zeusDeckAt(x, pref) { let best = null, bd = 1e18; for (const p of plats) { if (p.gone || p.dropping || p.flipOff) continue; if (x < p.x - 2 || x > p.x + p.len + 2) continue; if (p === pref) return p; const d = Math.abs(zeusSurf(p, x) - ZS.planeY); if (d < bd) { bd = d; best = p; } } return best; }   /* DEV FORK 107: the solid deck under a point, preferring the surface nearest his current ground plane */
 function zeusNextDeck(from) { const E0 = from.x + from.len; let best = null, bs = 1e18; for (const p of plats) { if (p === from || p.gone || p.dropping || p.flipOff) continue; if (p.x + p.len <= E0 + 20 || p.x < from.x) continue; const sc = (p.x - E0) * 4 + Math.abs(p.y - from.y); if (sc < bs) { bs = sc; best = p; } } return best; }   /* DEV FORK 107: the next solid deck ahead — the gap dominates the score, the band step breaks ties */
@@ -1130,19 +1144,79 @@ function zeusPlanLeap(d0, d1) { const E0 = d0.x + d0.len; let contactX = E0 - ZE
 function zeusLeapTravel(P, x) { if (x <= P.contactX) return ZEUS_TC * Math.max(0, (x - P.startX) / Math.max(30, P.contactX - P.startX)); if (x <= P.touchX) return ZEUS_TC + (ZEUS_TT - ZEUS_TC) * (x - P.contactX) / (P.touchX - P.contactX); return ZEUS_TT + (ZEUS_TE - ZEUS_TT) * Math.min(1, (x - P.touchX) / Math.max(30, P.endX - P.touchX)); }   /* DEV FORK 107: world x -> clip travel under the plan */
 function zeusFrameFor(tU) { const m = tU / ZEUS_UPM; if (m <= 0) return 0; for (let i = 1; i < ZEUS_JTRV.length; i++) { if (ZEUS_JTRV[i] >= m) { const a = ZEUS_JTRV[i - 1], b = ZEUS_JTRV[i]; return b > a ? (i - 1) + (m - a) / (b - a) : i - 1; } } return 140; }   /* DEV FORK 107: clip travel -> fractional frame, inverting the measured travel curve */
 function zeusArcW(ff) { const i = Math.max(0, Math.min(143, ff)), i0 = Math.floor(i), i1 = Math.min(143, i0 + 1), g = ZEUS_JROW[i0] + (ZEUS_JROW[i1] - ZEUS_JROW[i0]) * (i - i0); return Math.max(0, Math.min(1, (g - ZEUS_JROW_C) / (ZEUS_JROW_A - ZEUS_JROW_C))); }   /* DEV FORK 131: the arc's shape is the capture's own vertical profile — the frame's ground-row excursion between its contact rows and its apex row: 0 while he gathers on the ground, 1 at the clip's apex, back to 0 at touchdown, so the added arc swells exactly as his body rises in the clip and the touchdown solve stays exact */
-window.__zeusReset = function () { ZS.on = false; ZS.deck = null; ZS.plan = null; ZS.mode = 'off'; ZS.drawn = false; ZS.leaps = 0; ZS.prevPx = (typeof px === 'number') ? px : 0; };   /* DEV FORK 107: startRun + the revive call this — Zeus is reborn at his station every (re)start */
+window.__zeusReset = function () { ZS.on = false; ZS.deck = null; ZS.plan = null; ZS.mode = 'off'; ZS.drawn = false; ZS.leaps = 0; ZS.prevPx = (typeof px === 'number') ? px : 0; ZS.bmode = null; ZS.bdeck = null; ZS.bpin = null; ZS.bhips = null; ZS.bimg = null; ZS.brot = 0; };   /* DEV FORK 141: a (re)birth clears the bite-hang with the rest of him */   /* DEV FORK 107: startRun + the revive call this — Zeus is reborn at his station every (re)start */
 window.__zeusTick = function (dt) {
   const act = !!window.__zeusOpt && selChar === 'ivey' && mode === 'run';
-  if (!act) { ZS.on = false; ZS.prevPx = px; return; }
+  if (!act) { ZS.on = false; ZS.prevPx = px; if (ZS.mode === 'bite') { ZS.mode = 'off'; ZS.bmode = null; ZS.bimg = null; } return; }   /* DEV FORK 141: the bite-hang stands down with the rest of him */
   const dz = px - ZS.prevPx; ZS.prevPx = px;
   const born = !ZS.on || Math.abs(dz) > 900;   /* DEV FORK 117: the birth/teleport verdict, captured once — the birth-tick fix below reads it */
   if (born) {   /* birth, or a teleport (a test seek, a course swap): take station on solid ground */
     ZS.zx = px - ZEUS_STATION; ZS.planeY = py;
     const d = zeusDeckAt(ZS.zx, null) || grounded || (plats.length ? plats[0] : null);
     if (!d) { ZS.on = false; return; }
-    ZS.deck = d; ZS.plan = null; ZS.mode = 'gallop'; ZS.phase = 0; ZS.leaps = 0;
+    ZS.deck = d; ZS.plan = null; ZS.mode = 'gallop'; ZS.phase = 0; ZS.leaps = 0; ZS.bmode = null; ZS.bimg = null;   /* DEV FORK 141: a birth (teleport / revive) annuls any bite-hang in flight */
     ZS.zx = Math.max(d.x + 40, Math.min(ZS.zx, d.x + d.len - 40));
     ZS.on = true;
+  }
+  /* DEV FORK 141: THE BITE-HANG — a third Zeus mode beside gallop and leap (Keith, 2026-11-17: "Rotate him and loop the frame as he dangles"; steering seconds later: "he will need to be lower and to the right"). While she HANGS or SLIPS on a deck, Zeus bite-hangs on the SAME deck: the Bite_Up clip's bite point pins to that deck's lip at gripOf + the ZEUS_BITE_OFF seat, the entry frames travel him onto the pin, the grip window loops ROTATED by ZEUS_BITE_ROT about the pin (the sway on top) for as long as she hangs, and her pull-up / slip-off / release plays the clip out and hands him back to the gallop law below. A leap in flight when she grabs resolves into the entry at her deck — the plan is annulled, never completed over air. FORK 138's line below stands for the record: with the bite live, a hang during his leap comes here instead, and the freeze it fixed is re-proven in the bite's own terms by forkcheck S119 (S116 re-contracted openly). Zeus OFF, or Ivey not hanging, never reaches this block — FORK 140 behavior byte for byte. */
+  const hangD141 = hangPlat || slipPlat;
+  if (ZS.mode !== 'bite' && hangD141 && (ZS.mode === 'gallop' || ZS.mode === 'leap')) {
+    ZS.bstart = { x: ZS.zx, y: ZS.planeY - (ZS.grow - 218) * PX2U * ZEUS_SCALE };   /* his hips, read off the frame he is in right now (gallop row or leap row alike) */
+    ZS.mode = 'bite'; ZS.plan = null; ZS.bmode = 'entry'; ZS.bframe = 0; ZS.brot = 0; ZS.bdeck = hangD141; ZS.bholdT = 0;
+  }
+  if (ZS.mode === 'bite') {
+    const S141 = PX2U * ZEUS_SCALE;
+    const rel141 = () => { const p = ZEUS_BITE_PTS[Math.max(0, Math.min(95, Math.floor(ZS.bframe)))]; return { x: (p[0] - 308) * S141, y: (p[1] - 218) * S141 }; };   /* this frame's bite point relative to the hips anchor, flipped-capture px -> units */
+    const pin141 = () => { const g = gripOf(ZS.bdeck); return { x: g.x + ZEUS_BITE_OFF_X, y: g.y + ZEUS_BITE_OFF_Y }; };   /* the pin: her deck's lip, seated lower and to the right per Keith's steering */
+    if (hangD141 && ZS.bmode === 'exit') { ZS.bmode = 'entry'; ZS.bstart = { x: ZS.bhips.x, y: ZS.bhips.y }; ZS.bframe = 0; ZS.brot = 0; }   /* she grabbed again mid-release: he re-enters from where he hangs */
+    if (hangD141) ZS.bdeck = hangD141;
+    if (ZS.bmode === 'entry' && hangD141) {
+      ZS.bframe += dt * 60;
+      const rel = rel141(), tp = pin141(), k0 = Math.max(0, Math.min(1, ZS.bframe / ZEUS_BITE_LATCH)), k = k0 * k0 * (3 - 2 * k0);
+      ZS.bhips = { x: ZS.bstart.x + (tp.x - rel.x - ZS.bstart.x) * k, y: ZS.bstart.y + (tp.y - rel.y - ZS.bstart.y) * k };   /* the teeth ride the ease and sit exactly on the pin at the latch */
+      ZS.brot = 0;   /* the entry draws unrotated — the pitch belongs to the held dangle */
+      ZS.bpin = { x: ZS.bhips.x + rel.x, y: ZS.bhips.y + rel.y };
+      if (ZS.bframe >= ZEUS_BITE_WIN1) { ZS.bmode = 'hold'; ZS.bholdT = 0; }
+    } else if (ZS.bmode === 'hold' && hangD141) {
+      ZS.bholdT += dt;
+      ZS.bframe += dt * 60;
+      if (ZS.bframe >= ZEUS_BITE_WIN1 + 1) ZS.bframe = ZEUS_BITE_WIN0 + (ZS.bframe - (ZEUS_BITE_WIN1 + 1));   /* THE LOOP (Keith's word): the grip window, f41-f55, for as long as she hangs */
+      const bl0 = Math.max(0, Math.min(1, ZS.bholdT / ((ZEUS_BITE_WIN1 - ZEUS_BITE_WIN0 + 1) / 60))), blend = bl0 * bl0 * (3 - 2 * bl0);
+      ZS.brot = blend * (ZEUS_BITE_ROT + ZEUS_BITE_SWAY * Math.sin(ZS.bholdT * 2 * Math.PI / ZEUS_BITE_SWAY_T));   /* the pitch eases in across the grip window's first loop — a hard 60-degree switch at the latch would pop — then the pendulum rides on top */
+      const rel = rel141(), tp = pin141(), rr = zeusBiteRot(rel, ZS.brot);
+      ZS.bpin = tp;
+      ZS.bhips = { x: tp.x - rr.x, y: tp.y - rr.y };   /* the body hangs off the pin: hips = pin - R(pitch) * (bite point rel hips) */
+    } else {
+      if (ZS.bmode !== 'exit') { ZS.bmode = 'exit'; ZS.bexitF = ZS.bframe; ZS.brot0 = ZS.brot; }   /* her pull-up, slip-off or release: the clip plays out from wherever it stands */
+      ZS.bframe += dt * 60;
+      const f = ZS.bframe, rel = rel141(), tp = pin141();
+      const fade = Math.max(0, Math.min(1, (f - ZS.bexitF) / 12));
+      ZS.brot = ZS.brot0 * (1 - fade);   /* the pitch unwinds over the release's first 12 frames */
+      const rr = zeusBiteRot(rel, ZS.brot);
+      const hipsPin = { x: tp.x - rr.x, y: tp.y - rr.y };
+      let sd = zeusDeckAt(px - ZEUS_STATION, null), stx = px - ZEUS_STATION;
+      if (!sd && ZS.bdeck && !ZS.bdeck.gone) { sd = ZS.bdeck; stx = Math.max(sd.x + 40, Math.min(stx, sd.x + sd.len - 40)); }   /* no solid deck at his station (she pulled up over the gap): he scrambles back onto the deck he was biting — never a bridge over air */
+      const hipsSt = sd ? { x: stx, y: zeusSurf(sd, stx) - (ZEUS_GROW[10] - 218) * S141 } : null;
+      const w0 = Math.max(0, Math.min(1, (f - ZS.bexitF) / Math.max(1, 95 - ZS.bexitF))), w = w0 * w0 * (3 - 2 * w0);
+      ZS.bhips = hipsSt ? { x: hipsPin.x + (hipsSt.x - hipsPin.x) * w, y: hipsPin.y + (hipsSt.y - hipsPin.y) * w } : hipsPin;
+      ZS.bpin = { x: ZS.bhips.x + rr.x, y: ZS.bhips.y + rr.y };
+      if (f >= 95) {   /* the clip has played out: hand him back to the gallop law, on solid ground, at the contact frame so nothing pops */
+        ZS.mode = 'gallop'; ZS.bmode = null; ZS.bimg = null; ZS.phase = 10;
+        ZS.zx = ZS.bhips.x;
+        ZS.deck = zeusDeckAt(ZS.zx, null) || sd || grounded || null;
+        if (ZS.deck) ZS.planeY = zeusSurf(ZS.deck, ZS.zx); else ZS.on = false;
+        ZS.frame = 10; ZS.img = ZEUS_GALLOP[10]; ZS.grow = ZEUS_GROW[10];
+        return;
+      }
+    }
+    const bfi = Math.max(0, Math.min(95, Math.floor(ZS.bframe)));
+    ZS.frame = bfi;
+    const bim = ZEUS_BITEUP[bfi];
+    ZS.bimg = (bim && bim.naturalWidth) ? bim : null;
+    ZS.img = ZS.bimg || ZEUS_GALLOP[10];
+    ZS.zx = ZS.bhips.x;
+    ZS.planeY = ZS.bpin.y;   /* while he hangs, his plane reads the lip line he hangs from */
+    return;
   }
   const zx0 = ZS.zx, tgt = px - ZEUS_STATION;
   let adv = dz;
@@ -1196,10 +1270,11 @@ window.__zeusTick = function (dt) {
     else if (ZS.deck) ZS.planeY = zeusSurf(ZS.deck, ZS.zx);   /* DEV FORK 111: the unparked ground line — the leap-era rule, restored when the flag flips */
   }
 };
-window.__zeusDraw = function () { ZS.drawn = false; ZS.tdrawn = false; if (mode === 'title') { window.__zeusTitleDraw(); return; } if (!ZS.on || mode !== 'run') return; const img = ZS.img; if (!img || !img.naturalWidth) return; ctx.drawImage(img, ZS.zx - camX - ZEUS_AX, ZS.planeY - camY - ZS.grow * PX2U * ZEUS_SCALE, ZEUS_DW, ZEUS_DH); ZS.drawn = true; };   /* DEV FORK 107: the frame's ground row lands on his ground plane; the hips anchor sits at his x. DEV FORK 136: the title stage branches off below — the run path above is byte-identical */
+window.__zeusDraw = function () { ZS.drawn = false; ZS.tdrawn = false; if (mode === 'title') { window.__zeusTitleDraw(); return; } if (!ZS.on || mode !== 'run') return; if (ZS.mode === 'bite' && ZS.bpin && ZS.bhips) { const S = PX2U * ZEUS_SCALE, pt = ZEUS_BITE_PTS[Math.max(0, Math.min(95, Math.floor(ZS.bframe)))]; if (ZS.bimg) { ctx.save(); ctx.translate(ZS.bpin.x - camX, ZS.bpin.y - camY); ctx.rotate(-ZS.brot * Math.PI / 180); ctx.drawImage(ZS.bimg, -pt[0] * S, -pt[1] * S, ZEUS_DW, ZEUS_DH); ctx.restore(); } else { const g10 = ZEUS_GALLOP[10]; if (!g10 || !g10.naturalWidth) return; ctx.drawImage(g10, ZS.bhips.x - camX - ZEUS_AX, ZS.bhips.y - camY - 218 * S, ZEUS_DW, ZEUS_DH); } ZS.drawn = true; return; }   /* DEV FORK 141: THE BITE-HANG DRAW — the frame turns about its own bite point, which sits on the pin: the pivot IS the pin, so the teeth cannot drift while the body swings into the dangle. Until the lazy bite frames land he draws as his gallop contact frame at his hips — present, never vanished (the loader law) */ const img = ZS.img; if (!img || !img.naturalWidth) return; ctx.drawImage(img, ZS.zx - camX - ZEUS_AX, ZS.planeY - camY - ZS.grow * PX2U * ZEUS_SCALE, ZEUS_DW, ZEUS_DH); ZS.drawn = true; };   /* DEV FORK 107: the frame's ground row lands on his ground plane; the hips anchor sits at his x. DEV FORK 136: the title stage branches off below — the run path above is byte-identical */
 window.__zeusTitleDraw = function () { if (!window.__zeusOpt || selChar !== 'ivey' || loadState !== 'done') return; const fi = Math.floor(time * 60 * (window.__zeusTempo || 1)) % 64; const img = ZEUS_GALLOP[fi]; if (!img || !img.naturalWidth) return; const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53; ctx.drawImage(img, cxT - ZEUS_TITLE_STATION - ZEUS_AX, fyT - ZEUS_GROW[fi] * PX2U * ZEUS_SCALE, ZEUS_DW, ZEUS_DH); ZS.tframe = fi; ZS.tdrawn = true; };   /* DEV FORK 136: ZEUS ON THE TITLE STAGE (Keith) — with ZEUS WITH IVEY on and Ivey picked, Zeus gallops in place on the title stage beside her: his hips at the title station, his ground row on her feet line (fyT, the stage's own ground line — the same line her run-in-place stands on), the frame driven at the authored cadence the ZEUS TEMPO dial divides in-run (60 fps at x1, the 1.0667 s cycle). Any other runner, the option off, or any moment before the stage is set ('done') and he is simply not there; the in-run Zeus never wakes on the title (ZS.on stays false — the tick's own gate is untouched) */
-window.__zeusState = function () { return { on: ZS.on, opt: !!window.__zeusOpt, char: selChar, mode: ZS.mode, zx: Math.round(ZS.zx), frame: ZS.frame, grow: Math.round(ZS.grow * 10) / 10, arc: ZS.plan ? Math.round(ZS.plan.arc || 0) : 0, plan: ZS.plan ? { startX: Math.round(ZS.plan.startX), contactX: Math.round(ZS.plan.contactX), touchX: Math.round(ZS.plan.touchX), endX: Math.round(ZS.plan.endX) } : null, planeY: Math.round(ZS.planeY), deck: ZS.deck ? { x: ZS.deck.x, len: ZS.deck.len, y: ZS.deck.y, right: ZS.deck.x + ZS.deck.len } : null, leaps: ZS.leaps, drawn: ZS.drawn, tDrawn: ZS.tdrawn, tFrame: ZS.tframe };   /* DEV FORK 136: the title stage's draw flag + frame ride the state reader (forkcheck S114) */ };   /* DEV FORK 132: the plan's four anchors ride along — forkcheck S110 asserts the takeoff anchor, the touchdown inset and the run-out cap from the state alone */   /* DEV FORK 107: the state reader (forkcheck S93 + the proof renderers) — DEV FORK 131: grow + the plan's arc ride along so the envelope's apex is measurable from the state alone */
+window.__zeusState = function () { return { on: ZS.on, opt: !!window.__zeusOpt, char: selChar, mode: ZS.mode, zx: Math.round(ZS.zx), frame: ZS.frame, grow: Math.round(ZS.grow * 10) / 10, arc: ZS.plan ? Math.round(ZS.plan.arc || 0) : 0, plan: ZS.plan ? { startX: Math.round(ZS.plan.startX), contactX: Math.round(ZS.plan.contactX), touchX: Math.round(ZS.plan.touchX), endX: Math.round(ZS.plan.endX) } : null, planeY: Math.round(ZS.planeY), deck: ZS.deck ? { x: ZS.deck.x, len: ZS.deck.len, y: ZS.deck.y, right: ZS.deck.x + ZS.deck.len } : null, leaps: ZS.leaps, drawn: ZS.drawn, tDrawn: ZS.tdrawn, tFrame: ZS.tframe, bite: ZS.mode === 'bite' ? { sub: ZS.bmode, frame: Math.round(ZS.bframe), rot: Math.round(ZS.brot * 10) / 10, pin: ZS.bpin ? { x: Math.round(ZS.bpin.x), y: Math.round(ZS.bpin.y) } : null, hips: ZS.bhips ? { x: Math.round(ZS.bhips.x), y: Math.round(ZS.bhips.y) } : null, deck: ZS.bdeck ? { x: ZS.bdeck.x, len: ZS.bdeck.len, y: ZS.bdeck.y } : null } : null };   /* DEV FORK 136: the title stage's draw flag + frame ride the state reader (forkcheck S114) */ };   /* DEV FORK 132: the plan's four anchors ride along — forkcheck S110 asserts the takeoff anchor, the touchdown inset and the run-out cap from the state alone */   /* DEV FORK 107: the state reader (forkcheck S93 + the proof renderers) — DEV FORK 131: grow + the plan's arc ride along so the envelope's apex is measurable from the state alone */
 window.__zeusMeasure = function () { return { scale: ZEUS_SCALE, dw: ZEUS_DW, dh: ZEUS_DH, ax: ZEUS_AX, station: ZEUS_STATION, upm: ZEUS_UPM, refFrame: 10, refTop: ZEUS_TOP10, refGrow: ZEUS_GROW[10], refH: (ZEUS_GROW[10] - ZEUS_TOP10) * PX2U * ZEUS_SCALE, iveyH: CHAR_H }; };   /* DEV FORK 109: the scale reader (forkcheck S95 + the proof renderers) — refH is his drawn height on the reference frame by the game's own draw math */
+window.__zeusBiteMeasure = function () { return { rot: ZEUS_BITE_ROT, sway: ZEUS_BITE_SWAY, swayT: ZEUS_BITE_SWAY_T, offX: ZEUS_BITE_OFF_X, offY: ZEUS_BITE_OFF_Y, latch: ZEUS_BITE_LATCH, win0: ZEUS_BITE_WIN0, win1: ZEUS_BITE_WIN1, frames: ZEUS_BITE_PTS.length, supDegs: [50, 55, 60, 65, 70], sup: i => ZEUS_BITE_SUP[Math.max(0, Math.min(14, i - ZEUS_BITE_WIN0))], pt: i => ZEUS_BITE_PTS[Math.max(0, Math.min(95, i | 0))] }; };   /* DEV FORK 141: the bite-hang's constants + measured tables, exposed — forkcheck S119 and the proof renderers read the drop and the seat from here, never from a copy */
 /* DEV FORK 139: SPARKLES (Keith, ruled 2026-11-16) — the pair's state, tick, draw and readers, on the Zeus FORK 107/109/136 patterns throughout. The capture (sparkles-sprites-v2): gallop 36 / jump 90 / flap 56 at 60 fps, canvas 1248x1024, 340 px = 1 m, anchor (648, 896) the ground point under the seat, ground row 896; flipped at conversion to face the run, so the anchor mirrors to x = 600 (the MANIFEST's own flip note).
    SCALE (the FORK 109 method): on gallop frame 0 the pair's lowest alpha point is row 897 and Sayori's crown is row 183 — 714 canvas px of pair, 456.96 units at PX2U. Keith ruled the pair stands 286 units at the crown ('A child on a horse is taller than a man standing'; 6lade's CHAR_H is 256), so SPK_SCALE = 286 / 456.96 = 0.6259, and a bake metre lands at SPK_UPM = 340 * PX2U * SPK_SCALE = 136.2 units — the game's own human scale (256 units / 1.88 m). __sparkMeasure reads the height back by the draw math.
    GROUND ROWS (the FORK 136 method): SPK_GROW_* are each frame's lowest alpha>=128 row measured off the shipped webps; the draw lands that row on her ground line, so contacts meet the deck and suspension frames ride tucked — the convention Zeus ships.
@@ -1279,8 +1354,8 @@ window.__sparkTick = function (dt) {
   }
   SS.wasGround = !!grounded; SS.wasDbl = doubleUsed; SS.wasTpl = tripleUsed;
 };
-window.__sparkDraw = function () { SS.drawn = false; SS.tDrawn = false; if (mode === 'title') { window.__sparkTitleDraw(); return; } if (!SS.on || mode !== 'run') return; const img = SS.img; if (!img || !img.naturalWidth) return; const dx = px - camX - SPK_AX, dy = py - camY - SS.grow * PX2U * SPK_SCALE; const holdC = (grounded && held && !hangPlat && !slipPlat) ? Math.min(1, pressT / CHARGE_FULL) : 0; if (champMode || flareT > 0 || holdC > 0) { ctx.save(); ctx.shadowColor = (window.__chargeHex ? window.__chargeHex(selChar) : CHAR_FX[selChar].halo);   /* RC1: an equipped charge color recolors the halo — ghosts keep their own */ if (champMode || flareT > 0) ctx.shadowBlur = 30 + 12 * Math.sin(time * 9); else if (holdC >= 1) { ctx.shadowBlur = 30 + 12 * Math.sin(time * 9); ctx.globalAlpha = 1; } else { ctx.shadowBlur = 6 + 24 * holdC; ctx.globalAlpha = 0.3 + 0.7 * holdC; } ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); } if (magFlashT > 0) { ctx.save(); ctx.globalAlpha = Math.floor(time * 24) % 2 === 0 ? 0.15 : 1; ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); } else ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); SS.drawn = true; };   /* DEV FORK 139: the pair draws where Zeus draws (after the runner, before the decks); the frame's ground row lands on her ground line and the seat anchor sits at her x. The charge halo and the magnet strobe re-apply to the pair so a held charge still reads on the unicorn */
-window.__sparkTitleDraw = function () { if (!window.__spkTitleVis() || loadState !== 'done') return; const fi = Math.floor(time * 60) % 36; const img = SPK_GALLOP[fi]; if (!img || !img.naturalWidth) return; const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53; ctx.drawImage(img, cxT - SPK_AX, fyT - SPK_GROW_G[fi] * PX2U * SPK_SCALE, SPK_DW, SPK_DH); SS.tFrame = fi; SS.tDrawn = true; };   /* DEV FORK 139: SPARKLES ON THE TITLE STAGE (Keith) — with SPARKLES FOR SAYORI on and Sayori picked, the pair gallops in place on the title stage: the seat anchor at her mark (the stage centre), the ground row on her feet line (fyT), the frame at the clip's authored cadence (60 fps, the 0.6 s cycle). Her own title draw stands down behind __spkTitleVis; any other runner, the option off, or any moment before the stage is set ('done') and the pair is simply not there; the in-run pair never wakes on the title (SS.on stays false — the tick's own gate is untouched) */
+window.__sparkDraw = function () { SS.drawn = false; SS.tDrawn = false; if (mode === 'title') { window.__sparkTitleDraw(); return; } if (!SS.on || mode !== 'run') return; const img = SS.img; if (!img || !img.naturalWidth) return; const dx = px - camX - SPK_AX, dy = py - camY - SS.grow * PX2U * SPK_SCALE + ((grounded && !hangPlat && !slipPlat) ? FEET : 0);   /* RC1.1 THE TUCK + HER FLOOR (Keith, 2026-11-17: 'Sparkle needs to be behind the cloud layer to hide his feet like the other players' + 'raise the floor on sparkles'): grounded, the pair seats at the RUNNERS' foot line — hooves FEET deep like his feet (FEET: 'his feet sit this deep in the cloud tops'), and the deck pass (drawn after the pair) covers just the hoof bottoms the way it covers a runner's feet. Airborne the offset is off — she passes decks exactly as she always has, never hidden mid-air. */ /* RC1.1 SPARKLES FX IDENTITY (Keith, 2026-11-17: 'no charge glow for sparkles'): the mounted pair NEVER wears the charge halo — the shadow stamp that re-applied the runner's halo to the pair is gone at every charge state (holding, full, crown, flare); her charge reads in RAINBOW GLITTER instead (the RC particle block). The magnet strobe after this note still reads. Sayori ON FOOT keeps the normal halo — the runner's own draw is untouched. */ if (magFlashT > 0) { ctx.save(); ctx.globalAlpha = Math.floor(time * 24) % 2 === 0 ? 0.15 : 1; ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); } else ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); SS.drawn = true; };   /* DEV FORK 139: the pair draws where Zeus draws (after the runner, before the decks); the frame's ground row lands on her ground line and the seat anchor sits at her x. The charge halo and the magnet strobe re-apply to the pair so a held charge still reads on the unicorn */
+window.__sparkTitleDraw = function () { if (!window.__spkTitleVis() || loadState !== 'done') return; const fi = Math.floor(time * 60) % 36; const img = SPK_GALLOP[fi]; if (!img || !img.naturalWidth) return; const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53; ctx.drawImage(img, cxT - SPK_AX, fyT - SPK_GROW_G[fi] * PX2U * SPK_SCALE, SPK_DW, SPK_DH); const __scT = window.__stageCloud ? window.__stageCloud() : null; const __ciT = __scT ? __scT.img : IMG['cloud01'], __cdT = __scT || CLOUDS['01']; if (__ciT && __ciT.naturalWidth) { const cw3 = 478, dh3 = cw3 * __cdT.asp; ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24; ctx.drawImage(__ciT, cxT - cw3 / 2 - 6, fyT - 58 - __cdT.surf * dh3, cw3, dh3); ctx.restore(); } SS.tFrame = fi;   /* RC1.1 (Keith, 2026-11-17): the title stage's front cloud lip re-applied over the pair — the stage draws its lip inside the runner's pass, which the pair replaces, and the pair draws later, so without this her hooves paint OVER the lip; the pass above is the stage's own lip, byte for byte */ SS.tDrawn = true; };   /* DEV FORK 139: SPARKLES ON THE TITLE STAGE (Keith) — with SPARKLES FOR SAYORI on and Sayori picked, the pair gallops in place on the title stage: the seat anchor at her mark (the stage centre), the ground row on her feet line (fyT), the frame at the clip's authored cadence (60 fps, the 0.6 s cycle). Her own title draw stands down behind __spkTitleVis; any other runner, the option off, or any moment before the stage is set ('done') and the pair is simply not there; the in-run pair never wakes on the title (SS.on stays false — the tick's own gate is untouched) */
 window.__sparkState = function () { return { on: SS.on, opt: !!window.__sparkOpt, char: selChar, set: SS.set, frame: SS.frame, phase: SS.phase, hn: Math.round(SS.hn * 1000) / 1000, gPhase: Math.round(SS.gPhase * 10) / 10, grow: Math.round(SS.grow * 10) / 10, drawn: SS.drawn, tDrawn: SS.tDrawn, tFrame: SS.tFrame }; };   /* DEV FORK 139: the state reader (forkcheck S117 + the proof renderers) */
 window.__sparkMeasure = function () { return { scale: SPK_SCALE, dw: SPK_DW, dh: SPK_DH, ax: SPK_AX, upm: SPK_UPM, cycle: SPK_CYCLE, refFrame: 0, refTop: SPK_TOP0, refGrow: SPK_GROW_G[0], refH: (SPK_GROW_G[0] - SPK_TOP0) * PX2U * SPK_SCALE, charH: CHAR_H, crown: 286 }; };   /* DEV FORK 139: the scale reader (forkcheck S117 + the proof renderers) — refH is the pair's drawn crown height on the reference frame by the game's own draw math */
 window.__sparkTest = { get on() { return !!window.__sparkOpt; }, set: b => { window.__sparkOpt = !!b; optSave(); }, toggle: optToggleSparkles, state: () => window.__sparkState(), measure: () => window.__sparkMeasure(), player: () => ({ px: Math.round(px), py: Math.round(py), vy: Math.round(vy), grounded: !!grounded, hang: !!hangPlat, slip: !!slipPlat, dbl: doubleUsed, tpl: tripleUsed, wingT: Math.round(wingT * 10) / 10, mode, dead }), press: () => press(), release: () => release(), setup: o => { plats = o.plats; px = o.px || 0; py = o.py || 0; vy = 0; grounded = o.ground || null; hangPlat = null; slipPlat = null; dist = o.dist || 0; runTime = o.runTime || 0; dead = false; worldEnd = 1e12; stormAt = 1e12; notes = []; coin = null; wing = null; bwing = null; magnet = null; gwing = null; noteNextT = runTime + 1e9; nextCoinFt = 1e9; nextWingFt = 1e9; nextBWingFt = 1e9; nextMagFt = 1e9; nextGWingFt = 1e9; wingT = o.wingT || 0; wingKind = o.wingT ? 'std' : wingKind; coinT = 0; magT = 0; noteCharge = false; champMode = false; held = false; pressT = 0; flipped = false; flipArmed = false; rollArmed = false; doubleArmed = false; doubleUsed = false; tripleUsed = false; mode = 'run'; if (window.__sparkReset) window.__sparkReset(); }, rescue: () => { const t = plats.find(p => !p.gone && p.x + p.len > px + 400) || plats[plats.length - 1]; if (t) { px = t.x + 120; py = t.y; vy = 0; grounded = t; hangPlat = null; slipPlat = null; dead = false; } } };   /* DEV FORK 139: the Sparkles test surface (forkcheck S117 + the proof renderers) — setup/rescue mirror the Zeus audit's hands: a synthetic course in, the real tick driven over it */
@@ -1416,7 +1491,8 @@ const HANG_WINDOW = 1.05, HANG_TAPS = 3, SLIP_DUR = 0.75;
    on that tip, ~55% of the cloud's drawn height below the surface
    line, body dangling under the end of the cloud. Hands sit ~300
    above his soles in the dangle cycle (bobbing ±25). */
-const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.37, GRIP_DX = 0.04;   /* grip fraction tracks the floor so his hands stay on the SAME point of the cloud image: 0.55 original, 0.19 at the deep floor (v0.69.2), 0.37 at the halfway raise (v0.70.2) — surf + GRIP_FRAC is invariant per cloud */
+const HANG_HANDS = 300, HANG_DX = 8, GRIP_FRAC = 0.37, GRIP_DX = 0.04;
+const HANG_SEAT = { ivey: [-16, 16] };   /* RC1.1 (Keith, 2026-11-17): IVEY'S HANG SEAT — down 1 unit, left 1 unit while she hangs (FLAGGED starting read, his correction comes off the v2 hero). Per-character on purpose: the hang ride is shared code, and only Ivey's seat moves. */   /* grip fraction tracks the floor so his hands stay on the SAME point of the cloud image: 0.55 original, 0.19 at the deep floor (v0.69.2), 0.37 at the halfway raise (v0.70.2) — surf + GRIP_FRAC is invariant per cloud */
 const HANDS_DANGLE = { 3: 269, 4: 269, 5: 269, 6: 269, 7: 281, 8: 292, 9: 304, 10: 315, 11: 320, 12: 324, 13: 324, 14: 323 };   /* 60 fps (v0.79): his measured 30 fps hand heights interpolated onto the doubled frame indices */   /* hand height per dangle frame, measured off the shipped art */
 const LASH_DANGLE = { 10: 323, 11: 332 };   /* DEV FORK 16: the hang sway reads idx 10/11 at rate 2 — the old grip heights carried at doubled indices for the ALT, Keith's to steer */   /* LaShmoove's dangle: 6lade's table scaled per-frame by his measured figure extent (v0.56) */
 const YORO_DANGLE = { 3: 295, 4: 299, 5: 302, 6: 306, 7: 309, 8: 312, 9: 315, 10: 309, 11: 314, 12: 317, 13: 321, 14: 324, 15: 325, 16: 325 };   /* v0.89: hang/slip keys RE-MEASURED off her shipped frames on the v0.81 yardstick (hand height above the drawn feet line x PX2U, same +7 as the validated girls' tables) — the v0.80 interpolation hung her ~10 too low (Keith: 'hangs off too far while climbing') */
@@ -1431,11 +1507,11 @@ const SAYORI_DANGLE = { 3: 227, 4: 233, 5: 239, 6: 245, 7: 251, 8: 263, 9: 275, 
 let selChar = 'blade';
 try { const c0 = localStorage.getItem('sixloudrc1_char'); if (c0 === 'lash' || c0 === 'yoro' || c0 === 'ivey' || c0 === 'sayori') selChar = c0; } catch (e) {}
 const SKINS = {
-  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true, wingM: [-17, -240], hangOff: [-16, 32]   /* HANG FIT (Keith 2026-11-11): while he dangles, bring the wings DOWN 2 units and LEFT 1 unit off the standing mount (1 unit = 16) — the standing mount lands at his raised hands on a stretched body; his back sits lower */, wingR: 26, fallOff: [[38, 32, -32], [47, 16, 16], [999, 32, 32]], fallRotD: {38: 10}, fallOffD: {38: [48, -16]}, flyC: 15, flyH: 2, flyM: [86, -150], flyR: 103, wfix133: { ground: { 'run:4': [[27, 0, 32, -10], [0, 0, 16, -10], [9, 0, 0, -10]], 'run:22': [[27, 0, 0, -10], [0, 0, 0, -10], [9, 0, 0, -10]], 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 0, 48, 20]] }, fly: { '*': [[0, 0, 16, 0]] }, slip: { 16: [[0, 0, -16, 10]] }, fall: { 5: [[0, 0, 32, 0]], 55: [[0, 0, 32, 0]] } }   /* DEV FORK 133: Keith 2026-11-16 -- run #1-#6 rot -10 (drops 2u/1u on #1/#2 at their flap phases), bend pair, fly all down 1u, slip #19, plunge #24/#26 */ },
-  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', rate: 2, ready: true,   /* DEV FORK 16: the ALT at the cast's 60 fps rate */ wingM: [-11, -224], hangOff: [-36, 36]   /* HANG FIT (Keith 2026-11-11): down 3 left 3, then UP 0.75 RIGHT 0.75 — net DOWN 2.25 units, LEFT 2.25 units off the standing mount while dangling (1 unit = 16) */, wingR: 22, fallOff: [[34, 24, -24], [38, 16, -16], [47, 0, 0], [999, 8, 24]], fallRotD: {30: 5, 34: 5, 38: 5}   /* DEV FORK 16: the APPROVED falling fit (Keith 2026-11-11) */, flyC: 12, flyH: 4   /* the fly window doubled to the sheet Keith was shown — still his to rule */, flyM: [81, -176], flyR: 109, flyLate: 16, flyCDrop: 16, flyEarly: -10, wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 0, 48, 20]] }, fly: { '*': [[0, 0, 16, 0]] }, hang: { 10: [[0, 32, 0, 10], [9, 32, 0, 10]], 11: [[0, 32, 0, 10]] }, slip: { 13: [[0, 16, -48, 0]], 16: [[0, 16, -48, 0]] }, fall: { 5: [[0, 0, 32, 0]], 55: [[0, 16, 32, 0]] } }   /* DEV FORK 133: Keith 2026-11-16 -- bend pair, fly all down 1u, hang #19-#21 rot 10 right 2u, slip #22/#23 up 3u right 1u, plunge #28/#30; fall descent untouched (approved zero) */ },
-  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', rate: 2, ready: true, wingM: [-1, -232], hangOff: [-24, 32], hangR: 20   /* HANG FIT (Keith 2026-11-11): down 3 left 3, up 1 right 1, right 0.5 — net DOWN 2 units, LEFT 1.5 units, ROTATE 20 degrees (clockwise, his steer convention) off the standing mount while dangling (1 unit = 16); her standing anchor floated in open air right of her raised arms */, wingR: 32, fallOff: [[38, 40, -24], [42, 8, 24], [999, 16, 32]], fallOffD: {30: [32, -24]}   /* FALL STEER round 4 (Keith, 2026-11-10, Yorokobi): frame 1 alone left 0.5u more */   /* FALL STEER round 3 (Keith, 2026-11-10, Yorokobi): frame-6 rotate/nudge UNDONE (back to the round-1 zone fit); frames 1-4 up 0.5u left 0.5u (1 unit = 16) */   /* FALL STEER round 2 (Keith, 2026-11-10, Yorokobi): frames 1-3 right 1u down 1u more, frame 4 left 1u, frame 6 rotate -20 and right 2u down 2u more (per-frame override) */   /* v0.92 FALL STEER (Keith, 2026-11-10, Yorokobi): frames 1-3 up 2u right 2u, frame 4 right 2u down 2u, frames 5-6 right 1u down 2u (1 unit = 16) */, flyC: 17, flyH: 4, flyM: [79, -153], flyR: 109, flyLate: 16, flyCDrop: 32, flyEDrop: 32, flyTail: 10, flyTailD: [16, 8], wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 0, 48, 20]] }, slip: { 16: [[0, 16, -16, 0]] }, fall: { 5: [[0, 16, 32, 0]], 55: [[0, 16, 48, 0]] } }   /* DEV FORK 133: Keith 2026-11-16 -- bend pair, slip #23 up 1u right 1u, plunge #28/#30 */ },
-  ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'IVEY', rate: 2, dblFlip: true, ready: true, wingM: [5, -228], hangOff: [-40, 32]   /* HANG FIT (Keith 2026-11-11): down 2 left 2, then LEFT 0.5 more — net DOWN 2 units, LEFT 2.5 units off the standing mount while dangling (1 unit = 16); her standing anchor floated between her raised arms */, wingR: 24, fallOffD: {46: [16, 32], 49: [16, 64]}, fallRotD: {49: 20}   /* Ivey round 3 (Keith, 2026-11-10): frame 6 down 1u right 1u more */   /* v0.92 FALL STEER (Keith, 2026-11-10, Ivey): frames 5-6 down 1u more; frame 6 keeps its rotate 20 (1 unit = 16) */, flyC: 17, flyH: 4, flyM: [59, -160], flyR: 91, flyEDrop: 16, flyLateRot: 20, flyLate: 16, flyCRot: 10, flyOffD: { 2: 8, 4: 16 }, flyCDrop: 16, flyLastRot: 10, wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 0, 48, 20]] }, slip: { 16: [[0, 0, -32, 0]] }, fall: { 55: [[0, 16, 48, 0]] } }   /* DEV FORK 133: Keith 2026-11-16 -- bend pair, slip #23 up 2u, plunge #30 down 3u right 1u */ },
-  sayori: { man: SAYORI_MANIFEST, anim: SAYORI_ANIM, dangle: SAYORI_DANGLE, name: 'SAYORI', rate: 2, dblFlip: true, ready: true, wingM: [2, -231], hangOff: [-24, 8], hangR: 15   /* HANG FIT (Keith 2026-11-11): left 2.5, right 0.5, right 0.75, down 0.5 left 0.5, right 0.25 — net LEFT 1.5 units, DOWN 0.5 units, ROTATE 15 degrees (clockwise, his steer convention) off the standing mount while dangling (1 unit = 16); her standing anchor sat on her raised arm */, wingR: 25, fallOff: [[38, 8, -8]], fallOffD: {30: [-8, -8], 46: [16, 32], 49: [16, 48]}, fallRotD: {49: 20}   /* Sayori round 3 (Keith, 2026-11-10): frame 6 down 1u right 1u, frame 5 left 1u, frame 1 left 1u */   /* v0.92 FALL STEER (Keith, 2026-11-10, Sayori): frames 1-3 right 0.5u up 0.5u; frame 5 down 1u right 1u more; frame 6 rotate 20 + down 2u (1 unit = 16) */, flyC: 17, flyH: 4, flyM: [66, -146], flyR: 92, flyTail: 10, flyEarly: 10, flyEDrop: 32, wfix133: { ground: { 'run:4': [[27, -16, 0, 0], [0, -16, 0, 0], [9, -16, 0, 0]], 'run:22': [[27, -16, 0, 0]], 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 0, 48, 20]] }, fly: { 13: [[0, 0, -16, 5]], 14: [[0, 0, -16, 5]], 15: [[0, 0, -16, 5]] }, fall: { 5: [[0, -16, 16, 0]], 30: [[0, 0, 16, 10], [9, 32, -16, 0]], 31: [[0, 0, 16, 10]], 32: [[0, 0, 16, 10]], 33: [[0, 0, 16, 10]], 34: [[0, 0, 16, 10]], 35: [[0, 0, 32, 20]], 36: [[0, 0, 32, 20]], 37: [[0, 0, 32, 20]], 38: [[0, 0, 32, 20]], 39: [[0, 0, 32, 20]], 40: [[0, 0, 32, 20]], 41: [[0, 0, 32, 20]], 42: [[0, 0, 32, 20]], 43: [[0, 0, 32, 20]], 44: [[0, 0, 32, 20]], 45: [[0, 0, 32, 20]], 46: [[0, 0, 32, 20]], 47: [[0, 0, 32, 20]], 48: [[0, 0, 32, 20]], 49: [[0, 0, 32, 20]], 55: [[0, 16, 48, 0]] } }   /* DEV FORK 133: Keith 2026-11-16 -- run #1-#4 left 1u, bend pair, fly #1-#3 rot 5 up 1u, fall #31-#35 rot 10 down 1u / #36-#50 rot 20 down 2u / #52 up 1u right 2u (f030's two flap-phase reads; #51 w027 unnamed, rides the blend), plunge #28/#30 */ }   /* wingM (v0.89): the mount measured per body — one mount for every runner put the pair wrong on Yorokobi (Keith's photo); Sayori's is her kc2 fit verbatim, the rest are her yardstick on their own frames */
+  blade: { man: MANIFEST, anim: ANIM, dangle: HANDS_DANGLE, name: '6LADE', rate: 2, ready: true, wingM: [-17, -240], hangOff: [-16, 32]   /* HANG FIT (Keith 2026-11-11): while he dangles, bring the wings DOWN 2 units and LEFT 1 unit off the standing mount (1 unit = 16) — the standing mount lands at his raised hands on a stretched body; his back sits lower */, wingR: 26, fallOff: [[38, 32, -32], [47, 16, 16], [999, 32, 32]], fallRotD: {38: 10}, fallOffD: {38: [48, -16]}, flyC: 15, flyH: 2, flyM: [86, -150], flyR: 103, wfix133: { ground: { 'run:4': [[27, 0, 32, -10], [0, 0, 16, -10], [9, 0, 0, -10]], 'run:22': [[27, 0, 0, -10], [0, 0, 0, -10], [9, 0, 0, -10]], 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 16, 80, 30]] }, fly: { '*': [[0, 0, 16, 0]] }, slip: { 16: [[0, 0, -16, 10]] }, hang: { 10: [[27, -16, 0, 0]] }, fall: { '*': [[0, -16, 16, 0]], 5: [[0, 0, 32, 0]], 30: [[27, 0, 16, 0]], 46: [[0, 0, 16, 0]], 47: [[0, 0, 16, 0]], 48: [[0, 0, 16, 0]], 49: [[0, 0, 16, 0]], 55: [[0, 16, 64, 10]] }   /* RC1.1 WING STEERS 3+4+5 (Keith, 2026-11-17): 6LADE — hang #14 (f010 w027) -16 X (a NEW hang family); fall GENERAL +16 Y -16 X (the '*' entry — it SUMS with any frame entry); fall #43-#46 by his numbering (f046-f049) +16 Y, and his #47 — the f030 w027 EXTRA panel — +16 Y on key 30 at w027 */ }   /* DEV FORK 133: Keith 2026-11-16 -- run #1-#6 rot -10 (drops 2u/1u on #1/#2 at their flap phases), bend pair, fly all down 1u, slip #19, plunge #24/#26 */ },
+  lash: { man: LASH_MANIFEST, anim: LASH_ANIM, dangle: LASH_DANGLE, name: 'LASHMOOVE', rate: 2, ready: true,   /* DEV FORK 16: the ALT at the cast's 60 fps rate */ wingM: [-11, -224], hangOff: [-36, 36]   /* HANG FIT (Keith 2026-11-11): down 3 left 3, then UP 0.75 RIGHT 0.75 — net DOWN 2.25 units, LEFT 2.25 units off the standing mount while dangling (1 unit = 16) */, wingR: 22, fallOff: [[34, 24, -24], [38, 16, -16], [47, 0, 0], [999, 8, 24]], fallRotD: {30: 5, 34: 5, 38: 5}   /* DEV FORK 16: the APPROVED falling fit (Keith 2026-11-11) */, flyC: 12, flyH: 4   /* the fly window doubled to the sheet Keith was shown — still his to rule */, flyM: [81, -176], flyR: 109, flyLate: 16, flyCDrop: 16, flyEarly: -10, wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 16, 80, 30]] }, fly: { '*': [[0, 0, 16, 0]] }, hang: { 10: [[0, 32, 0, 10], [9, 32, 0, 10], [27, -16, 0, 0]], 11: [[0, 32, 0, 10]] }   /* RC1.1 WING STEER 3 (Keith, 2026-11-17): LASHMOOVE hang #18 (f010 w027) -16 X — his third read on this body frame joins the w000/w009 anchors; the phases between ease, the system's law */, slip: { 13: [[0, 16, -48, 0]], 16: [[0, 16, -48, 0]] }, fall: { 5: [[0, 0, 32, 0]], 42: [[0, 0, 16, 0]], 43: [[0, 0, 16, 0]], 44: [[0, 0, 16, 0]], 45: [[0, 0, 16, 0]], 46: [[0, 0, 16, 0]], 47: [[0, 0, 24, 0]], 48: [[0, 0, 24, 0]], 55: [[0, 32, 64, 10]] }   /* RC1.1 WING STEER 5 (Keith, 2026-11-17): LASHMOOVE fall — he had NO fall entries before this pass beyond the plunge pair: #43-#47 (f042-f046) +16 Y, #48-#49 (f047-f048) +24 Y (1.5 units) */ }   /* DEV FORK 133: Keith 2026-11-16 -- bend pair, fly all down 1u, hang #19-#21 rot 10 right 2u, slip #22/#23 up 3u right 1u, plunge #28/#30; fall descent untouched (approved zero) */ },
+  yoro: { man: YORO_MANIFEST, anim: YORO_ANIM, dangle: YORO_DANGLE, name: 'YOROKOBI', rate: 2, ready: true, wingM: [-1, -232], hangOff: [-24, 32], hangR: 20   /* HANG FIT (Keith 2026-11-11): down 3 left 3, up 1 right 1, right 0.5 — net DOWN 2 units, LEFT 1.5 units, ROTATE 20 degrees (clockwise, his steer convention) off the standing mount while dangling (1 unit = 16); her standing anchor floated in open air right of her raised arms */, wingR: 32, fallOff: [[38, 40, -24], [42, 8, 24], [999, 16, 32]], fallOffD: {30: [32, -24]}   /* FALL STEER round 4 (Keith, 2026-11-10, Yorokobi): frame 1 alone left 0.5u more */   /* FALL STEER round 3 (Keith, 2026-11-10, Yorokobi): frame-6 rotate/nudge UNDONE (back to the round-1 zone fit); frames 1-4 up 0.5u left 0.5u (1 unit = 16) */   /* FALL STEER round 2 (Keith, 2026-11-10, Yorokobi): frames 1-3 right 1u down 1u more, frame 4 left 1u, frame 6 rotate -20 and right 2u down 2u more (per-frame override) */   /* v0.92 FALL STEER (Keith, 2026-11-10, Yorokobi): frames 1-3 up 2u right 2u, frame 4 right 2u down 2u, frames 5-6 right 1u down 2u (1 unit = 16) */, flyC: 17, flyH: 4, flyM: [79, -153], flyR: 109, flyLate: 16, flyCDrop: 32, flyEDrop: 32, flyTail: 10, flyTailD: [16, 8], wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 16, 80, 30]] }, slip: { 16: [[0, 16, -16, 0]] }, hang: { 10: [[27, -16, 0, -5]] }, fall: { '*': [[0, -32, 32, 0]], 5: [[0, 16, 32, 0]], 40: [[0, 0, 16, 0]], 41: [[0, 0, 16, 0]], 42: [[0, 0, 16, 0]], 43: [[0, 0, 16, 0]], 44: [[0, 0, 16, 0]], 46: [[0, -16, 32, 0]], 47: [[0, -16, 32, 0]], 48: [[0, -16, 32, 0]], 55: [[0, 32, 80, 10]] }   /* RC1.1 WING STEERS 3+4+5 (Keith, 2026-11-17): YOROKOBI — hang #18 (f010 w027) -16 X rotate -5 (a NEW hang family); fall GENERAL +32 Y -32 X (the '*' entry — it SUMS with frame entries); #41-#45 (f040-f044) +16 Y; #46 (f045) UNTOUCHED; #47-#49 (f046-f048) +32 Y -16 X — the X is a FLAGGED ASSUMPTION: he wrote 'left' with no amount, read as 1 unit */ }   /* DEV FORK 133: Keith 2026-11-16 -- bend pair, slip #23 up 1u right 1u, plunge #28/#30 */ },
+  ivey: { man: IVEY_MANIFEST, anim: IVEY_ANIM, dangle: IVEY_DANGLE, name: 'IVEY', rate: 2, dblFlip: true, ready: true, wingM: [5, -228], hangOff: [-40, 32]   /* HANG FIT (Keith 2026-11-11): down 2 left 2, then LEFT 0.5 more — net DOWN 2 units, LEFT 2.5 units off the standing mount while dangling (1 unit = 16); her standing anchor floated between her raised arms */, wingR: 24, fallOffD: {46: [16, 32], 49: [16, 64]}, fallRotD: {49: 20}   /* Ivey round 3 (Keith, 2026-11-10): frame 6 down 1u right 1u more */   /* v0.92 FALL STEER (Keith, 2026-11-10, Ivey): frames 5-6 down 1u more; frame 6 keeps its rotate 20 (1 unit = 16) */, flyC: 17, flyH: 4, flyM: [59, -160], flyR: 91, flyEDrop: 16, flyLateRot: 20, flyLate: 16, flyCRot: 10, flyOffD: { 2: 8, 4: 16 }, flyCDrop: 16, flyLastRot: 10, wfix133: { ground: { 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 16, 80, 30]] }, slip: { 16: [[0, 0, -32, 0]] }, hang: { 10: [[27, -16, 0, 0]] }, fall: { 5: [[0, -16, 16, 0]], 55: [[0, 32, 80, 10]] }   /* RC1.1 WING STEERS 3+4 (Keith, 2026-11-17): IVEY — hang #18 (f010 w027) -16 X (a NEW hang family); fall plunge #28 (f005) +16 Y -16 X (a new key — her fall held only the f055 fit) */ }   /* DEV FORK 133: Keith 2026-11-16 -- bend pair, slip #23 up 2u, plunge #30 down 3u right 1u */ },
+  sayori: { man: SAYORI_MANIFEST, anim: SAYORI_ANIM, dangle: SAYORI_DANGLE, name: 'SAYORI', rate: 2, dblFlip: true, ready: true, wingM: [2, -231], hangOff: [-24, 8], hangR: 15   /* HANG FIT (Keith 2026-11-11): left 2.5, right 0.5, right 0.75, down 0.5 left 0.5, right 0.25 — net LEFT 1.5 units, DOWN 0.5 units, ROTATE 15 degrees (clockwise, his steer convention) off the standing mount while dangling (1 unit = 16); her standing anchor sat on her raised arm */, wingR: 25, fallOff: [[38, 8, -8]], fallOffD: {30: [-8, -8], 46: [16, 32], 49: [16, 48]}, fallRotD: {49: 20}   /* Sayori round 3 (Keith, 2026-11-10): frame 6 down 1u right 1u, frame 5 left 1u, frame 1 left 1u */   /* v0.92 FALL STEER (Keith, 2026-11-10, Sayori): frames 1-3 right 0.5u up 0.5u; frame 5 down 1u right 1u more; frame 6 rotate 20 + down 2u (1 unit = 16) */, flyC: 17, flyH: 4, flyM: [66, -146], flyR: 92, flyTail: 10, flyEarly: 10, flyEDrop: 32, wfix133: { ground: { 'run:4': [[27, 0, 0, 0], [0, 0, 0, 0], [9, 0, 0, 0]], 'run:22': [[27, 0, 0, 0]], 'run:0': [[0, 16, 0, 0]], 'run:1': [[0, 16, 0, 0]], 'run:2': [[0, 16, 0, 0]], 'run:3': [[0, 16, 0, 0]], 'run:5': [[0, 16, 0, 0]], 'run:6': [[0, 16, 0, 0]], 'run:7': [[0, 16, 0, 0]], 'run:8': [[0, 16, 0, 0]], 'run:9': [[0, 16, 0, 0]], 'run:10': [[0, 16, 0, 0]], 'run:11': [[0, 16, 0, 0]], 'run:12': [[0, 16, 0, 0]], 'run:13': [[0, 16, 0, 0]], 'run:14': [[0, 16, 0, 0]], 'run:15': [[0, 16, 0, 0]], 'run:16': [[0, 16, 0, 0]], 'run:17': [[0, 16, 0, 0]], 'run:18': [[0, 16, 0, 0]], 'run:19': [[0, 16, 0, 0]], 'run:20': [[0, 16, 0, 0]], 'run:21': [[0, 16, 0, 0]], 'run:23': [[0, 16, 0, 0]], 'run:24': [[0, 16, 0, 0]], 'run:25': [[0, 16, 0, 0]], 'run:26': [[0, 16, 0, 0]], 'run:27': [[0, 16, 0, 0]], 'run:28': [[0, 16, 0, 0]], 'run:29': [[0, 16, 0, 0]], 'run:30': [[0, 16, 0, 0]], 'run:31': [[0, 16, 0, 0]], 'run:32': [[0, 16, 0, 0]], 'run:33': [[0, 16, 0, 0]], 'run:34': [[0, 16, 0, 0]], 'run:35': [[0, 16, 0, 0]], 'run:36': [[0, 16, 0, 0]],   /* RC1.1 WING STEERS (Keith, 2026-11-17): (1) Sayori RUN winged — every run frame +1 unit right (+16 X): run:4/run:22 keyframes shifted, run:0-3,5-21,23-36 added at [[0, 16, 0, 0]]; hers only, no other motion, no Y. (2) LANDING f055, ALL FIVE runners — down 2u (+32 Y), right 1u (+16 X), rotate +10: the two fits containing frame 055 of the landing motion shifted — ground 'armsopen:55' (all five) and fall 55 (per runner). */ 'basic:54': [[0, -16, 32, 10]], 'armsopen:55': [[0, 16, 80, 30]] }, fly: { 13: [[0, 0, -16, 5]], 14: [[0, 0, -16, 5]], 15: [[0, 0, -16, 5]] }, fall: { 5: [[0, 0, 32, 0]], 20: [[0, -16, 0, 0]], 30: [[0, 0, 16, 10], [9, 32, -16, 0]]   /* RC1.1 WING STEER 4 (Keith, 2026-11-17): SAYORI plunge — #28 (f005) +16 X +16 Y (her existing entry shifts), #29 (f020) -16 X (a new key) */, 31: [[0, 0, 16, 10]], 32: [[0, 0, 16, 10]], 33: [[0, 0, 16, 10]], 34: [[0, 0, 16, 10]], 35: [[0, 0, 32, 20]], 36: [[0, 0, 32, 20]], 37: [[0, 0, 32, 20]], 38: [[0, 0, 32, 20]], 39: [[0, 0, 32, 20]], 40: [[0, 0, 32, 20]], 41: [[0, 0, 32, 20]], 42: [[0, 0, 32, 20]], 43: [[0, 0, 32, 20]], 44: [[0, 0, 32, 20]], 45: [[0, 0, 32, 20]], 46: [[0, 0, 32, 20]], 47: [[0, 0, 32, 20]], 48: [[0, 0, 32, 20]], 49: [[0, 0, 32, 20]], 55: [[0, 32, 112, 20]] }   /* RC1.1 WING STEER 4 (Keith, 2026-11-17): SAYORI plunge #30 (f055) +32 Y rotate +10 — STACKED on steer 2's landing shift of this same entry (the #30 panel IS the landing frame) */ }   /* DEV FORK 133: Keith 2026-11-16 -- run #1-#4 left 1u, bend pair, fly #1-#3 rot 5 up 1u, fall #31-#35 rot 10 down 1u / #36-#50 rot 20 down 2u / #52 up 1u right 2u (f030's two flap-phase reads; #51 w027 unnamed, rides the blend), plunge #28/#30 */ }   /* wingM (v0.89): the mount measured per body — one mount for every runner put the pair wrong on Yorokobi (Keith's photo); Sayori's is her kc2 fit verbatim, the rest are her yardstick on their own frames */
 };
 /* each runner burns in their OWN color (Keith: 6lade blue + LaShmoove fire, v0.56; Yorokobi PURPLE, v0.70).
    pstreak = the ground streaks a runner stamps AS THE PLAYER while lit — LaShmoove and Yorokobi carry theirs; 6lade has none. */
@@ -1455,7 +1531,7 @@ function charBests() { try { return JSON.parse(localStorage.getItem('sixloudrc1_
 function bestLine(c) { const b = charBests()[c] || 0; return b > 0 ? 'LOCAL BEST · ' + b.toLocaleString('en-US') + ' FT' : 'LOCAL BEST · —'; }
 function applyChar() { PSKIN = SKINS[selChar]; const cn = $('charName'); if (cn) cn.textContent = PSKIN.name; if (window.__lockUI) window.__lockUI();   /* DEV FORK 56: the lock price line rides the chooser's own refresh */
   const cb = $('charBest'); if (cb) cb.textContent = bestLine(selChar);
-  const st = $('strip'); if (st) st.innerHTML = ORDER.filter(c => SKINS[c]).map(c => '<button class="scard' + (c === selChar ? ' sel' : '') + '" data-char="' + c + '" aria-label="' + SKINS[c].name + '" style="background-image:url(\'' + (c === 'ivey' && window.__zeusOpt ? 'select-ivey-zeus-v2.jpg' : c === 'sayori' && window.__sparkOpt ? 'select-sayori-sparkles.jpg' : PHOTOS[c])   /* DEV FORK 139: Sayori's card wears the pair portrait while SPARKLES FOR SAYORI is on; every other card, and hers while it is off, is the photo it always was */ +   /* DEV FORK 136: Ivey's card wears the Ivey+Zeus portrait while ZEUS WITH IVEY is on; every other card, and hers while it is off, is the photo it always was */ '\')"></button>').join(''); }
+  const st = $('strip'); if (st) st.innerHTML = ORDER.filter(c => SKINS[c]).map(c => '<button class="scard' + (c === selChar ? ' sel' : '') + ((c === 'ivey' || c === 'sayori') ? ' fitwhole' : '') + '" data-char="' + c + '" aria-label="' + SKINS[c].name + '" style="background-image:url(\'' + (c === 'ivey' && window.__zeusOpt ? 'select-ivey-zeus-v2.jpg' : c === 'sayori' && window.__sparkOpt ? 'select-sayori-sparkles.jpg' : PHOTOS[c])   /* DEV FORK 139: Sayori's card wears the pair portrait while SPARKLES FOR SAYORI is on; every other card, and hers while it is off, is the photo it always was */ +   /* DEV FORK 136: Ivey's card wears the Ivey+Zeus portrait while ZEUS WITH IVEY is on; every other card, and hers while it is off, is the photo it always was */ '\')"></button>').join(''); }
 function setChar(c) { if (!SKINS[c]) return; selChar = c; try { localStorage.setItem('sixloudrc1_char', selChar); } catch (e) {} applyChar(); kickDecode(); titleMusic(); }
 function cycleChar(dir) { const avail = ORDER.filter(c => SKINS[c]); let i = avail.indexOf(selChar); i = (i + (dir || 1) + avail.length) % avail.length; selChar = avail[i]; try { localStorage.setItem('sixloudrc1_char', selChar); } catch (e) {} applyChar(); kickDecode(); titleMusic(); }
 applyChar();
@@ -2547,6 +2623,8 @@ function update(dt) {
   { const altT = Math.max(0, Math.min(1, (-camY - viewH * 0.42) / 700)); altSm += (altT - altSm) * Math.min(1, dt * 0.30); }   /* v0.41: zoom-free target + a ~3.3 s constant (was 1.4/s on a zoom-coupled target — the deck still bobbed ~10 px per hop) */
   camSmY += (camY - camSmY) * Math.min(1, dt * 0.9);
   camBgY += (camY - camBgY) * Math.min(1, dt * 0.22);   /* the background clouds' camera: hops average out to nothing */
+  if (typeof window.__floorCamY !== 'number') window.__floorCamY = camSmY;
+  if (grounded || hangPlat || slipPlat) window.__floorCamY += (camY - window.__floorCamY) * Math.min(1, dt * 0.9);   /* RC1.1: THE FLOOR'S CAMERA (Keith, 2026-11-17) — eases toward camY only while she is grounded (or on a deck by hand or boot); while she is airborne it HOLDS, so the floor stays locked to the horizon through the whole hop and re-seats only across grounded band transitions */
   if (bannerT > 0) bannerT -= dt;
   if (flareT > 0) flareT -= dt;
   /* while crowned he CHARGES: blue sparks rise off him (Keith v0.15) */
@@ -2565,9 +2643,10 @@ function update(dt) {
   /* horizontal: the world scrolls; player advances at speed */
   if (!frozen) px += speed * spdF() * dt * (window.__revF ? window.__revF() : 1);   /* DEV FORK 35: same — he runs in place on the station while the factor is 0 */   /* frozen on the ledge beat: he hangs on the lip, the lip hangs on the world */
   /* vertical physics */
+  const __hangSeat = HANG_SEAT[selChar] || [0, 0];   /* RC1.1: this runner's hang seat, read once per tick for the grab seed and both rigid rides */
   if (hangPlat) {
     hangT -= dt;
-    { const gx = gripDrawn(hangPlat).x - HANG_DX, gy = gripDrawn(hangPlat).y + HANG_HANDS - FEET;
+    { const gx = gripDrawn(hangPlat).x - HANG_DX + __hangSeat[0], gy = gripDrawn(hangPlat).y + HANG_HANDS - FEET + __hangSeat[1];
       px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* ride the bending tip RIGIDLY: his hands move exactly with the drawn grip (v0.38) */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
@@ -2578,7 +2657,7 @@ function update(dt) {
     } else if (hangT <= 0) { slipPlat = hangPlat; hangPlat = null; slipT = 0; }   /* no save: the slip begins */
   } else if (slipPlat) {
     slipT += dt;
-    { const gx = gripDrawn(slipPlat).x - HANG_DX, gy = gripDrawn(slipPlat).y + HANG_HANDS - FEET;
+    { const gx = gripDrawn(slipPlat).x - HANG_DX + __hangSeat[0], gy = gripDrawn(slipPlat).y + HANG_HANDS - FEET + __hangSeat[1];
       px += gx - hangTX; py += gy - hangTY; hangTX = gx; hangTY = gy; }   /* same rigid ride through the slip */
     px += (hangTX - px) * Math.min(1, dt * 10);
     py += (hangTY - py) * Math.min(1, dt * 10); vy = 0;
@@ -2635,7 +2714,7 @@ function update(dt) {
       const top = p.y;
       if (!(window.__spkOn && window.__spkOn()) && vy > (wingT > 0 ? (flutterT > 0 ? 0 : 90) : 260) && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {   /* DEV FORK 139: NO HANG ON THE UNICORN (Keith) — the grab refuses her while she rides Sparkles: a lip she cannot land on is a fall, never a hang (and with no hang, no slip either); the landing scan above still runs first, so a descent that can land still lands */   /* DEV FORK 23: a FLUTTERING winged descent hangs at any sink speed — the flutter tap resets vy to ~40, under the v0.99.2 floor of 90, so Keith's sequence (jump -> flight -> triple -> flutter down) could cross a lip ineligible right after a tap; he ruled that sequence eligible to hang (2026-11-12) */   /* v0.99.2 (Keith: 'I should be able to hang while i have wings'): the grab demanded a fast fall (vy > 260), but a winged descent is a controlled one — fluttering down at ~150 he fell THROUGH the window slow and past it before speed built (probe-verified: no hang, fell at vy 1193). Winged, he can catch a lip at descent speed (90); the landing check still runs first, so a descent that can land still lands */
         hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
-        { const g = gripDrawn(p); hangTX = g.x - HANG_DX; hangTY = g.y + HANG_HANDS - FEET; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
+        { const g = gripDrawn(p); hangTX = g.x - HANG_DX + __hangSeat[0]; hangTY = g.y + HANG_HANDS - FEET + __hangSeat[1]; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1; tripleUsed = false;
         break;
       }
@@ -2975,8 +3054,8 @@ function draw() {
     const sw = W * 0.52, span = sw * 0.66 * seaSet.length;
     if (   /* DEV FORK 124: the FORK 83/84 POOL SWAP that used to open this branch is REMOVED -- the rain worlds take the strip branch below with the cloud floor; the storm/bgrain pools still dress the far/mid layers via __dressDay/__dressOne, they just no longer pave the sea */(window.__pick === 'rmx6' ? (window.__SNOWSTRIP && window.__SNOWSTRIP.naturalWidth) : window.__pick === 'rmx5' ? (window.__PLAINSSTRIP && window.__PLAINSSTRIP.naturalWidth) : (window.__map === 'rain' || window.__map === 'rain2') ? (window.__CLOUDSTRIP && window.__CLOUDSTRIP.naturalWidth) : window.__map === 'mnt' ? (window.__MTNSTRIP && window.__MTNSTRIP.naturalWidth) : window.__map === 'night' ? (window.__OCEANSTRIP && window.__OCEANSTRIP.naturalWidth) : (window.__SEASTRIP && window.__SEASTRIP.naturalWidth))   /* DEV FORK 127: NIGHT SHIFT'S FLOOR keys on the SELECTION ahead of the world -- in rmx6 the slot draws the SNOW strip in both segments; every other selection keeps the FORK 125 pick verbatim inside this one */   /* DEV FORK 125: SUN SHOWER'S FLOOR keys on the SELECTION ahead of the world — in rmx5 the slot draws the PLAINS strip in both segments; every other selection keeps the FORK 124 world condition verbatim inside this one */) {   /* DEV FORK 123: MIDNIGHT RUN'S FLOOR -- in the 'night' world the slot draws the OCEAN strip instead of the sea strip; 'mnt' keeps FORK 121's mountain branch ahead of it */   /* DEV FORK 121: DAY BREAK'S FLOOR -- in the 'mnt' world the slot draws the MOUNTAIN strip instead of the sea strip; every other world keeps FORK 95's sea branch as it was */   /* DEV FORK 95: THE SEA STRIP (Keith, with aerial reference) — the standard worlds' sea is ONE baked cloud-top field drawn as a continuous band along the billow line, mirror-tiled like the city plates with the parity anchored to a world tile index; the five spaced sunset billboards are retired */
       const simg = window.__pick === 'rmx6' ? window.__SNOWSTRIP : window.__pick === 'rmx5' ? window.__PLAINSSTRIP : (window.__map === 'rain' || window.__map === 'rain2') ? window.__CLOUDSTRIP : window.__map === 'mnt' ? window.__MTNSTRIP : window.__map === 'night' ? window.__OCEANSTRIP : window.__SEASTRIP, sh3 = H * 0.40   /* DEV FORK 138: the band grows (H*0.34 -> H*0.40) so seated at the horizon its bottom fade finishes past the screen's last row — the floor is solid to the edge */, sw3 = sh3 * simg.naturalWidth / simg.naturalHeight, scroll = camX * 0.58 * S;
-      const simgB = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(simg, 7) || simg) : simg;   /* RC1: the floor strip takes the /7 grade — decks, runner and pickups stay sharp */   /* DEV FORK 127: the picture in the slot follows the SELECTION first (the snow ridge for NIGHT SHIFT, either segment; the plains for SUN SHOWER), then the world (cloud sea in the rain worlds, mountain in 'mnt', ocean in 'night', the sea strip everywhere else); same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 125: the picture in the slot follows the SELECTION first (plains for SUN SHOWER, either segment), then the world (cloud sea in the rain worlds, mountain in 'mnt', ocean in 'night', the sea strip everywhere else); same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 124: the picture in the slot follows the world -- cloud sea in the rain worlds, mountain in 'mnt', ocean in 'night', the sea strip everywhere else; same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 123: the picture in the slot follows the world -- mountain in 'mnt', ocean in 'night', the sea strip everywhere else; same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 121: same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below -- only the picture in the slot changes with the world */
-      const __hzB138 = (window.__map === 'night' || window.__map === 'night2') ? Math.max(235 - camSmY * 0.10, 212 - camSmY * 0.16, 190 - camSmY * 0.22) : (window.__map === 'rain' || window.__map === 'rain2') ? Math.max(262 - camSmY * 0.07, 232 - camSmY * 0.12, 198 - camSmY * 0.18) : Math.max(235 - camSmY * 0.07, 195 - camSmY * 0.12, 160 - camSmY * 0.18); const __hz138 = __hzB138 * S * zoom + H * 0.55 + (1 - __seaVis) * H * 0.18; window.__below121.lift = 0; window.__below121.hz = Math.round(__hz138);   /* DEV FORK 138: THE FLOOR SEATS AT THE HORIZON (Keith) — __hzB138 is the ground line in view units, the lowest base among the active world's horizon set (the swells' bases/pvs at night, the storm ranges' in the rain worlds, the standard ranges' elsewhere), from the same camSmY terms the ridge/ocean draws use, so the line tracks the horizon in title and run framing alike; __hz138 carries it to screen px (vh2*0.55 lands at H*0.55) plus FORK 95's sink as the gate closes. The strip's top edge seats on it in (A7) below. FORK 128/134's mtn lift is retired by this seating — the horizon ruling supersedes it */   /* DEV FORK 138: the lift this note describes is RETIRED — the horizon seating above supersedes it under Keith's 2026-11-17 ruling ('They need to match the horizon / Not go above them'); the note stands as the lift's history. DEV FORK 134: THE LIFT HALVES (Keith, 2026-11-16 20:27 ET) -- FORK 128's fifth-of-the-screen raise rode TOO HIGH (the band crossed behind the decks); a tenth of the screen keeps the range clear of the ridge bases without the climb, and the presence Keith asked for now comes from the v2 re-bake of the strip itself (tools/bake_mtnstrip_v2.py: firmer top edge, deeper shadows, more saturation). Keyed on the picked picture, so every other floor keeps its geometry exactly */
+      const simgB = simg;   /* RC1.1: THE FLOOR DRAWS NATIVE (Keith, 2026-11-17) — the /7 grade pixelated the strip in play; the floor slot keeps its own native reference (simg itself) and the shared graded cache keeps serving every other plane exactly as before */ const __fcY = (typeof window.__floorCamY === 'number') ? window.__floorCamY : camSmY;   /* RC1.1: the floor's horizon camera — held through every hop (part 7, seated in update below) */   /* DEV FORK 127: the picture in the slot follows the SELECTION first (the snow ridge for NIGHT SHIFT, either segment; the plains for SUN SHOWER), then the world (cloud sea in the rain worlds, mountain in 'mnt', ocean in 'night', the sea strip everywhere else); same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 125: the picture in the slot follows the SELECTION first (plains for SUN SHOWER, either segment), then the world (cloud sea in the rain worlds, mountain in 'mnt', ocean in 'night', the sea strip everywhere else); same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 124: the picture in the slot follows the world -- cloud sea in the rain worlds, mountain in 'mnt', ocean in 'night', the sea strip everywhere else; same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 123: the picture in the slot follows the world -- mountain in 'mnt', ocean in 'night', the sea strip everywhere else; same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below */   /* DEV FORK 121: same band geometry, same billow line, same 0.58 parallax, same seaVis gate on the alpha below -- only the picture in the slot changes with the world */
+      const __hzB138 = (window.__map === 'night' || window.__map === 'night2') ? Math.max(235 - __fcY * 0.10, 212 - __fcY * 0.16, 190 - __fcY * 0.22) : (window.__map === 'rain' || window.__map === 'rain2') ? Math.max(262 - __fcY * 0.07, 232 - __fcY * 0.12, 198 - __fcY * 0.18) : Math.max(235 - __fcY * 0.07, 195 - __fcY * 0.12, 160 - __fcY * 0.18);   /* RC1.1: the horizon line reads the FLOOR camera (__fcY), not camSmY — the hop no longer reaches the floor */ const __hz138 = __hzB138 * S * zoom + H * 0.55 + (1 - __seaVis) * H * 0.18; window.__below121.lift = 0; window.__below121.hz = Math.round(__hz138);   /* DEV FORK 138: THE FLOOR SEATS AT THE HORIZON (Keith) — __hzB138 is the ground line in view units, the lowest base among the active world's horizon set (the swells' bases/pvs at night, the storm ranges' in the rain worlds, the standard ranges' elsewhere), from the same camSmY terms the ridge/ocean draws use, so the line tracks the horizon in title and run framing alike; __hz138 carries it to screen px (vh2*0.55 lands at H*0.55) plus FORK 95's sink as the gate closes. The strip's top edge seats on it in (A7) below. FORK 128/134's mtn lift is retired by this seating — the horizon ruling supersedes it */   /* DEV FORK 138: the lift this note describes is RETIRED — the horizon seating above supersedes it under Keith's 2026-11-17 ruling ('They need to match the horizon / Not go above them'); the note stands as the lift's history. DEV FORK 134: THE LIFT HALVES (Keith, 2026-11-16 20:27 ET) -- FORK 128's fifth-of-the-screen raise rode TOO HIGH (the band crossed behind the decks); a tenth of the screen keeps the range clear of the ridge bases without the climb, and the presence Keith asked for now comes from the v2 re-bake of the strip itself (tools/bake_mtnstrip_v2.py: firmer top edge, deeper shadows, more saturation). Keyed on the picked picture, so every other floor keeps its geometry exactly */
       const k0 = Math.floor(scroll / sw3);
       ctx.save(); ctx.globalAlpha = 0.97 * (1 - 0.5 * sky.star) * __seaVis * __cwS;
       window.__below121.img = (simg === window.__SNOWSTRIP) ? 'snowstrip' : (simg === window.__PLAINSSTRIP) ? 'plainsstrip' : (simg === window.__CLOUDSTRIP) ? 'cloudstrip' : (simg === window.__MTNSTRIP) ? 'mtnstrip' : (simg === window.__OCEANSTRIP) ? 'oceanstrip' : 'seastrip';   /* DEV FORK 127: the one below ledger now names the snow strip too */   /* DEV FORK 125: the one below ledger now names the plains strip too */   /* DEV FORK 124: the one below ledger now names the cloud strip too */   /* DEV FORK 123: the one below ledger now names the ocean strip too */ window.__below121.alpha = 0.97 * (1 - 0.5 * sky.star) * __seaVis * __cwS; window.__below121.tiles = 0;   /* DEV FORK 121: ledger -- which floor drew, at the gated alpha the gate actually gave it */
@@ -3223,7 +3302,7 @@ function draw() {
       ctx.drawImage(img, sx - gx, sy - cd.surf * dh + 6 - gy, p.len, dh);
     } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
     ctx.restore();
-    if (p.thunder) { const __ph = (time * 1.4 + (p.x % 997) / 997 * 2.7) % 2.7; if (__ph < 0.45)   /* DEV FORK 76: the charge shows ~0.32 s a cycle, not a 0.09 s blink (Keith: 'I didn't have lightning clouds yet') */ { const __bx = sx + p.len * 0.5, __by = sy + (1 - cd.surf) * dh + 16; ctx.save(); ctx.strokeStyle = 'rgba(255,244,170,0.95)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(__bx, __by); ctx.lineTo(__bx - 9, __by + 20); ctx.lineTo(__bx + 2, __by + 20); ctx.lineTo(__bx - 8, __by + 44); ctx.stroke(); ctx.restore(); } }   /* DEV FORK 67: a thunder cloud shows its charge — a little bolt flickers under it now and then */
+    if (p.thunder) { const __ph = (time * 1.4 + (p.x % 997) / 997 * 2.7) % 2.7; if (__ph < 0.45)   /* DEV FORK 76: the charge shows ~0.32 s a cycle, not a 0.09 s blink (Keith: 'I didn't have lightning clouds yet') */ { if (window.__spiderMini) window.__spiderMini(p, sx, sy, dh); } } /* DEV FORK 67: a thunder cloud shows its charge — a little bolt flickers under it now and then */
     if ((p.dark || p.storm) && window.__map !== 'mnt' && window.__map !== 'mnt2' && window.__map !== 'gold' && !(p.dark && (p.sink || 0) > 200)) {   /* DEV FORK 96: no under-deck rain streaks in DAY BREAK (Keith) — the streaks stay in MIDNIGHT RUN + STORM SEASON; the storm bank's sky rain (__rainDraw) is a separate system and stays */   /* v0.98 RAIN SIMULATION (Keith: 'we should do rain simulation under the clouds because they dont look good'): animated streaks fall from a rain deck's underside and fade down the fall zone — the baked art never carried the rain like his source sheet does */
       const under = sy + (1 - cd.surf) * dh + 10, fallH = 150, nR = Math.max(4, Math.floor(p.len / 58));
       ctx.save(); ctx.strokeStyle = 'rgba(168,194,235,0.5)'; ctx.lineWidth = 2; ctx.beginPath();
@@ -3232,7 +3311,7 @@ function draw() {
     }
   }
   if (window.__rainDraw) window.__rainDraw();
-  if (window.__flashT > 0.01) { ctx.save(); ctx.globalAlpha = Math.min(0.55, window.__flashT * 0.55); ctx.fillStyle = '#dfe8ff'; ctx.fillRect(0, 0, W, H); ctx.restore(); window.__flashT = Math.max(0, window.__flashT - 0.045); }   /* DEV FORK 67: THE LIGHTNING FLASH — stepping on a thunder cloud lights the whole screen (Keith) */   /* DEV FORK 61: STORM SEASON's rain (movement 1) falls over the world */
+  if (window.__spiderDraw) window.__spiderDraw();   /* RC1.1 SPIDER LIGHTNING (Keith, 2026-11-17): the arcs crawl through the cloud band where the strike landed — the FORK 67 whole-screen flash that stood here is retired */   /* DEV FORK 67: THE LIGHTNING FLASH — stepping on a thunder cloud lights the whole screen (Keith) */   /* DEV FORK 61: STORM SEASON's rain (movement 1) falls over the world */
   /* ===== ITEMS (v0.82): notes, the coin, the charge aura ===== */
   for (const n of notes) {
     if (n.got) continue;
@@ -3278,7 +3357,7 @@ function draw() {
     const img = IMG.magnet;
     if (img && img.naturalWidth && (magT > 1 || Math.floor(time * 6) % 2 === 0)) { const w = 46, h = w * img.naturalHeight / img.naturalWidth; ctx.drawImage(img, px - camX - w / 2, py - camY - 306 + Math.sin(time * 6) * 4 - h / 2, w, h); }
   }
-  if (coinT > 0 && mode === 'run') {   /* wearing the charge: the glow follows the BODY (Keith, v0.89) — her own frame stamped in her color with a soft shadow, the charge halo's trick. The old radial DISC read as a glowing green circle around her whenever she tucked into a roll; a silhouette can't do that. */
+  if (coinT > 0 && mode === 'run' && !(window.__spkOn && window.__spkOn())) {   /* RC1.1: the body glow stands down while she rides Sparkles (no charge glow on the pair) */ /* wearing the charge: the glow follows the BODY (Keith, v0.89) — her own frame stamped in her color with a soft shadow, the charge halo's trick. The old radial DISC read as a glowing green circle around her whenever she tucked into a roll; a silhouette can't do that. */
     const pa2 = playerAnim();
     ctx.save();
     ctx.shadowColor = (window.__chargeHex ? window.__chargeHex(selChar) : CHAR_FX[selChar].halo);   /* RC1: an equipped charge color recolors the halo — ghosts keep their own */
@@ -3368,7 +3447,7 @@ let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
 const DBG_EV = [];
 let dbgLastText = 0, dbgFrames = 0, dbgFpsT = 0, dbgFps = 0; const dbgPrev = {};
 function dbgLog(s) { DBG_EV.push(s); if (DBG_EV.length > 6) DBG_EV.shift(); }
-function dbgTick(ts) { if (!window.__dbgReadout) { const __rd = $('dbg'); if (__rd) __rd.style.display = 'none'; return; }   /* DEV FORK 135: readout OFF -- the state line hides and the tick costs one return */
+function dbgTick(ts) { const __rdv = $('dbg'); if (__rdv) __rdv.style.display = window.__dbgReadout ? '' : 'none';   /* RC1.1: DEVELOPER MODE owns the strip's VISIBILITY — OFF is a clean screen; the text still composes underneath so the state is never stale when the strip returns (and the OVER line still lands in the element for the record) */   /* DEV FORK 135: readout OFF -- the state line hides and the tick costs one return */
   dbgFrames++; if (ts - dbgFpsT >= 500) { dbgFps = Math.round(dbgFrames * 1000 / Math.max(1, ts - dbgFpsT)); dbgFrames = 0; dbgFpsT = ts; }
   const P = dbgPrev, wingOn = wingT > 0, magOn = magT > 0, hangOn = !!hangPlat;
   if (P.mode !== undefined && P.mode !== mode) { if (mode === 'over') dbgLog('DEATH ' + Math.round(runFt()) + ' FT'); if (mode === 'run') dbgLog('RUN START ' + selChar); }
@@ -3382,25 +3461,23 @@ function dbgTick(ts) { if (!window.__dbgReadout) { const __rd = $('dbg'); if (__
   const ghostTxt = 'GHOST ' + (RACE ? ghostChar() + ' ' + (GR && GR.style ? GR.style : '') + ' gap ' + (G ? Math.round(G.o) : '-') + ' perf ' + (GR && GR.perfD != null ? Math.round(GR.perfD / 15.24) : '-') : 'none') + ' · STORM in ' + Math.max(0, Math.round((stormAt - dist) / 15.24)) + ' FT';
   if (mode === 'over') {   /* DEV FORK: on the results screen the readout SHRINKS to a two-line strip docked at the very bottom — the full panel was sprawled over the leaderboard (Keith's screenshot, 2026-11-11) */
     const el = $('dbg');
-    el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '9.5px';
+    el.style.top = 'auto'; el.style.bottom = 'calc(4px + env(safe-area-inset-bottom))'; el.style.fontSize = '8px';   /* RC1.1: the docked OVER strip matches the compact face */
     el.textContent = 'RC1 · OVER · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' · ' + selChar + ' R' + (PSKIN.rate || 1) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps + '\n' + ghostTxt + (DBG_EV.length ? ' · ' + DBG_EV[DBG_EV.length - 1] : '');
     return;
   }
   const el = $('dbg'); el.style.top = ''; el.style.bottom = ''; el.style.fontSize = '';
   const lines = [
     'RC1 · ' + String(mode).toUpperCase() + ' · ' + dbgFps + 'fps · ' + innerWidth + 'x' + innerHeight + ' dpr' + (devicePixelRatio || 1),
-    'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2),
-    'DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,
+    'CHR ' + selChar + ' R' + (PSKIN.rate || 1) + ' · SPD ' + Math.round(speed) + ' · ZOOM ' + zoom.toFixed(2) + ' · DIST ' + Math.round(runFt()) + ' FT · SCR ' + score + ' · JMP ' + jumps,   /* RC1.1: the compact strip — CHR and DIST share a line */
     'vy ' + Math.round(vy) + (grounded ? ' · GROUND' : ' · AIR ' + (airMove || '-')) + ' · DBL ' + (doubleArmed ? 'ARM' : doubleUsed ? 'USED' : '-') + ' · TPL ' + (tripleUsed ? 'USED' : '-'),
-    'WING ' + (wingOn ? String(wingKind).toUpperCase() + ' ' + wingT.toFixed(1) + '/' + wingMax + 's' : '-') + ' · FLUT ' + flutterT.toFixed(2) + ' · HANG ' + (hangPlat ? 'YES' : '-'),
-    'MAG ' + (magOn ? magT.toFixed(1) + 's' : '-') + ' · COIN ' + (coinT > 0 ? coinT.toFixed(1) + 's' : '-') + ' · NOTES ' + (window.__notes | 0) + (noteCharge ? ' · FULLCHG' : ''),   /* DEV FORK 140: the strip's NOTES is the WALLET (window.__notes) — the haul it used to read is 0 at every title, which is what Keith filmed; the haul still itemizes on the wipeout screen (+N THIS RUN) */
+    'WING ' + (wingOn ? String(wingKind).toUpperCase() + ' ' + wingT.toFixed(1) + '/' + wingMax + 's' : '-') + ' · FLUT ' + flutterT.toFixed(2) + ' · HANG ' + (hangPlat ? 'YES' : '-') + ' · MAG ' + (magOn ? magT.toFixed(1) + 's' : '-') + ' · COIN ' + (coinT > 0 ? coinT.toFixed(1) + 's' : '-') + ' · NOTES ' + (window.__notes | 0) + (noteCharge ? ' · FULLCHG' : ''),   /* RC1.1: the compact strip — WING and the MAG/COIN/NOTES wallet share a line; the NOTES read stays the WALLET (FORK 140) */
     'AUD ' + (actx ? 'web-' + actx.state : 'element') + ' bufD ' + (bufD ? 'Y' : '-') + ' bufS ' + (bufS ? 'Y' : '-') + ' · el ' + (music && music.src ? music.src.split('/').pop() : '-') + ' ' + (music ? (music.paused ? 'PAUSED' : 'playing') + ' @' + (music.currentTime || 0).toFixed(1) : '-'),
     ghostTxt
   ];
   const __tkl = window.__tkLine ? window.__tkLine() : null; if (__tkl) lines.push(__tkl);   /* DEV FORK 101 TEST KIT: the armed test rides the strip */
   if (window.__zeusOpt) lines.push('ZEUS: ' + (selChar === 'ivey' ? 'WITH IVEY' : 'ARMED — NEEDS IVEY'));   /* DEV FORK 107: an armed Zeus rides the strip too, so a playtest screenshot reads at a glance */
   if (window.__sparkOpt) lines.push('SPARKLES: ' + (selChar === 'sayori' ? 'WITH SAYORI' : 'ARMED — NEEDS SAYORI'));   /* DEV FORK 139: an armed Sparkles rides the strip too, so a playtest screenshot reads at a glance */
-  if (DBG_EV.length) lines.push('- EVENTS -', ...DBG_EV.slice(-4));
+  if (DBG_EV.length) lines.push('- EVENTS -', ...DBG_EV.slice(-2));   /* RC1.1: the compact strip keeps the last two events */
   $('dbg').textContent = lines.join('\n');
 }
 /* DEV FORK — THE NEW BEST CARD plumbing: the publish row lives in the card
@@ -3683,9 +3760,9 @@ fetchBoard();
 if (new URLSearchParams(location.search).has('over')) { $('over').style.display = 'flex'; $('nameRow').style.display = 'flex'; $('pubRow').style.display = 'flex'; }   /* DEV FORK layout hook: ?over=1 pins the WIPEOUT panel open so it can be checked at any window size / rotation */
 if (new URLSearchParams(location.search).has('board')) setTimeout(openBoardPage, 2000);
 /* DEV FORK 52: THE OPTIONS PAGE (Keith, 2026-11-13 — for the store push: restore purchases, ghost runners, sound settings, reset local scores) */
-window.__optGhostsOff = false; window.__debugOpt = false; window.__dbgReadout = true;   /* DEV FORK 135: the DEBUG READOUT starts ON (Keith) */   /* DEV FORK 73: the DEBUG map-review option (Keith) */ window.__cityDuskOpt = false; window.__bokehOpt = false; window.__tkWings = false; window.__tkKind = '';   /* DEV FORK 101 TEST KIT: endless wings + the armed force-kind (Keith) */ window.__zeusOpt = false;   /* DEV FORK 107: ZEUS WITH IVEY starts OFF */ window.__sparkOpt = false;   /* DEV FORK 139: SPARKLES FOR SAYORI starts OFF */ window.__zeusTempo = 1;   /* DEV FORK 117: the ZEUS TEMPO dial — the gallop rate multiplier; 1 is the clip's authored cadence (Keith judges tempo in game, not from previews) */ window.__flowerOpt = false;   /* DEV FORK 108: FLOWER FIELD starts OFF */   /* DEV FORK 87: the CITY DUSK + BOKEH demo toggles (Keith) */
-try { const o52 = JSON.parse(localStorage.getItem('sixloudrc1_options') || '{}'); window.__optGhostsOff = !!o52.g; window.__debugOpt = !!o52.d; window.__dbgReadout = o52.dr !== 0;   /* DEV FORK 135: the readout persists as dr, defaulting ON */ window.__cityDuskOpt = !!o52.cd && /[?&]dev=1/.test(location.search || '');   /* RC1: City Dusk's row is hidden and its flag pinned false for players — the flag itself is load-bearing (__cityW), so it is never deleted */ window.__bokehOpt = o52.bk !== 0;   /* RC1: DEPTH BLUR ships ON by default */ window.__tkWings = !!o52.tw; window.__tkKind = (o52.tk === 'saw' || o52.tk === 'flip' || o52.tk === 'shiv') ? o52.tk : '';   /* DEV FORK 101 TEST KIT persists with the other options */ window.__zeusOpt = false;   /* RC1: upgrade equip state owns this flag now — __rcSyncUpgrades applies it after load */   /* DEV FORK 107: ZEUS WITH IVEY persists with the other options */ if (window.__zeusOpt) applyChar();   /* DEV FORK 136: a persisted ON greets the strip already wearing the Ivey+Zeus portrait */ window.__sparkOpt = false;   /* RC1: upgrade equip state owns this flag now */   /* DEV FORK 139: SPARKLES FOR SAYORI persists as sp */ if (window.__sparkOpt) applyChar();   /* DEV FORK 139: a persisted ON greets the strip already wearing the pair portrait */ window.__zeusTempo = [1, 1.1, 1.255, 1.4].includes(o52.zt) ? o52.zt : 1;   /* DEV FORK 117: the tempo dial persists as zt beside z */ window.__flowerOpt = !!o52.fb;   /* DEV FORK 108: FLOWER FIELD persists with the other options */   /* DEV FORK 87: the demo toggles persist with the other options */   /* DEV FORK 73: DEBUG persists with the other options */ } catch (e) {}
-function optSave() { try { localStorage.setItem('sixloudrc1_options', JSON.stringify({ g: window.__optGhostsOff ? 1 : 0, d: window.__debugOpt ? 1 : 0, dr: window.__dbgReadout ? 1 : 0, cd: window.__cityDuskOpt ? 1 : 0, bk: window.__bokehOpt ? 1 : 0, tw: window.__tkWings ? 1 : 0, tk: window.__tkKind || '',   /* RC1: z/sp/fb keys retired — equip state and the flower selection own those now */   /* DEV FORK 139: the Sparkles toggle saves with the rest */ zt: window.__zeusTempo || 1, fb: window.__flowerOpt ? 1 : 0 })   /* DEV FORK 87: the demo toggles save with the rest */   /* DEV FORK 107: the Zeus toggle saves with the rest */   /* DEV FORK 108: the Flower Field toggle saves with the rest */); } catch (e) {} }
+window.__optGhostsOff = false; window.__debugOpt = false; window.__dbgReadout = false;   /* RC1.1: the readout now follows DEVELOPER MODE — dark until the switch is on */ window.__devMode = false;   /* RC1.1: DEVELOPER MODE (Keith, 2026-11-17) starts OFF: the honest game */   /* DEV FORK 135: the DEBUG READOUT starts ON (Keith) */   /* DEV FORK 73: the DEBUG map-review option (Keith) */ window.__cityDuskOpt = false; window.__bokehOpt = false; window.__tkWings = false; window.__tkKind = '';   /* DEV FORK 101 TEST KIT: endless wings + the armed force-kind (Keith) */ window.__zeusOpt = false;   /* DEV FORK 107: ZEUS WITH IVEY starts OFF */ window.__sparkOpt = false;   /* DEV FORK 139: SPARKLES FOR SAYORI starts OFF */ window.__zeusTempo = 1;   /* DEV FORK 117: the ZEUS TEMPO dial — the gallop rate multiplier; 1 is the clip's authored cadence (Keith judges tempo in game, not from previews) */ window.__flowerOpt = false;   /* DEV FORK 108: FLOWER FIELD starts OFF */   /* DEV FORK 87: the CITY DUSK + BOKEH demo toggles (Keith) */
+try { const o52 = JSON.parse(localStorage.getItem('sixloudrc1_options') || '{}'); window.__optGhostsOff = !!o52.g; window.__debugOpt = !!o52.d; window.__devMode = !!o52.dm; window.__dbgReadout = window.__devMode;   /* RC1.1: DEVELOPER MODE persists as dm in sixloudrc1_options and OWNS the readout — ON shows the data strip, OFF is a clean screen (Keith, 2026-11-17). The dr key stays written by optSave for any older reader; nothing reads it back */   /* DEV FORK 135: the readout persists as dr, defaulting ON */ window.__cityDuskOpt = !!o52.cd && /[?&]dev=1/.test(location.search || '');   /* RC1: City Dusk's row is hidden and its flag pinned false for players — the flag itself is load-bearing (__cityW), so it is never deleted */ window.__bokehOpt = o52.bk !== 0;   /* RC1: DEPTH BLUR ships ON by default */ window.__tkWings = !!o52.tw; window.__tkKind = (o52.tk === 'saw' || o52.tk === 'flip' || o52.tk === 'shiv') ? o52.tk : '';   /* DEV FORK 101 TEST KIT persists with the other options */ window.__zeusOpt = false;   /* RC1: upgrade equip state owns this flag now — __rcSyncUpgrades applies it after load */   /* DEV FORK 107: ZEUS WITH IVEY persists with the other options */ if (window.__zeusOpt) applyChar();   /* DEV FORK 136: a persisted ON greets the strip already wearing the Ivey+Zeus portrait */ window.__sparkOpt = false;   /* RC1: upgrade equip state owns this flag now */   /* DEV FORK 139: SPARKLES FOR SAYORI persists as sp */ if (window.__sparkOpt) applyChar();   /* DEV FORK 139: a persisted ON greets the strip already wearing the pair portrait */ window.__zeusTempo = [1, 1.1, 1.255, 1.4].includes(o52.zt) ? o52.zt : 1;   /* DEV FORK 117: the tempo dial persists as zt beside z */ window.__flowerOpt = !!o52.fb;   /* DEV FORK 108: FLOWER FIELD persists with the other options */   /* DEV FORK 87: the demo toggles persist with the other options */   /* DEV FORK 73: DEBUG persists with the other options */ } catch (e) {}
+function optSave() { try { localStorage.setItem('sixloudrc1_options', JSON.stringify({ g: window.__optGhostsOff ? 1 : 0, d: window.__debugOpt ? 1 : 0, dr: window.__dbgReadout ? 1 : 0, dm: window.__devMode ? 1 : 0,   /* RC1.1: DEVELOPER MODE persists as dm */ cd: window.__cityDuskOpt ? 1 : 0, bk: window.__bokehOpt ? 1 : 0, tw: window.__tkWings ? 1 : 0, tk: window.__tkKind || '',   /* RC1: z/sp/fb keys retired — equip state and the flower selection own those now */   /* DEV FORK 139: the Sparkles toggle saves with the rest */ zt: window.__zeusTempo || 1, fb: window.__flowerOpt ? 1 : 0 })   /* DEV FORK 87: the demo toggles save with the rest */   /* DEV FORK 107: the Zeus toggle saves with the rest */   /* DEV FORK 108: the Flower Field toggle saves with the rest */); } catch (e) {} }
 function optMsg(t) { const m = document.getElementById('optMsg'); if (m) m.textContent = t; }
 function optUI() { const g = document.getElementById('optGhosts'); if (g) { g.textContent = window.__optGhostsOff ? 'GHOSTS OFF' : 'GHOSTS ON'; g.classList.remove('off'); if (window.__optGhostsOff) g.classList.add('off'); } const mu = document.getElementById('optMusic'); if (mu) { mu.textContent = window.__musOff ? 'MUSIC OFF' : 'MUSIC ON'; mu.classList.remove('off'); if (window.__musOff) mu.classList.add('off'); } const sf = document.getElementById('optSfx'); if (sf) { sf.textContent = window.__sfxOff ? 'SOUND OFF' : 'SOUND ON'; sf.classList.remove('off'); if (window.__sfxOff) sf.classList.add('off'); } const dg = document.getElementById('optDebug'); if (dg) { dg.textContent = window.__debugOpt ? 'DEBUG ON' : 'DEBUG OFF'; dg.classList.remove('off'); if (!window.__debugOpt) dg.classList.add('off'); } const db = document.getElementById('optDbg'); if (db) { db.textContent = window.__dbgReadout ? 'READOUT ON' : 'READOUT OFF'; db.classList.remove('off'); if (!window.__dbgReadout) db.classList.add('off'); }   /* DEV FORK 135: the readout toggle shows its state like its neighbours */ const ct = document.getElementById('optCity'); if (ct) { ct.textContent = window.__cityDuskOpt ? 'CITY DUSK ON' : 'CITY DUSK OFF'; ct.classList.remove('off'); if (!window.__cityDuskOpt) ct.classList.add('off'); } const bk = document.getElementById('optBokeh'); if (bk) { bk.textContent = window.__bokehOpt ? 'DEPTH BLUR ON' : 'DEPTH BLUR OFF'; bk.classList.remove('off'); if (!window.__bokehOpt) bk.classList.add('off'); } const tw = document.getElementById('optTkWings'); if (tw) { tw.textContent = window.__tkWings ? 'ENDLESS ON' : 'ENDLESS OFF'; tw.classList.remove('off'); if (!window.__tkWings) tw.classList.add('off'); } for (const __tkb of [['optTkSaw', 'saw', 'SEESAW'], ['optTkFlip', 'flip', '360'], ['optTkShiv', 'shiv', 'SHIVER']]) { const bb = document.getElementById(__tkb[0]); if (bb) { const on = window.__tkKind === __tkb[1]; bb.textContent = __tkb[2] + (on ? ' ON' : ' OFF'); bb.classList.remove('off'); if (!on) bb.classList.add('off'); } }   /* DEV FORK 101 TEST KIT: the kit buttons show their state like their neighbours */   /* DEV FORK 87: the demo toggles show their state like their neighbours */ const zu = document.getElementById('optZeus'); if (zu) { zu.textContent = window.__zeusOpt ? 'ZEUS ON' : 'ZEUS OFF'; zu.classList.remove('off'); if (!window.__zeusOpt) zu.classList.add('off'); }   /* DEV FORK 107: the Zeus toggle shows its state like its neighbours */ const ztm = document.getElementById('optZeusTempo'); if (ztm) ztm.textContent = 'TEMPO ×' + ({ 1: '1.0', 1.1: '1.1', 1.255: '1.255', 1.4: '1.4' })[window.__zeusTempo || 1];   /* DEV FORK 117: the tempo dial shows its rate like its neighbours show state */ const sp = document.getElementById('optSpark'); if (sp) { sp.textContent = window.__sparkOpt ? 'SPARKLES ON' : 'SPARKLES OFF'; sp.classList.remove('off'); if (!window.__sparkOpt) sp.classList.add('off'); }   /* DEV FORK 139: the Sparkles toggle shows its state like its neighbours */ const v = document.getElementById('optVer'); const vv = document.getElementById('ver'); if (v && vv) v.textContent = vv.textContent; }
 function openOptions() { optUI(); optMsg(''); const p = document.getElementById('optPage'); if (p) p.style.display = 'block';   /* DEV FORK 113: shown as a plain block — #optPage is the scroller now (its column-flex shell is retired); the header sticks inside it */ }
@@ -3760,7 +3837,7 @@ window.__flowerDraw = function (sky) { const F = window.__FLOWER || {}; const vw
    /* DEV FORK 108: the HILLS plate at a ridge-class parallax (the mid ridge's own 0.08), sinking gently as he climbs */
   { const lowA = Math.max(0, Math.min(1, (altSm - 0.02) / 0.48)); if (lowA > 0.01 && window.__map !== 'rain' && window.__map !== 'rain2') for (const d of dressLow) { const img = (window.__bokehOn && window.__bokehOn() && window.__bokSrc) ? (window.__bokSrc(BGIMG['f' + d.img], 7) || BGIMG['f' + d.img]) : BGIMG['f' + d.img]; if (!img || !img.naturalWidth) continue; const wW = d.w / zoom, spanW = vw2 + wW + 120 / (S * zoom); let dx = ((d.x - camX * 0.24) / zoom) % spanW; if (dx < -wW - 120 / (S * zoom)) dx += spanW; ctx.save(); ctx.globalAlpha = 0.34 * lowA * (1 - 0.55 * sky.star); ctx.drawImage(img, dx - wW * 0.5 - tiltX * 30 / (S * zoom), vh2 * d.fy - tiltY * 10 / (S * zoom), wW, wW * img.naturalHeight / img.naturalWidth); dressCnt.low++; ctx.restore(); } }   /* DEV FORK 115: DRESSLOW between the hills and the mid plane — its screen-space draw converted to world units (span/scroll/sizes divided through by S*zoom, so the 0.24 drift and the altitude entry law are the standard ones); out of the rain worlds, as at home */
   window.__bokPlane = 'mid'; for (const d of dressMid) { const img = (window.__bokehOn && window.__bokehOn() && window.__bokPick) ? (window.__bokPick(BGIMG['m' + d.img]) || BGIMG['m' + d.img]) : BGIMG['m' + d.img]; if ((!img || !img.naturalWidth) && window.__map !== 'rain' && window.__map !== 'rain2') continue; let dx = (((d.x - camX * 0.32) % 3450) + 3450) % 3450 - 820; const dy = d.y - camBgY * 0.30 + vh2 * 0.55; ctx.save(); ctx.globalAlpha = (0.74 + 0.20 * warmBg) * nightDim; if (!(window.__dressOne && window.__dressOne(d, sky.star, dx, dy, -410, 20, 8))) ctx.drawImage(img, dx - 410 - tiltX * 20, dy - tiltY * 8, d.w, d.w * img.naturalHeight / img.naturalWidth); dressCnt.mid++; ctx.restore(); }   /* DEV FORK 115: DRESSMID over the hills and the low plane — the main-pass draw repeated (3450 wrap at 0.32, the /3 grade through __bokPick, __dressOne for the rain worlds) */
-  const seaVis = 1 - Math.max(0, Math.min(1, (altSm - 0.30) / 0.42));   /* DEV FORK 138: the same widened gate as the sea's — one altitude law for every floor */ const seaVisF = mode === 'run' ? seaVis : 1;   /* DEV FORK 129: off a run the field presents SETTLED -- the altitude gate is a running law, not a menu law (Keith's title held a high run's leftover camera/altitude frozen, the gate stayed shut, and the sky plate showed under the hills' bottom edge as a blurry band) */ if (seaVisF > 0.01) { const __hb = vh2 * 0.91 - camSmY * 0.10; let __stY = vh2 * 0.74 - camSmY * 0.30 + (1 - seaVisF) * vh2 * 0.18; __stY = Math.min(__stY, __hb - vh2 * 0.17); __stY = Math.max(__stY, vh2 * 0.70); tile((window.__bokSrc ? (window.__bokSrc(F.strip, 7) || F.strip) : F.strip), __stY, vh2 * 0.30, 0.58, 0.98 * seaVisF);   /* RC1: the sunflower strip takes the /7 grade like every floor */ window.__flowerStrip.top = __stY; window.__flowerStrip.bot = __stY + vh2 * 0.30; window.__flowerStrip.vh = vh2; window.__flowerStrip.hb = __hb; window.__flowerStrip.seam = __hb - __stY; window.__flowerStrip.alpha = 0.98 * seaVisF; }   /* DEV FORK 118: THE JOIN + THE FLUSH (Keith, 2026-11-16 00:27-00:34 ET: 'on flower feilds i dont want this gap at the bottom, so we need to pull the image down' — and the cause, found on his altitude shots: 'its when we go up in altitude... the window rides up and the flowers separate from the fields') — the strip's topY couples to camSmY at 0.30 while the hills plate couples at 0.10, so at altitude the strip sinks ~3x faster than the hills and the seam between the hills' bottom edge and the strip's top edge opens onto bare sky; carried into the title after a high death, the same offset left the band at the screen's bottom. THE JOIN: the strip's top edge never passes below the hills plate's drawn bottom edge (__hb = vh2*0.91 - camSmY*0.10, its tile top vh2*0.47 - camSmY*0.10 plus its vh2*0.44 height) minus the camSmY=0 overlap (vh2*0.17) — field and flowers stay joined at every altitude. THE FLUSH: the strip's bottom edge never leaves the screen's last row open in title/low states. FORK 95's sea-gate alpha is untouched and both plates keep their parallax rates — only the strip's final position is clamped */   /* DEV FORK 108: the SUNFLOWER strip takes the sea strip's role whole — its 0.58 parallax and FORK 95's altitude gate: full when he runs low, sliding down and dissolving as he climbs */
+  const seaVis = 1 - Math.max(0, Math.min(1, (altSm - 0.30) / 0.42));   /* DEV FORK 138: the same widened gate as the sea's — one altitude law for every floor */ const seaVisF = mode === 'run' ? seaVis : 1;   /* DEV FORK 129: off a run the field presents SETTLED -- the altitude gate is a running law, not a menu law (Keith's title held a high run's leftover camera/altitude frozen, the gate stayed shut, and the sky plate showed under the hills' bottom edge as a blurry band) */ if (seaVisF > 0.01) { const __fcY = (typeof window.__floorCamY === 'number') ? window.__floorCamY : camSmY; const __hb = vh2 * 0.91 - __fcY * 0.10; let __stY = vh2 * 0.74 - __fcY * 0.30 + (1 - seaVisF) * vh2 * 0.18;   /* RC1.1: the flower floor seats on the floor camera too, join clamp included — the hills' vh2*0.17 overlap absorbs the few px the hills plate itself rides during a hop */ __stY = Math.min(__stY, __hb - vh2 * 0.17); __stY = Math.max(__stY, vh2 * 0.70); tile(F.strip, __stY, vh2 * 0.30, 0.58, 0.98 * seaVisF);   /* RC1.1: the sunflower strip draws NATIVE (Keith, 2026-11-17) — the floor slot never takes the /7 grade */ window.__flowerStrip.top = __stY; window.__flowerStrip.bot = __stY + vh2 * 0.30; window.__flowerStrip.vh = vh2; window.__flowerStrip.hb = __hb; window.__flowerStrip.seam = __hb - __stY; window.__flowerStrip.alpha = 0.98 * seaVisF; }   /* DEV FORK 118: THE JOIN + THE FLUSH (Keith, 2026-11-16 00:27-00:34 ET: 'on flower feilds i dont want this gap at the bottom, so we need to pull the image down' — and the cause, found on his altitude shots: 'its when we go up in altitude... the window rides up and the flowers separate from the fields') — the strip's topY couples to camSmY at 0.30 while the hills plate couples at 0.10, so at altitude the strip sinks ~3x faster than the hills and the seam between the hills' bottom edge and the strip's top edge opens onto bare sky; carried into the title after a high death, the same offset left the band at the screen's bottom. THE JOIN: the strip's top edge never passes below the hills plate's drawn bottom edge (__hb = vh2*0.91 - camSmY*0.10, its tile top vh2*0.47 - camSmY*0.10 plus its vh2*0.44 height) minus the camSmY=0 overlap (vh2*0.17) — field and flowers stay joined at every altitude. THE FLUSH: the strip's bottom edge never leaves the screen's last row open in title/low states. FORK 95's sea-gate alpha is untouched and both plates keep their parallax rates — only the strip's final position is clamped */   /* DEV FORK 108: the SUNFLOWER strip takes the sea strip's role whole — its 0.58 parallax and FORK 95's altitude gate: full when he runs low, sliding down and dissolving as he climbs */
   window.__flowerDrawn = drawn; window.__flowerDress = dressCnt; };   /* DEV FORK 115: the frame's per-plane dress counts publish beside the plate count */
 const __cityW108 = window.__cityW; window.__cityW = function () { if (window.__flowerOn()) return 1; return __cityW108(); };
 const __cityW125 = window.__cityW; window.__cityW = function () { if (window.__pick === 'rmx5' && !window.__cityDuskOpt) return 0; return __cityW125(); };   /* DEV FORK 125: SUN SHOWER never raises the city — its gold segment is golden sky + rain over the rolling plains, so every stand-down that answers to the city weight (the below gate, the dress planes, the ridges, the city stack itself) hears 'no city' for the rmx5 pick; the CITY DUSK demo toggle still wins when a tester arms it; every other pick passes through untouched */   /* DEV FORK 108: the flower takes the scenery weight — dressLow, the sea, dressFar, the ridges and dressMid all stand down behind the plates */
@@ -3817,7 +3894,7 @@ window.__deckTick61 = function (p, dt) {   /* DEV FORK 62: FORK 61's rhythm flip
 };
 /* DEV FORK 62: THE WEIGHT PHYSICS (Keith, 2026-11-13) — one physics for both special decks: angle under his weight, keep angling, the slope pulls him low-side; see-saws cap, flips go all the way around. */
 window.__deckTick = function (p, dt) {
-  if (p.thunder) { if (!p.rumbled && p.x - camX < viewW + 260 && p.x > px) { p.rumbled = true; if (window.__thunderFar) window.__thunderFar(); } if (!p.thundered && typeof grounded !== 'undefined' && grounded === p) { p.thundered = true; if (typeof playThunder === 'function') playThunder(); window.__flashT = 1; } }   /* DEV FORK 67: a thunder cloud cracks softly as it rolls in; stepping on it is the lightning strike — full thunder + the whole screen flashes (Keith) */
+  if (p.thunder) { if (!p.rumbled && p.x - camX < viewW + 260 && p.x > px) { p.rumbled = true; if (window.__thunderFar) window.__thunderFar(); } if (!p.thundered && typeof grounded !== 'undefined' && grounded === p) { p.thundered = true; if (typeof playThunder === 'function') playThunder(); if (window.__spiderStrike) window.__spiderStrike(p);   /* RC1.1 SPIDER LIGHTNING: the strike fires the crawling arc network at this deck — the whole-screen flash is retired (its only trigger was this strike) */ } }   /* DEV FORK 67: a thunder cloud cracks softly as it rolls in; stepping on it is the lightning strike — full thunder + the whole screen flashes (Keith) */
   if (p.kind !== 'saw' && p.kind !== 'flip' && p.kind !== 'shiv') return;
   if (p.kind === 'shiv') {
     if (p.dropping) { p.sinkV = (p.sinkV || 0) + 5200 * dt; p.sink = (p.sink || 0) + p.sinkV * dt; if (p.sink > 640) p.gone = true; return; }   /* falling away — the dark clouds' language: sink, fade, gone */
@@ -3960,6 +4037,80 @@ window.__THUNDER_ART = [6, 9, 10];   /* DEV FORK 85: Keith's bolt clouds */
 window.__TCD = { 6: [0.593, 0.145], 9: [0.673, 0.124], 10: [0.642, 0.056] };   /* DEV FORK 85: [asp h/w, surf] scanned from each cut's alpha */
 window.__THUNDER_ART.forEach(n => loadImg('tc' + n, 'stormbg/s' + n + '.webp'));
 window.__tcPick = function (p) { const h = Math.abs(Math.sin(p.x * 0.9137) * 43758.5453) % 1; return window.__THUNDER_ART[Math.floor(h * window.__THUNDER_ART.length)]; };
+/* ===== RC1.1 SPIDER LIGHTNING (Keith, 2026-11-17: 'lightning spider through the clouds') =====
+   A strike no longer flashes the whole screen: a branching network of arcs is seeded at the
+   thunder deck and CRAWLS through the cloud band — forked polylines spreading both ways from
+   the strike point, each point lit by its distance from the seed (the crawl), then a brief
+   flicker and decay (~0.55 s). One event at a time, a bounded segment count, two stroked
+   passes — the perf envelope is a handful of polylines per strike. The thunder clouds
+   themselves render in their ORIGINAL artwork color (the FORK 137 brightening is undone in
+   the RC tree — the original storm-06/09/10 files are restored). */
+window.__spiderEv = null;
+window.__spiderStrike = function (p) {
+  if (!p) return;
+  var seedX = p.x + p.len * 0.5, seedY = p.y + 26;
+  var segs = [];
+  function walk(x, y, dir, reach, ang) {
+    if (segs.length > 26) return;
+    var pts = [[x, y, 0]], cx = x, cy = y, a = ang, d = 0;
+    var steps = Math.max(3, Math.round(reach / 36));
+    for (var i = 0; i < steps; i++) {
+      a += (Math.random() - 0.5) * 0.85;
+      var st = 26 + Math.random() * 30;
+      cx += Math.cos(a) * st * dir; cy += Math.sin(a) * st * 0.5;
+      cy = Math.max(seedY - 110, Math.min(seedY + 120, cy));
+      d += st; pts.push([cx, cy, d]);
+      if (Math.random() < 0.30 && reach > 110) walk(cx, cy, dir, reach * 0.42, a + (Math.random() < 0.5 ? -0.8 : 0.8));
+    }
+    segs.push(pts);
+  }
+  walk(seedX, seedY, 1, 560 + Math.random() * 420, 0);
+  walk(seedX, seedY, -1, 560 + Math.random() * 420, 0);
+  walk(seedX, seedY + 30, 1, 300 + Math.random() * 200, 0.5);
+  walk(seedX, seedY + 30, -1, 300 + Math.random() * 200, -0.5);
+  window.__spiderEv = { t: 0, segs: segs, x: seedX, y: seedY };
+};
+window.__spiderState = function () { return window.__spiderEv ? { t: Math.round(window.__spiderEv.t * 100) / 100, segs: window.__spiderEv.segs.length } : null; };   /* RC1.1: the check/proof window */
+window.__spiderDraw = function () {
+  var ev = window.__spiderEv; if (!ev) return;
+  ev.t += 1 / 60;
+  var age = ev.t, LIFE = 0.55;
+  if (age > LIFE) { window.__spiderEv = null; return; }
+  var front = age / 0.16 * 1500;                       /* the crawl front: the full spread lands in ~0.16 s */
+  var fade = age < 0.3 ? 1 : Math.max(0, 1 - (age - 0.3) / (LIFE - 0.3));
+  var flick = 0.72 + 0.28 * Math.sin(age * 67) * Math.sin(age * 41 + 1.7);
+  var A = Math.max(0, Math.min(1, fade * flick));
+  if (A <= 0.02) return;
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  for (var pass = 0; pass < 2; pass++) {
+    ctx.strokeStyle = pass === 0 ? 'rgba(150,170,255,' + (0.30 * A) + ')' : 'rgba(255,252,230,' + (0.95 * A) + ')';
+    ctx.lineWidth = pass === 0 ? 4.5 : 1.6;
+    ctx.beginPath();
+    for (var s = 0; s < ev.segs.length; s++) {
+      var pts = ev.segs[s], started = false;
+      for (var i = 0; i < pts.length; i++) {
+        if (pts[i][2] > front) break;
+        var X = pts[i][0] - camX, Y = pts[i][1] - camY;
+        if (!started) { ctx.moveTo(X, Y); started = true; } else ctx.lineTo(X, Y);
+      }
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+};
+window.__spiderMini = function (p, sx, sy, dh) {   /* the idle charge, spider-style: little arcs crackling INSIDE the cloud body on the old 2.7 s cadence — replaces the single bolt glyph */
+  var q = Math.floor(time * 9) * 131 + (p.x | 0);
+  var sd = (q * 2654435761) % 2147483647; if (sd <= 0) sd += 2147483646;
+  var rnd = function () { sd = (sd * 1103515245 + 12345) % 2147483647; return sd / 2147483647; };
+  ctx.save(); ctx.strokeStyle = 'rgba(230,238,255,0.85)'; ctx.lineWidth = 1.6; ctx.beginPath();
+  for (var k = 0; k < 3; k++) {
+    var x = sx + p.len * (0.2 + rnd() * 0.6), y = sy + dh * (0.34 + rnd() * 0.3), a = rnd() < 0.5 ? 0 : 3.14159;
+    ctx.moveTo(x, y);
+    for (var i = 0; i < 4; i++) { a += (rnd() - 0.5) * 1.1; x += Math.cos(a) * (13 + rnd() * 13); y += Math.sin(a) * 7; ctx.lineTo(x, y); }
+  }
+  ctx.stroke(); ctx.restore();
+};
+
 window.__mapLockSync = () => { const id = window.__pick || window.__map || 'mnt'; window.__mapLocked = !window.__devOpen && !(window.__selOpen ? window.__selOpen(id) : true);   /* DEV FORK 106: locks follow THE PATH — a selection opens when the previous selection's clear exists (FORK 66: the fork's test door — the feat flags underneath stay honest) */ const mb = $('mapBtn'); if (mb) mb.textContent = 'MAP: ' + (window.__selLabel ? window.__selLabel(id) : (window.__MAPNAMES[id] || 'DAY BREAK')) + (window.__mapLocked ? ' 🔒' : '');   /* DEV FORK 118: the MAP button wears the label law — '# NAME'; the feet suffix is gone */ const sb = $('startBtn'); if (sb) sb.textContent = window.__mapLocked ? '🔒' : 'START GAME';   /* DEV FORK 118: THE FEAT LINE IS GONE (Keith, 2026-11-16 00:23 ET: 'yes bring it off') — the feat map, its writer and every distance-from hint come off the start screen whole; a locked pick's START button wears the lock alone. With his 00:22 ET rulings (no distance in the names; labels read 'N: NAME'), no name display anywhere carries a distance figure */ if (sb && !window.__mapLocked && typeof charOwned === 'function' && !charOwned(selChar)) sb.textContent = 'UNLOCK RUNNER';   /* DEV FORK 74: whoever wrote the label last, a locked pick still names the buy door */ };
 window.__mapLockSync();   /* DEV FORK 65: sync once at boot, then on every pick */
 /* DEV FORK 66: KEITH'S TEST SETUP (2026-11-13) — FORK ONLY, never ports to the real game: every map open for starting, a one-time grant of 20,000 notes, and the chosen 3 reset to locked so the buy flow can be run end to end. */
@@ -4034,7 +4185,7 @@ window.__gActChar = function () {
 
 /* --- charge colors: the player's halo follows the equipped color --- */
 window.__chargeHex = function (c) {
-  var e = entLoad();
+  var e = __rcEntView();   /* RC1.1: a session color equip under Developer Mode recolors too */
   var id = (e.charge && e.charge[c]) || 'classic';
   for (var i = 0; i < ECONOMY.colors.length; i++) {
     if (ECONOMY.colors[i].id === id && ECONOMY.colors[i].col) return ECONOMY.colors[i].col;
@@ -4110,6 +4261,17 @@ function __rcBurst(x, y, col, n, spd, life, size) {
     __rcSpawn(x, y, Math.cos(a) * s, Math.sin(a) * s - spd * 0.35, life * (0.6 + Math.random() * 0.7), col, size * (0.7 + Math.random() * 0.6), 500);
   }
 }
+/* RC1.1 SPARKLES FX IDENTITY (Keith, 2026-11-17): RAINBOW GLITTER — the mounted pair's fixed effect identity (not a purchasable FX type): small bright multi-color specks that TWINKLE (the gl flag rides the particle; the draw below oscillates its alpha). Same pool, same 240 cap, same counts as the charge-color bursts it replaces for the pair — the perf envelope is unchanged. */
+var __RC_RAINBOW = ['#ff4d6d', '#ff9f1c', '#ffe74d', '#4dff88', '#4dc9ff', '#b44dff', '#ff4dd8'];
+function __rcGlitter(x, y, n, spd, life, size) {
+  for (var i = 0; i < n; i++) {
+    var a = Math.random() * 6.2832, s = (0.3 + Math.random() * 0.7) * spd;
+    var lf = life * (0.6 + Math.random() * 0.7);
+    if (__rcP.length > 240) __rcP.shift();
+    __rcP.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - spd * 0.35, life: lf, max: lf, col: __RC_RAINBOW[(Math.random() * 7) | 0], size: size * (0.7 + Math.random() * 0.6), grav: 500, gl: 1, sd: Math.random() * 6.2832 });
+  }
+}
+window.__rcFxTest = function () { var gl = 0; for (var i = 0; i < __rcP.length; i++) if (__rcP[i].gl) gl++; return { p: __rcP.length, glitter: gl }; };   /* RC1.1: the check window for the FX identity */
 function __rcPDraw() {
   if (!__rcP.length) return;
   for (var i = __rcP.length - 1; i >= 0; i--) {
@@ -4118,7 +4280,7 @@ function __rcPDraw() {
     if (p.life <= 0) { __rcP.splice(i, 1); continue; }
     p.x += p.vx / 60; p.y += p.vy / 60; p.vy += p.grav / 60;
     ctx.save();
-    ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.max));
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.max)) * (p.gl ? (0.35 + 0.65 * Math.abs(Math.sin((p.max - p.life) * 30 + (p.sd || 0)))) : 1);   /* RC1.1: glitter specks TWINKLE; plain burst particles keep the plain fade */
     ctx.fillStyle = p.col;
     ctx.beginPath(); ctx.arc(p.x - camX, p.y - camY, p.size, 0, 6.2832); ctx.fill();
     ctx.restore();
@@ -4130,8 +4292,7 @@ if (typeof window.__sparkDraw === 'function') {
 }
 var __rbIdx = 0;
 window.__rcTrailKind = function (k) {
-  var e = entLoad();
-  if (e.fxOn && e.fxOn.indexOf('rainbow') >= 0) {
+  if (__rcFxOn().indexOf('rainbow') >= 0) {   /* RC1.1: the trail reads the effective FX on-set */
     var kinds = ['fire', 'streakB', 'streakP', 'streakG'];
     __rbIdx = (__rbIdx + 1) % 4;
     return kinds[__rbIdx];
@@ -4157,7 +4318,7 @@ function __rcApplyLash(alt) {
 
 /* --- upgrade sync: ownership + equip drive the fork's Zeus/Sparkles flags --- */
 function __rcSyncUpgrades() {
-  var e = entLoad();
+  var e = __rcEntView();   /* RC1.1: equip flags read the EFFECTIVE entitlements — the Developer Mode overlay included, so the bite-hang (and gallop/leap) answer to the overlay exactly as they answer to a real owned+equipped Zeus */
   window.__zeusOpt = !!(e.upg.zeus && e.eq.zeus);
   window.__sparkOpt = !!(e.upg.spark && e.eq.spark);
   if (window.__zeusSet) window.__zeusSet(window.__zeusOpt);
@@ -4169,13 +4330,13 @@ function __rcSyncUpgrades() {
 /* --- select-card upgrade chips --- */
 function __rcChipDef(id, e) {
   if (id === 'ivey') {
-    if (!e.upg.zeus) return { t: 'ZEUS 🔒 1,500♪', cls: '', act: 'cust' };
-    return e.eq.zeus ? { t: 'ZEUS ✓ ON', cls: 'on', act: 'toggle:zeus' } : { t: 'ZEUS + EQUIP', cls: '', act: 'toggle:zeus' };
-  }
+    if (!e.upg.zeus) return { t: 'ZEUS — IN CUSTOMIZE', cls: '', act: 'cust' };
+    return e.eq.zeus ? { t: 'ZEUS ✓', cls: 'on', act: 'toggle:zeus' } : { t: 'ZEUS — TAP TO EQUIP', cls: '', act: 'toggle:zeus' };
+  }   /* RC1.1: the companion's name, whole, in every state (Keith) */
   if (id === 'sayori') {
-    if (!e.upg.spark) return { t: 'SPARK 🔒 1,500♪', cls: '', act: 'cust' };
-    return e.eq.spark ? { t: 'SPARK ✓ ON', cls: 'on', act: 'toggle:spark' } : { t: 'SPARK + EQUIP', cls: '', act: 'toggle:spark' };
-  }
+    if (!e.upg.spark) return { t: 'SPARKLES — IN CUSTOMIZE', cls: '', act: 'cust' };
+    return e.eq.spark ? { t: 'SPARKLES ✓', cls: 'on', act: 'toggle:spark' } : { t: 'SPARKLES — TAP TO EQUIP', cls: '', act: 'toggle:spark' };
+  }   /* RC1.1: SPARKLES named on Sayori's card in every state — she was hiding in CUSTOMIZE (Keith, 2026-11-17) */
   if (id === 'lash') {
     if (!e.upg.lalt) return { t: 'ALT 🔒 1,500♪', cls: '', act: 'cust' };
     return e.eq.lalt ? { t: 'ALT ✓ ON', cls: 'on', act: 'toggle:lalt' } : { t: 'ALT + EQUIP', cls: '', act: 'toggle:lalt' };
@@ -4186,8 +4347,8 @@ function __rcChipDef(id, e) {
 function __rcChips() {
   var cards = document.querySelectorAll ? document.querySelectorAll('#strip .scard') : [];
   if (!cards || !cards.length) return;
-  var e = entLoad();
-  cards.forEach(function (card, i) {
+  var e = __rcEntView();
+  cards.forEach(function (card, i) {   /* RC1.1: chips read the effective entitlements */
     var id = ORDER[i];
     if (!id) return;
     var def = __rcChipDef(id, e);
@@ -4199,10 +4360,7 @@ function __rcChips() {
       ev.stopPropagation();
       if (def.act === 'cust') { openCust(); return; }
       var key = def.act.split(':')[1];
-      var e2 = entLoad();
-      e2.eq[key] = e2.eq[key] ? 0 : 1;
-      entSave(e2);
-      __rcSyncUpgrades();
+      toggleEquip(key);   /* RC1.1: the chip rides the one equip hand — under Developer Mode it flips the session equip, never the record */
     });
     card.appendChild(chip);
   });
@@ -4211,6 +4369,7 @@ if (typeof buildStrip === 'function') {
   var __bs0 = buildStrip;
   buildStrip = function () { __bs0(); __rcChips(); };
 }
+if (typeof applyChar === 'function') { var __ac0 = applyChar; applyChar = function () { __ac0(); __rcChips(); }; }   /* RC1.1: this lineage builds the strip inside applyChar (there is no buildStrip) — the chips ride the chooser's own refresh, so every rebuilt strip is re-chipped in the same pass; without this the chips never landed in-game at all */
 
 /* --- SHOP / CUSTOMIZE --- */
 function __rcEl(id) { return document.getElementById(id); }
@@ -4285,6 +4444,7 @@ function buyUpgrade(key) {
   if (key !== 'zeus' && key !== 'spark' && key !== 'lalt') return false;   /* only the three real upgrades exist — Yorokobi's and 6lade's slots are placeholders, nothing to sell yet */
   var e = entLoad();
   if (e.upg[key]) return false;
+  if (window.__devMode) { __rcMsg('custMsg', 'DEVELOPER MODE — ALREADY UNLOCKED'); return false; }   /* RC1.1: the overlay never transacts — the entitlement record stays exactly as it was */
   if ((window.__notes || 0) < ECONOMY.upgradePrice) { __rcMsg('custMsg', 'NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' ♪'); return false; }
   window.__notes -= ECONOMY.upgradePrice;
   e.upg[key] = 1; e.eq[key] = 1;
@@ -4297,6 +4457,7 @@ function buyUpgrade(key) {
 }
 function toggleEquip(key) {
   if (key !== 'zeus' && key !== 'spark' && key !== 'lalt') return false;
+  if (window.__devMode) { var dq = __rcDmEq(); dq[key] = dq[key] ? 0 : 1; __rcSyncUpgrades(); renderCust(); return true; }   /* RC1.1: under DEVELOPER MODE the equip flips in the session only — sixloudrc1_ent is never written */
   var e = entLoad();
   if (!e.upg[key]) return false;
   e.eq[key] = e.eq[key] ? 0 : 1;
@@ -4322,6 +4483,7 @@ function buyColor(id) {
   var row = null;
   ECONOMY.colors.forEach(function (c) { if (c.id === id) row = c; });
   if (!row) return false;
+  if (window.__devMode) { if (!window.__dmCharge) window.__dmCharge = {}; window.__dmCharge[selChar] = id; renderCust(); return true; }   /* RC1.1: a Developer Mode color equip is session-only */
   var e = entLoad();
   if (e.colors.indexOf(id) < 0) {
     if ((window.__notes || 0) < row.price) { __rcMsg('custMsg', 'NOT ENOUGH NOTES — ' + row.price + ' ♪'); return false; }
@@ -4338,6 +4500,7 @@ function buyColor(id) {
   return true;
 }
 function toggleFx(id) {
+  if (window.__devMode) { var on = __rcFxOn(); var ii = on.indexOf(id); if (ii >= 0) on.splice(ii, 1); else on.push(id); renderCust(); return true; }   /* RC1.1: FX flips are session-only under DEVELOPER MODE */
   var e = entLoad();
   if (e.fx.indexOf(id) < 0) {
     var row = null;
@@ -4359,7 +4522,7 @@ function toggleFx(id) {
 }
 function renderCust() {
   var bal = __rcEl('custBal'); if (bal) bal.textContent = (window.__notes || 0).toLocaleString('en-US');
-  var e = entLoad();
+  var e = __rcEntView();   /* RC1.1: CUSTOMIZE reads the effective entitlements — under Developer Mode the whole shelf reads owned */
   var cl = __rcEl('custList'); if (!cl) return;
   cl.innerHTML = '';
   var UPG = {
@@ -4390,7 +4553,7 @@ function renderCust() {
   }
   var cr = __rcEl('colorRow'); if (cr) {
     cr.innerHTML = '';
-    var e3 = entLoad();
+    var e3 = __rcEntView();   /* RC1.1: colors read the effective entitlements */
     ECONOMY.colors.forEach(function (c) {
       var owned = e3.colors.indexOf(c.id) >= 0;
       var on = (e3.charge[selChar] || 'classic') === c.id;
@@ -4410,7 +4573,7 @@ function renderCust() {
   }
   var fl = __rcEl('fxList'); if (fl) {
     fl.innerHTML = '';
-    var e4 = entLoad();
+    var e4 = __rcEntView();   /* RC1.1: FX read the effective entitlements */
     ECONOMY.fx.forEach(function (f) {
       var owned = e4.fx.indexOf(f.id) >= 0, on = e4.fxOn.indexOf(f.id) >= 0;
       var extra = f.id === 'land' ? 'Every runner already lands with an impact burst in their charge color — this is the bigger ring variant' : 'Code effect — no baked art, no power';
@@ -4450,12 +4613,17 @@ if (typeof startRun === 'function') {
   var __sr0 = startRun;
   startRun = function () { __sr0(); if (mode === 'run') { window.__deathless = true; window.__goldK = 0; } };
 }
-var __prevG = null, __flapT = 0;
+var __prevG = null, __flapT = 0, __rcPuffT = 0, __rcWasDbl = false;
 function __rcLandBurst() {
   var e = entLoad();
+  if (window.__spkOn && window.__spkOn()) {   /* RC1.1 SPARKLES FX IDENTITY: the mounted pair LANDS in rainbow glitter — the charge-color burst never fires for the pair (the LANDING BURST + shelf item, when on, buys MORE GLITTER, not the ring) */
+    __rcGlitter(px, py - 6, 12, 150, 0.5, 3);
+    if (__rcFxOn().indexOf('land') >= 0) { __rcGlitter(px, py - 6, 12, 250, 0.65, 3.5); __rcGlitter(px, py - 6, 5, 180, 0.5, 2.5); }
+    return;
+  }
   var col = window.__chargeHex(selChar);
   __rcBurst(px, py - 6, col, 10, 130, 0.45, 5);
-  if (e.fxOn && e.fxOn.indexOf('land') >= 0) { __rcBurst(px, py - 6, col, 16, 240, 0.6, 7); __rcBurst(px, py - 6, '#ffffff', 6, 180, 0.5, 4); }
+  if (__rcFxOn().indexOf('land') >= 0) {   /* RC1.1: the effective FX on-set */ __rcBurst(px, py - 6, col, 16, 240, 0.6, 7); __rcBurst(px, py - 6, '#ffffff', 6, 180, 0.5, 4); }
 }
 window.__rcTick = function () {
   if (mode !== 'run') { __prevG = null; return; }
@@ -4473,14 +4641,23 @@ window.__rcTick = function () {
   }
   var g = grounded;
   if (!__prevG && g) __rcLandBurst();
-  if (__prevG && !g && typeof vy === 'number' && vy < -100 && e.fxOn && e.fxOn.indexOf('jump') >= 0) __rcBurst(px, py - 4, window.__chargeHex(selChar), 8, 90, 0.4, 4);
+  if (__prevG && !g && typeof vy === 'number' && vy < -100) {
+    if (window.__spkOn && window.__spkOn()) { if (doubleArmed) __rcGlitter(px, py - 4, 14, 170, 0.55, 3.2); }   /* RC1.1 SPARKLES FX IDENTITY: the pair's CHARGED jump (the takeoff that arms her double) bursts RAINBOW SPARKLES; a plain takeoff keeps the cloud puff only — and the charge-color jump burst never fires for the pair */
+    else if (__rcFxOn().indexOf('jump') >= 0) __rcBurst(px, py - 4, window.__chargeHex(selChar), 8, 90, 0.4, 4);
+  }
+  /* RC1.1 SPARKLES FX IDENTITY: the pair's living glitter — charge-up puffs while she gathers on the deck, and a rainbow burst the moment her double fires (the flap set's first beat) */
+  if (window.__spkOn && window.__spkOn()) {
+    if (g && held && pressT > 0.08) { __rcPuffT++; if (__rcPuffT % 5 === 0) __rcGlitter(px - 26 + Math.random() * 52, py + 4, 2, 46, 0.5, 2.4); }
+    if (!__rcWasDbl && doubleUsed && !g) __rcGlitter(px, py - 30, 16, 190, 0.6, 3.2);
+  }
+  __rcWasDbl = doubleUsed;
   __prevG = g;
   var flags = window.__flags || [];
   for (var i = 0; i < flags.length; i++) {
     var f = flags[i];
     if (f.on && !f.__rcConf) {
       f.__rcConf = 1;
-      if (e.fxOn && e.fxOn.indexOf('confetti') >= 0) {
+      if (__rcFxOn().indexOf('confetti') >= 0) {   /* RC1.1: the effective FX on-set */
         var cols = ['#ffd94d', '#ff4dd8', '#4de8ff', '#b6ff4d'];
         var fy = (f.plat ? f.plat.y : py) - 30;
         for (var ci = 0; ci < 14; ci++) __rcSpawn(f.x, fy, (Math.random() - 0.5) * 220, -Math.random() * 220 - 40, 0.7, cols[ci % 4], 4, 620);
@@ -4490,7 +4667,7 @@ window.__rcTick = function () {
   __flapT++;
   if (wingT > 0 && !g && __flapT % 6 === 0) {
     if (wingKind === 'gold') __rcSpawn(px - 24, py - 190, (Math.random() - 0.5) * 40, 26 + Math.random() * 30, 0.9, '#ffd94d', 4, -30);
-    if (e.fxOn && e.fxOn.indexOf('flap') >= 0) __rcSpawn(px - 30, py - 200, (Math.random() - 0.5) * 60, 10, 0.6, window.__chargeHex(selChar), 3, 0);
+    if (__rcFxOn().indexOf('flap') >= 0 /* RC1.1: the effective FX on-set */) __rcSpawn(px - 30, py - 200, (Math.random() - 0.5) * 60, 10, 0.6, window.__chargeHex(selChar), 3, 0);
   }
 };
 
@@ -4509,6 +4686,7 @@ function __rcTokenSync() {
 (function __rcWire() {
   var os = __rcEl('optShop'); if (os) os.addEventListener('click', openShop);
   var oc = __rcEl('optCust'); if (oc) oc.addEventListener('click', openCust);
+  var od = __rcEl('optDevMode'); if (od) od.addEventListener('click', function () { __rcSetDevMode(!window.__devMode); });   /* RC1.1: DEVELOPER MODE answers taps */
   var sb = __rcEl('shopBack'); if (sb) sb.addEventListener('click', function () { var s = __rcEl('shopPage'); if (s) s.style.display = 'none'; if (typeof openOptions === 'function') openOptions(); });
   var cb = __rcEl('custBack'); if (cb) cb.addEventListener('click', function () { var s = __rcEl('custPage'); if (s) s.style.display = 'none'; if (typeof openOptions === 'function') openOptions(); });
   var tb = __rcEl('tokenBtn');
@@ -4534,6 +4712,90 @@ __rcSyncUpgrades();
 if (typeof noteUI === 'function') noteUI();
 window.__rcReady = true;
 
+
+/* ================= RC1.1: DEVELOPER MODE (Keith, 2026-11-17) =================
+   "Give me an option that says 'developer mode' that unlocks everything" —
+   an ownership OVERLAY, never a purchase: while ON, charOwned() reads true
+   for every runner, zeus/spark/lalt count as owned AND equippable, every
+   level reads open, and all ECONOMY colors + FX count as owned. The overlay
+   NEVER writes sixloudrc1_ent: the honest buy paths refuse to transact
+   while it is up, equips/colors/FX flip in session variables only, and
+   __rcTick — the one hand that entSaves mid-run, on a gold earn — keeps
+   reading the REAL record. Toggling OFF drops the overlay and the exact
+   honest state is back, because nothing was ever moved. The same switch
+   owns the data readout strip (Keith: developer mode also toggles the
+   overlay screen that shows the data needed when he screenshots): ON
+   shows the strip, OFF is a clean screen. */
+var RC_LAUNCH_HIDE_DEVMODE = false;   /* RC1.1: THE LAUNCH CONSTANT — Keith: at launch we just hide it. Flip to true for the shipping build and the DEVELOPER MODE row does not render; the switch, the overlay and the strip logic stay in the walls, unreachable */
+window.__rcLaunchHideDevMode = RC_LAUNCH_HIDE_DEVMODE;
+
+function __rcDmEq() {
+  if (!window.__dmEq) {
+    var e = entLoad();
+    window.__dmEq = {
+      zeus: e.upg.zeus ? (e.eq.zeus ? 1 : 0) : 1,
+      spark: e.upg.spark ? (e.eq.spark ? 1 : 0) : 1,
+      lalt: e.upg.lalt ? (e.eq.lalt ? 1 : 0) : 1
+    };   /* a virtual ownership auto-equips, exactly like a real buyUpgrade; a runner's real unequip is respected */
+  }
+  return window.__dmEq;
+}
+function __rcFxOn() {
+  if (window.__devMode) {
+    if (!window.__dmFxOn) window.__dmFxOn = (entLoad().fxOn || []).slice();
+    return window.__dmFxOn;
+  }
+  return entLoad().fxOn || [];
+}
+function __rcEntView() {
+  var e = entLoad();
+  if (!window.__devMode) return e;
+  var v = {}, k;
+  for (k in e) v[k] = e[k];
+  v.upg = { zeus: 1, spark: 1, lalt: 1 };
+  v.eq = __rcDmEq();
+  v.colors = ECONOMY.colors.map(function (c) { return c.id; });
+  v.charge = {}; for (k in e.charge) v.charge[k] = e.charge[k];
+  if (window.__dmCharge) for (k in window.__dmCharge) v.charge[k] = window.__dmCharge[k];
+  v.fx = ECONOMY.fx.map(function (f) { return f.id; });
+  v.fxOn = __rcFxOn();
+  return v;
+}
+function __rcDmBtn() {
+  var b = __rcEl('optDevMode');
+  if (!b) return;
+  b.textContent = window.__devMode ? 'DEV MODE ON' : 'DEV MODE OFF';
+  b.classList.toggle('off', !window.__devMode);
+}
+function __rcSetDevMode(on) {
+  window.__devMode = !!on;
+  window.__dmEq = null; window.__dmCharge = null; window.__dmFxOn = null;   /* a fresh overlay every flip — session equips never outlive the mode that made them */
+  if (window.__devMode) __rcDmEq();
+  window.__dbgReadout = window.__devMode;   /* the switch owns the strip: ON shows the screenshot data, OFF is a clean screen */
+  __rcSyncUpgrades();
+  if (window.__lockUI) window.__lockUI();
+  if (window.__mapLockSync) window.__mapLockSync();
+  try { optSave(); } catch (e) {}   /* persists dm (and the dr mirror) in sixloudrc1_options — the entitlement record is not in this hand's reach */
+  if (typeof applyDbgVis === 'function') applyDbgVis();
+  __rcDmBtn();
+  if (typeof optMsg === 'function') optMsg(window.__devMode ? 'DEVELOPER MODE on — everything unlocked and the data readout is up. Your real purchases underneath are untouched.' : 'DEVELOPER MODE off — the game is exactly as a player gets it.');
+}
+var __charOwned0 = charOwned;
+charOwned = function (c) { if (window.__devMode) return true; return __charOwned0(c); };   /* RC1.1: under the overlay every runner reads owned; the honest hand answers otherwise */
+var __selOpen0 = window.__selOpen;
+window.__selOpen = function (id) { if (window.__devMode) return true; return __selOpen0(id); };   /* RC1.1: under the overlay every level reads open */
+window.__rcDevMode = { get: function () { return !!window.__devMode; }, set: __rcSetDevMode };
+(function __rcDevModeInit() {
+  if (RC_LAUNCH_HIDE_DEVMODE) { var r = __rcEl('optDevModeRow'); if (r) r.style.display = 'none'; }   /* launch: the row never renders */
+  if (window.__devOpen && !window.__devMode) window.__devMode = true;   /* the ?dev=1 door flips the same switch */
+  window.__dbgReadout = window.__devMode;
+  if (typeof applyDbgVis === 'function') applyDbgVis();
+  __rcSyncUpgrades();
+  if (window.__devMode) { if (window.__lockUI) window.__lockUI(); if (window.__mapLockSync) window.__mapLockSync(); }
+  __rcDmBtn();
+  __rcChips();   /* RC1.1: the boot strip was built before this block ran — chip it now */
+})();
+
 window.__rcTest = {
   economy: ECONOMY,
   ent: function () { return entLoad(); },
@@ -4544,7 +4806,12 @@ window.__rcTest = {
   buySkip: buySkip, buyColor: buyColor, toggleFx: toggleFx,
   gold: function () { return { held: !!entLoad().gold, deathless: !!window.__deathless }; },
   openShop: openShop, openCust: openCust,
-  chips: __rcChips
+  chips: __rcChips,
+  devMode: function () { return !!window.__devMode; },
+  setDevMode: __rcSetDevMode,
+  entView: __rcEntView,
+  fxOn: __rcFxOn,
+  hideDevMode: RC_LAUNCH_HIDE_DEVMODE
 };
 
 } catch (e) {
