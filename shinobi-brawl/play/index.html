@@ -124,7 +124,7 @@ const DEV_PW='ninjamusic';
 const DEV_ROW_HIDDEN=false; // launch: set true to hide the OPTIONS row
 let DEV_ON=false; try{ DEV_ON=localStorage.getItem('sbDevModeV1')==='1'; }catch(e){}
 let devMsg='', devMsgT=0, devMsgOk=false;
-function menuLocked(i){ if(DEV_ON) return i===2&&!(save.vsWon||save.beaten); return i!==3; }
+function menuLocked(i){ if(DEV_ON) return false; return i!==3; }
 function devToggle(){ if(DEV_ON){ DEV_ON=false; try{ localStorage.removeItem('sbDevModeV1'); }catch(e){} devMsg='DEVELOPER MODE OFF - GAME MODES LOCKED'; devMsgOk=false; devMsgT=3; return; }
   const p=prompt('Enter the developer password:'); if(p===null) return;
   if(p.trim().toLowerCase()===DEV_PW){ DEV_ON=true; try{ localStorage.setItem('sbDevModeV1','1'); }catch(e){} devMsg='DEVELOPER MODE ON - ALL GAME MODES UNLOCKED'; devMsgOk=true; devMsgT=3; }
@@ -1310,7 +1310,7 @@ function drawPracticeSetup(){ const P=PRACTICE;
   ctx.font='12.5px Arial'; ctx.textAlign='center'; ctx.fillStyle='#8a8a9c';
   ctx.fillText('UP/DOWN CHOOSE - LEFT/RIGHT CHANGE - ENTER FIGHT - ESC BACK',W/2,516);
   if(P.fatal){ ctx.fillStyle='#ff9d9d'; ctx.fillText('FATAL TEST: MATCH POINT - A KILL TRIGGERS THE FINISHER, THEN THE LAB RESETS',W/2,158+10*33+6); } }
-function chooseMenu(i){ if(menuLocked(i)) return; if(i===0){ mode='vs'; vsKind='arcade'; selPhase='player'; selPhase='player'; state='select'; playSelectCall(); } else if(i===1){ mode='vs'; vsKind='ladder'; selPhase='player'; selPhase='player'; state='select'; playSelectCall(); } else if(i===2){ if(save.vsWon||save.beaten){ mode='story'; selPhase='player'; state='select'; playSelectCall(); } } else if(i===3){ optIdx=0; resetArm=false; state='options'; } else if(i===4){ PRACTICE.idx=0; state='practiceSetup'; } }
+function chooseMenu(i){ if(i===2&&DEV_ON){ location.href='../story/?level=norfolk'; return; } if(menuLocked(i)) return; if(i===0){ mode='vs'; vsKind='arcade'; selPhase='player'; selPhase='player'; state='select'; playSelectCall(); } else if(i===1){ mode='vs'; vsKind='ladder'; selPhase='player'; selPhase='player'; state='select'; playSelectCall(); } else if(i===2){ if(save.vsWon||save.beaten){ mode='story'; selPhase='player'; state='select'; playSelectCall(); } } else if(i===3){ optIdx=0; resetArm=false; state='options'; } else if(i===4){ PRACTICE.idx=0; state='practiceSetup'; } }
 let gateAt=0;
 let loadT0=0, loadFrac=0, duelArmT=0, duelLoadFrac=1;
 function bootAssetsReady(){ let tot=0, rdy=0, etot=0, erdy=0; const chk=(im,ess)=>{ if(!im) return; tot++; if(ess) etot++; if(im.complete||im.width){ rdy++; if(ess) erdy++; } };
@@ -2243,7 +2243,8 @@ ctx.font='16px Arial'; ctx.fillStyle='#e8e8f2'; ctx.textAlign='center';
     menuItems.forEach((m,i)=>{ const y=336+i*31, sel=menuIdx===i, locked=menuLocked(i);
       if(sel&&!locked){ ctx.fillStyle='rgba(255,181,46,0.16)'; ctx.fillRect(W/2-170,y-24,340,32); }
       bigText((sel&&!locked?'▶ ':'')+m+(locked?'  🔒':''),W/2,y,24,locked?'#59596a':(sel?'#9dff57':'#e8e8f2')); });
-    ctx.restore(); }
+    ctx.restore();
+    ctx.save(); ctx.font='12px Arial'; ctx.textAlign='center'; ctx.fillStyle='rgba(232,232,242,0.55)'; ctx.fillText('v'+VERSION,W/2,H-10); ctx.restore(); }
   else if(state==='options'){ const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#0d0a1c'); g.addColorStop(1,'#241016'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); if(STUDIO_IMG.complete&&STUDIO_IMG.naturalWidth){ ctx.drawImage(STUDIO_IMG,STUDIO_SOX[STUDIO_SHIFT],0,948,533,0,0,W,H); ctx.fillStyle='rgba(10,7,20,0.42)'; ctx.fillRect(0,0,W,H); }
     bigText('OPTIONS',W/2,58,38,'#ffb52e');
     ctx.textAlign='center';
