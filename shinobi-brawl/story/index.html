@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.6</title>
+<title>Shinobi Brawl — Story Dev 0.7.7</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
   .chip { position:fixed; z-index:5; background:rgba(14,16,14,.82); color:#f2ede3; border:1px solid #4a4f42; border-radius:8px; padding:7px 11px; font-size:12px; line-height:1.5; }
-  #title { top:10px; left:10px; }
-  #title b { color:#ffd65a; font-size:13px; letter-spacing:.4px; }
-  #help { bottom:10px; left:10px; color:#c9c4b4; }
-  #panel { top:10px; right:10px; width:218px; }
+  #title { top:10px; left:10px; white-space:nowrap; max-width:calc(100vw - 20px); overflow:hidden; text-overflow:ellipsis; transition:opacity .6s ease; }
+  #title b { color:#ffd65a; font-size:12px; letter-spacing:.4px; }
+  #help { bottom:26px; left:10px; color:#c9c4b4; font-size:11px; white-space:nowrap; max-width:calc(100vw - 20px); overflow:hidden; text-overflow:ellipsis; transition:opacity .6s ease; }
+  #panel { top:10px; right:10px; width:218px; background:rgba(14,16,14,.55); }
+  #panel.closed { width:auto; }
+  @media (max-width:600px) { #title { font-size:11px; padding:5px 8px; max-width:calc(100vw - 118px); } #title b { font-size:11px; letter-spacing:0; } }
   #panel h3 { margin:0 0 6px; font-size:12px; color:#ffd65a; letter-spacing:.5px; cursor:pointer; }
   #panel label { display:block; font-size:12px; margin:3px 0; cursor:pointer; }
   #panel input[type=range] { width:118px; vertical-align:middle; }
@@ -22,11 +24,12 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.6</b> — five levels, pick in OPTIONS<br>Norfolk = Level 1: real sky + 6loud clouds, real trees, Capcom houses, driveways, chain-link fence, asphalt · Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
-<div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · SWIPE &#8593; jump / flip · SWIPE &#8595; roll / crouch · TAP attack — faster taps chain the string<br>keys: A D walk · SHIFT run · SPACE jump · S roll / crouch</div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.7</b> · <span id="titleLevel">Level 1 — Norfolk, VA</span></div>
+<div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · &#8593; jump / flip · &#8595; roll / crouch · TAP attack</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
   <div id="panelBody">
+    <div class="split" style="margin:0 0 8px; border-top:none; padding-top:0;">Norfolk = Level 1: real sky + 6loud clouds, real trees, Capcom houses, driveways, chain-link fence, asphalt · Forest = real photo assets in layers · Gaslamp = F Street, layered buildings · Tokyo = neon street, photo assets in layers</div>
     <label><input type="checkbox" id="lySky" checked> Sky gradient</label>
     <label><input type="checkbox" id="lyClouds" checked> 6loud clouds &#215;0.05 far / &#215;0.10 near</label>
     <label><input type="checkbox" id="lyOcean" checked> Ocean &#215;0.18</label>
@@ -82,11 +85,23 @@ function bindChk(id, key){ $(id).addEventListener('change', e => opt[key] = e.ta
 bindChk('lySky','sky'); bindChk('lyClouds','clouds'); bindChk('lyOcean','ocean'); bindChk('lyBeach','beach'); bindChk('lyStreet','street'); bindChk('lyProps','props'); bindChk('lyFg','fg'); bindChk('lyBand','band');
 $('rngH').addEventListener('input', e => { opt.charH = +e.target.value; $('valH').textContent = opt.charH; });
 $('rngSpd').addEventListener('input', e => { opt.spd = +e.target.value / 100; $('valSpd').textContent = opt.spd.toFixed(2); });
-$('selLevel').addEventListener('change', e => { opt.level = e.target.value; P.onCar = null; });
+$('selLevel').addEventListener('change', e => { opt.level = e.target.value; P.onCar = null; syncTitleLevel(); });
 $('lyReal').addEventListener('change', e => { opt.real = e.target.checked; });
 $('rngOcean').addEventListener('input', e => { opt.oceanF = +e.target.value / 100; $('valOcean').textContent = opt.oceanF.toFixed(2); });
 $('rngStreet').addEventListener('input', e => { opt.streetF = +e.target.value / 100; $('valStreet').textContent = opt.streetF.toFixed(2); });
-$('panelHead').addEventListener('click', () => { const b = $('panelBody'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
+$('panelHead').addEventListener('click', () => { const b = $('panelBody'); const closing = b.style.display !== 'none'; b.style.display = closing ? 'none' : 'block'; $('panel').classList.toggle('closed', closing); });
+
+// ---- clean-screen chrome (Keith 2026-11-20, phone verdict on 0.7.6: "I cant see, too many things on the screen") ----
+// Slim header line auto-fades ~4s after it last appeared; using the chrome itself (OPTIONS panel,
+// level picker) brings it back — gameplay input does not, so it stays out of the way while playing.
+const titleEl = $('title'), helpEl = $('help');
+let titleShownAt = performance.now(), helpShownAt = performance.now(), helpGone = false;
+function pokeTitle(){ titleEl.style.opacity = '1'; titleEl.style.pointerEvents = 'auto'; titleShownAt = performance.now(); }
+function dismissHelp(){ if (helpGone) return; helpGone = true; helpEl.style.opacity = '0'; helpEl.style.pointerEvents = 'none'; }
+$('panel').addEventListener('pointerdown', pokeTitle);
+titleEl.addEventListener('pointerdown', pokeTitle);
+const LEVEL_NAMES = { norfolk:'Level 1 — Norfolk, VA', coast:'Coastal Street', forest:'Japanese Forest', gaslamp:'Gaslamp District', tokyo:'Tokyo — Neon Street' };
+function syncTitleLevel(){ $('titleLevel').textContent = LEVEL_NAMES[opt.level] || opt.level; pokeTitle(); }
 
 // street row in street-layer space (span = (WORLD_W - VWpx) * f + VWpx, computed at draw)
 const STREET = [
@@ -360,6 +375,7 @@ let gPtr = null;
 const SLIDE_PX = 26;
 const cvEl = $('game');
 cvEl.addEventListener('pointerdown', e => {
+  dismissHelp(); // clean-screen: the help line bows out at the player's first touch
   if (gPtr) return;
   gPtr = { id: e.pointerId, ax: e.clientX, ay: e.clientY, t: performance.now(), fired: false, vDone: false };
 });
@@ -448,6 +464,9 @@ function drawTile(img, y, h, camX, u){
 
 let perfT = 0;
 function draw(){
+  // clean-screen upkeep: header fades ~4s after it last appeared; help line fades ~6s in (or at first touch)
+  if (performance.now() - titleShownAt > 4000 && titleEl.style.opacity !== '0') { titleEl.style.opacity = '0'; titleEl.style.pointerEvents = 'none'; }
+  if (!helpGone && performance.now() - helpShownAt > 6000) dismissHelp();
   let u = Math.min(VH / 460, VW / 960); // design-unit scale: view height 460 (bumped up 2026-11-15, Keith: overall game needed a bump in size)
   if (VW < VH) u = Math.max(u, VW / 640); // portrait phones: zoom in so the world fills the frame (Keith 2026-11-16: character submerged in the world)
   const yOff = Math.max(0, VH - 540 * u); // bottom-anchored: road meets the screen bottom, sky fills the top
@@ -714,9 +733,15 @@ function draw(){
   const fgA = FOREST ? IMG.fg_tree : GASLAMP ? IMG.fg_lamp : TOKYO ? null : NORFOLK ? IMG.nf_fg_tree : IMG.fg_palm;
   if (opt.fg && fgA && fgA.im.complete) {
     const a = fgA, f = 1.30;
+    // clean-screen cap (Keith 2026-11-20): a foreground passer must never blanket the view —
+    // drawn width capped at ~55% of the viewport, height scaled to match, hanging from the top
+    // so it passes at one side of the frame; spacing stays sparse as built.
+    let dw = a.w * 0.62 * u, dh = a.h * 0.62 * u;
+    const FG_CAP = VW * 0.55;
+    if (dw > FG_CAP) { const k = FG_CAP / dw; dw *= k; dh *= k; }
     for (let bx = -300; bx < viewW + 700; bx += 2500) {
       const sx = (bx - camX * f) * u;
-      ctx.drawImage(a.im, sx, -70 * u, a.w * 0.62 * u, a.h * 0.62 * u);
+      ctx.drawImage(a.im, sx, -70 * u, dw, dh);
     }
   }
   if (FOREST && opt.fg && IMG.fg_foliage && IMG.fg_foliage.im.complete) {
@@ -726,14 +751,14 @@ function draw(){
       ctx.drawImage(fa.im, sx, (540 - 218) * u, 442 * u, 250 * u);
     }
   }
-  // state readout (screen space, bottom-center)
+  // state readout (screen space, bottom-center — small + translucent at the very edge, Keith uses it)
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = 'rgba(14,16,14,0.75)';
+  ctx.fillStyle = 'rgba(14,16,14,0.45)';
   const label = 'STATE ' + (P.state === 'attack' ? 'ATTACK ' + P.atkStage : P.state.toUpperCase()) + (P.onCar ? ' · ON CAR' : '') + ' · X ' + Math.round(P.x) + ' / ' + WORLD_W + (attract ? ' · ATTRACT' : '');
-  ctx.font = '12px Verdana'; const tw = ctx.measureText(label).width + 18;
-  ctx.fillRect((VW - tw) / 2, VH - 30, tw, 22);
-  ctx.fillStyle = '#f2ede3'; ctx.textAlign = 'left';
-  ctx.fillText(label, (VW - tw) / 2 + 9, VH - 15);
+  ctx.font = '10px Verdana'; const tw = ctx.measureText(label).width + 14;
+  ctx.fillRect((VW - tw) / 2, VH - 19, tw, 15);
+  ctx.fillStyle = 'rgba(242,237,227,0.85)'; ctx.textAlign = 'left';
+  ctx.fillText(label, (VW - tw) / 2 + 7, VH - 8);
 }
 
 function drawPlayer(camX, u){
@@ -796,8 +821,9 @@ if (Q.has('state')) {
   if (st === 'attack') { P.state = 'attack'; P.atkStage = +Q.get('s') || 1; P.atkT = 12; }
 }
 for (const [id, k] of [['lySky','sky'],['lyClouds','clouds'],['lyOcean','ocean'],['lyBeach','beach'],['lyStreet','street'],['lyProps','props'],['lyFg','fg'],['lyBand','band']]) $(id).checked = opt[k];
+syncTitleLevel();
 $('rngH').value = opt.charH; $('valH').textContent = opt.charH;
-if (VW < 760) $('panelBody').style.display = 'none';
+if (VW < 760) { $('panelBody').style.display = 'none'; $('panel').classList.add('closed'); }
 const FREEZE = Q.has('freeze');
 let last = 0, acc = 0;
 function loop(t){
