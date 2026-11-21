@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.12</title>
+<title>Shinobi Brawl — Story Dev 0.7.13</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.12</b> · <span id="titleLevel">Level 1 — Norfolk, VA</span></div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.13</b> · <span id="titleLevel">Level 1 — Norfolk, VA</span></div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · &#8593; jump / flip · &#8595; roll / crouch · TAP attack</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -40,7 +40,7 @@
     <label><input type="checkbox" id="lyBand"> Walk band overlay</label>
     <label>Level <select id="selLevel"><option value="norfolk">Level 1 — Norfolk, VA</option><option value="coast">Coastal Street</option><option value="forest">Japanese Forest</option><option value="gaslamp">Gaslamp District</option><option value="tokyo">Tokyo — Neon Street</option></select></label>
     <label><input type="checkbox" id="lyReal"> Realistic items (Coastal)</label>
-    <label>Height <input type="range" id="rngH" min="140" max="320" value="200"> <span class="val" id="valH">200</span>px</label>
+    <label>Height <input type="range" id="rngH" min="140" max="320" value="140"> <span class="val" id="valH">140</span>px</label>
     <label>Speed <input type="range" id="rngSpd" min="40" max="200" value="100"> <span class="val" id="valSpd">1.00</span>&#215;</label>
     <label>Ocean &#215; <input type="range" id="rngOcean" min="5" max="40" value="18"> <span class="val" id="valOcean">0.18</span></label>
     <label>Street &#215; <input type="range" id="rngStreet" min="30" max="90" value="55"> <span class="val" id="valStreet">0.55</span></label>
@@ -80,7 +80,7 @@ const WEBP_KEYS = ['real_sakura','real_pine','real_lamp','tree_sakura_mid','tree
 const WORLD_W = 6800;
 const FEET_Y = 373, SIDE_TOP = 340, HORIZON = 238;
 const $ = id => document.getElementById(id);
-const opt = { sky:true, clouds:true, ocean:true, beach:true, street:true, props:false, fg:false, band:false, charH:200, spd:1, oceanF:0.18, streetF:0.55, level:'norfolk', real:false };
+const opt = { sky:true, clouds:true, ocean:true, beach:true, street:true, props:false, fg:false, band:false, charH:140, spd:1, oceanF:0.18, streetF:0.55, level:'norfolk', real:false }; // 0.7.13: charH default 140 (Keith: "the smallest height I have the character at should be default")
 function bindChk(id, key){ $(id).addEventListener('change', e => opt[key] = e.target.checked); }
 bindChk('lySky','sky'); bindChk('lyClouds','clouds'); bindChk('lyOcean','ocean'); bindChk('lyBeach','beach'); bindChk('lyStreet','street'); bindChk('lyProps','props'); bindChk('lyFg','fg'); bindChk('lyBand','band');
 $('rngH').addEventListener('input', e => { opt.charH = +e.target.value; $('valH').textContent = opt.charH; });
@@ -228,7 +228,7 @@ const TOKYO_NEAR = [
 // the player's position; the flat Bing colonial retires from this slot only):
 // storm-sky photo (far plate) -> harbor landmark band + NORFOLK water tower (shows
 // through the one grass gap) -> Pine Wall treeline (base-anchored, height-capped: no
-// portrait swell) -> far trees -> yard band -> BIG new Capcom houses (no identical
+// portrait swell) -> yard band (code grass, 0.7.13) -> BIG new Capcom houses (no identical
 // neighbors; the red brick colonial LAST is the SNYPA house, after passing 5 houses,
 // marked by its mailbox + NORFOLK VIRGINIA sign) -> bushes/signs -> cracked wet
 // street -> poles + sagging wires -> low fog everywhere. Fences + driveways are
@@ -239,6 +239,20 @@ const TOKYO_NEAR = [
 // storm plate draws as a single cover-fit span (no mirror-tile join), and the
 // treeline's pale frosted spire band is melted off its top (make_norfolk0712_
 // assets.py) so no second sky sits above the pines.
+// 0.7.13 (Keith's annotated LIVE screenshots, 2026-11-21 — his marks are literal):
+// (1) ALL nf_tree cuts are OUT of Norfolk — every keyed tree (NF_GAP_TREES +
+// NF_TREES_FAR) carried white keying haze / visible rectangular mattes from the
+// baked-checkerboard sheets (circled at the street start, beside the pole, behind
+// the runner, beside the walk-by house). The Pine Wall treeline and the skyline
+// band stay — they're plates, not keyed cuts. The lists below stay defined but
+// are never drawn; nf_tree_* stay in assets.json. (2) The Victorian street lamp
+// (prop_street-lamp, NF_NEAR) is X'd OUT of Norfolk — utility poles only.
+// (3) GRASS BY CODE: the keyed nf2_yard strip had white haze at the road edge
+// ("it not being a clear png") — the yard band is now a PROCEDURAL canvas
+// (NF_GRASS below: seeded tufts/blades in the Norfolk palette, noise-melted top
+// edge), same position/extent/seating. nf2_yard stays in assets.json, undrawn.
+// (4) Character height DEFAULT is now 140 (the slider's minimum — Keith runs at
+// 140; see the opt defaults).
 const NF_YARD_END = 4090; // street-layer x where the yard band gives out (just past the Snypa house; +130 with the 0.7.10 row shift)
 const NF_BAND = [
   { k:'nf2_band', x:0, h:214, base:302 },
@@ -265,7 +279,64 @@ const NF_HOUSES = [ // 0.7.9: heights x0.69 so the tallest (colonial 359) frames
 // (dev-src/make_walkby_assets.py): gw/gh = canvas size, go = ground line below the
 // canvas top, cw = straight-front content width (the frame-index span).
 const NF_WALKBY = { k:'nf2_walkby', cx:3682, base:346, gw:536.9, gh:371.1, go:327.2, cw:388.7 };
-const NF_GAP_TREES = [
+// ---- CODE GRASS (0.7.13, Keith: "can we grass that with code?") ----
+// The yard band is PROCEDURAL: a canvas tile generated once at load — seeded
+// (mulberry32, fixed seed 20261121) so it is identical on every load, no photo,
+// no keying, no white haze. Structure: a deep storm-green body whose top edge
+// is a sine-noise line, mottled for texture, then three blade passes (dark ->
+// mid -> light) rooted at the tile bottom; the tallest blades poke above the
+// body line, which is what melts the top edge (6loud floor law). Pale seed-head
+// tips dot the light pass, like the old strip read. Tile is 1024x104 px, drawn
+// 52 units tall (2px/unit) and mirror-tiled by drawNfGrass() with the same math
+// strip() uses, at the yard's exact old position (y 306, h 52, f = streetF) and
+// clipped at NF_YARD_END; the street strip still draws after it, tucking its
+// bottom behind the asphalt's top edge. nf2_yard stays in assets.json, undrawn.
+const NF_GRASS = (() => {
+  const W = 1024, H = 104;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  let s = 20261121 >>> 0;
+  const rnd = () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+  const topAt = x => 30 + 10 * Math.sin(x * 0.011 + 1.7) + 7 * Math.sin(x * 0.023 + 0.4) + 4 * Math.sin(x * 0.052 + 2.9);
+  // body
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#46622f'); grad.addColorStop(0.55, '#33482a'); grad.addColorStop(1, '#22301c');
+  g.fillStyle = grad;
+  g.beginPath(); g.moveTo(0, topAt(0));
+  for (let x = 8; x <= W; x += 8) g.lineTo(x, topAt(x));
+  g.lineTo(W, H); g.lineTo(0, H); g.closePath(); g.fill();
+  // mottling
+  for (let i = 0; i < 520; i++) {
+    const x = rnd() * W, y = topAt(x) + rnd() * (H - topAt(x));
+    g.globalAlpha = 0.05 + rnd() * 0.09;
+    g.fillStyle = pick(['#527a3a', '#2c4423', '#5d8742', '#1e2d18', '#6b9a4a']);
+    g.beginPath(); g.ellipse(x, y, 3 + rnd() * 9, 1.5 + rnd() * 3.5, rnd() * 3, 0, 7); g.fill();
+  }
+  g.globalAlpha = 1;
+  // blade passes: dark -> mid -> light (light pass also grows the seed heads)
+  const passes = [
+    { n: 1000, hMin: 18, hMax: 54, wdt: 2.1, cols: ['#2a4220', '#243a1c', '#2f4a24'], seeds: 0 },
+    { n: 1300, hMin: 24, hMax: 76, wdt: 1.7, cols: ['#476b32', '#527a3a', '#3f6130', '#5d8742', '#9aa065'], seeds: 0 },
+    { n: 650, hMin: 32, hMax: 97, wdt: 1.5, cols: ['#6b9a4a', '#7cab54', '#639145'], seeds: 0.16 }
+  ];
+  for (const p of passes) {
+    g.lineCap = 'round';
+    for (let i = 0; i < p.n; i++) {
+      const x = rnd() * W, h = p.hMin + rnd() * (p.hMax - p.hMin), lean = (rnd() - 0.5) * 15;
+      g.strokeStyle = pick(p.cols); g.globalAlpha = 0.82 + rnd() * 0.18; g.lineWidth = p.wdt * (0.7 + rnd() * 0.6);
+      g.beginPath(); g.moveTo(x, H + 2);
+      g.quadraticCurveTo(x + lean * 0.25, H - h * 0.55, x + lean, H - h); g.stroke();
+      if (rnd() < p.seeds) { // pale seed head at the blade tip
+        g.globalAlpha = 0.75 + rnd() * 0.25; g.fillStyle = pick(['#cfd2ab', '#dde0bd', '#bcc294']);
+        g.beginPath(); g.ellipse(x + lean, H - h, 1.7 + rnd() * 1.1, 2.6 + rnd() * 1.6, lean * 0.04, 0, 7); g.fill();
+      }
+    }
+  }
+  g.globalAlpha = 1;
+  return { im: cv, w: W, h: H };
+})();
+const NF_GAP_TREES = [ // 0.7.13: RETIRED from drawing — keyed nf_tree cuts carry white haze (Keith). Kept for the record; never drawn in Norfolk.
   { k:'nf_tree_2', x:470, h:262, base:348 },
   { k:'nf_tree_4', x:950, h:250, base:348 },
   { k:'nf_tree_1', x:1440, h:270, base:348 },
@@ -325,7 +396,7 @@ const NF_FOG_STREET = [
   { k:'nf2_fog_a', x:5980, y:342, w:720, h:58, a:0.13 },
   { k:'nf2_fog_b', x:6740, y:342, w:720, h:58, a:0.15 }
 ]; // 0.7.12: the last two entries were the denser dirt-path fog (y340, a0.19) — evened to the street's own pattern now that the asphalt runs to the edge
-const NF_TREES_FAR = [
+const NF_TREES_FAR = [ // 0.7.13: RETIRED from drawing — same white-haze ruling as NF_GAP_TREES. Never drawn in Norfolk.
   { k:'nf_tree_1', x:180, h:196 },
   { k:'nf_tree_2', x:850, h:209 },
   { k:'nf_tree_4', x:2190, h:235 },
@@ -337,11 +408,10 @@ const NF_TREES_FAR = [
   { k:'nf_tree_3', x:6210, h:209 }
 ];
 const NF_NEAR = [ // 0.7.9: seated at the curb seam (base 346), not on the walk plane
-  { k:'prop_street-lamp', x:520, h:232, base:346 },
+  // 0.7.13: the Victorian street lamps are OUT (Keith X'd the lamp in his live
+  // screenshot) — Norfolk's NF_NEAR rotation is utility poles only.
   { k:'prop_utility-pole', x:1670, h:246, base:346 },
-  { k:'prop_street-lamp', x:2820, h:232, base:346 },
   { k:'prop_utility-pole', x:3970, h:246, base:346 },
-  { k:'prop_street-lamp', x:5120, h:232, base:346 },
   { k:'prop_utility-pole', x:6270, h:246, base:346 }
 ];
 
@@ -554,6 +624,21 @@ function draw(){
     const sy = Math.max(0, Math.min(a.h - sh, 700 - (215 - top) / hgt * sh));
     ctx.drawImage(a.im, sx, sy, sw, sh, 0, top * u, rW, rH);
   };
+  // YARD BAND (Norfolk, 0.7.13): the procedural NF_GRASS tile, mirror-tiled with
+  // strip()'s math at the old nf2_yard position/extent (y 306, h 52, streetF).
+  const drawNfGrass = () => {
+    const a = NF_GRASS, y = 306, h = 52, f = opt.streetF;
+    const sw = a.w * (h * u) / a.h;
+    const off = camX * f * u;
+    const wi0 = Math.floor(off / sw);
+    for (let wi = wi0 - 1; wi * sw - off < VW + sw; wi++) {
+      const sx = wi * sw - off;
+      ctx.save();
+      if (Math.abs(wi % 2) === 1) { ctx.translate(sx + sw, y * u); ctx.scale(-1, 1); ctx.drawImage(a.im, 0, 0, sw, h * u); }
+      else ctx.drawImage(a.im, sx, y * u, sw, h * u);
+      ctx.restore();
+    }
+  };
   const layer = (items, f, baseY) => {
     for (const it of items) {
       let k = it.k;
@@ -718,7 +803,7 @@ function draw(){
     // TREELINE: Pine Wall — base anchored to the houses' ground line, height CAPPED (0.7.7's
     // formula drew it 1049 units tall in portrait; it is 215 now in every aspect — swell gone)
     strip(IMG.nf_treeline, SIDE_TOP + 34 - 215, 215, 0.14, 0);
-    layer(NF_TREES_FAR, 0.26, SIDE_TOP + 6);
+    // 0.7.13: no NF_TREES_FAR here — the keyed nf_tree cuts are OUT of Norfolk (white haze)
     if (opt.street) {
       // SEATING (0.7.9, Keith: "houses are above the road layer, I see posts where I
       // shouldn't") — back-to-front with correct overlaps: HOUSES first, bases sunk to
@@ -727,10 +812,11 @@ function draw(){
       // that same grass (drawn with the yard layer, posts end at base 342); PATH DECO
       // plants at the final stretch's back edge. The STREET strip draws after all of it,
       // so the ground's top rows trim every post bottom — nothing stands in the road.
-      layer(NF_GAP_TREES, opt.streetF, 348); layer(NF_HOUSES, opt.streetF, SIDE_TOP + 6); drawNfWalkby(); layer(NF_BUSHES, opt.streetF, 348);
-      // YARD BAND: grass strip over the houses' feet, clipped where the Snypa lot ends
+      // 0.7.13: no NF_GAP_TREES here either — all nf_tree draws are out of Norfolk
+      layer(NF_HOUSES, opt.streetF, SIDE_TOP + 6); drawNfWalkby(); layer(NF_BUSHES, opt.streetF, 348);
+      // YARD BAND: CODE GRASS (0.7.13) over the houses' feet, clipped where the Snypa lot ends
       ctx.save(); ctx.beginPath(); ctx.rect(-8, -yOff - 8, (NF_YARD_END - camX * opt.streetF) * u + 8, VH + 16); ctx.clip();
-      strip(IMG.nf2_yard, 306, 52, opt.streetF, 0);
+      drawNfGrass();
       ctx.restore();
       layer(NF_SIGNS, opt.streetF, 0);
       layer(NF_PATH_DECO, 1.0, 0);
