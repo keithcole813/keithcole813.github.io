@@ -1346,23 +1346,39 @@ const SPK_GROW_F = [922,919,927,933,933,932,922,919,917,908,895,879,864,849,836,
   733,740,745,748,754,764,773,784,796,807,817,827,837,847,856,865,
   874,883,890,897,903,907,908,907];   /* flap ground rows, the same measure off dev/sparkles/flap/ */
 const SPK_RZ_J = [1.22,1.218,1.21,1.195,1.175,1.149,1.12,1.09,1.06,1.029,0.997,0.963,0.928,0.893,0.857,0.821,
-  0.79,0.771,0.764,0.771,0.79,0.819,0.858,0.905,0.957,1.013,1.07,1.125,1.174,1.213,1.242,1.266,
-  1.29,1.318,1.349,1.381,1.413,1.444,1.473,1.5,1.525,1.548,1.569,1.586,1.602,1.617,1.631,1.644,
-  1.654,1.659,1.662,1.661,1.658,1.655,1.651,1.645,1.636,1.625,1.61,1.594,1.575,1.556,1.533,1.507,
-  1.476,1.438,1.395,1.348,1.299,1.251,1.206,1.169,1.139,1.117,1.108,1.11,1.119,1.139,1.162,1.181,
-  1.194,1.203,1.208,1.213,1.217,1.219,1.22,1.22,1.22,1.22];   /* the jump clip's root-z curve (frames.csv) — the arc the pose is matched against */
+      0.79,0.768,0.759,0.76,0.769,0.788,0.818,0.857,0.905,0.959,1.017,1.074,1.126,1.17,1.207,1.24,
+      1.274,1.313,1.356,1.403,1.451,1.497,1.542,1.584,1.621,1.654,1.681,1.703,1.723,1.743,1.762,1.779,
+      1.792,1.799,1.802,1.802,1.799,1.795,1.789,1.782,1.771,1.754,1.735,1.714,1.691,1.663,1.633,1.599,
+      1.559,1.508,1.449,1.388,1.325,1.261,1.206,1.167,1.139,1.118,1.108,1.11,1.119,1.139,1.162,1.181,
+      1.194,1.203,1.208,1.213,1.217,1.219,1.22,1.22,1.22,1.22];   /* RC1.8: the V3 set's OWN measured root curve (sparkles-sprites-v3/frames.csv root_z_m) — the v2 curve (apex 1.662 @50) is retired; Keith's playtest reports 2026-11-21 traced the pop + missing takeoff to the old playback map */   /* the jump clip's root-z curve (frames.csv) — the arc the pose is matched against */
 const SPK_RZ_F = [0.79,0.771,0.764,0.771,0.79,0.819,0.858,0.905,0.957,1.013,1.07,1.125,1.174,1.213,1.242,1.266,
   1.29,1.318,1.349,1.381,1.413,1.444,1.473,1.5,1.525,1.548,1.569,1.586,1.602,1.617,1.631,1.644,
   1.654,1.659,1.662,1.661,1.658,1.655,1.651,1.645,1.636,1.625,1.61,1.594,1.575,1.556,1.533,1.507,
   1.476,1.438,1.395,1.348,1.299,1.251,1.206,1.169];   /* the flap clip's root-z curve (frames.csv) — the jump's leap window with the authored flap composited */
 const SPK_PICK = (rz, lo, hi, base, apex, hn) => { let best = lo, bd = 1e9; for (let k = lo; k <= hi; k++) { const d = Math.abs((rz[k] - base) / (apex - base) - hn); if (d < bd) { bd = d; best = k; } } return best; };   /* the branch frame whose root-z fraction sits closest to her height fraction */
-window.__spkJumpFrame = (hn, rising) => rising ? SPK_PICK(SPK_RZ_J, 27, 50, SPK_RZ_J[27], SPK_RZ_J[50], hn) : SPK_PICK(SPK_RZ_J, 50, 65, SPK_RZ_J[65], SPK_RZ_J[50], hn);   /* DEV FORK 139: the jump set by height fraction — ascent 27-50, descent 50-65, apex idx 50 at hn 1 */
+window.__spkJumpFrame = (hn, rising) => rising ? SPK_PICK(SPK_RZ_J, 28, 50, SPK_RZ_J[28], SPK_RZ_J[50], hn) : SPK_PICK(SPK_RZ_J, 50, 69, SPK_RZ_J[69], SPK_RZ_J[50], hn);   /* RC1.8: the v3 set's true branch — liftoff at idx 28 (her mesh leaves the ground there), apex idx 50, touchdown idx 69 (mesh back at the ground line); the v2 windows (27-50 / 50-65) amputated both ends of the new leap */
 window.__spkFlapFrame = (hn, rising) => rising ? SPK_PICK(SPK_RZ_F, 11, 34, SPK_RZ_F[11], SPK_RZ_F[34], hn) : SPK_PICK(SPK_RZ_F, 34, 49, SPK_RZ_F[49], SPK_RZ_F[34], hn);   /* DEV FORK 139: the flap set by the same law on its own curve — ascent 11-34, descent 34-49 */
-const SS = { on: false, set: 'gallop', frame: 0, img: null, grow: SPK_GROW_G[0], gPhase: 0, phase: 0, originY: 0, apex: 1, hn: 0, fallY: 0, fallT: 0, prevPx: 0, lastY: 0, wasGround: true, wasDbl: false, wasTpl: false, drawn: false, tDrawn: false, tFrame: 0 };
+const SS = { on: false, set: 'gallop', frame: 0, img: null, grow: SPK_GROW_G[0], gPhase: 0, phase: 0, originY: 0, apex: 1, hn: 0, fallY: 0, fallT: 0, prevPx: 0, lastY: 0, wasGround: true, wasDbl: false, wasTpl: false, drawn: false, tDrawn: false, tFrame: 0, scr: null, takeT: 0, scrTilt: 0 };   /* RC1.8: scr = the Scramble state, takeT = the takeoff-coil clock, scrTilt = the scramble lean in degrees */
 window.__spkOn = function () { return !!window.__sparkOpt && selChar === 'sayori'; };   /* DEV FORK 139: the logical mount — the hang gate reads this, unconditional on art */
 window.__spkVis = function () { return window.__spkOn() && SS.on && !!SS.img && !!SS.img.naturalWidth; };   /* DEV FORK 139: the visual mount — her draw stands down only while a real pair frame is in hand */
 window.__spkTitleVis = function () { return !!window.__sparkOpt && selChar === 'sayori' && !!SPK_GALLOP[0] && !!SPK_GALLOP[0].naturalWidth; };   /* DEV FORK 139: the title stage's gate — the pair covers her only once its first frame has landed */
-window.__sparkReset = function () { SS.on = false; SS.phase = 0; SS.gPhase = 0; SS.set = 'gallop'; SS.frame = 0; SS.img = SPK_GALLOP[0]; SS.grow = SPK_GROW_G[0]; SS.hn = 0; SS.fallT = 0; SS.prevPx = (typeof px === 'number') ? px : 0; SS.lastY = (typeof py === 'number') ? py : 0; SS.wasGround = true; SS.wasDbl = false; SS.wasTpl = false; SS.drawn = false; SS.tDrawn = false; };   /* DEV FORK 139: startRun + the revive call this — the pair is re-seated every (re)start */
+window.__sparkReset = function () { SS.on = false; SS.phase = 0; SS.gPhase = 0; SS.set = 'gallop'; SS.frame = 0; SS.img = SPK_GALLOP[0]; SS.grow = SPK_GROW_G[0]; SS.hn = 0; SS.fallT = 0; SS.prevPx = (typeof px === 'number') ? px : 0; SS.lastY = (typeof py === 'number') ? py : 0; SS.wasGround = true; SS.wasDbl = false; SS.wasTpl = false; SS.drawn = false; SS.tDrawn = false; SS.scr = null; SS.takeT = 0; SS.scrTilt = 0; window.__scrFrz = false; };   /* DEV FORK 139: startRun + the revive call this — the pair is re-seated every (re)start */
+window.__scrStart = function (p) {   /* RC1.8 THE SCRAMBLE (Keith's spec 2026-11-20, 'Build it' 2026-11-21): the pair's answer to the hang she never takes — at the same lip catch, she catches with her front hooves and SCRAMBLES: tilted at the lip, wings beating (the flap set), sliding off slowly; 3 rapid jump taps (HANG_TAPS inside HANG_WINDOW, the hang's own numbers) claw her back on top. A deck already gone or dropping cannot hold the scramble. */
+  if (!SS.on || SS.scr || !p || p.gone || p.dropping || p.flipOff) return false;
+  const g = gripDrawn(p);
+  SS.scr = { plat: p, t: HANG_WINDOW, taps: 0, slide: 0, x: px, y: g.y + 10, clock: 0 };
+  SS.phase = 0; SS.scrTilt = 18; window.__scrFrz = true;   /* the ledge freeze takes her too: no distance, no world advance while she fights for the lip */
+  return true;
+};
+window.__scrSave = function () { const p = SS.scr.plat; SS.scr = null; SS.scrTilt = 0; window.__scrFrz = false; grounded = p; px = p.x + 130; py = p.y + (p.sink || 0); vy = 0; SS.phase = 0; SS.lastY = py; for (let k = 0; k < 9; k++) spawnPuff(px - 30 + k * 8, py + 10, 10 + Math.random() * 8, 140); };   /* RC1.8: the third tap lands her ON the deck, running — hooves back on top past the lip, a puff burst for the claw-up */
+window.__scrFail = function () { SS.scr = null; SS.scrTilt = 0; window.__scrFrz = false; noLand = true; vy = 160; SS.phase = 0; SS.fallY = py; SS.fallT = 0; };   /* RC1.8: the window ran out — she slides off into the plunge, and like the runners' slip fall it never lands (noLand) */
+window.__scrTap = function () {   /* RC1.8: a jump tap while she scrambles is a traction bite — she claws 46 units back up the slide and the lean eases; the third bite saves her */
+  if (!SS.scr) return false;
+  SS.scr.taps++; SS.scr.slide = Math.max(0, SS.scr.slide - 46); shake = Math.min(10, shake + 2);
+  if (SS.scr.taps >= HANG_TAPS) window.__scrSave();
+  return true;
+};
+window.__scrState = function () { return SS.scr ? { taps: SS.scr.taps, t: Math.round(SS.scr.t * 100) / 100, slide: Math.round(SS.scr.slide), tilt: Math.round(SS.scrTilt) } : null; };   /* RC1.8: the checks' + proofs' eyes on the scramble */
 window.__sparkTick = function (dt) {
   const act = !!window.__sparkOpt && selChar === 'sayori' && mode === 'run';
   if (!act) { SS.on = false; SS.prevPx = (typeof px === 'number') ? px : 0; return; }
@@ -1370,6 +1386,21 @@ window.__sparkTick = function (dt) {
   SS.on = true;
   if (hangPlat || slipPlat) { hangPlat = null; slipPlat = null; }   /* DEV FORK 139: NO HANG, the belt-and-braces — the grab gate in the physics already refuses her; if any path ever set a hang or a slip while she rides, it converts to a plain fall this same tick */
   const dz = px - SS.prevPx; SS.prevPx = px;
+  if (SS.scr) {   /* RC1.8 THE SCRAMBLE owns her while it lasts: pinned at the lip (the world is frozen by __scrFrz), sliding off slowly, the flap set beating over her, the lean easing with every tap that lands */
+    const sc = SS.scr;
+    if (sc.plat.gone || sc.plat.dropping) { window.__scrFail(); }
+    else {
+      sc.t -= dt; sc.clock += dt; sc.slide += 55 * dt;
+      px = sc.x - sc.slide; py = sc.y + sc.slide * 0.30; vy = 0;
+      SS.scrTilt += ((Math.max(6, 18 - 4 * sc.taps)) - SS.scrTilt) * Math.min(1, dt * 10);
+      const fi = Math.floor(sc.clock * 60) % 56;
+      SS.set = 'flap'; SS.frame = fi; SS.img = SPK_FLAP[fi]; SS.grow = SPK_GROW_F[fi];
+      if (Math.floor(sc.clock * 60) % 6 === 0) spawnPuff(px - 24 + Math.random() * 30, py + 12, 8 + Math.random() * 6, 110);   /* her hind hooves churn the cloud edge */
+      if (sc.t <= 0) window.__scrFail();
+    }
+    SS.wasGround = false; SS.wasDbl = doubleUsed; SS.wasTpl = tripleUsed; SS.lastY = py;
+    return;
+  }
   if (grounded) {
     SS.phase = 0; SS.hn = 0; SS.lastY = py;
     SS.gPhase += dz / SPK_CYCLE * 36;   /* the gallop is distance-driven: one 36-frame cycle per SPK_CYCLE of her advance — Zeus's law at the pair's stride */
@@ -1377,7 +1408,7 @@ window.__sparkTick = function (dt) {
     SS.set = 'gallop'; SS.frame = fi; SS.img = SPK_GALLOP[fi]; SS.grow = SPK_GROW_G[fi];
   } else {
     if (SS.wasGround) {
-      if (vy < 0) { SS.phase = 1; SS.originY = SS.lastY; SS.apex = 40; }   /* a takeoff: phase 1 — its apex is measured off the trajectory itself below, not a formula */
+      if (vy < 0) { SS.phase = 1; SS.originY = SS.lastY; SS.apex = 40; SS.takeT = 0; }   /* a takeoff: phase 1 — its apex is measured off the trajectory itself below, not a formula */
       else { SS.phase = 0; SS.fallY = SS.lastY; SS.fallT = 0; }   /* she ran off a lip: a plain fall, no phase */
     } else if (SS.phase === 1 && !SS.wasDbl && doubleUsed) { SS.phase = 2; SS.originY = SS.lastY; SS.apex = 40; }   /* the double fired (it fires between ticks, so lastY is the exact fire height): phase 2 — the FLAP set owns it */
     else if (SS.phase === 2 && !SS.wasTpl && tripleUsed) { SS.phase = 3; SS.originY = SS.lastY; SS.apex = 40; }   /* the triple fired: phase 3 — the FLAP set owns it too */
@@ -1387,13 +1418,14 @@ window.__sparkTick = function (dt) {
       else SS.apex = Math.max(SS.apex, risen);
       SS.hn = Math.min(1, Math.max(0, risen / SS.apex));
     }
-    if (SS.phase === 1) { const fi = window.__spkJumpFrame(SS.hn, vy <= 0); SS.set = 'jump'; SS.frame = fi; SS.img = SPK_JUMP[fi]; SS.grow = SPK_GROW_J[fi]; }
+    if (SS.phase === 1) { SS.takeT += dt; let fi; if (SS.takeT < 10 / 60) fi = 18 + Math.min(9, Math.floor(SS.takeT * 60)); else fi = window.__spkJumpFrame(SS.hn, vy <= 0); SS.set = 'jump'; SS.frame = fi; SS.img = SPK_JUMP[fi]; SS.grow = SPK_GROW_J[fi]; }   /* RC1.8: the takeoff plays BY TIME first — idx 18-27, the coil and the two-leg rear-up (her root DIPS through it, so no height fraction can order it); at idx 28 she leaves the ground and the height-fraction branch takes over */
     else if (SS.phase >= 2) { const fi = window.__spkFlapFrame(SS.hn, vy <= 0); SS.set = 'flap'; SS.frame = fi; SS.img = SPK_FLAP[fi]; SS.grow = SPK_GROW_F[fi]; }
-    else { SS.fallT += dt; const fi = Math.min(65, 50 + Math.floor(SS.fallT * 30)); SS.set = 'jump'; SS.frame = fi; SS.img = SPK_JUMP[fi]; SS.grow = SPK_GROW_J[fi]; }   /* the plain fall rides the jump set's descent branch by time to its touchdown pose, then holds it */
+    else { SS.fallT += dt; const fi = Math.min(69, 50 + Math.floor(SS.fallT * 30));   /* RC1.8: the fall rides to the v3 touchdown pose (69), not the v2 cut at 65 */ SS.set = 'jump'; SS.frame = fi; SS.img = SPK_JUMP[fi]; SS.grow = SPK_GROW_J[fi]; }   /* the plain fall rides the jump set's descent branch by time to its touchdown pose, then holds it */
   }
   SS.wasGround = !!grounded; SS.wasDbl = doubleUsed; SS.wasTpl = tripleUsed;
 };
-window.__sparkDraw = function () { SS.drawn = false; SS.tDrawn = false; if (mode === 'title') { window.__sparkTitleDraw(); return; } if (!SS.on || mode !== 'run') return; const img = SS.img; if (!img || !img.naturalWidth) return; const dx = px - camX - SPK_AX, dy = py - camY - SS.grow * PX2U * SPK_SCALE + ((grounded && !hangPlat && !slipPlat) ? FEET : 0);   /* RC1.1 THE TUCK + HER FLOOR (Keith, 2026-11-17: 'Sparkle needs to be behind the cloud layer to hide his feet like the other players' + 'raise the floor on sparkles'): grounded, the pair seats at the RUNNERS' foot line — hooves FEET deep like his feet (FEET: 'his feet sit this deep in the cloud tops'), and the deck pass (drawn after the pair) covers just the hoof bottoms the way it covers a runner's feet. Airborne the offset is off — she passes decks exactly as she always has, never hidden mid-air. */ /* RC1.1 SPARKLES FX IDENTITY (Keith, 2026-11-17: 'no charge glow for sparkles'): the mounted pair NEVER wears the charge halo — the shadow stamp that re-applied the runner's halo to the pair is gone at every charge state (holding, full, crown, flare); her charge reads in RAINBOW GLITTER instead (the RC particle block). The magnet strobe after this note still reads. Sayori ON FOOT keeps the normal halo — the runner's own draw is untouched. */ if (magFlashT > 0) { ctx.save(); ctx.globalAlpha = Math.floor(time * 24) % 2 === 0 ? 0.15 : 1; ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); } else ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); SS.drawn = true; };   /* DEV FORK 139: the pair draws where Zeus draws (after the runner, before the decks); the frame's ground row lands on her ground line and the seat anchor sits at her x. The charge halo and the magnet strobe re-apply to the pair so a held charge still reads on the unicorn */
+window.__sparkDraw = function () { SS.drawn = false; SS.tDrawn = false; if (mode === 'title') { window.__sparkTitleDraw(); return; } if (!SS.on || mode !== 'run') return; const img = SS.img; if (!img || !img.naturalWidth) return; const dx = px - camX - SPK_AX, dy = py - camY - SS.grow * PX2U * SPK_SCALE + ((grounded && !hangPlat && !slipPlat) ? FEET : 0);   /* RC1.1 THE TUCK + HER FLOOR (Keith, 2026-11-17: 'Sparkle needs to be behind the cloud layer to hide his feet like the other players' + 'raise the floor on sparkles'): grounded, the pair seats at the RUNNERS' foot line — hooves FEET deep like his feet (FEET: 'his feet sit this deep in the cloud tops'), and the deck pass (drawn after the pair) covers just the hoof bottoms the way it covers a runner's feet. Airborne the offset is off — she passes decks exactly as she always has, never hidden mid-air. */ /* RC1.1 SPARKLES FX IDENTITY (Keith, 2026-11-17: 'no charge glow for sparkles'): the mounted pair NEVER wears the charge halo — the shadow stamp that re-applied the runner's halo to the pair is gone at every charge state (holding, full, crown, flare); her charge reads in RAINBOW GLITTER instead (the RC particle block). The magnet strobe after this note still reads. Sayori ON FOOT keeps the normal halo — the runner's own draw is untouched. */ if (SS.scr) { ctx.save(); const pvx = dx + SPK_AX, pvy = dy + SS.grow * PX2U * SPK_SCALE; ctx.translate(pvx, pvy); ctx.rotate(-SS.scrTilt * Math.PI / 180); ctx.translate(-pvx, -pvy); ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); }   /* RC1.8: the scramble lean — she pivots on her front hooves at the lip, nose up the deck, hindquarters hanging off the edge */
+  else if (magFlashT > 0) { ctx.save(); ctx.globalAlpha = Math.floor(time * 24) % 2 === 0 ? 0.15 : 1; ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); } else ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); SS.drawn = true; };   /* DEV FORK 139: the pair draws where Zeus draws (after the runner, before the decks); the frame's ground row lands on her ground line and the seat anchor sits at her x. The charge halo and the magnet strobe re-apply to the pair so a held charge still reads on the unicorn */
 window.__sparkTitleDraw = function () { if (!window.__spkTitleVis() || loadState !== 'done') return; const fi = Math.floor(time * 60) % 36; const img = SPK_GALLOP[fi]; if (!img || !img.naturalWidth) return; const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53; ctx.drawImage(img, cxT - SPK_AX, fyT - SPK_GROW_G[fi] * PX2U * SPK_SCALE, SPK_DW, SPK_DH); const __scT = window.__stageCloud ? window.__stageCloud() : null; const __ciT = __scT ? __scT.img : IMG['cloud01'], __cdT = __scT || CLOUDS['01']; if (__ciT && __ciT.naturalWidth) { const cw3 = 478, dh3 = cw3 * __cdT.asp; ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24; ctx.drawImage(__ciT, cxT - cw3 / 2 - 6, fyT - 58 - __cdT.surf * dh3, cw3, dh3); ctx.restore(); } SS.tFrame = fi;   /* RC1.1 (Keith, 2026-11-17): the title stage's front cloud lip re-applied over the pair — the stage draws its lip inside the runner's pass, which the pair replaces, and the pair draws later, so without this her hooves paint OVER the lip; the pass above is the stage's own lip, byte for byte */ SS.tDrawn = true; };   /* DEV FORK 139: SPARKLES ON THE TITLE STAGE (Keith) — with SPARKLES FOR SAYORI on and Sayori picked, the pair gallops in place on the title stage: the seat anchor at her mark (the stage centre), the ground row on her feet line (fyT), the frame at the clip's authored cadence (60 fps, the 0.6 s cycle). Her own title draw stands down behind __spkTitleVis; any other runner, the option off, or any moment before the stage is set ('done') and the pair is simply not there; the in-run pair never wakes on the title (SS.on stays false — the tick's own gate is untouched) */
 window.__sparkState = function () { return { on: SS.on, opt: !!window.__sparkOpt, char: selChar, set: SS.set, frame: SS.frame, phase: SS.phase, hn: Math.round(SS.hn * 1000) / 1000, gPhase: Math.round(SS.gPhase * 10) / 10, grow: Math.round(SS.grow * 10) / 10, drawn: SS.drawn, tDrawn: SS.tDrawn, tFrame: SS.tFrame }; };   /* DEV FORK 139: the state reader (forkcheck S117 + the proof renderers) */
 window.__sparkMeasure = function () { return { scale: SPK_SCALE, dw: SPK_DW, dh: SPK_DH, ax: SPK_AX, upm: SPK_UPM, cycle: SPK_CYCLE, refFrame: 0, refTop: SPK_TOP0, refGrow: SPK_GROW_G[0], refH: (SPK_GROW_G[0] - SPK_TOP0) * PX2U * SPK_SCALE, charH: CHAR_H, crown: 286 }; };   /* DEV FORK 139: the scale reader (forkcheck S117 + the proof renderers) — refH is the pair's drawn crown height on the reference frame by the game's own draw math */
@@ -2535,6 +2567,7 @@ function press() { kickDecode();
   if (mode === 'title') { titleMusic(); if (loadState === 'done' && typeof charOwned === 'function' && !charOwned(selChar) && typeof openUnlock === 'function') openUnlock(selChar); return; }   /* DEV FORK 74: tapping the locked runner himself opens his buy card */   /* title taps are inert (Keith v0.57: picking a character started the game) — the START GAME button starts the run */
   if (mode !== 'run' || dead) return;
   if (hangPlat) { struggleTaps++; return; }   /* hanging: taps are the climb struggle (Keith) */
+  if (window.__scrTap && window.__scrTap()) return;   /* RC1.8: scrambling (Sparkles): taps are her traction bites */
   /* no freeze, no launch: he keeps running while the button is down */
   held = true; pressT = 0;
 }
@@ -2637,7 +2670,7 @@ function update(dt) {
      and the roll resumes. Freezing dist can't desync LaShmoove — his whole
      performance is a function of dist, so he pauses and resumes on the
      exact frame, like the recording was never interrupted. */
-  const frozen = !!(hangPlat || slipPlat);
+  const frozen = !!(hangPlat || slipPlat || window.__scrFrz);   /* RC1.8: the scramble freezes the world on the same ledge beat */
   if (!frozen) runTime += dt;
   speed = Math.min(1150, 620 + runTime * 9);
   if (!frozen) dist += speed * spdF() * dt * (window.__revF ? window.__revF() : 1);   /* DEV FORK 35: the restart hold/ease scales the world's advance */
@@ -2752,7 +2785,11 @@ function update(dt) {
       if (p.gone || p.flipOff || p.dropping) continue;   /* v0.91: no grabbing a cloud that already sank away */   /* DEV FORK 61: nor a flipped one */   /* DEV FORK 63: nor a falling one */
       if (px + 70 < p.x || px - 40 > p.x + p.len) continue;
       const top = p.y;
-      if (!(window.__spkOn && window.__spkOn()) && vy > (wingT > 0 ? (flutterT > 0 ? 0 : 90) : 260) && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {   /* DEV FORK 139: NO HANG ON THE UNICORN (Keith) — the grab refuses her while she rides Sparkles: a lip she cannot land on is a fall, never a hang (and with no hang, no slip either); the landing scan above still runs first, so a descent that can land still lands */   /* DEV FORK 23: a FLUTTERING winged descent hangs at any sink speed — the flutter tap resets vy to ~40, under the v0.99.2 floor of 90, so Keith's sequence (jump -> flight -> triple -> flutter down) could cross a lip ineligible right after a tap; he ruled that sequence eligible to hang (2026-11-12) */   /* v0.99.2 (Keith: 'I should be able to hang while i have wings'): the grab demanded a fast fall (vy > 260), but a winged descent is a controlled one — fluttering down at ~150 he fell THROUGH the window slow and past it before speed built (probe-verified: no hang, fell at vy 1193). Winged, he can catch a lip at descent speed (90); the landing check still runs first, so a descent that can land still lands */
+      if (vy > (wingT > 0 ? (flutterT > 0 ? 0 : 90) : 260) && py > top + 10 && py < top + 175 && px + 62 > p.x && px + 62 < p.x + 150 && prevFeet < top + 175) {   /* DEV FORK 139: NO HANG ON THE UNICORN (Keith) — the grab refuses her while she rides Sparkles: a lip she cannot land on is a fall, never a hang (and with no hang, no slip either); the landing scan above still runs first, so a descent that can land still lands */   /* DEV FORK 23: a FLUTTERING winged descent hangs at any sink speed — the flutter tap resets vy to ~40, under the v0.99.2 floor of 90, so Keith's sequence (jump -> flight -> triple -> flutter down) could cross a lip ineligible right after a tap; he ruled that sequence eligible to hang (2026-11-12) */   /* v0.99.2 (Keith: 'I should be able to hang while i have wings'): the grab demanded a fast fall (vy > 260), but a winged descent is a controlled one — fluttering down at ~150 he fell THROUGH the window slow and past it before speed built (probe-verified: no hang, fell at vy 1193). Winged, he can catch a lip at descent speed (90); the landing check still runs first, so a descent that can land still lands */
+        if (window.__spkOn && window.__spkOn()) {   /* RC1.8: NO HANG stands (Keith) — but the pair no longer falls past a catchable lip either: she SCRAMBLES on it (the __scrStart state in the pair's tick), same catch, same numbers, her own way back up */
+          if (window.__scrStart && window.__scrStart(p)) { airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1; tripleUsed = false; shake = Math.min(10, shake + 4); break; }
+          continue;
+        }
         hangPlat = p; hangT = HANG_WINDOW; struggleTaps = 0; shake = Math.min(10, shake + 4);
         { const g = gripDrawn(p); hangTX = g.x - HANG_DX + __hangSeat[0]; hangTY = g.y + HANG_HANDS - FEET + __hangSeat[1]; }   /* ease to the drooped tip: hands on it, body under the cloud's end */
         airMove = null; flipped = false; flipMove = null; flipArmed = false; rollArmed = false; airGrav = 1; tripleUsed = false;
