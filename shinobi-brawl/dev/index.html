@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Shinobi Brawl — Story Dev 0.7.9</title>
+<title>Shinobi Brawl — Story Dev 0.7.10</title>
 <style>
   html, body { margin:0; padding:0; background:#101210; height:100%; overflow:hidden; font-family: Verdana, Geneva, sans-serif; }
   #game { position:fixed; inset:0; display:block; touch-action:none; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div class="chip" id="title"><b>SB STORY DEV 0.7.9</b> · <span id="titleLevel">Level 1 — Norfolk, VA</span></div>
+<div class="chip" id="title"><b>SB STORY DEV 0.7.10</b> · <span id="titleLevel">Level 1 — Norfolk, VA</span></div>
 <div class="chip" id="help">SWIPE &#8592;&#8594; walk · again = run · &#8593; jump / flip · &#8595; roll / crouch · TAP attack</div>
 <div class="chip" id="panel">
   <h3 id="panelHead">OPTIONS &#9662;</h3>
@@ -215,7 +215,13 @@ const TOKYO_NEAR = [
 // 0.7.9: Norfolk-only taller framing (530 view / 480 anchor, houses x0.69 — nothing
 // clipped, portrait composed), sky/treeline de-washed (sat x1.2 / x1.3), band bottom
 // melt lengthened, and the seating pass: houses tuck behind the yard band, signs plant
-// in the grass, poles sit at the curb seam behind the street's top edge):
+// in the grass, poles sit at the curb seam behind the street's top edge;
+// 0.7.10: Keith's annotated 079 proof — his X marks are literal, three removals/fixes:
+// the in-gap oak (NF_TREES_FAR nf_tree_3 @1520) is OUT (it didn't blend in the harbor
+// gap), the house row shifts +130 so the first house stands whole at the street start
+// (its Snypa sign + mailbox + the yard-band end move with it), and the utility pole in
+// front of the Snypa house (NF_POLES @6300) is OUT (too cluttered); wires re-span
+// automatically between the remaining pole tops):
 // storm-sky photo (far plate) -> harbor landmark band + NORFOLK water tower (shows
 // through the one grass gap) -> Pine Wall treeline (base-anchored, height-capped: no
 // portrait swell) -> far trees -> yard band -> BIG new Capcom houses (no identical
@@ -224,18 +230,19 @@ const TOKYO_NEAR = [
 // street, which gives way to a dirt path for the final stretch -> poles + sagging
 // wires -> low fog everywhere. Fences + driveways are OUT (Keith's ruling).
 const NF_PATH_X = 5980;   // world x where the asphalt ends and the dirt path begins
-const NF_YARD_END = 3960; // street-layer x where the yard band gives out (just past the Snypa house)
+const NF_YARD_END = 4090; // street-layer x where the yard band gives out (just past the Snypa house; +130 with the 0.7.10 row shift)
 const NF_BAND = [
   { k:'nf2_band', x:0, h:214, base:302 },
   { k:'nf2_tower', x:962, h:232, base:304 }
 ];
 const NF_HOUSES = [ // 0.7.9: heights x0.69 so the tallest (colonial 359) frames with sky above its chimney
-  { k:'nf2_house_2', x:60, h:262 },
-  { k:'nf2_house_4', x:560, h:283 },
-  { k:'nf2_house_3', x:1020, h:310 },
-  { k:'nf2_house_6', x:1510, h:297 },
-  { k:'nf2_house_5', x:2040, h:317 },
-  { k:'nf2_house_1', x:3420, h:359 }
+  // 0.7.10: whole row +130 — the first house (yellow ranch) was clipped at the frame start
+  { k:'nf2_house_2', x:190, h:262 },
+  { k:'nf2_house_4', x:690, h:283 },
+  { k:'nf2_house_3', x:1150, h:310 },
+  { k:'nf2_house_6', x:1640, h:297 },
+  { k:'nf2_house_5', x:2170, h:317 },
+  { k:'nf2_house_1', x:3550, h:359 }
 ];
 const NF_GAP_TREES = [
   { k:'nf_tree_2', x:470, h:262, base:348 },
@@ -263,15 +270,15 @@ const NF_SIGNS = [ // 0.7.9: planted IN the yard band (base 342) and drawn befor
   { k:'nf2_sign_welcome', x:170, h:165, base:342 },
   { k:'nf2_sign_together', x:1180, h:150, base:342 },
   { k:'nf2_sign_est', x:2280, h:140, base:342 },
-  { k:'nf2_sign_norfolk', x:3470, h:160, base:342 },
-  { k:'nf2_mailbox', x:3860, h:100, base:342 }
+  { k:'nf2_sign_norfolk', x:3600, h:160, base:342 },
+  { k:'nf2_mailbox', x:3990, h:100, base:342 }
 ];
 const NF_PATH_DECO = [ // 0.7.9: planted at the path's back edge (base 346), drawn before the path so its top rows trim the posts
   { k:'nf_bush_3', x:6180, h:48, base:346 },
   { k:'nf2_sign_discipline', x:6420, h:155, base:346 },
   { k:'nf_bush_6', x:6560, h:52, base:346 }
 ];
-const NF_POLES = [700, 1650, 2600, 3550, 4500, 5450, 6300];
+const NF_POLES = [700, 1650, 2600, 3550, 4500, 5450]; // 0.7.10: the @6300 pole in front of the Snypa house is OUT (Keith: too cluttered)
 const NF_FOG_FAR = [
   { k:'nf2_fog_a', x:-300, y:236, w:2200, h:88, a:0.22 },
   { k:'nf2_fog_b', x:500, y:250, w:1700, h:72, a:0.16 }
@@ -300,7 +307,6 @@ const NF_FOG_STREET = [
 const NF_TREES_FAR = [
   { k:'nf_tree_1', x:180, h:196 },
   { k:'nf_tree_2', x:850, h:209 },
-  { k:'nf_tree_3', x:1520, h:222 },
   { k:'nf_tree_4', x:2190, h:235 },
   { k:'nf_tree_5', x:2860, h:196 },
   { k:'nf_tree_6', x:3530, h:209 },
