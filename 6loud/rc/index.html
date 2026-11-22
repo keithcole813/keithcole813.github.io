@@ -1395,8 +1395,8 @@ window.__sparkTick = function (dt) {
     else {
       sc.t -= dt; sc.clock += dt; sc.slide += 55 * dt;
       px = sc.x - sc.slide; py = sc.y + sc.slide * 0.30; vy = 0;
-      const fi = Math.floor(sc.clock * 60) % 56;
-      SS.set = 'flap'; SS.frame = fi; SS.img = SPK_FLAP[fi]; SS.grow = SPK_GROW_F[fi];   /* RC1.12: the flight frames at the catch — the hover set stands down (still loaded, unplayed here) */
+      const fi = Math.floor(sc.clock * 60) % 16;
+      SS.set = 'flap'; SS.frame = fi; SS.img = SPK_FLAP[fi]; SS.grow = SPK_GROW_F[fi];   /* RC1.13: the catch loops ONLY frames 0-15 of the flight set (Keith, 2026-11-22: '16-55 show the front legs coming down for a landing, we shouldn't use those') — the upright wing-fan opening, fluttering in place; the double/triple still ride the full 56 by height */
       if (Math.floor(sc.clock * 60) % 6 === 0) spawnPuff(px - 24 + Math.random() * 30, py + 12, 8 + Math.random() * 6, 110);   /* RC1.10: her downwash worries the cloud edge while she hovers */
       if (sc.t <= 0) window.__scrFail();
     }
