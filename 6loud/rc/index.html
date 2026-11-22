@@ -1366,10 +1366,10 @@ window.__spkOn = function () { return !!window.__sparkOpt && selChar === 'sayori
 window.__spkVis = function () { return window.__spkOn() && SS.on && !!SS.img && !!SS.img.naturalWidth; };   /* DEV FORK 139: the visual mount — her draw stands down only while a real pair frame is in hand */
 window.__spkTitleVis = function () { return !!window.__sparkOpt && selChar === 'sayori' && !!SPK_GALLOP[0] && !!SPK_GALLOP[0].naturalWidth; };   /* DEV FORK 139: the title stage's gate — the pair covers her only once its first frame has landed */
 window.__sparkReset = function () { SS.on = false; SS.phase = 0; SS.gPhase = 0; SS.set = 'gallop'; SS.frame = 0; SS.img = SPK_GALLOP[0]; SS.grow = SPK_GROW_G[0]; SS.hn = 0; SS.fallT = 0; SS.prevPx = (typeof px === 'number') ? px : 0; SS.lastY = (typeof py === 'number') ? py : 0; SS.wasGround = true; SS.wasDbl = false; SS.wasTpl = false; SS.drawn = false; SS.tDrawn = false; SS.scr = null; SS.takeT = 0; SS.scrTilt = 0; window.__scrFrz = false; };   /* DEV FORK 139: startRun + the revive call this — the pair is re-seated every (re)start */
-window.__scrStart = function (p) {   /* RC1.8 THE SCRAMBLE (Keith's spec 2026-11-20, 'Build it' 2026-11-21) — RC1.10 re-poses it (Keith's ruling 2026-11-21, with Sayori's read; approved 2026-11-22): the pair's answer to the hang she never takes — at the same lip catch she does not reach or churn at the edge; she STRUGGLES TO FLY AND HOVER at the lip, wings beating fast and hard (the v5 hover set), sliding off slowly; 3 rapid jump taps (HANG_TAPS inside HANG_WINDOW, the hang's own numbers) claw her back on top. A deck already gone or dropping cannot hold her. */
+window.__scrStart = function (p) {   /* RC1.8 THE SCRAMBLE (Keith's spec 2026-11-20, 'Build it' 2026-11-21) — RC1.10 re-poses it (Keith's ruling 2026-11-21, with Sayori's read; approved 2026-11-22): the pair's answer to the hang she never takes — at the same lip catch she does not reach or churn at the edge; she STRUGGLES TO FLY AND HOVER at the lip, wings beating fast and hard (the FLIGHT set — Keith's ruling 2026-11-22: the v5 hover cycle's wings read too small at game size; the flight set's sweep is what shows), sliding off slowly; 3 rapid jump taps (HANG_TAPS inside HANG_WINDOW, the hang's own numbers) claw her back on top. A deck already gone or dropping cannot hold her. */
   if (!SS.on || SS.scr || !p || p.gone || p.dropping || p.flipOff) return false;
   const g = gripDrawn(p);
-  SS.scr = { plat: p, t: HANG_WINDOW, taps: 0, slide: 0, x: px, y: g.y + 10, clock: 0 };
+  SS.scr = { plat: p, t: HANG_WINDOW, taps: 0, slide: 0, x: px, y: g.y + 120, clock: 0 };   /* RC1.11: the hover seats A LOT LOWER (Keith, 2026-11-22) — +120 off the grip line, not +10: her hooves hang below the lip and her body rides alongside the cloud's face, straining up at the edge */
   SS.phase = 0; SS.scrTilt = 0; window.__scrFrz = true;   /* the ledge freeze takes her too: no distance, no world advance while she fights for the lip — RC1.10: scrTilt stays 0, the lean is retired (the hover art is near level; the strain is in the art) */
   return true;
 };
@@ -1389,14 +1389,14 @@ window.__sparkTick = function (dt) {
   SS.on = true;
   if (hangPlat || slipPlat) { hangPlat = null; slipPlat = null; }   /* DEV FORK 139: NO HANG, the belt-and-braces — the grab gate in the physics already refuses her; if any path ever set a hang or a slip while she rides, it converts to a plain fall this same tick */
   const dz = px - SS.prevPx; SS.prevPx = px;
-  if (SS.scr) {   /* RC1.8 THE SCRAMBLE owns her while it lasts — RC1.10: hovering at the lip (the world is frozen by __scrFrz), sliding off slowly, the v5 hover set beating over her at its authored 60 fps, the sink-and-catch bob riding SPK_GROW_H */
+  if (SS.scr) {   /* RC1.8 THE SCRAMBLE owns her while it lasts — RC1.12: hovering low at the lip (the world is frozen by __scrFrz), sliding off slowly, the FLIGHT set beating over her by clock at 60 fps (Keith's ruling: the flight frames at the catch) */
     const sc = SS.scr;
     if (sc.plat.gone || sc.plat.dropping) { window.__scrFail(); }
     else {
       sc.t -= dt; sc.clock += dt; sc.slide += 55 * dt;
       px = sc.x - sc.slide; py = sc.y + sc.slide * 0.30; vy = 0;
-      const fi = Math.floor(sc.clock * 60) % 22;
-      SS.set = 'hover'; SS.frame = fi; SS.img = SPK_HOVER[fi]; SS.grow = SPK_GROW_H[fi];
+      const fi = Math.floor(sc.clock * 60) % 56;
+      SS.set = 'flap'; SS.frame = fi; SS.img = SPK_FLAP[fi]; SS.grow = SPK_GROW_F[fi];   /* RC1.12: the flight frames at the catch — the hover set stands down (still loaded, unplayed here) */
       if (Math.floor(sc.clock * 60) % 6 === 0) spawnPuff(px - 24 + Math.random() * 30, py + 12, 8 + Math.random() * 6, 110);   /* RC1.10: her downwash worries the cloud edge while she hovers */
       if (sc.t <= 0) window.__scrFail();
     }
