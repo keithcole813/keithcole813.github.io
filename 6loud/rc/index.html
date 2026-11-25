@@ -1346,9 +1346,9 @@ const SPK_UPM = 340 * PX2U * SPK_SCALE;   /* world units per metre of capture tr
 const SPK_CYCLE = 585;   /* one gallop cycle per 585 units of advance — the 4.29 m stride (1.5x the pair's 2.86 m) at SPK_UPM */
 const SPK_AX = 600 * PX2U * SPK_SCALE, SPK_DW = 1248 * PX2U * SPK_SCALE, SPK_DH = 1024 * PX2U * SPK_SCALE;   /* the flipped seat anchor + the drawn frame size */
 const SPK_TOP0 = 183;   /* gallop frame 0's crown row, measured off the shipped webp */
-const SPK_GROW_G = [897,897,891,897,900,906,910,902,889,874,859,851,860,871,876,877,
-  879,880,879,882,891,898,896,882,880,878,878,877,882,890,888,893,
-  895,894,893,897];   /* gallop ground rows: each frame's lowest alpha>=128 row off dev/sparkles/gallop/fNNN.webp */
+const SPK_GROW_G = [897,897,891,897,900,906,910,902,889,874,864,874,883,883,879,879,
+  881,883,879,882,891,897,896,889,880,878,878,877,882,890,888,893,
+  895,894,893,897];   /* RC1.16: gallop ground rows re-measured off the v17 GALLOP OF RECORD (sparkles-sprites-v17-gallopwings-hold) — each frame's lowest alpha>=128 row; the gather (10-17) and frame 23 moved with the hind fix and Sayori's hold */
 const SPK_GROW_J = [897,898,898,893,895,898,901,906,909,907,899,899,902,902,902,906,
   912,920,928,938,953,958,950,934,930,926,916,903,887,871,856,841,
   825,807,785,760,731,705,683,658,635,620,609,598,589,581,575,573,
