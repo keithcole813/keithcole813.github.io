@@ -118,6 +118,17 @@
   #reviveRow { display:none; margin-top:14px; text-align:center; }
   #reviveBtn { background:linear-gradient(#ffe259,#ffa751); color:#3a1503; }
   #custBtn { display:none; margin:10px auto 0; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:14px; letter-spacing:1px; color:#eaf2ff; background:linear-gradient(#2b3a67,#16224a); border:2px solid #ffd94d; border-radius:999px; padding:8px 20px; cursor:pointer; }   /* RC1.9: CUSTOMIZE rides the title beside MAP, in MAP's clothes — one tap, no menu dive (Keith, 2026-11-21) */
+  #dressStrip { display:none; pointer-events:auto; width:min(94vw,470px); box-sizing:border-box; background:rgba(12,6,28,.88); border:2px solid rgba(255,217,77,.55); border-radius:14px; padding:7px 10px 8px; text-align:left; }   /* RC1.15: THE DRESSING ROOM (Keith, 2026-11-22) — customization on the start screen itself; the stage character demonstrates every pick */
+  #dressHead { font-family:'Luckiest Guy',cursive; font-size:12px; letter-spacing:1px; color:#ffd94d; display:flex; justify-content:space-between; gap:8px; cursor:pointer; pointer-events:auto; }
+  #dressBody { max-height:38vh; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; }
+  #dressMsg { font-size:11px; color:#ffb3b3; text-align:center; }
+  .dressRow { display:flex; gap:6px; align-items:center; overflow-x:auto; padding:4px 0 1px; scrollbar-width:none; }
+  .dressRow::-webkit-scrollbar { display:none; }
+  .dressLab { font-family:'Luckiest Guy',cursive; font-size:9px; letter-spacing:.5px; color:#ffd94d; flex:0 0 46px; }
+  .dChip { pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:10.5px; letter-spacing:.4px; padding:6px 10px; border-radius:99px; border:2px solid rgba(255,217,77,.65); background:#2b3a67; color:#eaf2ff; white-space:nowrap; cursor:pointer; }
+  .dChip.on { background:#ffd94d; color:#3a1503; border-color:#ffd94d; }
+  .dChip.dim { opacity:.62; }
+  .dChip:disabled { opacity:.45; cursor:default; }
   #mapBtn { display:none; margin:10px auto 0; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:14px; letter-spacing:1px; color:#eaf2ff; background:linear-gradient(#2b3a67,#16224a); border:2px solid #ffd94d; border-radius:999px; padding:8px 20px; cursor:pointer; }   /* DEV FORK 26: the start-area toggle (title only, unlocked only) */
   #mapToast { position:fixed; left:50%; top:21%; transform:translateX(-50%); z-index:30; text-align:center; pointer-events:none; }   /* DEV FORK 26: the unlock moment */
   #mapBadge { width:min(80vw,560px); height:auto; filter:drop-shadow(0 10px 24px rgba(0,0,0,.45)); animation:mapPop .45s ease-out; }   /* DEV FORK 27: Keith's keyed badge art + a pop-in */
@@ -323,7 +334,7 @@
   <button id="charR" aria-label="Next character"></button>
   <div id="selectStack"><div id="charName">6LADE</div><div id="charBest"></div><div id="charLock" style="display:none;pointer-events:auto;cursor:pointer;"></div>   <!-- DEV FORK 74: the price line is a tap target — it opens the buy card --></div>
   <div id="strip"></div>
-  <div id="goldToast" style="display:none;">✦ GOLD WINGS EARNED ✦</div><div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="custBtn" style="display:none;">CUSTOMIZE</button>   <!-- RC1.9: customization on the title surface — no OPTIONS dive (Keith, 2026-11-21) --><button id="optBtn" class="audTg">OPTIONS</button><div id="ver">v0.99.8 · RELEASE CANDIDATE 1</div></div>
+  <div id="goldToast" style="display:none;">✦ GOLD WINGS EARNED ✦</div><div id="mapToast" style="display:none;"><img id="mapBadge" src="unlock-badge.webp" alt="NEW LEVEL UNLOCKED!"><div class="mt2" id="mapToastName">MIDNIGHT RUN</div></div>   <!-- DEV FORK 27: Keith's badge art carries the announcement; the gold line names the map --><div id="titleUI">   <!-- DEV FORK 26: the unlock toast lives at body level — a fixed element inside a transformed ancestor would anchor to the ancestor, not the sky --><button id="startBtn">START GAME</button><button id="mapBtn" style="display:none;">MAP: DAY BREAK</button>   <!-- DEV FORK 26: the start-area toggle --><button id="custBtn" style="display:none;">CUSTOMIZE</button>   <!-- RC1.9: customization on the title surface — no OPTIONS dive (Keith, 2026-11-21) --><button id="optBtn" class="audTg">OPTIONS</button><div id="dressStrip" style="display:none;"><div id="dressHead"></div><div id="dressBody"></div><div id="dressMsg"></div></div><div id="ver">v0.99.8 · RELEASE CANDIDATE 1</div></div>
   <div id="dbg"></div>
   <div id="adSim"><div class="adSimIn"><button id="adSimClose" disabled>✕</button><div class="adSimTag">TEST AD · <span id="adSimKind">REWARDED</span></div><div class="adSimBody">Your ad would play here.</div><div id="adSimCount">5s</div><div class="adSimBar"><div id="adSimFill"></div></div><button id="adSimClaim" class="btn" style="display:none;">CLAIM REVIVE</button><div class="adSimHint" id="adSimHint"></div></div></div>
   <div id="loader"><div class="ldSea"></div><img id="ldEmblem" src="emblem.webp" alt="6LOUD"><div id="ldWord">LOADING...</div><div id="ldBarWrap"><div id="ldBar"><div id="ldFill"></div></div></div><div id="ldSub">GET READY TO JUMP!</div><div id="ldPct">LOADING 0%</div><div id="ldTip"></div></div>
@@ -4692,6 +4703,75 @@ function renderCust() {
     });
   }
 }
+/* --- RC1.15: THE DRESSING ROOM — the start screen carries the
+   customization (Keith, 2026-11-22). Same economy functions the
+   CUSTOMIZE page calls; the title stage draws the live equip
+   state, so the character demonstrates every pick as it is made. */
+if (window.__dressOpen === undefined) window.__dressOpen = true;
+function __dressMsg(t) { var m = __rcEl('dressMsg'); if (m) { m.textContent = t; setTimeout(function () { if (m.textContent === t) m.textContent = ''; }, 2600); } }
+function renderDress() {
+  var head = __rcEl('dressHead'), body = __rcEl('dressBody'); if (!head || !body) return;
+  var e = __rcEntView();
+  var nm = (SKINS[selChar] && SKINS[selChar].name) || selChar.toUpperCase();
+  head.innerHTML = '';
+  var ht = document.createElement('span'); ht.textContent = 'DRESSING ROOM — ' + nm; head.appendChild(ht);
+  var hb = document.createElement('span'); hb.textContent = '♪ ' + (window.__notes || 0).toLocaleString('en-US') + (window.__dressOpen ? '  ▾' : '  ▸'); head.appendChild(hb);
+  body.innerHTML = ''; body.style.display = window.__dressOpen ? 'block' : 'none';
+  if (!window.__dressOpen) return;
+  var UPG = {
+    ivey: { key: 'zeus', name: 'ZEUS', kind: 'COMPANION' },
+    sayori: { key: 'spark', name: 'SPARKLES', kind: 'COMPANION' },
+    lash: { key: 'lalt', name: 'ALT — WHITE ROBE', kind: 'OUTFIT' },
+    yoro: { key: 'yalt', name: 'ALT — CHARCOAL GI', kind: 'OUTFIT' },
+    blade: { key: null, name: 'GANGSTA SLIM', kind: 'OUTFIT' }
+  };
+  function row(lab) { var r = document.createElement('div'); r.className = 'dressRow'; var l = document.createElement('span'); l.className = 'dressLab'; l.textContent = lab; r.appendChild(l); body.appendChild(r); return r; }
+  function chip(parent, text, cls, fn) { var b = document.createElement('button'); b.className = 'dChip' + (cls ? ' ' + cls : ''); b.textContent = text; if (fn) b.addEventListener('click', function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); fn(); renderDress(); }); else b.disabled = true; parent.appendChild(b); return b; }
+  var u = UPG[selChar];
+  if (u) {
+    var kr = row(u.kind);
+    if (!u.key) chip(kr, u.name + ' — SOON', 'dim', null);
+    else if (!e.upg[u.key]) chip(kr, 'BUY ' + u.name + ' — ' + ECONOMY.upgradePrice + ' ♪', '', function () { if (!buyUpgrade(u.key)) __dressMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' ♪'); });
+    else {
+      if (u.kind === 'OUTFIT') chip(kr, 'STANDARD', e.eq[u.key] ? '' : 'on', function () { if (e.eq[u.key]) toggleEquip(u.key); });
+      chip(kr, u.name + (e.eq[u.key] ? ' ✓ ON' : ''), e.eq[u.key] ? 'on' : '', function () { toggleEquip(u.key); });
+    }
+  }
+  var cr = row('CHARGE');
+  ECONOMY.colors.forEach(function (c) {
+    var owned = e.colors.indexOf(c.id) >= 0, on = (e.charge[selChar] || 'classic') === c.id;
+    var b = document.createElement('button'); b.className = 'rcSw'; b.style.background = c.col || '#ffd94d'; b.style.outline = on ? '3px solid #ffd94d' : 'none'; b.style.flex = '0 0 auto';
+    b.title = c.name + (owned ? '' : ' — ' + c.price + ' ♪');
+    b.textContent = on ? '✓' : (owned ? '' : c.price); b.style.fontSize = '10px'; b.style.fontFamily = "'Luckiest Guy',cursive"; b.style.color = '#3a1503';
+    b.addEventListener('click', function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); if (!buyColor(c.id)) __dressMsg('NOT ENOUGH NOTES — ' + c.price + ' ♪'); renderDress(); });
+    cr.appendChild(b);
+  });
+  var fr = row('FX');
+  ECONOMY.fx.forEach(function (f) {
+    var owned = e.fx.indexOf(f.id) >= 0, on = e.fxOn.indexOf(f.id) >= 0;
+    chip(fr, f.name + (owned ? (on ? ' ✓' : '') : ' — ' + f.price + ' ♪'), on ? 'on' : (owned ? '' : 'dim'), function () { if (!toggleFx(f.id)) __dressMsg('NOT ENOUGH NOTES — ' + f.price + ' ♪'); });
+  });
+  var locked = (window.__CHAIN106 || []).filter(function (c) { return !(window.__selOpen ? window.__selOpen(c[0]) : true); });
+  if (locked.length) {
+    var sr = row('SKIP TO');
+    locked.forEach(function (c) { var id = c[0]; chip(sr, (window.__selLabel ? window.__selLabel(id) : id) + ' — ' + ECONOMY.skip[id] + ' ♪', 'dim', function () { if (!buySkip(id)) __dressMsg('NOT ENOUGH NOTES — ' + ECONOMY.skip[id] + ' ♪'); }); });
+  }
+  var or2 = row('OPTIONS');
+  chip(or2, window.__musOff ? 'MUSIC OFF' : 'MUSIC ON', window.__musOff ? 'dim' : 'on', function () { audToggle('m'); if (typeof optUI === 'function') optUI(); });
+  chip(or2, window.__sfxOff ? 'SOUND OFF' : 'SOUND ON', window.__sfxOff ? 'dim' : 'on', function () { audToggle('s'); if (typeof optUI === 'function') optUI(); });
+  chip(or2, window.__optGhostsOff ? 'GHOSTS OFF' : 'GHOSTS ON', window.__optGhostsOff ? 'dim' : 'on', function () { optToggleGhosts(); });
+}
+window.__renderDress = renderDress;
+var __dressSig = '';
+setInterval(function () {
+  var strip = __rcEl('dressStrip'); if (!strip) return;
+  var show = (typeof mode === 'string' && mode === 'title' && typeof loadState === 'string' && loadState === 'done' && !window.__reviveArmed);
+  var want = show ? 'block' : 'none';
+  if (strip.style.display !== want) strip.style.display = want;
+  if (!show) return;
+  var sig = [selChar, window.__notes || 0, window.__devMode ? 1 : 0, window.__musOff ? 1 : 0, window.__sfxOff ? 1 : 0, window.__optGhostsOff ? 1 : 0, window.__dressOpen ? 1 : 0, JSON.stringify(entLoad())].join('|');
+  if (sig !== __dressSig) { __dressSig = sig; renderDress(); }
+}, 300);   /* RC1.15: the strip rides the title chrome — shown only on a loaded title, never on the revive start (FORK 72), re-rendered on any state change */
 function openShop() { var p = __rcEl('optPage'); if (p) p.style.display = 'none'; renderShop(); var s = __rcEl('shopPage'); if (s) s.style.display = 'block'; }
 function openCust() { var p = __rcEl('optPage'); if (p) p.style.display = 'none'; renderCust(); var s = __rcEl('custPage'); if (s) s.style.display = 'block'; }
 window.__rcOpenCustLevel = function (id) {
@@ -4795,7 +4875,7 @@ function __rcTokenSync() {
 }
 (function __rcWire() {
   var os = __rcEl('optShop'); if (os) os.addEventListener('click', openShop);
-  var oc = __rcEl('optCust'); if (oc) oc.addEventListener('click', openCust); var cb1 = __rcEl('custBtn'); if (cb1) cb1.addEventListener('click', openCust);   /* RC1.9: the title's own CUSTOMIZE button — wired here, beside the OPTIONS row's, because openCust lives in this block's scope */
+  var oc = __rcEl('optCust'); if (oc) oc.addEventListener('click', openCust); var cb1 = __rcEl('custBtn'); if (cb1) cb1.addEventListener('click', openCust); var dh15 = __rcEl('dressHead'); if (dh15) dh15.addEventListener('click', function () { window.__dressOpen = !window.__dressOpen; renderDress(); });   /* RC1.15: the dressing-room header folds the strip away and back */   /* RC1.9: the title's own CUSTOMIZE button — wired here, beside the OPTIONS row's, because openCust lives in this block's scope */
   var od = __rcEl('optDevMode'); if (od) od.addEventListener('click', function () { __rcSetDevMode(!window.__devMode); });   /* RC1.1: DEVELOPER MODE answers taps */
   var sb = __rcEl('shopBack'); if (sb) sb.addEventListener('click', function () { var s = __rcEl('shopPage'); if (s) s.style.display = 'none'; if (typeof openOptions === 'function') openOptions(); });
   var cb = __rcEl('custBack'); if (cb) cb.addEventListener('click', function () { var s = __rcEl('custPage'); if (s) s.style.display = 'none'; if (typeof openOptions === 'function') openOptions(); });
