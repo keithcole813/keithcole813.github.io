@@ -3539,8 +3539,9 @@ function draw() {
 }
 
 /* ---------- frame loop / sizing ---------- */
+let __rs = 1;   /* RC1.19: the render scale — 1 is the full backing resolution; the governor below steps it down on hardware that cannot hold the frame rate and back up when there is headroom. Only the backing store scales; the game's geometry reads CSS pixels and never knows. */
 function resize() {
-  const dpr = Math.min(2, devicePixelRatio || 1);
+  const dpr = Math.min(2, devicePixelRatio || 1) * __rs;
   W = innerWidth; H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -3548,6 +3549,18 @@ function resize() {
   viewW = W / S; viewH = H / S;
 }
 addEventListener('resize', resize);
+/* RC1.19 TV PERFORMANCE GOVERNOR (Keith, 2026-11-25 — the Firestick/Silk test: 'it was really slow'): loop() feeds the real frame cost here once the loader is done. Every 120 frames the rolling average is judged: sustained frames over ~20.5 ms (dropped frames at 60 Hz) step the backing scale down a notch (floor 0.45); two consecutive windows locked under ~17.2 ms step it back up one notch (ceiling 1). Decisions are rare and one-directional per window, so the size never hunts; hardware that holds 60 fps never moves off 1. */
+let __ftEMA = 16.7, __ftWin = 0, __ftGood = 0;
+window.__perfTick = function (ms) {
+  if (!(ms > 0) || ms > 100) return;
+  __ftEMA = __ftEMA * 0.92 + ms * 0.08;
+  if (++__ftWin < 120) return;
+  __ftWin = 0;
+  if (__ftEMA > 20.5 && __rs > 0.45) { __rs = Math.max(0.45, Math.round((__rs - 0.15) * 100) / 100); __ftGood = 0; resize(); }
+  else if (__ftEMA < 17.2) { __ftGood++; if (__ftGood >= 2 && __rs < 1) { __rs = Math.min(1, Math.round((__rs + 0.1) * 100) / 100); __ftGood = 0; resize(); } }
+  else __ftGood = 0;
+};
+window.__perfState = function () { return { rs: __rs, ema: Math.round(__ftEMA * 10) / 10 }; };
 let lastTs = 0;
 let puShown = null, dbShown = null, charUiShown = null, hudShown = true, sbShown = false;   /* DEV FORK 43: null sentinels (the charUiShown pattern) — the first frame writes the helpers' hidden state itself; their display no longer rides on one stylesheet line */   /* charUiShown starts NULL (v0.73.2): the sentinel makes the first frame APPLY the select cluster's state — hidden while loading (its elements are visible by CSS default), shown at 'done'. (v0.73.1's true->false fix cured the never-appearing strip; the null sentinel is what lets the cluster also start hidden.) */
 let audioBeat = 0;   /* the audio heartbeat clock (v0.67) */
@@ -3835,6 +3848,7 @@ window.__audTest = { toggle: audToggle, state: () => ({ m: !!window.__musOff, s:
 
 function loop(ts) { if (window.__forkFrame) window.__forkFrame();   /* DEV FORK 35: per-frame fork housekeeping — restart-flag planting/activation + the revive hold/ease timers */
   const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016); lastTs = ts;
+  if (loadState === 'done' && window.__perfTick) window.__perfTick(dt * 1000);   /* RC1.19: the governor watches the real frame cost, post-load only (the loader's decode hitches are not the game's frame rate) */
   dbgTick(ts);   /* DEV FORK: the debug overlay rides the frame loop */
   if (mode === 'debug' && window.__debugFrame) window.__debugFrame();   /* DEV FORK 73: the review keeps its course built and its readout honest */
   tiltEase(dt);   /* the depth eases toward the phone's pose every frame, every mode (v0.83) */
