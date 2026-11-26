@@ -120,7 +120,7 @@
   #custBtn { display:none; margin:10px auto 0; pointer-events:auto; font-family:'Luckiest Guy',cursive; font-size:14px; letter-spacing:1px; color:#eaf2ff; background:linear-gradient(#2b3a67,#16224a); border:2px solid #ffd94d; border-radius:999px; padding:8px 20px; cursor:pointer; }   /* RC1.9: CUSTOMIZE rides the title beside MAP, in MAP's clothes — one tap, no menu dive (Keith, 2026-11-21) */
   #dressStrip { display:none; pointer-events:auto; width:min(94vw,470px); box-sizing:border-box; background:rgba(12,6,28,.88); border:2px solid rgba(255,217,77,.55); border-radius:14px; padding:7px 10px 8px; text-align:left; }   /* RC1.15: THE DRESSING ROOM (Keith, 2026-11-22) — customization on the start screen itself; the stage character demonstrates every pick */
   #dressHead { font-family:'Luckiest Guy',cursive; font-size:12px; letter-spacing:1px; color:#ffd94d; display:flex; justify-content:space-between; gap:8px; cursor:pointer; pointer-events:auto; }
-  #dressBody { max-height:38vh; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; }
+  #dressBody { }   /* RC1.18: one row only — no scroll well, nothing stacked over the stage */
   #dressMsg { font-size:11px; color:#ffb3b3; text-align:center; }
   .dressRow { display:flex; gap:6px; align-items:center; overflow-x:auto; padding:4px 0 1px; scrollbar-width:none; }
   .dressRow::-webkit-scrollbar { display:none; }
@@ -1376,7 +1376,8 @@ window.__spkFlapFrame = (hn, rising) => rising ? SPK_PICK(SPK_RZ_F, 11, 34, SPK_
 const SS = { on: false, set: 'gallop', frame: 0, img: null, grow: SPK_GROW_G[0], gPhase: 0, phase: 0, originY: 0, apex: 1, hn: 0, fallY: 0, fallT: 0, prevPx: 0, lastY: 0, wasGround: true, wasDbl: false, wasTpl: false, drawn: false, tDrawn: false, tFrame: 0, scr: null, takeT: 0, scrTilt: 0 };   /* RC1.8: scr = the Scramble state, takeT = the takeoff-coil clock, scrTilt = the scramble lean in degrees */
 window.__spkOn = function () { return !!window.__sparkOpt && selChar === 'sayori'; };   /* DEV FORK 139: the logical mount — the hang gate reads this, unconditional on art */
 window.__spkVis = function () { return window.__spkOn() && SS.on && !!SS.img && !!SS.img.naturalWidth; };   /* DEV FORK 139: the visual mount — her draw stands down only while a real pair frame is in hand */
-window.__spkTitleVis = function () { return !!window.__sparkOpt && selChar === 'sayori' && !!SPK_GALLOP[0] && !!SPK_GALLOP[0].naturalWidth; };   /* DEV FORK 139: the title stage's gate — the pair covers her only once its first frame has landed */
+window.__spkTitleVis = function () { return !!window.__sparkOpt && selChar === 'sayori' && !!SPK_GALLOP[0] && !!SPK_GALLOP[0].naturalWidth; };
+window.__spkTeaserVis = function () { return !window.__sparkOpt && selChar === 'sayori' && typeof loadState === 'string' && loadState === 'done' && !!SPK_FLAP[0] && !!SPK_FLAP[0].naturalWidth; };   /* RC1.18: the grand teaser's gate — Sayori picked, Sparkles not on, the flight set landed, the stage settled: she flies the stage, and Sayori's solo stand-in stands down (she is ON the alicorn in the flight art) */   /* DEV FORK 139: the title stage's gate — the pair covers her only once its first frame has landed */
 window.__sparkReset = function () { SS.on = false; SS.phase = 0; SS.gPhase = 0; SS.set = 'gallop'; SS.frame = 0; SS.img = SPK_GALLOP[0]; SS.grow = SPK_GROW_G[0]; SS.hn = 0; SS.fallT = 0; SS.prevPx = (typeof px === 'number') ? px : 0; SS.lastY = (typeof py === 'number') ? py : 0; SS.wasGround = true; SS.wasDbl = false; SS.wasTpl = false; SS.drawn = false; SS.tDrawn = false; SS.scr = null; SS.takeT = 0; SS.scrTilt = 0; window.__scrFrz = false; };   /* DEV FORK 139: startRun + the revive call this — the pair is re-seated every (re)start */
 window.__scrStart = function (p) {   /* RC1.8 THE SCRAMBLE (Keith's spec 2026-11-20, 'Build it' 2026-11-21) — RC1.10 re-poses it (Keith's ruling 2026-11-21, with Sayori's read; approved 2026-11-22): the pair's answer to the hang she never takes — at the same lip catch she does not reach or churn at the edge; she STRUGGLES TO FLY AND HOVER at the lip, wings beating fast and hard (the FLIGHT set — Keith's ruling 2026-11-22: the v5 hover cycle's wings read too small at game size; the flight set's sweep is what shows), sliding off slowly; 3 rapid jump taps (HANG_TAPS inside HANG_WINDOW, the hang's own numbers) claw her back on top. A deck already gone or dropping cannot hold her. */
   if (!SS.on || SS.scr || !p || p.gone || p.dropping || p.flipOff) return false;
@@ -1440,8 +1441,17 @@ window.__sparkTick = function (dt) {
 };
 window.__sparkDraw = function () { SS.drawn = false; SS.tDrawn = false; if (mode === 'title') { window.__sparkTitleDraw(); return; } if (!SS.on || mode !== 'run') return; const img = SS.img; if (!img || !img.naturalWidth) return; const dx = px - camX - SPK_AX, dy = py - camY - SS.grow * PX2U * SPK_SCALE + ((grounded && !hangPlat && !slipPlat) ? FEET : 0);   /* RC1.1 THE TUCK + HER FLOOR (Keith, 2026-11-17: 'Sparkle needs to be behind the cloud layer to hide his feet like the other players' + 'raise the floor on sparkles'): grounded, the pair seats at the RUNNERS' foot line — hooves FEET deep like his feet (FEET: 'his feet sit this deep in the cloud tops'), and the deck pass (drawn after the pair) covers just the hoof bottoms the way it covers a runner's feet. Airborne the offset is off — she passes decks exactly as she always has, never hidden mid-air. */ /* RC1.1 SPARKLES FX IDENTITY (Keith, 2026-11-17: 'no charge glow for sparkles'): the mounted pair NEVER wears the charge halo — the shadow stamp that re-applied the runner's halo to the pair is gone at every charge state (holding, full, crown, flare); her charge reads in RAINBOW GLITTER instead (the RC particle block). The magnet strobe after this note still reads. Sayori ON FOOT keeps the normal halo — the runner's own draw is untouched. */ if (SS.scr) { ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); }   /* RC1.10: the catch draws PLAIN — the lean is retired with the v4 pose family (Keith's ruling); she hovers near level and the strain reads in the art */
   else if (magFlashT > 0) { ctx.save(); ctx.globalAlpha = Math.floor(time * 24) % 2 === 0 ? 0.15 : 1; ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); ctx.restore(); } else ctx.drawImage(img, dx, dy, SPK_DW, SPK_DH); SS.drawn = true; };   /* DEV FORK 139: the pair draws where Zeus draws (after the runner, before the decks); the frame's ground row lands on her ground line and the seat anchor sits at her x. The charge halo and the magnet strobe re-apply to the pair so a held charge still reads on the unicorn */
-window.__sparkTitleDraw = function () { if (!window.__spkTitleVis() || loadState !== 'done') return; const fi = Math.floor(time * 60) % 36; const img = SPK_GALLOP[fi]; if (!img || !img.naturalWidth) return; const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53; ctx.drawImage(img, cxT - SPK_AX, fyT - SPK_GROW_G[fi] * PX2U * SPK_SCALE, SPK_DW, SPK_DH); const __scT = window.__stageCloud ? window.__stageCloud() : null; const __ciT = __scT ? __scT.img : IMG['cloud01'], __cdT = __scT || CLOUDS['01']; if (__ciT && __ciT.naturalWidth) { const cw3 = 478, dh3 = cw3 * __cdT.asp; ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24; ctx.drawImage(__ciT, cxT - cw3 / 2 - 6, fyT - 58 - __cdT.surf * dh3, cw3, dh3); ctx.restore(); } SS.tFrame = fi;   /* RC1.1 (Keith, 2026-11-17): the title stage's front cloud lip re-applied over the pair — the stage draws its lip inside the runner's pass, which the pair replaces, and the pair draws later, so without this her hooves paint OVER the lip; the pass above is the stage's own lip, byte for byte */ SS.tDrawn = true; };   /* DEV FORK 139: SPARKLES ON THE TITLE STAGE (Keith) — with SPARKLES FOR SAYORI on and Sayori picked, the pair gallops in place on the title stage: the seat anchor at her mark (the stage centre), the ground row on her feet line (fyT), the frame at the clip's authored cadence (60 fps, the 0.6 s cycle). Her own title draw stands down behind __spkTitleVis; any other runner, the option off, or any moment before the stage is set ('done') and the pair is simply not there; the in-run pair never wakes on the title (SS.on stays false — the tick's own gate is untouched) */
-window.__sparkState = function () { return { on: SS.on, opt: !!window.__sparkOpt, char: selChar, set: SS.set, frame: SS.frame, phase: SS.phase, hn: Math.round(SS.hn * 1000) / 1000, gPhase: Math.round(SS.gPhase * 10) / 10, grow: Math.round(SS.grow * 10) / 10, drawn: SS.drawn, tDrawn: SS.tDrawn, tFrame: SS.tFrame }; };   /* DEV FORK 139: the state reader (forkcheck S117 + the proof renderers) */
+window.__sparkTitleDraw = function () { if (loadState !== 'done') return; const cxT = viewW / zoom * 0.5, fyT = viewH / zoom * 0.53;
+  /* RC1.18: title sparkles — a small view-space drift that rides both draws below (rainbow, twinkling, drifting off the feathers) */
+  const RB = ['#ff4d6d', '#ff9f1c', '#ffe74d', '#4dff88', '#4dc9ff', '#b44dff', '#ff4dd8'];   /* her rainbow, named locally — the RC overlay's palette lives in its own scope */
+  const emitSpk = (x, y, n, spread) => { for (let i = 0; i < n; i++) { if (__tSpk.length > 130) __tSpk.shift(); const lf = 0.7 + Math.random() * 0.8; __tSpk.push({ x: x + (Math.random() - 0.5) * spread, y: y + (Math.random() - 0.5) * spread * 0.5, vx: -14 - Math.random() * 26, vy: -8 - Math.random() * 20, life: lf, max: lf, col: RB[(Math.random() * 7) | 0], size: 1.6 + Math.random() * 2.2, sd: Math.random() * 6.2832 }); } };
+  const stepSpk = () => { for (let i = __tSpk.length - 1; i >= 0; i--) { const q = __tSpk[i]; q.life -= 1 / 60; if (q.life <= 0) { __tSpk.splice(i, 1); continue; } q.x += q.vx / 60; q.y += q.vy / 60; } for (const q of __tSpk) { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, q.life / q.max)) * (0.35 + 0.65 * Math.abs(Math.sin((q.max - q.life) * 30 + q.sd))); ctx.fillStyle = q.col; ctx.beginPath(); ctx.arc(q.x, q.y, q.size, 0, 6.2832); ctx.fill(); ctx.restore(); } };
+  if (window.__spkTitleVis()) { const fi = Math.floor(time * 60) % 36; const img = SPK_GALLOP[fi]; if (!img || !img.naturalWidth) return; ctx.drawImage(img, cxT - SPK_AX, fyT - SPK_GROW_G[fi] * PX2U * SPK_SCALE, SPK_DW, SPK_DH); const __scT = window.__stageCloud ? window.__stageCloud() : null; const __ciT = __scT ? __scT.img : IMG['cloud01'], __cdT = __scT || CLOUDS['01']; if (__ciT && __ciT.naturalWidth) { const cw3 = 478, dh3 = cw3 * __cdT.asp; ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24; ctx.drawImage(__ciT, cxT - cw3 / 2 - 6, fyT - 58 - __cdT.surf * dh3, cw3, dh3); ctx.restore(); } SS.tFrame = fi; SS.tDrawn = true; emitSpk(cxT + SPK_DW * 0.28, fyT - SPK_DH * 0.52, 2, 150); stepSpk(); return; }   /* the equipped pair: FORK 139's draw, byte for byte, plus her sparkle drift (RC1.18) */
+  /* RC1.18 GRAND SPARKLES — THE TEASER (Keith, 2026-11-25: she and the charge glow 'need to be more on a grand scale to be worth it', and a menu burial 'will not be found'): Sayori picked and Sparkles NOT on — she hovers beside her rider anyway, at 1.3x in the flight set, wings working, sparkles drifting. The stage is the advertisement; the BUY waits one row down. */
+  if (window.__spkTeaserVis()) { const fi = Math.floor(time * 60) % 56; const img = SPK_FLAP[fi]; if (!img || !img.naturalWidth) return; const GS = 1.3, GW = SPK_DW * GS, GH = SPK_DH * GS; const hx = Math.max(cxT + 40, Math.min(cxT + Math.min(viewW / zoom * 0.24, 290), viewW / zoom - (GW - SPK_AX * GS) - 12)), hy = fyT - 165 + Math.sin(time * 1.8) * 12;   /* RC1.18 fix: her frame never runs off the stage's right edge (the first phone proof clipped her head) */ ctx.drawImage(img, hx - SPK_AX * GS, hy - SPK_GROW_F[fi] * PX2U * SPK_SCALE * GS, GW, GH); SS.tTeaser = fi; emitSpk(hx + GW * 0.18, hy - GH * 0.30, 3, 190); stepSpk(); }
+};
+var __tSpk = [];   /* RC1.18: the title sparkle drift's pool (view space — the title has no world scroll) */
+window.__sparkState = function () { return { on: SS.on, opt: !!window.__sparkOpt, char: selChar, set: SS.set, frame: SS.frame, phase: SS.phase, hn: Math.round(SS.hn * 1000) / 1000, gPhase: Math.round(SS.gPhase * 10) / 10, grow: Math.round(SS.grow * 10) / 10, drawn: SS.drawn, tDrawn: SS.tDrawn, tFrame: SS.tFrame, tTeaser: (SS.tTeaser === undefined ? -1 : SS.tTeaser) }; };   /* RC1.18: the grand-teaser frame rides the state reader */   /* DEV FORK 139: the state reader (forkcheck S117 + the proof renderers) */
 window.__sparkMeasure = function () { return { scale: SPK_SCALE, dw: SPK_DW, dh: SPK_DH, ax: SPK_AX, upm: SPK_UPM, cycle: SPK_CYCLE, refFrame: 0, refTop: SPK_TOP0, refGrow: SPK_GROW_G[0], refH: (SPK_GROW_G[0] - SPK_TOP0) * PX2U * SPK_SCALE, charH: CHAR_H, crown: 286 }; };   /* DEV FORK 139: the scale reader (forkcheck S117 + the proof renderers) — refH is the pair's drawn crown height on the reference frame by the game's own draw math */
 window.__sparkTest = { get on() { return !!window.__sparkOpt; }, set: b => { window.__sparkOpt = !!b; optSave(); }, toggle: optToggleSparkles, state: () => window.__sparkState(), measure: () => window.__sparkMeasure(), player: () => ({ px: Math.round(px), py: Math.round(py), vy: Math.round(vy), grounded: !!grounded, hang: !!hangPlat, slip: !!slipPlat, dbl: doubleUsed, tpl: tripleUsed, wingT: Math.round(wingT * 10) / 10, mode, dead }), press: () => press(), release: () => release(), setup: o => { plats = o.plats; px = o.px || 0; py = o.py || 0; vy = 0; grounded = o.ground || null; hangPlat = null; slipPlat = null; dist = o.dist || 0; runTime = o.runTime || 0; dead = false; worldEnd = 1e12; stormAt = 1e12; notes = []; coin = null; wing = null; bwing = null; magnet = null; gwing = null; noteNextT = runTime + 1e9; nextCoinFt = 1e9; nextWingFt = 1e9; nextBWingFt = 1e9; nextMagFt = 1e9; nextGWingFt = 1e9; wingT = o.wingT || 0; wingKind = o.wingT ? 'std' : wingKind; coinT = 0; magT = 0; noteCharge = false; champMode = false; held = false; pressT = 0; flipped = false; flipArmed = false; rollArmed = false; doubleArmed = false; doubleUsed = false; tripleUsed = false; mode = 'run'; if (window.__sparkReset) window.__sparkReset(); }, rescue: () => { const t = plats.find(p => !p.gone && p.x + p.len > px + 400) || plats[plats.length - 1]; if (t) { px = t.x + 120; py = t.y; vy = 0; grounded = t; hangPlat = null; slipPlat = null; dead = false; } } };   /* DEV FORK 139: the Sparkles test surface (forkcheck S117 + the proof renderers) — setup/rescue mirror the Zeus audit's hands: a synthetic course in, the real tick driven over it */
 
@@ -2713,12 +2723,13 @@ function update(dt) {
   window.__floorCamY = camSmY;   /* RC1.17: THE FLOOR LOCK (Keith, 2026-11-25: 'lock the floors in with the background so the floor doesn't rise and fall differently than the backdrop') — the floor's separate camera is RETIRED: the floor seats on camSmY, the very camera the ridges, ocean, hills and city behind it read, so floor and backdrop rise and fall as one assembly and their authored geometry never opens. RC1.1's hold-while-airborne camera is superseded by this ruling */
   if (bannerT > 0) bannerT -= dt;
   if (flareT > 0) flareT -= dt;
+  window.__chargeC = (mode === 'run' && grounded && held && !hangPlat && !slipPlat) ? Math.min(1, pressT / CHARGE_FULL) : 0;   /* RC1.18 GRAND CHARGE (Keith, 2026-11-25): the shared charge fraction — the mote feed below, the deck light pool and the takeoff ring all read this one number */
   /* while crowned he CHARGES: blue sparks rise off him (Keith v0.15) */
-  if ((champMode || flareT > 0) && mode === 'run') {
+  if ((champMode || flareT > 0 || window.__chargeC > 0) && mode === 'run') {
     moteT -= dt;
-    if (moteT <= 0 && motes.length < 26) {
-      moteT = 0.045;
-      motes.push({ x: px + (Math.random() - 0.5) * 74, y: py - Math.random() * 165, r: 6 + Math.random() * 8, life: 0.55, max: 0.55 });
+    if (moteT <= 0 && motes.length < 26 + Math.round(34 * window.__chargeC)) {
+      moteT = (champMode || flareT > 0) ? 0.045 : 0.085 - 0.05 * window.__chargeC;   /* RC1.18: a held charge feeds the motes faster the fuller it gets — crowned numbers unchanged */
+      motes.push({ x: px + (Math.random() - 0.5) * (74 + 70 * window.__chargeC), y: py - Math.random() * (165 + 45 * window.__chargeC), r: (6 + Math.random() * 8) * (1 + 0.45 * window.__chargeC), life: 0.55 + 0.25 * window.__chargeC, max: 0.55 + 0.25 * window.__chargeC });
     }
   }
   for (let i = motes.length - 1; i >= 0; i--) { const m = motes[i]; m.y -= 150 * dt; m.life -= dt; if (m.life <= 0) motes.splice(i, 1); }
@@ -3284,18 +3295,18 @@ function draw() {
        TWICE (a base copy + the front lip) and the two offset copies read
        as two stacked clouds. Only the lip remains: one cloud, and it
        still sinks his feet the 58 units that hide the front-run ankles. */
-    if (loadState === 'intro' && !window.__spkTitleVis()) {   /* DEV FORK 11: THE DROP-IN (Keith) — from the sky onto the LEFT of the cloud, lands, runs to his mark */   /* DEV FORK 139: while the pair holds the title stage, her solo drop-in stands down */
+    if (loadState === 'intro' && !(window.__spkTitleVis() || window.__spkTeaserVis())) {   /* DEV FORK 11: THE DROP-IN (Keith) — from the sky onto the LEFT of the cloud, lands, runs to his mark */   /* DEV FORK 139: while the pair holds the title stage, her solo drop-in stands down */
       const ie = time - turnT0, iFall = 0.55, iRun = 0.85, rateI = PSKIN.rate || 1, landX = cxT - Math.min(160, viewW / zoom * 0.28), landT = turnT0 + iFall;
       if (ie < iFall) { const e = ie / iFall, off = (viewH / zoom * 0.75 + 300) * (1 - e * e); drawAnim('armsopen', Math.floor(PSKIN.man.armsopen.n * 0.59), landX, fyT - off); }
       else { const rx = landX + (cxT - landX) * Math.min(1, (ie - iFall) / iRun); drawAnim('run', (18 * rateI + Math.floor((time - landT) * 30 * rateI)) % PSKIN.man.run.n, rx, fyT); }
-    } else if (loadState === 'turn' && !window.__spkTitleVis()) {
+    } else if (loadState === 'turn' && !(window.__spkTitleVis() || window.__spkTeaserVis())) {
       const ti = Math.min(PSKIN.man.turn.n - 1, Math.floor((time - turnT0) * 30 * (PSKIN.rate || 1)));
       const k = 1.2 - 0.2 * smooth01(ti / (PSKIN.man.turn.n - 1));   /* title turn eases 1.2 -> 1.0, landing exactly on the done scale — the old ease went to 0.8 and he SNAPPED up 25% when the run took over (Keith: '6lade grows suddenly', 2026-11-09) */
       ctx.save(); ctx.translate(cxT, fyT); ctx.scale(k, k); ctx.translate(-cxT, -fyT);
       drawAnim('turn', ti, cxT, fyT); ctx.restore();
-    } else if (loadState === 'done' && !window.__spkTitleVis()) {
+    } else if (loadState === 'done' && !(window.__spkTitleVis() || window.__spkTeaserVis())) {
       drawAnim('run', (18 * (PSKIN.rate || 1) + Math.floor((time - titleT0) * 30 * (PSKIN.rate || 1))) % PSKIN.man.run.n, cxT, fyT);
-    } else if (!window.__spkTitleVis()) {
+    } else if (!(window.__spkTitleVis() || window.__spkTeaserVis())) {
       ctx.save(); ctx.translate(cxT, fyT); ctx.translate(-cxT, -fyT);   /* DEV FORK 11: no 1.2x front scale — title size from the first frame, nothing grows at the handoff */
       drawAnim('run', Math.floor(time * 30 * (PSKIN.rate || 1)) % PSKIN.man.run.n, cxT, fyT); ctx.restore();   /* DEV FORK 11: profile run behind the loader — the at-camera 'front' set never draws again */
     }
@@ -3392,6 +3403,17 @@ function draw() {
       ctx.drawImage(img, sx - gx, sy - cd.surf * dh + 6 - gy, p.len, dh);
     } else ctx.drawImage(img, sx, sy - cd.surf * dh + 6, p.len, dh);
     ctx.restore();
+    if (p === grounded && window.__chargeC > 0.02) {   /* RC1.18 GRAND CHARGE: the light POOLS on the deck under a charging runner — an ellipse of his charge color seated in the cloud top, radius and strength climbing with the hold */
+      const __cc = window.__chargeC, __hx = (window.__chargeHex ? window.__chargeHex(selChar) : '') || '';
+      const __rgb = __hx.charAt(0) === '#' ? [parseInt(__hx.slice(1, 3), 16), parseInt(__hx.slice(3, 5), 16), parseInt(__hx.slice(5, 7), 16)] : ((__hx.match(/\d+/g) || [255, 210, 90]).slice(0, 3));
+      const __px2 = px - camX, __py2 = py - camY + 10, __pr = 90 + 140 * __cc;   /* RC1.18 fix: the pool seats at the runner's FEET (the first proof floated it a deck-height into the sky — the surface formula double-counted the deck's drawn height) */
+      ctx.save(); ctx.translate(__px2, __py2); ctx.scale(1, 0.30);
+      const __pg = ctx.createRadialGradient(0, 0, 2, 0, 0, __pr);
+      __pg.addColorStop(0, 'rgba(' + __rgb.join(',') + ',' + (0.58 * __cc).toFixed(3) + ')');   /* RC1.18 proof fix: at 0.36 the pool vanished on a bright cloud (pixel-probed) — grander: a hot seat at the feet, a wide falloff */
+      __pg.addColorStop(0.45, 'rgba(' + __rgb.join(',') + ',' + (0.28 * __cc).toFixed(3) + ')');
+      __pg.addColorStop(1, 'rgba(' + __rgb.join(',') + ',0)');
+      ctx.fillStyle = __pg; ctx.beginPath(); ctx.arc(0, 0, __pr, 0, 6.2832); ctx.fill(); ctx.restore();
+    }
     if (p.thunder) { const __ph = (time * 1.4 + (p.x % 997) / 997 * 2.7) % 2.7; if (__ph < 0.45)   /* DEV FORK 76: the charge shows ~0.32 s a cycle, not a 0.09 s blink (Keith: 'I didn't have lightning clouds yet') */ { if (window.__spiderMini) window.__spiderMini(p, sx, sy, dh); } } /* DEV FORK 67: a thunder cloud shows its charge — a little bolt flickers under it now and then */
     if ((p.dark || p.storm) && window.__map !== 'mnt' && window.__map !== 'mnt2' && window.__map !== 'gold' && !(p.dark && (p.sink || 0) > 200)) {   /* DEV FORK 96: no under-deck rain streaks in DAY BREAK (Keith) — the streaks stay in MIDNIGHT RUN + STORM SEASON; the storm bank's sky rain (__rainDraw) is a separate system and stays */   /* v0.98 RAIN SIMULATION (Keith: 'we should do rain simulation under the clouds because they dont look good'): animated streaks fall from a rain deck's underside and fade down the fall zone — the baked art never carried the rain like his source sheet does */
       const under = sy + (1 - cd.surf) * dh + 10, fallH = 150, nR = Math.max(4, Math.floor(p.len / 58));
@@ -4362,8 +4384,18 @@ function __rcGlitter(x, y, n, spd, life, size) {
   }
 }
 window.__rcFxTest = function () { var gl = 0; for (var i = 0; i < __rcP.length; i++) if (__rcP[i].gl) gl++; return { p: __rcP.length, glitter: gl }; };   /* RC1.1: the check window for the FX identity */
+var __rcRings = [];
+function __rcRing(x, y, col) { if (__rcRings.length > 6) __rcRings.shift(); __rcRings.push({ x: x, y: y, t: 0, col: col }); }   /* RC1.18 GRAND CHARGE: the takeoff shockwave — a ring in the charge color, stepped with the particle pool */
+window.__rcRingCount = function () { return __rcRings.length; };
 function __rcPDraw() {
-  if (!__rcP.length) return;
+  if (!__rcP.length && !__rcRings.length) return;
+  for (var ri = __rcRings.length - 1; ri >= 0; ri--) {
+    var rg = __rcRings[ri]; rg.t += 1 / 60;
+    if (rg.t >= 0.45) { __rcRings.splice(ri, 1); continue; }
+    var rk = rg.t / 0.45;
+    ctx.save(); ctx.globalAlpha = 0.85 * (1 - rk); ctx.strokeStyle = rg.col; ctx.lineWidth = 1 + 6 * (1 - rk);
+    ctx.beginPath(); ctx.arc(rg.x - camX, rg.y - camY, 18 + 265 * rk, 0, 6.2832); ctx.stroke(); ctx.restore();
+  }
   for (var i = __rcP.length - 1; i >= 0; i--) {
     var p = __rcP[i];
     p.life -= 1 / 60;
@@ -4706,17 +4738,18 @@ function renderCust() {
    customization (Keith, 2026-11-22). Same economy functions the
    CUSTOMIZE page calls; the title stage draws the live equip
    state, so the character demonstrates every pick as it is made. */
-if (window.__dressOpen === undefined) window.__dressOpen = true;
+if (window.__dressOpen === undefined) window.__dressOpen = false;   /* RC1.18 (Keith, 2026-11-25): the row starts FOLDED — the stage stays clean until he calls it down */
 function __dressMsg(t) { var m = __rcEl('dressMsg'); if (m) { m.textContent = t; setTimeout(function () { if (m.textContent === t) m.textContent = ''; }, 2600); } }
 function renderDress() {
   var head = __rcEl('dressHead'), body = __rcEl('dressBody'); if (!head || !body) return;
   var e = __rcEntView();
   var nm = (SKINS[selChar] && SKINS[selChar].name) || selChar.toUpperCase();
   head.innerHTML = '';
-  var ht = document.createElement('span'); ht.textContent = 'DRESSING ROOM — ' + nm; head.appendChild(ht);
-  var hb = document.createElement('span'); hb.textContent = '♪ ' + (window.__notes || 0).toLocaleString('en-US') + (window.__dressOpen ? '  ▾' : '  ▸'); head.appendChild(hb);
+  var ht = document.createElement('span'); ht.textContent = nm + (window.__dressOpen ? ' — OUTFIT · COMPANION' : ' — \u25BE OUTFIT · COMPANION'); head.appendChild(ht);
+  var hb = document.createElement('span'); hb.textContent = '\u266A ' + (window.__notes || 0).toLocaleString('en-US') + (window.__dressOpen ? '  \u25B4' : ''); head.appendChild(hb);
   body.innerHTML = ''; body.style.display = window.__dressOpen ? 'block' : 'none';
   if (!window.__dressOpen) return;
+  /* RC1.18 (Keith, 2026-11-25: 'scroll left to right on the character, then down to change outfits and or add companions' — the row carries OUTFITS AND COMPANIONS ONLY. Charge colors, FX, skips and options live on CUSTOMIZE / the MAP pick / OPTIONS, where they already were; nothing is buried by the move.) */
   var UPG = {
     ivey: { key: 'zeus', name: 'ZEUS', kind: 'COMPANION' },
     sayori: { key: 'spark', name: 'SPARKLES', kind: 'COMPANION' },
@@ -4724,41 +4757,16 @@ function renderDress() {
     yoro: { key: 'yalt', name: 'ALT — CHARCOAL GI', kind: 'OUTFIT' },
     blade: { key: null, name: 'GANGSTA SLIM', kind: 'OUTFIT' }
   };
-  function row(lab) { var r = document.createElement('div'); r.className = 'dressRow'; var l = document.createElement('span'); l.className = 'dressLab'; l.textContent = lab; r.appendChild(l); body.appendChild(r); return r; }
   function chip(parent, text, cls, fn) { var b = document.createElement('button'); b.className = 'dChip' + (cls ? ' ' + cls : ''); b.textContent = text; if (fn) b.addEventListener('click', function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); fn(); renderDress(); }); else b.disabled = true; parent.appendChild(b); return b; }
+  var kr = document.createElement('div'); kr.className = 'dressRow'; body.appendChild(kr);
   var u = UPG[selChar];
-  if (u) {
-    var kr = row(u.kind);
-    if (!u.key) chip(kr, u.name + ' — SOON', 'dim', null);
-    else if (!e.upg[u.key]) chip(kr, 'BUY ' + u.name + ' — ' + ECONOMY.upgradePrice + ' ♪', '', function () { if (!buyUpgrade(u.key)) __dressMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' ♪'); });
-    else {
-      if (u.kind === 'OUTFIT') chip(kr, 'STANDARD', e.eq[u.key] ? '' : 'on', function () { if (e.eq[u.key]) toggleEquip(u.key); });
-      chip(kr, u.name + (e.eq[u.key] ? ' ✓ ON' : ''), e.eq[u.key] ? 'on' : '', function () { toggleEquip(u.key); });
-    }
+  if (!u) chip(kr, 'NOTHING TO CHANGE FOR ' + nm, 'dim', null);
+  else if (!u.key) chip(kr, u.name + ' — SOON', 'dim', null);
+  else if (!e.upg[u.key]) chip(kr, 'BUY ' + u.name + ' — ' + ECONOMY.upgradePrice + ' \u266A', '', function () { if (!buyUpgrade(u.key)) __dressMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' \u266A'); });
+  else {
+    if (u.kind === 'OUTFIT') chip(kr, 'STANDARD', e.eq[u.key] ? '' : 'on', function () { if (e.eq[u.key]) toggleEquip(u.key); });
+    chip(kr, u.name + (e.eq[u.key] ? ' \u2713 ON' : ''), e.eq[u.key] ? 'on' : '', function () { toggleEquip(u.key); });
   }
-  var cr = row('CHARGE');
-  ECONOMY.colors.forEach(function (c) {
-    var owned = e.colors.indexOf(c.id) >= 0, on = (e.charge[selChar] || 'classic') === c.id;
-    var b = document.createElement('button'); b.className = 'rcSw'; b.style.background = c.col || '#ffd94d'; b.style.outline = on ? '3px solid #ffd94d' : 'none'; b.style.flex = '0 0 auto';
-    b.title = c.name + (owned ? '' : ' — ' + c.price + ' ♪');
-    b.textContent = on ? '✓' : (owned ? '' : c.price); b.style.fontSize = '10px'; b.style.fontFamily = "'Luckiest Guy',cursive"; b.style.color = '#3a1503';
-    b.addEventListener('click', function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); if (!buyColor(c.id)) __dressMsg('NOT ENOUGH NOTES — ' + c.price + ' ♪'); renderDress(); });
-    cr.appendChild(b);
-  });
-  var fr = row('FX');
-  ECONOMY.fx.forEach(function (f) {
-    var owned = e.fx.indexOf(f.id) >= 0, on = e.fxOn.indexOf(f.id) >= 0;
-    chip(fr, f.name + (owned ? (on ? ' ✓' : '') : ' — ' + f.price + ' ♪'), on ? 'on' : (owned ? '' : 'dim'), function () { if (!toggleFx(f.id)) __dressMsg('NOT ENOUGH NOTES — ' + f.price + ' ♪'); });
-  });
-  var locked = (window.__CHAIN106 || []).filter(function (c) { return !(window.__selOpen ? window.__selOpen(c[0]) : true); });
-  if (locked.length) {
-    var sr = row('SKIP TO');
-    locked.forEach(function (c) { var id = c[0]; chip(sr, (window.__selLabel ? window.__selLabel(id) : id) + ' — ' + ECONOMY.skip[id] + ' ♪', 'dim', function () { if (!buySkip(id)) __dressMsg('NOT ENOUGH NOTES — ' + ECONOMY.skip[id] + ' ♪'); }); });
-  }
-  var or2 = row('OPTIONS');
-  chip(or2, window.__musOff ? 'MUSIC OFF' : 'MUSIC ON', window.__musOff ? 'dim' : 'on', function () { audToggle('m'); if (typeof optUI === 'function') optUI(); });
-  chip(or2, window.__sfxOff ? 'SOUND OFF' : 'SOUND ON', window.__sfxOff ? 'dim' : 'on', function () { audToggle('s'); if (typeof optUI === 'function') optUI(); });
-  chip(or2, window.__optGhostsOff ? 'GHOSTS OFF' : 'GHOSTS ON', window.__optGhostsOff ? 'dim' : 'on', function () { optToggleGhosts(); });
 }
 window.__renderDress = renderDress;
 var __dressSig = '';
@@ -4771,6 +4779,13 @@ setInterval(function () {
   var sig = [selChar, window.__notes || 0, window.__devMode ? 1 : 0, window.__musOff ? 1 : 0, window.__sfxOff ? 1 : 0, window.__optGhostsOff ? 1 : 0, window.__dressOpen ? 1 : 0, JSON.stringify(entLoad())].join('|');
   if (sig !== __dressSig) { __dressSig = sig; renderDress(); }
 }, 300);   /* RC1.15: the strip rides the title chrome — shown only on a loaded title, never on the revive start (FORK 72), re-rendered on any state change */
+/* RC1.18: HIS FLOW (Keith, 2026-11-25: 'scroll left to right on the character, then down to change outfits and or add companions') — swipes and arrow keys ride the title: sideways changes the runner on stage, down calls the outfit/companion row up, up folds it away. Taps that land on buttons or pages never become swipes. */
+(function () {
+  var sw = null;
+  window.addEventListener('pointerdown', function (e) { if (typeof mode !== 'string' || mode !== 'title') { sw = null; return; } if (e.target && e.target.closest && e.target.closest('button, .page')) { sw = null; return; } sw = { x: e.clientX, y: e.clientY }; }, true);
+  window.addEventListener('pointerup', function (e) { if (!sw) return; var dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null; if (typeof mode !== 'string' || mode !== 'title' || typeof loadState !== 'string' || loadState !== 'done') return; if (Math.abs(dy) > 46 && Math.abs(dy) > Math.abs(dx)) { window.__dressOpen = dy > 0; if (window.__renderDress) window.__renderDress(); } else if (Math.abs(dx) > 46) cycleChar(dx < 0 ? 1 : -1); }, true);
+  window.addEventListener('keydown', function (e) { if (typeof mode !== 'string' || mode !== 'title' || typeof loadState !== 'string' || loadState !== 'done') return; if (e.key === 'ArrowLeft') cycleChar(-1); else if (e.key === 'ArrowRight') cycleChar(1); else if (e.key === 'ArrowDown') { window.__dressOpen = true; if (window.__renderDress) window.__renderDress(); } else if (e.key === 'ArrowUp') { window.__dressOpen = false; if (window.__renderDress) window.__renderDress(); } });
+})();
 function openShop() { var p = __rcEl('optPage'); if (p) p.style.display = 'none'; renderShop(); var s = __rcEl('shopPage'); if (s) s.style.display = 'block'; }
 function openCust() { var p = __rcEl('optPage'); if (p) p.style.display = 'none'; renderCust(); var s = __rcEl('custPage'); if (s) s.style.display = 'block'; }
 window.__rcOpenCustLevel = function (id) {
@@ -4802,7 +4817,7 @@ if (typeof startRun === 'function') {
   var __sr0 = startRun;
   startRun = function () { __sr0(); if (mode === 'run') { window.__deathless = true; window.__goldK = 0; } };
 }
-var __prevG = null, __flapT = 0, __rcPuffT = 0, __rcWasDbl = false;
+var __prevG = null, __flapT = 0, __rcPuffT = 0, __rcWasDbl = false, __rcFlyT = 0;
 function __rcLandBurst() {
   var e = entLoad();
   if (window.__spkOn && window.__spkOn()) {   /* RC1.1 SPARKLES FX IDENTITY: the mounted pair LANDS in rainbow glitter — the charge-color burst never fires for the pair (the LANDING BURST + shelf item, when on, buys MORE GLITTER, not the ring) */
@@ -4832,6 +4847,7 @@ window.__rcTick = function () {
   if (!__prevG && g) __rcLandBurst();
   if (__prevG && !g && typeof vy === 'number' && vy < -100) {
     if (window.__spkOn && window.__spkOn()) { if (doubleArmed) __rcGlitter(px, py - 4, 14, 170, 0.55, 3.2); }   /* RC1.1 SPARKLES FX IDENTITY: the pair's CHARGED jump (the takeoff that arms her double) bursts RAINBOW SPARKLES; a plain takeoff keeps the cloud puff only — and the charge-color jump burst never fires for the pair */
+    else if (doubleArmed) { __rcRing(px, py + 2, window.__chargeHex(selChar)); __rcBurst(px, py - 4, window.__chargeHex(selChar), 16, 210, 0.55, 4.2); }   /* RC1.18 GRAND CHARGE: a CHARGED takeoff lets the aura off — ring + burst in his color, part of the charge itself, not an FX purchase */
     else if (__rcFxOn().indexOf('jump') >= 0) __rcBurst(px, py - 4, window.__chargeHex(selChar), 8, 90, 0.4, 4);
   }
   /* RC1.1 SPARKLES FX IDENTITY: the pair's living glitter — charge-up puffs while she gathers on the deck, and a rainbow burst the moment her double fires (the flap set's first beat) */
@@ -4839,6 +4855,7 @@ window.__rcTick = function () {
     if (g && held && pressT > 0.08) { __rcPuffT++; if (__rcPuffT % 5 === 0) __rcGlitter(px - 26 + Math.random() * 52, py + 4, 2, 46, 0.5, 2.4); }
     if (!__rcWasDbl && doubleUsed && !g) __rcGlitter(px, py - 30, 16, 190, 0.6, 3.2);
   }
+  if (window.__spkOn && window.__spkOn() && !g) { __rcFlyT++; if (__rcFlyT % 4 === 0) __rcGlitter(px + 20 + Math.random() * 70, py - 105 - Math.random() * 75, 2, 42, 0.7, 2.6); }   /* RC1.18 GRAND SPARKLES: her flight sheds rainbow glitter off the wing line — presence at scale, the same twinkle pool */
   __rcWasDbl = doubleUsed;
   __prevG = g;
   var flags = window.__flags || [];
