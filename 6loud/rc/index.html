@@ -3296,18 +3296,18 @@ function draw() {
        TWICE (a base copy + the front lip) and the two offset copies read
        as two stacked clouds. Only the lip remains: one cloud, and it
        still sinks his feet the 58 units that hide the front-run ankles. */
-    if (loadState === 'intro' && !(window.__spkTitleVis() || window.__spkTeaserVis())) {   /* DEV FORK 11: THE DROP-IN (Keith) — from the sky onto the LEFT of the cloud, lands, runs to his mark */   /* DEV FORK 139: while the pair holds the title stage, her solo drop-in stands down */
+    if (loadState === 'intro' && !(window.__spkTitleVis() || window.__spkTeaserVis() || (window.__pvOn && window.__pvOn()))) {   /* DEV FORK 11: THE DROP-IN (Keith) — from the sky onto the LEFT of the cloud, lands, runs to his mark */   /* DEV FORK 139: while the pair holds the title stage, her solo drop-in stands down */
       const ie = time - turnT0, iFall = 0.55, iRun = 0.85, rateI = PSKIN.rate || 1, landX = cxT - Math.min(160, viewW / zoom * 0.28), landT = turnT0 + iFall;
       if (ie < iFall) { const e = ie / iFall, off = (viewH / zoom * 0.75 + 300) * (1 - e * e); drawAnim('armsopen', Math.floor(PSKIN.man.armsopen.n * 0.59), landX, fyT - off); }
       else { const rx = landX + (cxT - landX) * Math.min(1, (ie - iFall) / iRun); drawAnim('run', (18 * rateI + Math.floor((time - landT) * 30 * rateI)) % PSKIN.man.run.n, rx, fyT); }
-    } else if (loadState === 'turn' && !(window.__spkTitleVis() || window.__spkTeaserVis())) {
+    } else if (loadState === 'turn' && !(window.__spkTitleVis() || window.__spkTeaserVis() || (window.__pvOn && window.__pvOn()))) {
       const ti = Math.min(PSKIN.man.turn.n - 1, Math.floor((time - turnT0) * 30 * (PSKIN.rate || 1)));
       const k = 1.2 - 0.2 * smooth01(ti / (PSKIN.man.turn.n - 1));   /* title turn eases 1.2 -> 1.0, landing exactly on the done scale — the old ease went to 0.8 and he SNAPPED up 25% when the run took over (Keith: '6lade grows suddenly', 2026-11-09) */
       ctx.save(); ctx.translate(cxT, fyT); ctx.scale(k, k); ctx.translate(-cxT, -fyT);
       drawAnim('turn', ti, cxT, fyT); ctx.restore();
-    } else if (loadState === 'done' && !(window.__spkTitleVis() || window.__spkTeaserVis())) {
+    } else if (loadState === 'done' && !(window.__spkTitleVis() || window.__spkTeaserVis() || (window.__pvOn && window.__pvOn()))) {
       drawAnim('run', (18 * (PSKIN.rate || 1) + Math.floor((time - titleT0) * 30 * (PSKIN.rate || 1))) % PSKIN.man.run.n, cxT, fyT);
-    } else if (!(window.__spkTitleVis() || window.__spkTeaserVis())) {
+    } else if (!(window.__spkTitleVis() || window.__spkTeaserVis() || (window.__pvOn && window.__pvOn()))) {
       ctx.save(); ctx.translate(cxT, fyT); ctx.translate(-cxT, -fyT);   /* DEV FORK 11: no 1.2x front scale — title size from the first frame, nothing grows at the handoff */
       drawAnim('run', Math.floor(time * 30 * (PSKIN.rate || 1)) % PSKIN.man.run.n, cxT, fyT); ctx.restore();   /* DEV FORK 11: profile run behind the loader — the at-camera 'front' set never draws again */
     }
@@ -4801,6 +4801,363 @@ setInterval(function () {
   window.addEventListener('pointerup', function (e) { if (!sw) return; var dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null; if (typeof mode !== 'string' || mode !== 'title' || typeof loadState !== 'string' || loadState !== 'done') return; if (Math.abs(dy) > 46 && Math.abs(dy) > Math.abs(dx)) { window.__dressOpen = dy > 0; if (window.__renderDress) window.__renderDress(); } else if (Math.abs(dx) > 46) cycleChar(dx < 0 ? 1 : -1); }, true);
   window.addEventListener('keydown', function (e) { if (typeof mode !== 'string' || mode !== 'title' || typeof loadState !== 'string' || loadState !== 'done') return; if (e.key === 'ArrowLeft') cycleChar(-1); else if (e.key === 'ArrowRight') cycleChar(1); else if (e.key === 'ArrowDown') { window.__dressOpen = true; if (window.__renderDress) window.__renderDress(); } else if (e.key === 'ArrowUp') { window.__dressOpen = false; if (window.__renderDress) window.__renderDress(); } });
 })();
+/* --- RC1.22: THE CUSTOMIZE OVERLAY + LIVE PREVIEW (Keith, 2026-11-26:
+   'on the customize screen lets overlay the entire customize screen for
+   the selected character in the red box area i circled, which would be
+   below the selection arrows. then lets have the character start jumping
+   from cloud to cloud. as you go through the options, the character
+   should instantly jump into the new outfit, or get the companion, or
+   their charge and sparkle trail should show. this will let the person
+   know how the game play will look.')
+   The overlay carries the selected runner's whole customize — runner,
+   outfit/companion, charge colors, FX, level skips — in the title's
+   lower column, and while it is open the title stage stops posing and
+   PLAYS: the runner runs a pocket course of clouds with the game's own
+   physics (GRAV 5200, tap hop -1500, charged launch -(1500+400c)), his
+   live skin, his companion at his heels, his charge color pooling and
+   trailing. Every pick re-reads live each frame, so a buy/equip lands
+   in the preview the same instant it lands in the wallet. No ghost
+   machinery: the character is drawn solid, feet on the clouds, by the
+   game's own drawAnim — never a floating ghost. */
+window.__custOvOpen = false;
+window.__pvOn = function () {
+  return !!window.__custOvOpen && typeof mode === 'string' && mode === 'title' &&
+    typeof loadState === 'string' && loadState === 'done' && !window.__reviveArmed;
+};
+
+/* ============ THE PREVIEW SIM ============ */
+var PV = {
+  P: 1949,                       /* the course period: 3 clouds of 478 + gaps 150 / 215 / 150 */
+  SPANS: [[0, 478], [628, 1106], [1321, 1799]],
+  CHARGE_GAP_A: 1106,            /* the 215 gap starts at the center cloud's right edge */
+  t: 0, lastT: -1,
+  ch: null, zu: null,
+  parts: [], rings: [],
+  maxCharge: 0, airSeen: false, drawnChar: false, drawnZeus: false, drawnPair: false,
+  reset: function () {
+    this.ch = { x: 700, h: 0, vy: 0, vx: 340, air: false, airT: 0, airTotal: 0, walkT: 0, dist: 0, mode: 'run', chargeT: 0, charged: false };
+    this.zu = { x: 370, h: 0, vy: 0, vx: 340, air: false, airT: 0, airTotal: 0, dist: 0 };
+    this.parts.length = 0; this.rings.length = 0;
+    this.maxCharge = 0; this.airSeen = false;
+  },
+  spanAt: function (x) {
+    var m = ((x % this.P) + this.P) % this.P;
+    for (var i = 0; i < this.SPANS.length; i++) if (m >= this.SPANS[i][0] && m <= this.SPANS[i][1]) return this.SPANS[i];
+    return null;
+  },
+  gapAfter: function (span) {
+    var nxt = this.SPANS[(this.SPANS.indexOf(span) + 1) % this.SPANS.length];
+    var end = span[1], start = nxt[0] + (nxt[0] <= span[0] ? this.P : 0);
+    return start - end;
+  },
+  colRGB: function () {
+    var hx = (window.__chargeHex ? window.__chargeHex(selChar) : '') || '';
+    if (hx.charAt(0) === '#') return [parseInt(hx.slice(1, 3), 16), parseInt(hx.slice(3, 5), 16), parseInt(hx.slice(5, 7), 16)];
+    var d = (hx.match(/\d+/g) || [255, 210, 90]).slice(0, 3); return [+d[0], +d[1], +d[2]];
+  },
+  fxOn: function (id) { try { return __rcFxOn().indexOf(id) >= 0; } catch (e) { return false; } },
+  spawn: function (x, y, vx, vy, g, life, r, col, star) {
+    if (this.parts.length > 240) this.parts.shift();
+    this.parts.push({ x: x, y: y, vx: vx, vy: vy, g: g, life: life, max: life, r: r, col: col, star: !!star });
+  },
+  burst: function (x, y, col, n, spd, life, r) {
+    for (var i = 0; i < n; i++) { var a = Math.random() * 6.2832, s = spd * (0.35 + Math.random() * 0.65); this.spawn(x, y, Math.cos(a) * s, Math.sin(a) * s - 40, 300, life * (0.6 + Math.random() * 0.4), r * (0.7 + Math.random() * 0.6), col, true); }
+  },
+  stepRunner: function (r, dt, isChar) {
+    var span = this.spanAt(r.x);
+    if (r.mode === 'charge') {
+      r.chargeT += dt;
+      var c = Math.min(1, r.chargeT / 0.6);
+      if (isChar) { this.maxCharge = Math.max(this.maxCharge, c); PV.chargeC = c; }
+      if (r.chargeT >= 0.85) { r.mode = 'run'; r.chargeArmed = true; }   /* full: he runs the last stretch lit, and the edge jump is the charged launch */
+      return;
+    }
+    if (!r.air) {
+      r.vx = 340; r.x += r.vx * dt; r.walkT += dt; r.dist += r.vx * dt;
+      if (span) {
+        var local = ((r.x % this.P) + this.P) % this.P;
+        var remain = span[1] - local;
+        var gap = this.gapAfter(span);
+        if (isChar && !r.chargeArmed && gap > 200 && remain < 250 && local > span[0] + 120) { r.mode = 'charge'; r.chargeT = 0; return; }
+        if (remain <= 8) {
+          r.air = true; r.airT = 0;
+          if (isChar && r.chargeArmed) { r.vy = 1900; r.vx = 380; r.charged = true; r.chargeArmed = false; this.rings.push({ x: this.screenX(r.x), y: this.feetY() + 8, t: 0 }); this.burst(this.screenX(r.x), this.feetY() - 6, this.colRGB(), 14, 200, 0.55, 4.2); }
+          else if (!isChar && gap > 200) { r.vy = 1650; r.vx = 400; r.charged = false; }
+          else { r.vy = 1500; r.vx = 340; r.charged = false; if (isChar && this.fxOn('jump')) this.burst(this.screenX(r.x), this.feetY() - 4, this.colRGB(), 8, 95, 0.4, 3.6); }
+          r.airTotal = 2 * r.vy / 5200;
+        }
+      } else { r.air = true; r.airT = 0; r.vy = 0; r.airTotal = 1; }   /* ran off a span edge between checks: fall, the failsafe catches him */
+    }
+    if (r.air) {
+      r.airT += dt; r.x += r.vx * dt; r.dist += r.vx * dt;
+      r.h += r.vy * dt; r.vy -= 5200 * dt;
+      if (isChar) {
+        this.airSeen = true;
+        var sx2 = this.screenX(r.x), sy2 = this.feetY() - r.h - 120;
+        if (r.charged) { var cc = this.fxOn('rainbow') ? [Math.round(127 + 127 * Math.sin(this.t * 7)), Math.round(127 + 127 * Math.sin(this.t * 7 + 2.1)), Math.round(127 + 127 * Math.sin(this.t * 7 + 4.2))] : this.colRGB(); this.spawn(sx2 + (Math.random() - 0.5) * 30, sy2 + Math.random() * 60, (Math.random() - 0.5) * 30, 26, 0, 0.55, 3.6, cc, true); }
+        if (this.pairOn) { var pc2 = [Math.round(127 + 127 * Math.sin(this.t * 9 + 1)), Math.round(127 + 127 * Math.sin(this.t * 9 + 3.1)), Math.round(127 + 127 * Math.sin(this.t * 9 + 5.2))]; this.spawn(sx2 - 60 + (Math.random() - 0.5) * 40, sy2 + 40 + Math.random() * 60, -30, 20, 0, 0.6, 3.4, pc2, true); }
+      }
+      if (r.vy < 0 && r.h <= 0) {
+        var sp2 = this.spanAt(r.x);
+        if (sp2) {
+          r.h = 0; r.air = false; r.vy = 0;
+          if (isChar) {
+            if (r.charged) this.rings.push({ x: this.screenX(r.x), y: this.feetY() + 8, t: 0 });
+            if (this.fxOn('land')) this.burst(this.screenX(r.x), this.feetY() - 2, this.colRGB(), 9, 130, 0.45, 3.6);
+          }
+          r.charged = false;
+        } else if (r.h < -320) {   /* failsafe: never fall forever in a preview */
+          var nx = this.nextSpanStart(r.x); r.x = nx + 30; r.h = 0; r.air = false; r.vy = 0; r.charged = false;
+        }
+      }
+    }
+    r.x = ((r.x % this.P) + this.P) % this.P;
+  },
+  nextSpanStart: function (x) {
+    var m = ((x % this.P) + this.P) % this.P;
+    for (var i = 0; i < this.SPANS.length; i++) if (this.SPANS[i][0] > m) return this.SPANS[i][0] + (x - m);
+    return this.SPANS[0][0] + (x - m) + this.P;
+  },
+  screenX: function (courseX) { return courseX - 867 + (viewW / zoom) * 0.5; },
+  feetY: function () { return (viewH / zoom) * 0.53; },
+  step: function (dt) {
+    if (!this.ch) this.reset();
+    dt = Math.min(0.05, Math.max(0, dt || 0));
+    this.t += dt;
+    var e = __rcEntView();
+    this.pairOn = (selChar === 'sayori' && !!e.eq.spark);
+    this.zeusOn = (selChar === 'ivey' && !!e.eq.zeus);
+    if (this._char !== selChar) { this._char = selChar; this.reset(); }
+    PV.chargeC = (this.ch.mode === 'charge') ? Math.min(1, this.ch.chargeT / 0.6) : (this.ch.chargeArmed ? 1 : 0);
+    this.stepRunner(this.ch, dt, true);
+    if (this.zeusOn) this.stepRunner(this.zu, dt, false);
+    if (this.ch.mode === 'charge' || this.ch.chargeArmed) {   /* the mote feed: sparks spiral into the charging runner */
+      var sx = this.screenX(this.ch.x), fy = this.feetY(), rgb = this.pairOn ? [255, 150, 220] : this.colRGB(), c = PV.chargeC;
+      for (var i = 0; i < 2; i++) this.spawn(sx + (Math.random() - 0.5) * (90 + 80 * c), fy - Math.random() * (150 + 50 * c), (Math.random() - 0.5) * 24, -18 - Math.random() * 22, -60, 0.55 + 0.25 * c, (5 + Math.random() * 6) * (1 + 0.4 * c), rgb, false);
+    }
+    for (var j = this.parts.length - 1; j >= 0; j--) { var p = this.parts[j]; p.life -= dt; if (p.life <= 0) { this.parts.splice(j, 1); continue; } p.vy += (p.g || 0) * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+    for (var k = this.rings.length - 1; k >= 0; k--) { this.rings[k].t += dt; if (this.rings[k].t > 0.5) this.rings.splice(k, 1); }
+  },
+  drawCloud: function (img, cd, sx0, fy) {
+    var dh = 478 * cd.asp;
+    ctx.save(); ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24;
+    ctx.drawImage(img, sx0 - 6, fy - 58 - cd.surf * dh, 478, dh); ctx.restore();
+  },
+  drawLip: function (img, cd, sx0, fy) {
+    var dh = 478 * cd.asp, top = fy - 58 - cd.surf * dh;
+    ctx.save(); ctx.beginPath(); ctx.rect(sx0 - 10, top - 4, 486, (fy + 6) - top); ctx.clip();
+    ctx.shadowColor = 'rgba(255,255,255,0.85)'; ctx.shadowBlur = 24;
+    ctx.drawImage(img, sx0 - 6, top, 478, dh); ctx.restore();
+  },
+  draw: function () {
+    this.drawnChar = false; this.drawnZeus = false; this.drawnPair = false;
+    if (!this.ch) this.reset();
+    var W2 = viewW / zoom, fy = this.feetY(), cxT = W2 * 0.5;
+    var sc = window.__stageCloud ? window.__stageCloud() : null;
+    var img = sc ? sc.img : IMG['cloud01'], cd = sc || CLOUDS['01'];
+    if (!img || !img.naturalWidth) return;
+    var spans = [];
+    for (var rep = -1; rep <= 1; rep++) for (var i = 0; i < this.SPANS.length; i++) {
+      var sx0 = rep * this.P + this.SPANS[i][0] - 867 + cxT;
+      if (sx0 + 478 < -90 || sx0 > W2 + 90) continue;
+      spans.push(sx0);
+      if (Math.abs(sx0 - (cxT - 239)) > 2) this.drawCloud(img, cd, sx0, fy);   /* the center cloud is the stage's own — it already drew */
+    }
+    var R = (typeof PSKIN !== 'undefined' && PSKIN && PSKIN.rate) || 1;
+    /* Zeus first — he trails, the runner leads */
+    if (this.zeusOn && typeof ZEUS_GALLOP !== 'undefined') {
+      var zx = this.screenX(this.zu.x), zimg = null, zrow = 0;
+      if (this.zu.air) { var zp = Math.min(1, this.zu.airT / Math.max(0.3, this.zu.airTotal)); var zf = Math.min(61, Math.floor(zp * 62)); zimg = (typeof ZEUS_JUMP !== 'undefined' && ZEUS_JUMP[zf]) || null; zrow = (typeof ZEUS_JROW !== 'undefined' && ZEUS_JROW[zf]) || 0; }
+      else { var zg = Math.floor(this.zu.dist * 45 / 750) % 45; zimg = ZEUS_GALLOP[zg]; zrow = (typeof ZEUS_GROW !== 'undefined' && ZEUS_GROW[zg]) || 0; }
+      if (zimg && zimg.naturalWidth) { ctx.drawImage(zimg, zx - ZEUS_AX, fy - this.zu.h - zrow * PX2U * ZEUS_SCALE, ZEUS_DW, ZEUS_DH); this.drawnZeus = true; }
+    }
+    var chx = this.screenX(this.ch.x);
+    if (this.pairOn && typeof SPK_GALLOP !== 'undefined') {
+      var simg = null, srow = 0;
+      if (this.ch.air) { var sf = Math.floor(this.t * 60) % 56; simg = SPK_FLAP[sf]; srow = (typeof SPK_GROW_F !== 'undefined' && SPK_GROW_F[sf]) || 0; }
+      else { var sg = Math.floor(this.ch.dist * 36 / SPK_CYCLE) % 36; simg = SPK_GALLOP[sg]; srow = (typeof SPK_GROW_G !== 'undefined' && SPK_GROW_G[sg]) || 0; }
+      if (simg && simg.naturalWidth) { ctx.drawImage(simg, chx - SPK_AX, fy - this.ch.h - srow * PX2U * SPK_SCALE, SPK_DW, SPK_DH); this.drawnPair = true; }
+    } else if (typeof drawAnim === 'function' && typeof PSKIN !== 'undefined' && PSKIN && PSKIN.man) {
+      var mv, ix;
+      if (this.ch.mode === 'charge') { mv = 'run'; ix = Math.floor(this.ch.walkT * 30 * R) % PSKIN.man.run.n; }   /* planted: the run cycle holds at the charge-start frame while the glow builds */
+      else if (this.ch.air) {
+        var aT = this.ch.airT;
+        if (aT < 0.30) { mv = 'armsopen'; ix = Math.min(9 * R, Math.floor(aT * 30 * R)); }
+        else if (this.ch.vy >= -350) { mv = 'armsopen'; ix = 9 * R + (typeof pingpong === 'function' ? pingpong(Math.floor((aT - 0.30) * 30 * R), 6 * R) : 0); }
+        else { mv = 'armsopen'; ix = 15 * R + Math.floor(aT * 18 * R) % (10 * R); }
+      } else { mv = 'run'; ix = Math.floor(this.ch.walkT * 30 * R) % PSKIN.man.run.n; }
+      var fimg = PSKIN.anim && PSKIN.anim[mv] && PSKIN.anim[mv][ix];
+      if ((this.ch.mode === 'charge' || this.ch.chargeArmed) && fimg && fimg.naturalWidth) {   /* the hold glow, his equipped color (the pair never wears it — RC1.1) */
+        var cc2 = this.ch.chargeArmed ? 1 : Math.min(1, this.ch.chargeT / 0.6);
+        ctx.save(); ctx.shadowColor = (window.__chargeHex ? window.__chargeHex(selChar) : 'rgba(255,210,90,0.95)'); ctx.shadowBlur = 6 + 24 * cc2; ctx.globalAlpha = 0.3 + 0.7 * cc2;
+        drawAnim(mv, ix, chx, fy - this.ch.h); ctx.restore();
+      }
+      drawAnim(mv, ix, chx, fy - this.ch.h);
+      if (fimg && fimg.naturalWidth) this.drawnChar = true;
+    }
+    /* the charge pool on his cloud (RC1.18's seat, at his feet) */
+    if (this.ch.mode === 'charge' || this.ch.chargeArmed) {
+      var pc = this.ch.chargeArmed ? 1 : Math.min(1, this.ch.chargeT / 0.6), prgb = this.colRGB(), pr = 90 + 140 * pc;
+      ctx.save(); ctx.translate(chx, fy + 10); ctx.scale(1, 0.30);
+      var pg = ctx.createRadialGradient(0, 0, 2, 0, 0, pr);
+      pg.addColorStop(0, 'rgba(' + prgb.join(',') + ',' + (0.58 * pc).toFixed(3) + ')');
+      pg.addColorStop(0.45, 'rgba(' + prgb.join(',') + ',' + (0.28 * pc).toFixed(3) + ')');
+      pg.addColorStop(1, 'rgba(' + prgb.join(',') + ',0)');
+      ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(0, 0, pr, 0, 6.2832); ctx.fill(); ctx.restore();
+    }
+    /* lips over the feet of whoever stands on each cloud */
+    for (var s2 = 0; s2 < spans.length; s2++) {
+      var lx = spans[s2];
+      var over = (!this.ch.air && chx > lx - 20 && chx < lx + 498) || (this.zeusOn && !this.zu.air && this.drawnZeus && this.screenX(this.zu.x) > lx - 20 && this.screenX(this.zu.x) < lx + 498) || (this.pairOn && !this.ch.air && chx > lx - 20 && chx < lx + 498);
+      if (over) this.drawLip(img, cd, lx, fy);
+    }
+    /* rings + particles */
+    for (var r2 = 0; r2 < this.rings.length; r2++) { var rg = this.rings[r2], rp = rg.t / 0.5, rrgb = this.colRGB(); ctx.save(); ctx.globalAlpha = 0.75 * (1 - rp); ctx.strokeStyle = 'rgba(' + rrgb.join(',') + ',1)'; ctx.lineWidth = 4 - 2.5 * rp; ctx.translate(rg.x, rg.y); ctx.scale(1, 0.30); ctx.beginPath(); ctx.arc(0, 0, 26 + 120 * rp, 0, 6.2832); ctx.stroke(); ctx.restore(); }
+    for (var q = 0; q < this.parts.length; q++) { var pt = this.parts[q], la = Math.max(0, pt.life / pt.max); ctx.save(); ctx.globalAlpha = 0.8 * la; ctx.fillStyle = 'rgba(' + pt.col.join(',') + ',1)'; if (pt.star) { ctx.translate(pt.x, pt.y); ctx.rotate(this.t * 3 + q); var rr = pt.r * (0.7 + 0.3 * la); ctx.beginPath(); ctx.moveTo(0, -rr * 1.7); ctx.lineTo(rr * 0.45, -rr * 0.45); ctx.lineTo(rr * 1.7, 0); ctx.lineTo(rr * 0.45, rr * 0.45); ctx.lineTo(0, rr * 1.7); ctx.lineTo(-rr * 0.45, rr * 0.45); ctx.lineTo(-rr * 1.7, 0); ctx.lineTo(-rr * 0.45, -rr * 0.45); ctx.closePath(); ctx.fill(); } else { ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, 6.2832); ctx.fill(); } ctx.restore(); }
+  },
+  frame: function () {
+    if (this.lastT < 0) this.lastT = (typeof time === 'number') ? time : 0;
+    var now = (typeof time === 'number') ? time : this.lastT;
+    var dt = Math.min(0.05, Math.max(0, now - this.lastT)); this.lastT = now;
+    if (dt > 0) this.step(dt);
+    this.draw();
+  }
+};
+window.__pv = PV;
+window.__pvStep = function (dt) { PV.step(dt); };
+PV.reset();
+
+/* the companion hooks stand down on the title while the preview plays —
+   the preview draws Zeus and the pair itself, at the runner's heels */
+(function () {
+  var zd0 = window.__zeusDraw;
+  if (typeof zd0 === 'function') window.__zeusDraw = function () {
+    if (window.__pvOn()) { if (typeof ZS !== 'undefined' && ZS) { ZS.drawn = false; ZS.tdrawn = false; } PV.frame(); return; }
+    return zd0();
+  };
+  var sd0 = window.__sparkDraw;
+  if (typeof sd0 === 'function') window.__sparkDraw = function () {
+    if (window.__pvOn()) { if (typeof SS !== 'undefined' && SS) { SS.drawn = false; SS.tDrawn = false; } return; }
+    return sd0();
+  };
+})();
+
+/* ============ THE OVERLAY PANEL ============ */
+(function () {
+  var css = document.createElement('style');
+  css.textContent =
+    '#custOv { display:none; pointer-events:auto; width:min(94vw,470px); max-height:36vh; overflow-y:auto; box-sizing:border-box; background:rgba(12,6,28,.92); border:2px solid rgba(255,217,77,.55); border-radius:14px; padding:8px 10px 9px; text-align:left; }' +
+    '#custOv .ovHead { display:flex; justify-content:space-between; align-items:center; font-family:\'Luckiest Guy\',cursive; color:#ffd94d; font-size:15px; letter-spacing:.04em; margin-bottom:2px; }' +
+    '#custOv .ovClose { background:none; border:none; color:#ffd94d; font-family:inherit; font-size:15px; cursor:pointer; padding:0 2px; }' +
+    '#custOv .ovSec { font-family:\'Luckiest Guy\',cursive; color:rgba(255,217,77,.75); font-size:11px; letter-spacing:.06em; margin:7px 0 2px; }' +
+    '#custOv .ovSw { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }' +
+    '#custOv .ovMsg { min-height:14px; font-size:11px; color:#ffd94d; margin-top:5px; }' +
+    '#titleUI.ovOpen #mapBtn, #titleUI.ovOpen #optBtn { display:none !important; }';
+  if (document.head || document.body) (document.head || document.body).appendChild(css);
+})();
+function __custOvEl() {
+  var el = __rcEl('custOv');
+  if (el) return el;
+  el = document.createElement('div'); el.id = 'custOv'; el.style.display = 'none';
+  var tui = __rcEl('titleUI');
+  if (tui) tui.appendChild(el);
+  return el;
+}
+function __ovMsg(t) { var m = __rcEl('ovMsg'); if (m) m.textContent = t || ''; }
+function renderCustOv() {
+  var el = __custOvEl(); if (!el) return;
+  var e = __rcEntView();
+  var nm = (SKINS[selChar] && SKINS[selChar].name) || selChar.toUpperCase();
+  el.innerHTML = '';
+  var head = document.createElement('div'); head.className = 'ovHead';
+  var ht = document.createElement('span'); ht.textContent = 'CUSTOMIZE — ' + nm; head.appendChild(ht);
+  var hw = document.createElement('span'); hw.textContent = '\u266A ' + (window.__notes || 0).toLocaleString('en-US'); head.appendChild(hw);
+  var hx = document.createElement('button'); hx.className = 'ovClose'; hx.textContent = '\u2715'; hx.addEventListener('click', function () { window.__custOvSet(false); }); head.appendChild(hx);
+  el.appendChild(head);
+  var hint = document.createElement('div'); hint.className = 'rcSub'; hint.textContent = 'Watch the stage — every pick shows on ' + nm + ' as you make it.'; el.appendChild(hint);
+  function again(fn) { return function () { fn(); renderCustOv(); }; }
+  if (charOwned(selChar)) __rcRow(el, nm, 'RUNNER OWNED', null, null);
+  else __rcRow(el, nm, 'Locked runner — the preview above is him, try the look', 'BUY ' + ECONOMY.charPrice + ' \u266A', again(function () { if (!buyChar(selChar)) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.charPrice + ' \u266A'); }));
+  var UPG = {
+    ivey: { key: 'zeus', name: 'ZEUS', kind: 'COMPANION' },
+    sayori: { key: 'spark', name: 'SPARKLES', kind: 'COMPANION' },
+    lash: { key: 'lalt', name: 'ALT — WHITE ROBE', kind: 'OUTFIT' },
+    yoro: { key: 'yalt', name: 'ALT — CHARCOAL GI', kind: 'OUTFIT' },
+    blade: { key: null, name: 'GANGSTA SLIM', kind: 'OUTFIT' }
+  };
+  var u = UPG[selChar];
+  var sec1 = document.createElement('div'); sec1.className = 'ovSec'; sec1.textContent = u && u.kind === 'COMPANION' ? 'COMPANION' : 'OUTFIT'; el.appendChild(sec1);
+  if (!u) __rcRow(el, 'NOTHING TO CHANGE', '', null, null);
+  else if (!u.key) __rcRow(el, u.name, 'ART IN PRODUCTION', 'SOON', null, true);
+  else if (!e.upg[u.key]) __rcRow(el, u.name, u.kind === 'COMPANION' ? 'Runs the course at his heels' : 'The preview wears it the instant it lands', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', again(function () { if (!buyUpgrade(u.key)) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' \u266A'); }));
+  else __rcRow(el, u.name, e.eq[u.key] ? 'ON — watch the stage' : 'Owned — tap to equip', e.eq[u.key] ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { toggleEquip(u.key); }), false, e.eq[u.key] ? '' : 'off');
+  var sec2 = document.createElement('div'); sec2.className = 'ovSec'; sec2.textContent = 'CHARGE COLOR — ' + nm; el.appendChild(sec2);
+  var sw = document.createElement('div'); sw.className = 'ovSw'; el.appendChild(sw);
+  ECONOMY.colors.forEach(function (c) {
+    var owned = e.colors.indexOf(c.id) >= 0;
+    var on = (e.charge[selChar] || 'classic') === c.id;
+    var b = document.createElement('button');
+    b.className = 'rcSw';
+    b.style.background = c.col || '#ffd94d';
+    b.style.outline = on ? '3px solid #ffd94d' : 'none';
+    b.title = c.name + (owned ? (on ? ' — ON' : ' — tap to equip') : ' — ' + c.price + ' \u266A');
+    b.textContent = on ? '\u2713' : (owned ? '' : c.price);
+    b.style.fontSize = '10px'; b.style.fontFamily = "'Luckiest Guy',cursive"; b.style.color = '#3a1503';
+    b.addEventListener('click', function () { buyColor(c.id); renderCustOv(); });
+    sw.appendChild(b);
+  });
+  var cn = document.createElement('div'); cn.className = 'rcSub'; cn.textContent = 'His charge pools under his feet and trails his charged jumps.'; el.appendChild(cn);
+  var sec3 = document.createElement('div'); sec3.className = 'ovSec'; sec3.textContent = 'EFFECTS — STYLE ONLY'; el.appendChild(sec3);
+  ECONOMY.fx.forEach(function (f) {
+    var owned = e.fx.indexOf(f.id) >= 0, on = e.fxOn.indexOf(f.id) >= 0;
+    if (!owned) __rcRow(el, f.name, 'Code effect — no power for sale', 'BUY ' + f.price + ' \u266A', again(function () { toggleFx(f.id); }));
+    else __rcRow(el, f.name, 'Code effect — no power for sale', on ? 'ON \u2713' : 'OFF', again(function () { toggleFx(f.id); }), false, on ? '' : 'off');
+  });
+  var sec4 = document.createElement('div'); sec4.className = 'ovSec'; sec4.textContent = 'LEVEL SKIPS'; el.appendChild(sec4);
+  (window.__CHAIN106 || []).forEach(function (c) {
+    var id = c[0], open = window.__selOpen ? window.__selOpen(id) : false;
+    var label = window.__selLabel ? window.__selLabel(id) : id;
+    var prev = window.__selLabel ? window.__selLabel(c[1]) : c[1];
+    if (open) __rcRow(el, label, 'OPEN — the path is yours', null, null);
+    else __rcRow(el, label, 'or run ' + c[2].toLocaleString('en-US') + ' FT in ' + prev, 'SKIP ' + ECONOMY.skip[id] + ' \u266A', again(function () { buySkip(id); }));
+  });
+  var msg = document.createElement('div'); msg.className = 'ovMsg'; msg.id = 'ovMsg'; el.appendChild(msg);
+}
+window.__custOvSet = function (open) {
+  window.__custOvOpen = !!open;
+  var el = __custOvEl(); if (!el) return;
+  var tui = __rcEl('titleUI');
+  if (open) {
+    window.__dressOpen = false; if (window.__renderDress) window.__renderDress();
+    PV.reset(); renderCustOv();
+    el.style.display = 'block';
+    if (tui && tui.classList) tui.classList.add('ovOpen');
+  } else {
+    el.style.display = 'none';
+    if (tui && tui.classList) tui.classList.remove('ovOpen');
+  }
+};
+(function () {
+  var sig = '';
+  setInterval(function () {
+    if (!window.__custOvOpen) return;
+    if (!(typeof mode === 'string' && mode === 'title')) { window.__custOvSet(false); return; }
+    var s = [selChar, window.__notes || 0, window.__devMode ? 1 : 0, JSON.stringify(entLoad())].join('|');
+    if (s !== sig) { sig = s; renderCustOv(); }
+  }, 300);
+  window.addEventListener('click', function (e) {
+    if (!e.target || !e.target.closest || !e.target.closest('#custBtn')) return;
+    if (typeof mode !== 'string' || mode !== 'title' || typeof loadState !== 'string' || loadState !== 'done') return;
+    e.stopPropagation(); e.preventDefault();
+    window.__custOvSet(!window.__custOvOpen);
+  }, true);
+  window.addEventListener('keydown', function (e) {
+    if (typeof mode !== 'string' || mode !== 'title' || typeof loadState !== 'string' || loadState !== 'done') return;
+    if (e.key === 'ArrowDown' && !window.__custOvOpen) { e.stopPropagation(); window.__custOvSet(true); }
+    else if (e.key === 'ArrowUp' && window.__custOvOpen) { e.stopPropagation(); window.__custOvSet(false); }
+  }, true);
+})();
+
 function openShop() { var p = __rcEl('optPage'); if (p) p.style.display = 'none'; renderShop(); var s = __rcEl('shopPage'); if (s) s.style.display = 'block'; }
 function openCust() { var p = __rcEl('optPage'); if (p) p.style.display = 'none'; renderCust(); var s = __rcEl('custPage'); if (s) s.style.display = 'block'; }
 window.__rcOpenCustLevel = function (id) {
