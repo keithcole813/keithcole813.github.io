@@ -1324,9 +1324,10 @@ const SPK_RZ_G = [
   1.0711,1.0676,1.0642,1.0697,1.0768,1.0854,1.0946,1.1049,1.1161,1.1294,1.1458,1.1621,1.1785,1.1942,1.2052,
   1.2162,1.221,1.2258,1.2247,1.2227,1.218,1.2123,1.2042,1.1943,1.1801,1.1602,1.1395,1.1165,1.0951,1.0831];   /* RC1.24: the v18 gallop's root-z curve (frames.csv) — the stride's own up-and-down */
 const SPK_RZ_G_MIN = 1.0642, SPK_BOBK = 1.3, SPK_BOBK_RUN = 2.6;
-const SPK_SEAT = 14;   /* RC1.29 (Keith, 2026-11-26: 'Sparkles also needs to sit lower in the cloud'): every GROUNDED pair draw (title, preview, run) sinks her this much deeper into the deck; airborne draws never take it */   /* RC1.28: the run-only bounce gain (Keith, twice: the selection bounce reads, the run's didn't) — see __sparkDraw */   /* RC1.24: the bounce floor + the ADDED gain — every gallop draw lifts her by (curve - floor) x SPK_UPM x SPK_BOBK on top of the bob already in the art (~2.3x total), zero at the contact frames so her hooves still plant */
+const SPK_SEAT = 14;   /* RC1.29 (Keith, 2026-11-26: 'Sparkles also needs to sit lower in the cloud'): every GROUNDED pair draw (title, run) sinks her this much deeper into the deck — the customize preview is exempt since RC1.33 (there she plants on the runner's own feet line); airborne draws never take it */   /* RC1.28: the run-only bounce gain (Keith, twice: the selection bounce reads, the run's didn't) — see __sparkDraw */   /* RC1.24: the bounce floor + the ADDED gain — every gallop draw lifts her by (curve - floor) x SPK_UPM x SPK_BOBK on top of the bob already in the art (~2.3x total), zero at the contact frames so her hooves still plant */
 const SPK_AX = 600 * PX2U * SPK_SCALE, SPK_DW = 1248 * PX2U * SPK_SCALE, SPK_DH = 1024 * PX2U * SPK_SCALE;   /* the flipped seat anchor + the drawn frame size */
-const SPK_JAX = 728 * PX2U * SPK_SCALE, SPK_JDW = 1504 * PX2U * SPK_SCALE, SPK_JDH = 1280 * PX2U * SPK_SCALE;   /* RC1.23: the v18 jump set's own canvas (1504x1280, anchor (728,1024)) — __sparkDraw swaps to these when SS.set is 'jump' */
+const SPK_JAX = 728 * PX2U * SPK_SCALE, SPK_JDW = 1504 * PX2U * SPK_SCALE, SPK_JDH = 1280 * PX2U * SPK_SCALE;
+const SPK_PV_AX = 657 * PX2U * SPK_SCALE, SPK_PV_JAX = 812 * PX2U * SPK_SCALE;   /* RC1.33: THE PREVIEW'S PAIR ANCHORS — the pair subjects' measured bounding-box centers in source px (gallop 657 of 1248, jump 812 of 1504; alpha scans in tools/shotnode/rc133-*), used ONLY by the customize preview, where the pair replaces the runner on her station and drawAnim centers the solo body on that station. SPK_AX / SPK_JAX above stay the run + title seat anchors */   /* RC1.23: the v18 jump set's own canvas (1504x1280, anchor (728,1024)) — __sparkDraw swaps to these when SS.set is 'jump' */
 const SPK_TOP0 = 183;   /* gallop frame 0's crown row, measured off the shipped webp */
 const SPK_GROW_G = [
   896,896,896,896,896,896,896,896,896,896,896,896,896,896,896,896,
@@ -4818,12 +4819,12 @@ var PV = {
   t: 0, lastT: -1,
   ch: null, zu: null,
   parts: [], rings: [],
-  maxCharge: 0, airSeen: false, drawnChar: false, drawnZeus: false, drawnPair: false,
+  maxCharge: 0, airSeen: false, drawnChar: false, drawnZeus: false, drawnPair: false, lastPair: null, lastZeus: null,   /* RC1.33: the last pair / Zeus draw boxes — the checks judge the preview's placement off them (the lastW2 precedent) */
   reset: function () {
     this.ch = { x: 700, h: 0, vy: 0, vx: 340, air: false, airT: 0, airTotal: 0, walkT: 0, dist: 0, mode: 'run', chargeT: 0, charged: false };
     this.zu = { x: 370, h: 0, vy: 0, vx: 340, air: false, airT: 0, airTotal: 0, dist: 0 };
     this.parts.length = 0; this.rings.length = 0; this.lift = 0;   /* RC1.28: every deck open starts the pair at the stage line, so the rise replays */
-    this.maxCharge = 0; this.airSeen = false; this.camX = null; this.pairFade = 0; this.zeusFade = 0;   /* RC1.29: the follow camera + the equip crossfades reset with the sim */
+    this.maxCharge = 0; this.airSeen = false; this.camX = null; this.pairFade = 0; this.zeusFade = 0; this.lastPair = null; this.lastZeus = null;   /* RC1.29: the follow camera + the equip crossfades reset with the sim */
   },
   spanAt: function (x) {
     var m = ((x % this.P) + this.P) % this.P;
@@ -4956,7 +4957,7 @@ var PV = {
       var zx = this.screenX(this.zu.x), zimg = null, zrow = 0;
       if (this.zu.air) { var zp = Math.min(1, this.zu.airT / Math.max(0.3, this.zu.airTotal)); var zf = Math.min(61, Math.floor(zp * 62)); zimg = (typeof ZEUS_JUMP !== 'undefined' && ZEUS_JUMP[zf]) || null; zrow = (typeof ZEUS_JROW !== 'undefined' && ZEUS_JROW[zf]) || 0; }
       else { var zg = Math.floor(this.zu.dist * 45 / 750) % 45; zimg = ZEUS_GALLOP[zg]; zrow = (typeof ZEUS_GROW !== 'undefined' && ZEUS_GROW[zg]) || 0; }
-      if (zimg && zimg.naturalWidth) { var zf129 = (this.zeusFade === undefined ? 1 : this.zeusFade); ctx.save(); if (zf129 < 1) ctx.globalAlpha = Math.max(0, zf129); if (this.zu.air) { var zpt129 = -(0.5 - Math.min(1, this.zu.airT / Math.max(0.3, this.zu.airTotal))) * 30 * Math.PI / 180; var zpx129 = zx, zpy129 = fy - this.zu.h - 218 * PX2U * ZEUS_SCALE; ctx.translate(zpx129, zpy129); ctx.rotate(zpt129); ctx.translate(-zpx129, -zpy129); } ctx.drawImage(zimg, zx - ZEUS_AX, fy - this.zu.h - zrow * PX2U * ZEUS_SCALE, ZEUS_DW, ZEUS_DH); ctx.restore(); this.drawnZeus = true; }   /* RC1.29: the preview's Zeus fades in on equip and PITCHES with his arc (nose up the rise, down the fall — the run's law by air progress) */
+      if (zimg && zimg.naturalWidth) { var zf129 = (this.zeusFade === undefined ? 1 : this.zeusFade); ctx.save(); if (zf129 < 1) ctx.globalAlpha = Math.max(0, zf129); if (this.zu.air) { var zpt129 = -(0.5 - Math.min(1, this.zu.airT / Math.max(0.3, this.zu.airTotal))) * 30 * Math.PI / 180; var zpx129 = zx, zpy129 = fy - this.zu.h - 218 * PX2U * ZEUS_SCALE; ctx.translate(zpx129, zpy129); ctx.rotate(zpt129); ctx.translate(-zpx129, -zpy129); } ctx.drawImage(zimg, zx - ZEUS_AX, fy - this.zu.h - zrow * PX2U * ZEUS_SCALE, ZEUS_DW, ZEUS_DH); this.lastZeus = { dy: fy - this.zu.h - zrow * PX2U * ZEUS_SCALE, rowU: zrow * PX2U * ZEUS_SCALE }; ctx.restore(); this.drawnZeus = true; }   /* RC1.29: the preview's Zeus fades in on equip and PITCHES with his arc (nose up the rise, down the fall — the run's law by air progress) */
     }
     var chx = this.screenX(this.ch.x);
     if ((this.pairOn || (this.pairFade || 0) > 0.02) && typeof SPK_GALLOP !== 'undefined') {
@@ -4968,7 +4969,7 @@ var PV = {
       }
       else { var sg = Math.floor(this.ch.dist * 30 / SPK_CYCLE) % 30; simg = SPK_GALLOP[sg]; srow = (typeof SPK_GROW_G !== 'undefined' && SPK_GROW_G[sg]) || 0; }
       this.pairSet = sj129 ? 'jump' : 'gallop';
-      if (simg && simg.naturalWidth) { var pf129 = (this.pairFade === undefined ? 1 : this.pairFade); ctx.save(); if (pf129 < 1) ctx.globalAlpha = Math.max(0, pf129); ctx.drawImage(simg, chx - (sj129 ? SPK_JAX : SPK_AX), fy - this.ch.h - srow * PX2U * SPK_SCALE - (this.ch.air ? 0 : (SPK_RZ_G[sg] - SPK_RZ_G_MIN) * SPK_UPM * SPK_BOBK) + (this.ch.air ? 0 : SPK_SEAT), sj129 ? SPK_JDW : SPK_DW, sj129 ? SPK_JDH : SPK_DH); ctx.restore(); this.drawnPair = true; }   /* RC1.29: the pair crossfades on equip, seats SPK_SEAT deep when grounded, and jumps on the jump set's own geometry */
+      if (simg && simg.naturalWidth) { var pf129 = (this.pairFade === undefined ? 1 : this.pairFade); ctx.save(); if (pf129 < 1) ctx.globalAlpha = Math.max(0, pf129); var pdx133 = chx - (sj129 ? SPK_PV_JAX : SPK_PV_AX), pdy133 = fy - this.ch.h - srow * PX2U * SPK_SCALE - (this.ch.air ? 0 : (SPK_RZ_G[sg] - SPK_RZ_G_MIN) * SPK_UPM * SPK_BOBK); ctx.drawImage(simg, pdx133, pdy133, sj129 ? SPK_JDW : SPK_DW, sj129 ? SPK_JDH : SPK_DH); this.lastPair = { dx: pdx133, dy: pdy133, axU: sj129 ? SPK_PV_JAX : SPK_PV_AX, rowU: srow * PX2U * SPK_SCALE, set: sj129 ? 'jump' : 'gallop', frame: sj129 ? null : sg }; ctx.restore(); this.drawnPair = true; }   /* RC1.33 (Keith's customize playtest, 2026-11-27): the preview pair centers its SUBJECT on her station (SPK_PV_AX / SPK_PV_JAX — the shipped art's measured bbox centers; the seat anchors left the pair's mass up to ~2.8 units right of where the solo runner stands) and plants its ground row ON her feet line — SPK_SEAT does not apply in the preview (it stays the run/title law; here it sank the pair a line below the solo runner it is compared with). RC1.29's crossfade + jump-set geometry are unchanged */
     }
     if ((!this.pairOn || (this.pairFade || 0) < 0.98) && typeof drawAnim === 'function' && typeof PSKIN !== 'undefined' && PSKIN && PSKIN.man) { var __soloA = 1 - (this.pairFade || 0); if (__soloA < 1) { ctx.save(); ctx.globalAlpha = Math.max(0, __soloA); }   /* RC1.29: while the pair fades in (or out), the solo runner crossfades against her at the same anchor — one settle, never a pop */
       var mv, ix;
