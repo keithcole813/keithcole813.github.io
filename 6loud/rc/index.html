@@ -1338,10 +1338,19 @@ window.__zeusBiteMeasure = function () { return { rot: ZEUS_BITE_ROT, sway: ZEUS
    THE WORN WINGS stand down while she rides (the draw gate below): Sparkles' own wings are the winged read — they show in the flap set on the double/triple; the HUD wing bar still runs. The charge halo and magnet strobe re-apply to the pair's draw so a held charge still reads. The pair's draw is also VISIBILITY-GATED (__spkVis): until the lazy frames land she draws as herself, never a vanishing runner (the loader class of bug Keith filmed on the title) — the hang gate uses the logical mount (__spkOn) and is unconditional.
    GHOST: untouched — recordings carry no mount flag and the ghost machinery draws the sister's clean frames as ever (GHOST_FOR), so a mounted run's ghost still runs as Ivey on foot. */
 const SPK_GALLOP = new Array(30), SPK_JUMP = new Array(43), SPK_FLAP = new Array(56), SPK_HOVER = new Array(22);   /* RC1.10: the struggle-hover set (v5) — the catch's own art */
-for (let i = 0; i < 30; i++) queueImg(im => { SPK_GALLOP[i] = im; }, 'sparkles/gallop/f' + String(i).padStart(3, '0') + '.webp', false);
-for (let i = 0; i < 43; i++) queueImg(im => { SPK_JUMP[i] = im; }, 'sparkles/jump/f' + String(i).padStart(3, '0') + '.webp', false);
-for (let i = 0; i < 56; i++) queueImg(im => { SPK_FLAP[i] = im; }, 'sparkles/flap/f' + String(i).padStart(3, '0') + '.webp', false);
+const SPK_PG = new Array(30), SPK_PJ = new Array(43), SPK_PF = new Array(56), SPK_BG = new Array(30), SPK_BJ = new Array(43), SPK_BF = new Array(56);   /* RC1.25: the coat backing stores — prismatic (v18 gallop/jump + the flight set) and BLACK (the Sparkles_BlackAlt mirrors) */
+window.__spkBlack = false; try { window.__spkBlack = localStorage.getItem('sixloudrc1_spkblack') === '1'; } catch (e) {}
+window.__spkCoat = function () { for (let i = 0; i < 30; i++) SPK_GALLOP[i] = (window.__spkBlack && SPK_BG[i]) || SPK_PG[i]; for (let i = 0; i < 43; i++) SPK_JUMP[i] = (window.__spkBlack && SPK_BJ[i]) || SPK_PJ[i]; for (let i = 0; i < 56; i++) SPK_FLAP[i] = (window.__spkBlack && SPK_BF[i]) || SPK_PF[i]; };   /* RC1.25: fill the live arrays from the active coat — every draw that reads SPK_* swaps together; a black frame still loading falls back to its prismatic twin */
+window.__spkSetBlack = function (on) { if (on && !window.__devMode) { try { var e2 = entLoad(); if (!(e2.upg && e2.upg.spkblk)) return; } catch (e) {} } window.__spkBlack = !!on;   /* RC1.27: the black coat is a bought upgrade now (1,000) — the switch refuses it unowned */ try { localStorage.setItem('sixloudrc1_spkblack', on ? '1' : '0'); } catch (e) {} window.__spkCoat(); if (typeof renderCust === 'function') renderCust(); };
+try { if (window.__spkBlack && typeof entLoad === 'function') { var ee = entLoad(); if (!ee.upg) ee.upg = {}; if (!ee.upg.spkblk) { ee.upg.spkblk = 1; entSave(ee); } } } catch (e) {}   /* RC1.27 grandfather: a coat equipped in the free RC1.25/26 window is owned, full stop */
+window.__spkCoatState = function () { return { black: !!window.__spkBlack, g0b: !!SPK_BG[0] && SPK_GALLOP[0] === SPK_BG[0], g0p: !!SPK_PG[0] && SPK_GALLOP[0] === SPK_PG[0], j0b: !!SPK_BJ[0] && SPK_JUMP[0] === SPK_BJ[0], f0b: !!SPK_BF[0] && SPK_FLAP[0] === SPK_BF[0] }; };   /* RC1.25: the checks' eyes on the coat */
+for (let i = 0; i < 30; i++) queueImg(im => { SPK_PG[i] = im; window.__spkCoat(); }, 'sparkles/gallop/f' + String(i).padStart(3, '0') + '.webp', false);
+for (let i = 0; i < 43; i++) queueImg(im => { SPK_PJ[i] = im; window.__spkCoat(); }, 'sparkles/jump/f' + String(i).padStart(3, '0') + '.webp', false);
+for (let i = 0; i < 56; i++) queueImg(im => { SPK_PF[i] = im; window.__spkCoat(); }, 'sparkles/flap/f' + String(i).padStart(3, '0') + '.webp', false);
 for (let i = 0; i < 22; i++) queueImg(im => { SPK_HOVER[i] = im; }, 'sparkles-hover/f' + String(i).padStart(3, '0') + '.webp', false);   /* RC1.10: byte-identical copies of the v5 delivery (sparkles-sprites-v5-flap/flap/) */
+for (let i = 0; i < 30; i++) queueImg(im => { SPK_BG[i] = im; window.__spkCoat(); }, 'sparkles-black/gallop/f' + String(i).padStart(3, '0') + '.webp', false);   /* RC1.25: the black coat's sets (sparkles-sprites-black/) */
+for (let i = 0; i < 43; i++) queueImg(im => { SPK_BJ[i] = im; window.__spkCoat(); }, 'sparkles-black/jump/f' + String(i).padStart(3, '0') + '.webp', false);
+for (let i = 0; i < 56; i++) queueImg(im => { SPK_BF[i] = im; window.__spkCoat(); }, 'sparkles-black/flap/f' + String(i).padStart(3, '0') + '.webp', false);
 const SPK_SCALE = 0.6259;   /* 286 / ((897 - 183) * PX2U) — the pair stands 286 units at the crown (Keith) */
 const SPK_UPM = 340 * PX2U * SPK_SCALE;   /* world units per metre of capture travel */
 const SPK_CYCLE = 667;   /* RC1.24 (Keith's playtest fix): one gallop cycle per 667 units of advance — the v18 sprint's 4.90 m stride at the pair's OWN SPK_UPM (340 x PX2U x SPK_SCALE = 136.19 units/m). RC1.23's 1066 was derived off ZEUS_UPM by mistake and left her feet tracking at 0.63x ground speed — the skating Keith caught on video. */
@@ -4609,7 +4618,7 @@ function buyChar(id) {
   return true;
 }
 function buyUpgrade(key) {
-  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt' && key !== 'yalt') return false;   /* only the four real upgrades exist — 6lade's costume slot is the placeholder now, nothing to sell there yet */
+  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt' && key !== 'yalt' && key !== 'spkblk') return false;   /* RC1.27: spkblk = the black coat, priced on this shelf at Keith's ruling (1,000) */   /* only the four real upgrades exist — 6lade's costume slot is the placeholder now, nothing to sell there yet */
   var e = entLoad();
   if (e.upg[key]) return false;
   if (window.__devMode) { __rcMsg('custMsg', 'DEVELOPER MODE — ALREADY UNLOCKED'); return false; }   /* RC1.1: the overlay never transacts — the entitlement record stays exactly as it was */
@@ -4709,6 +4718,11 @@ function renderCust() {
     else if (!e.upg[u.key]) __rcRow(cl, '↳ ' + u.name, u.sub, 'BUY ' + ECONOMY.upgradePrice + ' ♪', function () { buyUpgrade(u.key); });
     else __rcRow(cl, '↳ ' + u.name, u.sub, e.eq[u.key] ? 'EQUIPPED ✓' : 'EQUIP', function () { toggleEquip(u.key); }, false, e.eq[u.key] ? '' : 'off');
   });
+  if (e.upg.spark) {
+    __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 PRISMATIC', 'Her rainbow coat', window.__spkBlack ? 'EQUIP' : 'EQUIPPED \u2713', function () { window.__spkSetBlack(false); }, false, window.__spkBlack ? 'off' : '');
+    if (!e.upg.spkblk) __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 BLACK', 'The glossy black alternate \u2014 she goes black everywhere: stage, preview, run', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', function () { if (buyUpgrade('spkblk')) window.__spkSetBlack(true); });
+    else __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 BLACK', 'The glossy black alternate \u2014 she goes black everywhere: stage, preview, run', window.__spkBlack ? 'EQUIPPED \u2713' : 'EQUIP', function () { window.__spkSetBlack(true); }, false, window.__spkBlack ? '' : 'off');
+  }
   var sl = __rcEl('skipList'); if (sl) {
     sl.innerHTML = '';
     (window.__CHAIN106 || []).forEach(function (c) {
@@ -5047,13 +5061,24 @@ PV.reset();
 (function () {
   var css = document.createElement('style');
   css.textContent =
-    '#custOv { display:none; pointer-events:auto; width:min(94vw,470px); max-height:36vh; overflow-y:auto; box-sizing:border-box; background:rgba(12,6,28,.92); border:2px solid rgba(255,217,77,.55); border-radius:14px; padding:8px 10px 9px; text-align:left; }' +
+    '#custOvTap { position:fixed; inset:0; z-index:40; pointer-events:auto; background:transparent; }' +
+    '#custOv { display:none; position:fixed; left:0; right:0; bottom:0; z-index:50; pointer-events:auto; height:min(350px,42vh); flex-direction:column; box-sizing:border-box; background:rgba(12,6,28,.94); border-top:2px solid rgba(255,217,77,.55); border-radius:16px 16px 0 0; padding:8px 10px 10px; text-align:left; }' +
     '#custOv .ovHead { display:flex; justify-content:space-between; align-items:center; font-family:\'Luckiest Guy\',cursive; color:#ffd94d; font-size:15px; letter-spacing:.04em; margin-bottom:2px; }' +
     '#custOv .ovClose { background:none; border:none; color:#ffd94d; font-family:inherit; font-size:15px; cursor:pointer; padding:0 2px; }' +
+    '#custOv .ovTabs { display:flex; gap:6px; margin:4px 0 6px; }' +
+    '#custOv .ovTab { flex:1; background:rgba(255,255,255,.08); border:1px solid rgba(255,217,77,.35); color:#ffe9a8; border-radius:999px; padding:6px 2px; font-family:\'Luckiest Guy\',cursive; font-size:11px; letter-spacing:.03em; cursor:pointer; }' +
+    '#custOv .ovTab.on { background:linear-gradient(#ffd94d,#ff9d3c); color:#3a1503; border-color:#3a1503; }' +
+    '#custOv .ovPanel { flex:1; overflow-y:auto; min-height:0; }' +
+    '#custOv .ovNav { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }' +
+    '#custOv .ovNavB { background:rgba(255,255,255,.1); border:1px solid rgba(255,217,77,.4); color:#ffd94d; border-radius:10px; font-size:15px; padding:5px 16px; cursor:pointer; }' +
+    '#custOv .ovNavN { font-family:\'Luckiest Guy\',cursive; color:#fff; font-size:15px; letter-spacing:.05em; }' +
     '#custOv .ovSec { font-family:\'Luckiest Guy\',cursive; color:rgba(255,217,77,.75); font-size:11px; letter-spacing:.06em; margin:7px 0 2px; }' +
     '#custOv .ovSw { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }' +
     '#custOv .ovMsg { min-height:14px; font-size:11px; color:#ffd94d; margin-top:5px; }' +
-    '#titleUI.ovOpen #mapBtn, #titleUI.ovOpen #optBtn { display:none !important; }';
+    '#custOv .ovFoot { display:flex; gap:8px; margin-top:7px; }' +
+    '#custOv .ovBack { background:rgba(255,255,255,.1); border:1px solid rgba(255,217,77,.4); color:#ffd94d; border-radius:999px; padding:10px 16px; font-family:\'Luckiest Guy\',cursive; font-size:13px; cursor:pointer; }' +
+    '#custOv .ovStart { flex:1; background:linear-gradient(#ffd94d,#ff9d3c); border:2px solid #3a1503; color:#3a1503; border-radius:999px; padding:10px; font-family:\'Luckiest Guy\',cursive; font-size:16px; letter-spacing:.05em; cursor:pointer; box-shadow:0 3px 0 #b3541e; }' +
+    '#titleUI.ovOpen #mapBtn, #titleUI.ovOpen #optBtn, #titleUI.ovOpen #startBtn, #titleUI.ovOpen #custBtn, #titleUI.ovOpen #dressStrip { display:none !important; }';
   if (document.head || document.body) (document.head || document.body).appendChild(css);
 })();
 function __custOvEl() {
@@ -5065,6 +5090,20 @@ function __custOvEl() {
   return el;
 }
 function __ovMsg(t) { var m = __rcEl('ovMsg'); if (m) m.textContent = t || ''; }
+function __custOvTapEl() {
+  var el = __rcEl('custOvTap');
+  if (el) return el;
+  el = document.createElement('div'); el.id = 'custOvTap'; el.style.display = 'none';
+  var tui = __rcEl('titleUI');
+  if (tui) tui.appendChild(el);
+  var dx = 0, dy = 0, dt = 0;
+  el.addEventListener('pointerdown', function (ev) { dx = ev.clientX || 0; dy = ev.clientY || 0; dt = Date.now(); });
+  el.addEventListener('pointerup', function (ev) {
+    var mx = Math.abs((ev.clientX || 0) - dx), my = Math.abs((ev.clientY || 0) - dy);
+    if (mx < 12 && my < 12 && Date.now() - dt < 350) window.__custOvSet(false);   /* a tap on the stage closes the deck (Keith's consult borrow from Option 1); a swipe does not */
+  });
+  return el;
+}
 function renderCustOv() {
   var el = __custOvEl(); if (!el) return;
   var e = __rcEntView();
@@ -5075,10 +5114,7 @@ function renderCustOv() {
   var hw = document.createElement('span'); hw.textContent = '\u266A ' + (window.__notes || 0).toLocaleString('en-US'); head.appendChild(hw);
   var hx = document.createElement('button'); hx.className = 'ovClose'; hx.textContent = '\u2715'; hx.addEventListener('click', function () { window.__custOvSet(false); }); head.appendChild(hx);
   el.appendChild(head);
-  var hint = document.createElement('div'); hint.className = 'rcSub'; hint.textContent = 'Watch the stage — every pick shows on ' + nm + ' as you make it.'; el.appendChild(hint);
   function again(fn) { return function () { fn(); renderCustOv(); }; }
-  if (charOwned(selChar)) __rcRow(el, nm, 'RUNNER OWNED', null, null);
-  else __rcRow(el, nm, 'Locked runner — the preview above is him, try the look', 'BUY ' + ECONOMY.charPrice + ' \u266A', again(function () { if (!buyChar(selChar)) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.charPrice + ' \u266A'); }));
   var UPG = {
     ivey: { key: 'zeus', name: 'ZEUS', kind: 'COMPANION' },
     sayori: { key: 'spark', name: 'SPARKLES', kind: 'COMPANION' },
@@ -5087,54 +5123,91 @@ function renderCustOv() {
     blade: { key: null, name: 'GANGSTA SLIM', kind: 'OUTFIT' }
   };
   var u = UPG[selChar];
-  var sec1 = document.createElement('div'); sec1.className = 'ovSec'; sec1.textContent = u && u.kind === 'COMPANION' ? 'COMPANION' : 'OUTFIT'; el.appendChild(sec1);
-  if (!u) __rcRow(el, 'NOTHING TO CHANGE', '', null, null);
-  else if (!u.key) __rcRow(el, u.name, 'ART IN PRODUCTION', 'SOON', null, true);
-  else if (!e.upg[u.key]) __rcRow(el, u.name, u.kind === 'COMPANION' ? 'Runs the course at his heels' : 'The preview wears it the instant it lands', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', again(function () { if (!buyUpgrade(u.key)) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' \u266A'); }));
-  else __rcRow(el, u.name, e.eq[u.key] ? 'ON — watch the stage' : 'Owned — tap to equip', e.eq[u.key] ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { toggleEquip(u.key); }), false, e.eq[u.key] ? '' : 'off');
-  var sec2 = document.createElement('div'); sec2.className = 'ovSec'; sec2.textContent = 'CHARGE COLOR — ' + nm; el.appendChild(sec2);
-  var sw = document.createElement('div'); sw.className = 'ovSw'; el.appendChild(sw);
-  ECONOMY.colors.forEach(function (c) {
-    var owned = e.colors.indexOf(c.id) >= 0;
-    var on = (e.charge[selChar] || 'classic') === c.id;
-    var b = document.createElement('button');
-    b.className = 'rcSw';
-    b.style.background = c.col || '#ffd94d';
-    b.style.outline = on ? '3px solid #ffd94d' : 'none';
-    b.title = c.name + (owned ? (on ? ' — ON' : ' — tap to equip') : ' — ' + c.price + ' \u266A');
-    b.textContent = on ? '\u2713' : (owned ? '' : c.price);
-    b.style.fontSize = '10px'; b.style.fontFamily = "'Luckiest Guy',cursive"; b.style.color = '#3a1503';
-    b.addEventListener('click', function () { buyColor(c.id); renderCustOv(); });
-    sw.appendChild(b);
+  var TABS = [['runner', 'RUNNER'], ['gear', u && u.kind === 'COMPANION' ? 'COMPANION' : 'OUTFIT'], ['charge', 'CHARGE'], ['fx', 'FX'], ['skips', 'SKIPS']];
+  if (!window.__custTab) window.__custTab = 'runner';
+  var tabBar = document.createElement('div'); tabBar.className = 'ovTabs';
+  TABS.forEach(function (t) {
+    var b = document.createElement('button'); b.className = 'ovTab' + (window.__custTab === t[0] ? ' on' : ''); b.textContent = t[1];
+    b.addEventListener('click', function () { window.__custTab = t[0]; renderCustOv(); });
+    tabBar.appendChild(b);
   });
-  var cn = document.createElement('div'); cn.className = 'rcSub'; cn.textContent = 'His charge pools under his feet and trails his charged jumps.'; el.appendChild(cn);
-  var sec3 = document.createElement('div'); sec3.className = 'ovSec'; sec3.textContent = 'EFFECTS — STYLE ONLY'; el.appendChild(sec3);
-  ECONOMY.fx.forEach(function (f) {
-    var owned = e.fx.indexOf(f.id) >= 0, on = e.fxOn.indexOf(f.id) >= 0;
-    if (!owned) __rcRow(el, f.name, 'Code effect — no power for sale', 'BUY ' + f.price + ' \u266A', again(function () { toggleFx(f.id); }));
-    else __rcRow(el, f.name, 'Code effect — no power for sale', on ? 'ON \u2713' : 'OFF', again(function () { toggleFx(f.id); }), false, on ? '' : 'off');
-  });
-  var sec4 = document.createElement('div'); sec4.className = 'ovSec'; sec4.textContent = 'LEVEL SKIPS'; el.appendChild(sec4);
-  (window.__CHAIN106 || []).forEach(function (c) {
-    var id = c[0], open = window.__selOpen ? window.__selOpen(id) : false;
-    var label = window.__selLabel ? window.__selLabel(id) : id;
-    var prev = window.__selLabel ? window.__selLabel(c[1]) : c[1];
-    if (open) __rcRow(el, label, 'OPEN — the path is yours', null, null);
-    else __rcRow(el, label, 'or run ' + c[2].toLocaleString('en-US') + ' FT in ' + prev, 'SKIP ' + ECONOMY.skip[id] + ' \u266A', again(function () { buySkip(id); }));
-  });
+  el.appendChild(tabBar);
+  var panel = document.createElement('div'); panel.className = 'ovPanel'; el.appendChild(panel);
+  var tab = window.__custTab;
+  if (tab === 'runner') {
+    var nav = document.createElement('div'); nav.className = 'ovNav';
+    var pb = document.createElement('button'); pb.className = 'ovNavB'; pb.textContent = '\u25C0';
+    pb.addEventListener('click', function () { if (typeof cycleChar === 'function') cycleChar(-1); PV.reset(); renderCustOv(); });
+    var nmb = document.createElement('span'); nmb.className = 'ovNavN'; nmb.textContent = nm;
+    var nb = document.createElement('button'); nb.className = 'ovNavB'; nb.textContent = '\u25B6';
+    nb.addEventListener('click', function () { if (typeof cycleChar === 'function') cycleChar(1); PV.reset(); renderCustOv(); });
+    nav.appendChild(pb); nav.appendChild(nmb); nav.appendChild(nb); panel.appendChild(nav);
+    if (charOwned(selChar)) __rcRow(panel, nm, 'RUNNER OWNED', null, null);
+    else __rcRow(panel, nm, 'Locked runner — the preview above is ' + nm + ', try the look', 'BUY ' + ECONOMY.charPrice + ' \u266A', again(function () { if (!buyChar(selChar)) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.charPrice + ' \u266A'); }));
+    var hint = document.createElement('div'); hint.className = 'rcSub'; hint.textContent = 'Watch the stage — every pick shows on ' + nm + ' as you make it.'; panel.appendChild(hint);
+  } else if (tab === 'gear') {
+    if (!u) __rcRow(panel, 'NOTHING TO CHANGE', '', null, null);
+    else if (!u.key) __rcRow(panel, u.name, 'ART IN PRODUCTION', 'SOON', null, true);
+    else if (!e.upg[u.key]) __rcRow(panel, u.name, u.kind === 'COMPANION' ? 'Runs the course beside the runner' : 'The preview wears it the instant it lands', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', again(function () { if (!buyUpgrade(u.key)) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' \u266A'); }));
+    else __rcRow(panel, u.name, e.eq[u.key] ? 'ON — watch the stage' : 'Owned — tap to equip', e.eq[u.key] ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { toggleEquip(u.key); }), false, e.eq[u.key] ? '' : 'off');
+    if (selChar === 'sayori' && e.upg.spark) {
+      __rcRow(panel, 'COAT — PRISMATIC', 'Her rainbow coat', window.__spkBlack ? 'EQUIP' : 'EQUIPPED \u2713', again(function () { window.__spkSetBlack(false); }), false, window.__spkBlack ? 'off' : '');
+      if (!e.upg.spkblk) __rcRow(panel, 'COAT — BLACK', 'The glossy black alternate — she goes black everywhere', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', again(function () { if (!buyUpgrade('spkblk')) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' \u266A'); else window.__spkSetBlack(true); }));
+      else __rcRow(panel, 'COAT — BLACK', 'The glossy black alternate — she goes black everywhere', window.__spkBlack ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { window.__spkSetBlack(true); }), false, window.__spkBlack ? '' : 'off');
+    }
+  } else if (tab === 'charge') {
+    var sw = document.createElement('div'); sw.className = 'ovSw'; panel.appendChild(sw);
+    ECONOMY.colors.forEach(function (c) {
+      var owned = e.colors.indexOf(c.id) >= 0;
+      var on = (e.charge[selChar] || 'classic') === c.id;
+      var b = document.createElement('button');
+      b.className = 'rcSw';
+      b.style.background = c.col || '#ffd94d';
+      b.style.outline = on ? '3px solid #ffd94d' : 'none';
+      b.title = c.name + (owned ? (on ? ' — ON' : ' — tap to equip') : ' — ' + c.price + ' \u266A');
+      b.textContent = on ? '\u2713' : (owned ? '' : c.price);
+      b.style.fontSize = '10px'; b.style.fontFamily = "'Luckiest Guy',cursive"; b.style.color = '#3a1503';
+      b.addEventListener('click', function () { buyColor(c.id); renderCustOv(); });
+      sw.appendChild(b);
+    });
+    var cn = document.createElement('div'); cn.className = 'rcSub'; cn.textContent = 'The charge pools under the runner and trails the charged jumps — watch it up top.'; panel.appendChild(cn);
+  } else if (tab === 'fx') {
+    ECONOMY.fx.forEach(function (f) {
+      var owned = e.fx.indexOf(f.id) >= 0, on = e.fxOn.indexOf(f.id) >= 0;
+      if (!owned) __rcRow(panel, f.name, 'Code effect — no power for sale', 'BUY ' + f.price + ' \u266A', again(function () { toggleFx(f.id); }));
+      else __rcRow(panel, f.name, 'Code effect — no power for sale', on ? 'ON \u2713' : 'OFF', again(function () { toggleFx(f.id); }), false, on ? '' : 'off');
+    });
+  } else if (tab === 'skips') {
+    (window.__CHAIN106 || []).forEach(function (c) {
+      var id = c[0], open = window.__selOpen ? window.__selOpen(id) : false;
+      var label = window.__selLabel ? window.__selLabel(id) : id;
+      var prev = window.__selLabel ? window.__selLabel(c[1]) : c[1];
+      if (open) __rcRow(panel, label, 'OPEN — the path is yours', null, null);
+      else __rcRow(panel, label, 'or run ' + c[2].toLocaleString('en-US') + ' FT in ' + prev, 'SKIP ' + ECONOMY.skip[id] + ' \u266A', again(function () { buySkip(id); }));
+    });
+  }
   var msg = document.createElement('div'); msg.className = 'ovMsg'; msg.id = 'ovMsg'; el.appendChild(msg);
+  var foot = document.createElement('div'); foot.className = 'ovFoot';
+  var bk = document.createElement('button'); bk.className = 'ovBack'; bk.textContent = '\u2039 BACK';
+  bk.addEventListener('click', function () { window.__custOvSet(false); });
+  var st = document.createElement('button'); st.className = 'ovStart'; st.textContent = 'START GAME';
+  st.addEventListener('click', function () { window.__custOvSet(false); var sb = __rcEl('startBtn'); if (sb && sb.click) sb.click(); });
+  foot.appendChild(bk); foot.appendChild(st); el.appendChild(foot);
 }
 window.__custOvSet = function (open) {
   window.__custOvOpen = !!open;
   var el = __custOvEl(); if (!el) return;
   var tui = __rcEl('titleUI');
+  var tap = __custOvTapEl();
   if (open) {
     window.__dressOpen = false; if (window.__renderDress) window.__renderDress();
     PV.reset(); renderCustOv();
-    el.style.display = 'block';
+    el.style.display = 'flex';
+    if (tap) tap.style.display = 'block';
     if (tui && tui.classList) tui.classList.add('ovOpen');
   } else {
     el.style.display = 'none';
+    if (tap) tap.style.display = 'none';
     if (tui && tui.classList) tui.classList.remove('ovOpen');
   }
 };
@@ -5143,7 +5216,7 @@ window.__custOvSet = function (open) {
   setInterval(function () {
     if (!window.__custOvOpen) return;
     if (!(typeof mode === 'string' && mode === 'title')) { window.__custOvSet(false); return; }
-    var s = [selChar, window.__notes || 0, window.__devMode ? 1 : 0, JSON.stringify(entLoad())].join('|');
+    var s = [selChar, window.__notes || 0, window.__devMode ? 1 : 0, JSON.stringify(entLoad()), window.__spkBlack ? 'B' : 'P'].join('|');
     if (s !== sig) { sig = s; renderCustOv(); }
   }, 300);
   window.addEventListener('click', function (e) {
@@ -5332,7 +5405,7 @@ function __rcEntView() {
   if (!window.__devMode) return e;
   var v = {}, k;
   for (k in e) v[k] = e[k];
-  v.upg = { zeus: 1, spark: 1, lalt: 1, yalt: 1 };
+  v.upg = { zeus: 1, spark: 1, lalt: 1, yalt: 1, spkblk: 1 };
   v.eq = __rcDmEq();
   v.colors = ECONOMY.colors.map(function (c) { return c.id; });
   v.charge = {}; for (k in e.charge) v.charge[k] = e.charge[k];
