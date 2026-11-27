@@ -1341,7 +1341,8 @@ const SPK_GALLOP = new Array(30), SPK_JUMP = new Array(43), SPK_FLAP = new Array
 const SPK_PG = new Array(30), SPK_PJ = new Array(43), SPK_PF = new Array(56), SPK_BG = new Array(30), SPK_BJ = new Array(43), SPK_BF = new Array(56);   /* RC1.25: the coat backing stores — prismatic (v18 gallop/jump + the flight set) and BLACK (the Sparkles_BlackAlt mirrors) */
 window.__spkBlack = false; try { window.__spkBlack = localStorage.getItem('sixloudrc1_spkblack') === '1'; } catch (e) {}
 window.__spkCoat = function () { for (let i = 0; i < 30; i++) SPK_GALLOP[i] = (window.__spkBlack && SPK_BG[i]) || SPK_PG[i]; for (let i = 0; i < 43; i++) SPK_JUMP[i] = (window.__spkBlack && SPK_BJ[i]) || SPK_PJ[i]; for (let i = 0; i < 56; i++) SPK_FLAP[i] = (window.__spkBlack && SPK_BF[i]) || SPK_PF[i]; };   /* RC1.25: fill the live arrays from the active coat — every draw that reads SPK_* swaps together; a black frame still loading falls back to its prismatic twin */
-window.__spkSetBlack = function (on) { window.__spkBlack = !!on; try { localStorage.setItem('sixloudrc1_spkblack', on ? '1' : '0'); } catch (e) {} window.__spkCoat(); if (typeof renderCust === 'function') renderCust(); };
+window.__spkSetBlack = function (on) { if (on && !window.__devMode) { try { var e2 = entLoad(); if (!(e2.upg && e2.upg.spkblk)) return; } catch (e) {} } window.__spkBlack = !!on;   /* RC1.27: the black coat is a bought upgrade now (1,000) — the switch refuses it unowned */ try { localStorage.setItem('sixloudrc1_spkblack', on ? '1' : '0'); } catch (e) {} window.__spkCoat(); if (typeof renderCust === 'function') renderCust(); };
+try { if (window.__spkBlack && typeof entLoad === 'function') { var ee = entLoad(); if (!ee.upg) ee.upg = {}; if (!ee.upg.spkblk) { ee.upg.spkblk = 1; entSave(ee); } } } catch (e) {}   /* RC1.27 grandfather: a coat equipped in the free RC1.25/26 window is owned, full stop */
 window.__spkCoatState = function () { return { black: !!window.__spkBlack, g0b: !!SPK_BG[0] && SPK_GALLOP[0] === SPK_BG[0], g0p: !!SPK_PG[0] && SPK_GALLOP[0] === SPK_PG[0], j0b: !!SPK_BJ[0] && SPK_JUMP[0] === SPK_BJ[0], f0b: !!SPK_BF[0] && SPK_FLAP[0] === SPK_BF[0] }; };   /* RC1.25: the checks' eyes on the coat */
 for (let i = 0; i < 30; i++) queueImg(im => { SPK_PG[i] = im; window.__spkCoat(); }, 'sparkles/gallop/f' + String(i).padStart(3, '0') + '.webp', false);
 for (let i = 0; i < 43; i++) queueImg(im => { SPK_PJ[i] = im; window.__spkCoat(); }, 'sparkles/jump/f' + String(i).padStart(3, '0') + '.webp', false);
@@ -4617,7 +4618,7 @@ function buyChar(id) {
   return true;
 }
 function buyUpgrade(key) {
-  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt' && key !== 'yalt') return false;   /* only the four real upgrades exist — 6lade's costume slot is the placeholder now, nothing to sell there yet */
+  if (key !== 'zeus' && key !== 'spark' && key !== 'lalt' && key !== 'yalt' && key !== 'spkblk') return false;   /* RC1.27: spkblk = the black coat, priced on this shelf at Keith's ruling (1,000) */   /* only the four real upgrades exist — 6lade's costume slot is the placeholder now, nothing to sell there yet */
   var e = entLoad();
   if (e.upg[key]) return false;
   if (window.__devMode) { __rcMsg('custMsg', 'DEVELOPER MODE — ALREADY UNLOCKED'); return false; }   /* RC1.1: the overlay never transacts — the entitlement record stays exactly as it was */
@@ -4719,7 +4720,8 @@ function renderCust() {
   });
   if (e.upg.spark) {
     __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 PRISMATIC', 'Her rainbow coat', window.__spkBlack ? 'EQUIP' : 'EQUIPPED \u2713', function () { window.__spkSetBlack(false); }, false, window.__spkBlack ? 'off' : '');
-    __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 BLACK', 'The glossy black alternate \u2014 she goes black everywhere: stage, preview, run', window.__spkBlack ? 'EQUIPPED \u2713' : 'EQUIP', function () { window.__spkSetBlack(true); }, false, window.__spkBlack ? '' : 'off');
+    if (!e.upg.spkblk) __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 BLACK', 'The glossy black alternate \u2014 she goes black everywhere: stage, preview, run', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', function () { if (buyUpgrade('spkblk')) window.__spkSetBlack(true); });
+    else __rcRow(cl, '\u21B3 SPARKLES COAT \u2014 BLACK', 'The glossy black alternate \u2014 she goes black everywhere: stage, preview, run', window.__spkBlack ? 'EQUIPPED \u2713' : 'EQUIP', function () { window.__spkSetBlack(true); }, false, window.__spkBlack ? '' : 'off');
   }
   var sl = __rcEl('skipList'); if (sl) {
     sl.innerHTML = '';
@@ -5150,7 +5152,8 @@ function renderCustOv() {
     else __rcRow(panel, u.name, e.eq[u.key] ? 'ON — watch the stage' : 'Owned — tap to equip', e.eq[u.key] ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { toggleEquip(u.key); }), false, e.eq[u.key] ? '' : 'off');
     if (selChar === 'sayori' && e.upg.spark) {
       __rcRow(panel, 'COAT — PRISMATIC', 'Her rainbow coat', window.__spkBlack ? 'EQUIP' : 'EQUIPPED \u2713', again(function () { window.__spkSetBlack(false); }), false, window.__spkBlack ? 'off' : '');
-      __rcRow(panel, 'COAT — BLACK', 'The glossy black alternate — she goes black everywhere', window.__spkBlack ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { window.__spkSetBlack(true); }), false, window.__spkBlack ? '' : 'off');
+      if (!e.upg.spkblk) __rcRow(panel, 'COAT — BLACK', 'The glossy black alternate — she goes black everywhere', 'BUY ' + ECONOMY.upgradePrice + ' \u266A', again(function () { if (!buyUpgrade('spkblk')) __ovMsg('NOT ENOUGH NOTES — ' + ECONOMY.upgradePrice + ' \u266A'); else window.__spkSetBlack(true); }));
+      else __rcRow(panel, 'COAT — BLACK', 'The glossy black alternate — she goes black everywhere', window.__spkBlack ? 'EQUIPPED \u2713' : 'EQUIP', again(function () { window.__spkSetBlack(true); }), false, window.__spkBlack ? '' : 'off');
     }
   } else if (tab === 'charge') {
     var sw = document.createElement('div'); sw.className = 'ovSw'; panel.appendChild(sw);
@@ -5402,7 +5405,7 @@ function __rcEntView() {
   if (!window.__devMode) return e;
   var v = {}, k;
   for (k in e) v[k] = e[k];
-  v.upg = { zeus: 1, spark: 1, lalt: 1, yalt: 1 };
+  v.upg = { zeus: 1, spark: 1, lalt: 1, yalt: 1, spkblk: 1 };
   v.eq = __rcDmEq();
   v.colors = ECONOMY.colors.map(function (c) { return c.id; });
   v.charge = {}; for (k in e.charge) v.charge[k] = e.charge[k];
