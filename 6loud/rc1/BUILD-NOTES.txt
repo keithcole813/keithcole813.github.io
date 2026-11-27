@@ -1,0 +1,12 @@
+6LOUD — RELEASE CANDIDATE BUILD NOTES
+
+RC1.25 — BLACK SPARKLES, THE COAT EQUIP (2026-11-26)
+Sparkles' glossy black alternate (gallop 30f / jump 43f / flap 56f,
+mirroring the v18 sets) is a coat pick in CUSTOMIZE: PRISMATIC or
+BLACK, and she goes black everywhere — title, preview, run.
+
+RC1.26 — THE CUSTOMIZE DECK, OPTION 2 (2026-11-26)
+The customize overlay is now a bottom-sheet tabs deck (RUNNER /
+COMPANION or OUTFIT / CHARGE / FX / SKIPS) with a BACK + START GAME
+footer, so the stage and the live preview own the top of the screen.
+A tap on the stage closes the deck.
