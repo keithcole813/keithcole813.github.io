@@ -818,19 +818,21 @@ function titleMusic() {   /* bg 1 on the character select screen (Keith v0.63: "
 }
 let rawBoom = null, bufBoom = null, decBoom = null, gainBoom = null, boomT = 0, lastBoomT = -9;
 let rawCoin = null, bufCoin = null, decCoin = null, gainCoin = null;
-let rawNote = null, bufNote = null, decNote = null, gainNote = null, noteSrc = null, noteStreak = 0, lastNoteT = -9;
+let rawNote = null, bufNote = null, decNote = null, gainNote = null, noteSrc = null, noteStreak = 0, lastNoteT = -9, noteLastRate = 1;
+const NOTE_STREAK_WINDOW = 2.5;   /* RC1.34: the streak window, NAMED — grabs chained inside it climb playNote's pitch ladder; a gap longer than it breaks the streak and the ladder resets (the v0.83 ladder, its window made a constant) */
 let rawSpark = null, bufSpark = null, decSpark = null, gainSpark = null;   /* the electric spark (Keith v0.94, his YouTube pick WcxRBGpynTk) */
 let rawTh = null, bufTh = null, decTh = null, gainTh = null, rainHeard = false;   /* the thunder (Keith's upload, v0.95): cracks ONCE when a group of rain (dark) clouds shows up on screen; the latch re-arms when none are on screen */
 let rawW = null, bufW = null, decW = null, gainW = null, srcW = null;   /* the wings loop (Keith's trippin instrumental, v0.86) */
 let rawMg = null, bufMg = null, decMg = null, gainMg = null, srcMg = null;   /* the magnet loop (Keith's pick, v0.94): 'Best Intentions' — LaShmoove, 161.8 BPM, 6 bars, A minor */
 let rawDk = null, bufDk = null, decDk = null, gainDk = null, srcDk = null, darkGateOn = null;   /* the dark-cloud water walk (Keith's pick, v0.91): sounds ONLY while your feet are on a dark cloud */
 function playNote() {   /* Keith's note pick (v0.83): each successive note in a run climbs in pitch; a new note CUTS the last — they never overlap */
-  if (!actx || !bufNote || actx.state !== 'running') return;
-  noteStreak = (time - lastNoteT < 2.5) ? Math.min(noteStreak + 1, 12) : 0;
+  noteStreak = (time - lastNoteT < NOTE_STREAK_WINDOW) ? Math.min(noteStreak + 1, 12) : 0;   /* RC1.34: the streak is GAME STATE, so it is booked before the audio gate — the ladder climbs and resets identically whether or not the sound stack is live */
   lastNoteT = time;
+  noteLastRate = Math.pow(2, noteStreak / 12);
+  if (!actx || !bufNote || actx.state !== 'running') return;
   if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
   if (!gainNote) { gainNote = actx.createGain(); gainNote.gain.value = 0.7; gainNote.connect(audBusS()); }
-  const src = actx.createBufferSource(); src.buffer = bufNote; src.playbackRate.value = Math.pow(2, noteStreak / 12); src.connect(gainNote); src.start();
+  const src = actx.createBufferSource(); src.buffer = bufNote; src.playbackRate.value = noteLastRate; src.connect(gainNote); src.start();
   noteSrc = src;
 }
 function playCoin() {   /* the power-up sweep the moment the coin lands (Keith's pick, v0.83) */
@@ -1194,7 +1196,7 @@ const ZS = { on: false, zx: 0, deck: null, phase: 0, mode: 'off', frame: 0, grow
 function zeusSurf(p, x) { return p.y + (p.sink || 0) + 6 + (p.tilt ? Math.sin(p.tilt) * (x - (p.x + p.len * 0.5)) : 0); }   /* DEV FORK 107: a deck's drawn surface line at x — the +6 is the deck draw's own inset; a tilted deck's line leans with it, so his paws ride see-saws too */
 function zeusDeckAt(x, pref) { let best = null, bd = 1e18; for (const p of plats) { if (p.gone || p.dropping || p.flipOff) continue; if (x < p.x - 2 || x > p.x + p.len + 2) continue; if (p === pref) return p; const d = Math.abs(zeusSurf(p, x) - ZS.planeY); if (d < bd) { bd = d; best = p; } } return best; }   /* DEV FORK 107: the solid deck under a point, preferring the surface nearest his current ground plane */
 function zeusLeapFrame(t) { t = Math.max(0, Math.min(1, t)); if (t < 17 / 61) return t / (17 / 61) * 17; if (t < 45 / 61) return 17 + (t - 17 / 61) / (28 / 61) * 28; return 45 + (t - 45 / 61) / (16 / 61) * 16; }   /* RC1.31: span fraction -> leap frame BY PHASE — the clip's own phase shares (launch 0-16, hang 17-44, descent 45-60 of the 61-frame flight), re-driven: the span is now IVEY's air segment (her takeoff point to her landing point), and each of her double-jump sub-segments re-runs the whole map, so her double re-fires his launch. Frame 61 (the clip's touchdown) plays as the span completes, into the ZEUS_SETTLE run-out. (The FORK 111/RC1.20 signature zeusLeapFrame(P, x) and its plan are retired with the solved leap.) */
-function zeusProject(x0, y0, vy0, ag, rate, d0) { const dt = 1 / 60; const magF = (typeof magT !== 'undefined' && magT > 0) ? 1.6 : 1, grabV = (typeof wingT !== 'undefined' && wingT > 0) ? 90 : 260; let v = vy0, x = x0, y = y0, pyPrev = y0; for (let k = 0; k < 320; k++) { v += GRAV * ag * magF * dt;   /* RC1.32: the replay now runs under HER gravity of the moment — the magnet's 1.6x while it lasts — and her grab eligibility (a winged descent hangs at 90, not 260). The tapped flutter stays unmodelled: no projection can know her taps. */ pyPrev = y; x += rate * dt; y += v * dt; if (v >= 0) { for (const p of plats) { if (p.gone || p.flipOff || p.dropping) continue; if (x + 68 < p.x || x - 36 > p.x + p.len) continue; const top = p.y + (p.sink || 0); if (pyPrev <= top + 2 && y >= top) return { outcome: 'land', deck: p, x1: x }; } for (const p of plats) { if (p.gone || p.flipOff || p.dropping) continue; const top = p.y; if (v > grabV && y > top + 10 && y < top + 175 && x + 62 > p.x && x + 62 < p.x + 150 && pyPrev < top + 175) return { outcome: (!d0 || p.x >= d0.x + d0.len) ? 'liphang' : 'miss', deck: p, x1: x }; } } if (y > y0 + 6000) break; } return { outcome: 'miss', deck: null, x1: x }; }   /* RC1.31: THE MISS CALCULATION (Keith) — at her takeoff her jump is replayed through the game's own integrator and its landing / grab tests on the spec's four inputs (her launch vy from the charge, her airGrav, the course speed, GRAV 5200): she lands it, hangs on the far lip, or misses — known before Zeus commits to anything. Retired with the solved leap: zeusNextDeck, zeusArcFor, zeusTouchIn, zeusPlanLeap, zeusArcW */
+function zeusProject(x0, y0, vy0, ag, rate, d0) { const dt = 1 / 60; const grabV = (typeof wingT !== 'undefined' && wingT > 0) ? 90 : 260; let v = vy0, x = x0, y = y0, pyPrev = y0; for (let k = 0; k < 320; k++) { v += GRAV * ag * dt;   /* RC1.32: the replay runs under HER gravity of the moment and her grab eligibility (a winged descent hangs at 90, not 260). The tapped flutter stays unmodelled: no projection can know her taps. RC1.34: her gravity is never magnet-multiplied now (the 1.6x retired with the hazard), so the replay carries no magnet factor either */ pyPrev = y; x += rate * dt; y += v * dt; if (v >= 0) { for (const p of plats) { if (p.gone || p.flipOff || p.dropping) continue; if (x + 68 < p.x || x - 36 > p.x + p.len) continue; const top = p.y + (p.sink || 0); if (pyPrev <= top + 2 && y >= top) return { outcome: 'land', deck: p, x1: x }; } for (const p of plats) { if (p.gone || p.flipOff || p.dropping) continue; const top = p.y; if (v > grabV && y > top + 10 && y < top + 175 && x + 62 > p.x && x + 62 < p.x + 150 && pyPrev < top + 175) return { outcome: (!d0 || p.x >= d0.x + d0.len) ? 'liphang' : 'miss', deck: p, x1: x }; } } if (y > y0 + 6000) break; } return { outcome: 'miss', deck: null, x1: x }; }   /* RC1.31: THE MISS CALCULATION (Keith) — at her takeoff her jump is replayed through the game's own integrator and its landing / grab tests on the spec's four inputs (her launch vy from the charge, her airGrav, the course speed, GRAV 5200): she lands it, hangs on the far lip, or misses — known before Zeus commits to anything. Retired with the solved leap: zeusNextDeck, zeusArcFor, zeusTouchIn, zeusPlanLeap, zeusArcW */
 window.__zeusReset = function () { ZS.on = false; ZS.deck = null; ZS.mode = 'off'; ZS.sit = null; ZS.sitDeck = null; ZS.path.length = 0; ZS.segs.length = 0; ZS.seg = null; ZS._cur = null; ZS.drawn = false; ZS.leaps = 0; ZS.pitch = 0; ZS.phOff = 0; ZS.phSeg = null; ZS.phLatch = null; ZS.prevPx = (typeof px === 'number') ? px : 0; };   /* RC1.31: a reset clears the mirror whole — no path, no segments, no sit survives it */
 window.__zeusTick = function (dt) {
   const act = !!window.__zeusOpt && selChar === 'ivey' && mode === 'run';
@@ -1507,12 +1509,16 @@ let held = false, pressT = 0, lastHold = 0, airMove = null, airT = 0, spin = 0, 
 let doubleArmed = false, doubleUsed = false, tripleUsed = false;   /* Emma's double jump (v0.50): a charged jump arms ONE mid-air re-jump — never two (Keith: no triple jumps). The WINGS alone carve the exception (Keith v0.96): tripleUsed tracks the one extra air jump a worn pair grants */
 /* v0.82 ITEMS (Keith, 2026-11-09): notes bank feet, the lightning coin grants a timed charge, storm banks fork the course, planes cross, the sky dresses itself */
 let notes = [], noteFt = 0, notesGot = 0, notesBanked = 0, noteCharge = false;   /* RC1.21: notesBanked = the notes this run actually banked (25 x tier a grab) — the wipeout itemizes IT, not the grab count */
+let noteTrail = [], noteSparks = [], noteDisp = 0, notePend = 0, noteBumpT = 0, noteBumps = 0;   /* RC1.34 (Keith's Note Feel ruling, 2026-11-27): the grabbed note's PRESENTATION state — trail entries on their follow-then-fly ride home, the grab-point sparkles, and the counter's DISPLAYED count. The wallet banks at the grab (noteBank, unchanged); the counter steps when the icon lands, and notePend is what it still owes — display + pend always equals the wallet, so the two reconcile by construction */
+const NOTE_FOLLOW_T = 0.55, NOTE_POP_T = 0.3, NOTE_FLY_T = 0.45, NOTE_BUMP_T = 0.35, MAG_PULL = 152;   /* RC1.34: the feel constants — the follow's seconds (dial: window.__noteFollowT), the pop's swell window, the flight home, the counter bump — and Keith's ruled magnet range: 10 FT = 152 units */
+function noteFollowT() { const v = window.__noteFollowT; return (typeof v === 'number' && v >= 0.15 && v <= 1.5) ? v : NOTE_FOLLOW_T; }   /* the follow-feel dial, read at each grab — Keith tunes it under playtest like the Zeus tempo */
+function noteHudTarget() { let fx = 0.90, fy = 0.045; const h = document.getElementById('hudNotes'); if (h && typeof h.getBoundingClientRect === 'function') { const r = h.getBoundingClientRect(); if (r && r.width > 0 && window.innerWidth > 0 && window.innerHeight > 0) { fx = (r.left + r.width / 2) / window.innerWidth; fy = (r.top + r.height / 2) / window.innerHeight; } } return { x: camX + fx * viewW / zoom, y: camY + fy * viewH / zoom }; }   /* RC1.34: where the counter sits, in world units — measured off the element when the browser offers it, else the top-right corner the HUD box has always occupied */
 let noteNextT = 6, noteLane = 0;   /* the note drip (Keith v0.88): about 4 notes every 10 seconds, at low / high / in-between jump heights, never below the clouds */   /* banked feet ride along at display + posting only — the recorder's distance stays pure travel */
 let coin = null, nextCoinFt = 1000, coinT = 0;
 let wing = null, nextWingFt = 1500, wingT = 0, wingPhase = 0, flutterT = 0;   /* flutterT (v0.93): the tapped flutter's hold timer — while it runs, the wings hold a slow sink */
 let gwing = null, nextGWingFt = 1e9, gwingGap = 4500, wingKind = null, wingMax = 10;   /* DEV FORK 46: the gold milestone is parked at a billion (Keith) — the GOLD PICKUP IS RETIRED; gold wings are the deathless-10,000 FT feat, offered every 1,000 FT once earned, never a course pickup */   /* the GOLD wings (Keith v0.88): rarer, 15 seconds, Lashmoove-fire glow */
 let bwing = null, nextBWingFt = 3000, bwingGap = 3000;   /* the BLUE wings (Keith v0.94): his lightning pair — the middle tier, 12 seconds: more than the white pair's 10, less than the gold pair's 15 */
-let magnet = null, nextMagFt = 2000, magGap = 2000, magT = 0, magFlashT = 0;   /* THE MAGNET (Keith v0.94): a hazard pickup — touch it and gravity runs 1.6x for 7 seconds; jumping while magnetized sparks + strobes (magFlashT) */
+let magnet = null, nextMagFt = 2000, magGap = 2000, magT = 0, magFlashT = 0;   /* THE MAGNET (Keith v0.94; REWORKED RC1.34): a buff pickup now — touch it and for 7 seconds every note within 10 FT (152 units) is grabbed and streams after her; the 1.6x gravity hazard is retired. Jumping while magnetized still sparks + strobes (magFlashT) — the dressing now marks a buff */
 let coinGap = 1000, wingGap = 1500;   /* the power-up spacing GROWS as the run does (Keith v0.86): at top speed a flat 1000 FT coin gap leaves almost no un-charged running — back-to-back blue doubles, his 5,367 FT run called it */
 let floaters = [];   /* the +25 FT popups at each note (Keith v0.86): the player sees what the note just paid */   /* WINGS (Keith v0.86): a timed power-up — tap jump to flap and fly */
 const WINGN = { n: 36, w: 145.3, h: 223.7, ax: 0.4879, ay: 0.1731 };   /* the baked flap loop: cell + mount anchor, measured off Keith's kc2 bake (scene projections, not estimates) */
@@ -2401,6 +2407,7 @@ function startRun() { if (window.__mapLocked) return;
   notes = []; noteFt = 0; notesGot = 0; notesBanked = 0; noteCharge = false; coin = null; nextCoinFt = 1000; coinT = 0;   /* items reset per run (v0.82) */
   wing = null; nextWingFt = 1500; wingT = 0; wingPhase = 0; flutterT = 0; floaters = []; coinGap = 1000; wingGap = 1500; gwing = null; nextGWingFt = 1e9; gwingGap = 4500;   /* DEV FORK 46: gold pickup retired (Keith) */ wingKind = null; wingMax = 10; noteNextT = 6; noteLane = 0; bwing = null; nextBWingFt = 3000; bwingGap = 3000; magnet = null; nextMagFt = 2000; magGap = 2000; magT = 0; magFlashT = 0; rainHeard = false; if (window.__tkWings) { wingT = 10; wingMax = 10; wingKind = 'std'; wingPhase = 0; }   /* DEV FORK 101 TEST KIT: endless wings — the run starts with the white pair already on */   /* blue wings + magnet + thunder latch reset per run (v0.94/v0.95) */   /* wings + gold wings + spacing + note drip reset per run (v0.86/v0.88) */
   noteStreak = 0; lastNoteT = -9; if (noteSrc) { try { noteSrc.stop(); } catch (e) {} noteSrc = null; }
+  noteTrail = []; noteSparks = []; noteDisp = window.__notes | 0; notePend = 0; noteBumpT = 0; noteBumps = 0; noteLastRate = 1;   /* RC1.34: a fresh run starts with the counter honest — the display equals the wallet and nothing is in flight */
   stormAt = 800 * 15.24; stormSteps = 0; stumbleT = 0; rocket = null; rocketNextAt = 55; rpuffs = [];
   askTilt(); tiltHome = { b: tiltBeta, g: tiltGamma };   /* HOME is the pose in your hand when you hit play (Keith v0.83) */
   G = null; GR = null;   /* DEV FORK 86 (completed, Keith's 'Do it'): NO GHOST AT THE START LINE -- startRun used to switch him on here, around the checkpoint gate; he stands down now and the gate brings him in at the first claimed checkpoint */
@@ -2749,7 +2756,7 @@ function update(dt) {
       else { slipPlat = null; vy = 140; }   /* DEV FORK 21 (Keith, 2026-11-12): the slip plunge LANDS — 'Clouds below me should have caught me.' The v0.71 never-lands exception is retired; no grab on the way down and no mid-air jump, as ever */
     }
   } else if (!grounded) {
-    if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1) * (magT > 0 ? 1.6 : 1);   /* v0.94: the MAGNET multiplies whatever gravity the moment already has by 1.6 while its 7 seconds run */ if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
+    if (flutterT > 0) flutterT -= dt; vy += GRAV * airGrav * dt * (flutterT > 0 ? 0.3 : 1);   /* RC1.34: the MAGNET's 1.6x gravity multiplier is RETIRED (Keith's Note Feel ruling, 2026-11-27) — the magnet never touches her jump again; its 7 seconds now buy the 10 FT note pull at the grab instead */ if (flutterT > 0 && vy > 150) vy = 150; py += vy * dt; airT += dt;   /* v0.93 (Keith): the flutter is TAPPED, never automatic — while a tap's flutter hold runs, gravity is a third and the sink caps at 150; between taps he falls for real. The v0.92 automatic half-gravity + 460-cap descent is retired; the distance now comes from the 1.5x/2x jump stretch and the tapping itself. */
     /* the flip cue: an armed jump converts at the top of the arc */
     if (airMove === 'jump' && flipArmed && !flipped && airT >= 0.26 && vy >= -430) {
       flipped = true; flipMove = rnd(['flip', 'diveflip']); flipT = 0; airMove = flipMove;
@@ -2889,7 +2896,7 @@ function update(dt) {
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
   }
   if (magnet && Math.abs(px - magnet.x) < 80 && Math.abs((py - 110) - magnet.y) < 150) {
-    magnet = null; magT = 7; wingT = 0; wingKind = null; wingPhase = 0; flutterT = 0; coinT = 0; noteCharge = false; doubleArmed = false; playBoom(); playTrack();   /* MAGNETIZED (Keith v0.94): gravity runs 1.6x for 7 seconds — AND YOU LOSE YOUR WINGS AND YOUR CHARGE (Keith): the pair, the coin's charge, the 8th-note charge and the armed air jump all die the moment it grabs you; the boom sells the weight, and his beat takes over the music */
+    magnet = null; magT = 7; wingT = 0; wingKind = null; wingPhase = 0; flutterT = 0; coinT = 0; noteCharge = false; doubleArmed = false; playBoom(); playTrack();   /* MAGNETIZED (Keith v0.94; REWORKED RC1.34): 7 seconds of the 10 FT note pull — the 1.6x gravity that made it a hazard is retired (Note Feel ruling). What still dies the moment it grabs you, by Keith's v0.94 word, is the pair, the coin's charge, the 8th-note charge and the armed air jump; the boom sells the weight, and his beat takes over the music */
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 60);
   }
   if (runTime >= noteNextT) {   /* THE NOTE DRIP (Keith v0.88): about 4 every 10 seconds — low (a hop), high (a full jump), in-between — anchored to the next deck ahead and NEVER below the clouds */
@@ -2908,10 +2915,12 @@ function update(dt) {
     for (let k = 0; k < 12; k++) spawnPuff(px - 40 + k * 8, py - 60, 10 + Math.random() * 8, 170);
   }
   for (const n of notes) {
-    if (!n.got && Math.abs(px - n.x) < 64 && Math.abs((py - 110) - n.y) < 95) {   /* window tightened with the raise: only a jump collects (Keith v0.84) */
+    const ndx = px - n.x, ndy = (py - 110) - n.y;   /* RC1.34: the grab geometry, measured once — the contact box as always, plus the magnet's ruled pull around the same chest anchor */
+    if (!n.got && ((Math.abs(ndx) < 64 && Math.abs(ndy) < 95) || (magT > 0 && ndx * ndx + ndy * ndy < MAG_PULL * MAG_PULL))) {   /* window tightened with the raise: only a jump collects (Keith v0.84) — RC1.34: while the magnet burns, the same grab fires anywhere inside its 10 FT pull (152 units, radial from her chest) and the note streams after her like any grab */
       const tier = n.img === 'notegreen' ? 3 : n.img === 'notepurple' ? 2 : 1;   /* v0.94 (Keith): PURPLE pays 2x — 50 FT and the note sound twice; GREEN pays 3x — 75 FT and the note sound three times; the strikes climb because each one climbs the pitch ladder */
       n.got = true; noteFt += 25 * tier; notesGot++; playNote(); noteBank(25 * tier); notesBanked += 25 * tier;   /* RC1.21 (Keith): THE WALLET BANKS THE FLASH — the stars show 25 x tier, so 25 x tier is what a grab pays (was noteBank(1): a 3,000 FT run banked 7-10 while the screen flashed hundreds) */   /* DEV FORK 53: the wallet is credited the moment a note lands — the got flag fires once per note, so no revive or re-run can double-credit */
       for (let e = 1; e < tier; e++) setTimeout(() => { if (mode === 'run') playNote(); }, e * 110);   /* the extra strikes in succession, each a ladder step higher (and cutting the prior tail, per the standing note rule) */
+      noteTrail.push({ img: n.img, val: 25 * tier, x: n.x, y: n.y, st: 'follow', t: 0, followT: noteFollowT(), fx: n.x, fy: n.y, tx: n.x, ty: n.y }); noteSparks.push({ x: n.x, y: n.y, t: 0 }); notePend += 25 * tier;   /* RC1.34 (Keith's Note Feel ruling): the bank above has already landed — what follows is PRESENTATION of the same event: the note trails her, then flies to the counter and bumps it. notePend tracks what the counter still owes, so display + pend always equals the wallet */
       floaters.push({ x: n.x, y: n.y - 34, t: 0, mult: tier });   /* flash the +25 FT right where it was collected (Keith) — with its 2X/3X badge beside it on the paying tiers */
       spawnPuff(n.x, n.y, 13, 150); pushTrail(n.x, n.y, CHAR_FX[selChar].streak);
       if (notesGot % 8 === 0) { noteCharge = true; chargeFx(1.4); }   /* every 8th note: the next jump is a FULL charge */
@@ -2920,6 +2929,11 @@ function update(dt) {
   if (notes.length > 40) notes = notes.filter(n => !n.got && n.x > px - 700);
   for (const f of floaters) f.t += dt;
   if (floaters.length) floaters = floaters.filter(f => f.t < 0.9);
+  for (let i = noteTrail.length - 1; i >= 0; i--) { const e = noteTrail[i]; e.t += dt;   /* RC1.34: the grabbed notes' ride — FOLLOW her a beat (a homing trail at her shoulder), then FLY to the counter and bump it */
+    if (e.st === 'follow') { const ax = px - 120, ay = py - 130, kk = Math.min(1, dt * 9); e.x += (ax - e.x) * kk; e.y += (ay - e.y) * kk; if (e.t >= e.followT) { e.st = 'fly'; e.t = 0; e.fx = e.x; e.fy = e.y; } }
+    else { const tg = noteHudTarget(); e.tx = tg.x; e.ty = tg.y; const p = Math.min(1, e.t / NOTE_FLY_T), q = p * p * (3 - 2 * p); e.x = e.fx + (e.tx - e.fx) * q; e.y = e.fy + (e.ty - e.fy) * q; if (p >= 1) { noteTrail.splice(i, 1); noteDisp += e.val; notePend -= e.val; noteBumpT = NOTE_BUMP_T; noteBumps++; } } }
+  for (let i = noteSparks.length - 1; i >= 0; i--) { noteSparks[i].t += dt; if (noteSparks[i].t > 0.45) noteSparks.splice(i, 1); }   /* the grab sparkle's half-second */
+  if (noteBumpT > 0) noteBumpT = Math.max(0, noteBumpT - dt);
   if (!coin && Math.floor(dist / 15.24) >= nextCoinFt) {
     const q = pickupDeck(1000);
     if (q && pickupClear(q.x + q.len * 0.5) && itemClear(q.x + q.len * 0.5, q.y - 250, 48)) { coin = { x: q.x + q.len * 0.5, y: q.y - 250 }; nextCoinFt += coinGap; coinGap = Math.round(coinGap * 1.35); if (nextWingFt > nextCoinFt && nextWingFt - nextCoinFt < 500) nextWingFt = nextCoinFt + 500; }   /* raised (Keith v0.83); the gap grows 1000 -> 1350 -> 1820... and a wings milestone never sits within 500 FT of a coin (Keith v0.86) */
@@ -2962,7 +2976,7 @@ function update(dt) {
   camY += (wantY - camY) * Math.min(1, dt * 5);
   shake = Math.max(0, shake - dt * 26);
   $('dist').innerHTML = '<small>DISTANCE</small>' + runFt() + 'ft';
-  { const hn = $('hudNotes'); if (hn) hn.innerHTML = '<small>NOTES</small>♪ ' + (window.__notes | 0).toLocaleString('en-US'); }   /* DEV FORK 55 (Keith): FULL BALANCE in the run too — the player watches the gap to the 3,000-note unlock close as they play */   /* DEV FORK 54: this run's haul, counted live beside the distance — the top games' in-run pattern */
+  { const hn = $('hudNotes'); if (hn) { if (!noteTrail.length) { noteDisp = window.__notes | 0; notePend = 0; } hn.innerHTML = '<small>NOTES</small>♪ ' + (noteDisp | 0).toLocaleString('en-US'); hn.style.transform = noteBumpT > 0 ? 'scale(' + (1 + 0.38 * Math.sin(Math.PI * (1 - noteBumpT / NOTE_BUMP_T))).toFixed(3) + ')' : ''; } }   /* DEV FORK 55 (Keith): FULL BALANCE in the run too — the player watches the gap to the 3,000-note unlock close as they play */   /* DEV FORK 54: this run's haul, counted live beside the distance — the top games' in-run pattern */   /* RC1.34: the run counter is PRESENTATION now — it reads noteDisp, stepping when a grabbed note's icon lands on it and bumping with the landing (the wallet banked at the grab; noteUI owns every other surface). With nothing in flight the display resyncs to the wallet, so the two can never drift apart */
   if (window.__adGuardT > 0) { window.__adGuardT = Math.max(0, window.__adGuardT - (typeof dt === 'number' ? dt : 0.016)); if (vy > 90) vy = 90; } else if (py - camY > viewH / zoom + 260) gameOver();   /* DEV FORK 7: inside the 1.5 s revive float guard he sinks gently and cannot fall-die */
 }
 
@@ -3415,6 +3429,21 @@ function draw() {
     const w = 56, h = w * img.naturalHeight / img.naturalWidth;
     ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h);
   }
+  for (const e of noteTrail) {   /* RC1.34: the grabbed notes on their way home — trailing her, then flying to the counter */
+    const img = IMG[e.img]; if (!img || !img.naturalWidth) continue;
+    let sc = 1; if (e.st === 'follow' && e.t < NOTE_POP_T) sc = 1 + 0.5 * Math.sin(Math.PI * e.t / NOTE_POP_T); else if (e.st === 'fly') sc = 1 - 0.45 * Math.min(1, e.t / NOTE_FLY_T);   /* the POP: swell then shrink back as the grab registers; the flight shrinks her toward the counter's icon size */
+    const sx = e.x - camX, sy = e.y - camY; if (sx < -90 || sx > viewW / zoom + 90) continue;
+    const w = 56 * sc, h = w * img.naturalHeight / img.naturalWidth;
+    ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h);
+  }
+  for (const s of noteSparks) {   /* RC1.34: the grab SPARKLE — a flash ring + star points at the grab point, gone in half a second */
+    const sx = s.x - camX, sy = s.y - camY; if (sx < -120 || sx > viewW / zoom + 120) continue;
+    const a = Math.max(0, 1 - s.t / 0.45), r = 10 + s.t * 95;
+    ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = '#ffe98a'; ctx.lineWidth = 2.5; ctx.beginPath();
+    ctx.moveTo(sx - r, sy); ctx.lineTo(sx + r, sy); ctx.moveTo(sx, sy - r); ctx.lineTo(sx, sy + r);
+    ctx.moveTo(sx - r * 0.62, sy - r * 0.62); ctx.lineTo(sx + r * 0.62, sy + r * 0.62); ctx.moveTo(sx + r * 0.62, sy - r * 0.62); ctx.lineTo(sx - r * 0.62, sy + r * 0.62);
+    ctx.stroke(); ctx.beginPath(); ctx.arc(sx, sy, r * 0.45, 0, 6.2832); ctx.stroke(); ctx.restore();
+  }
   if (coin) {
     const img = IMG.coin, sx = coin.x - camX, sy = coin.y - camY + Math.sin(time * 2) * 5;
     const rgb = ((window.__chargeHex ? window.__chargeHex(selChar) : CHAR_FX[selChar].halo).match(/\d+/g)   /* RC1: the coin glow reads the equipped color too */ || [255, 210, 90]).slice(0, 3).join(',');
@@ -3447,7 +3476,7 @@ function draw() {
     const img = IMG.magnet, sx = magnet.x - camX, sy = magnet.y - camY + Math.sin(time * 2) * 5;
     if (img && img.naturalWidth) { const h = 84, w = h * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, sx - w / 2, sy - h / 2, w, h); }
   }
-  if (magT > 0 && mode === 'run') {   /* MAGNETIZED: the horseshoe rides over his head while the heavy gravity runs, blinking out in the last second like the wings do */
+  if (magT > 0 && mode === 'run') {   /* MAGNETIZED: the horseshoe rides over his head while the pull runs, blinking out in the last second like the wings do (RC1.34: the dressing now marks the buff) */
     const img = IMG.magnet;
     if (img && img.naturalWidth && (magT > 1 || Math.floor(time * 6) % 2 === 0)) { const w = 46, h = w * img.naturalHeight / img.naturalWidth; ctx.drawImage(img, px - camX - w / 2, py - camY - 306 + Math.sin(time * 6) * 4 - h / 2, w, h); }
   }
@@ -3957,10 +3986,10 @@ if (new URLSearchParams(location.search).has('options')) setTimeout(openOptions,
 window.__notes = 0;
 try { window.__notes = parseInt(localStorage.getItem('sixloudrc1_notes') || '0', 10) || 0; } catch (e) {}
 function noteSave() { try { localStorage.setItem('sixloudrc1_notes', String(window.__notes | 0)); } catch (e) {} }
-function noteUI() { const b = document.getElementById('noteBank'); if (b) b.textContent = '♪ ' + (window.__notes | 0).toLocaleString('en-US') + ' NOTES'; const o = document.getElementById('optNotes'); if (o) o.textContent = (window.__notes | 0).toLocaleString('en-US'); const h = document.getElementById('hudNotes'); if (h) h.innerHTML = '<small>NOTES</small>♪ ' + (window.__notes | 0).toLocaleString('en-US'); }   /* DEV FORK 140: THE CHIP IS A WALLET DISPLAY — noteUI already runs at boot and on every bank/spend; the title chip now reads the stored balance from boot instead of the hardcoded 0 it shipped with (Keith bug report, 2026-11-17) */
+function noteUI() { const b = document.getElementById('noteBank'); if (b) b.textContent = '♪ ' + (window.__notes | 0).toLocaleString('en-US') + ' NOTES'; const o = document.getElementById('optNotes'); if (o) o.textContent = (window.__notes | 0).toLocaleString('en-US'); const h = document.getElementById('hudNotes'); if (h && mode !== 'run') h.innerHTML = '<small>NOTES</small>♪ ' + (window.__notes | 0).toLocaleString('en-US'); }   /* RC1.34: during a run the tick owns hudNotes (the display count steps at the icon landing, not the bank) — noteUI keeps every other surface */   /* DEV FORK 140: THE CHIP IS A WALLET DISPLAY — noteUI already runs at boot and on every bank/spend; the title chip now reads the stored balance from boot instead of the hardcoded 0 it shipped with (Keith bug report, 2026-11-17) */
 function noteBank(n) { window.__notes = (window.__notes | 0) + (n | 0); noteSave(); noteUI(); }
 noteUI();
-window.__noteTest = { bal: () => window.__notes | 0, bank: noteBank };
+window.__noteTest = { bal: () => window.__notes | 0, bank: noteBank, feel: () => ({ streak: noteStreak, rate: noteLastRate, trail: noteTrail.length, sparks: noteSparks.length, disp: noteDisp, pend: notePend, bumpT: Math.round(noteBumpT * 100) / 100, bumps: noteBumps, magT: Math.round(magT * 10) / 10, followT: noteFollowT() }), addNote: (x, y, img) => { const n = { x, y, img: img || 'noteplain', got: false }; notes.push(n); return n; }, setMag: s => { magT = s; }, player: () => ({ px: Math.round(px), py: Math.round(py), vy: Math.round(vy), grounded: !!grounded, mode, dead }) };   /* RC1.34: the Note Feel surface — the suite drives grabs, the streak ladder, flights and the magnet off it */
 window.__clearTest = { cdOf, itemClear, noteFaceClear, pickupDeck, clouds: () => CLOUDS, img: () => IMG, plats: () => plats, setPlats: a => { plats = a; }, notes: () => notes, items: () => ({ coin, wing, bwing, magnet, gwing }), state: () => ({ mode, noteLane, nextCoinFt, nextWingFt, nextBWingFt, nextMagFt, nextGWingFt }), setup: o => { plats = o.plats; px = o.px || 0; py = o.py || 0; vy = 0; grounded = o.ground || null; hangPlat = null; slipPlat = null; dist = o.dist || 0; runTime = o.runTime || 0; worldEnd = 1e12; stormAt = 1e12; notes = []; coin = null; wing = null; bwing = null; magnet = null; gwing = null; noteLane = o.noteLane || 0; noteNextT = o.noteDue ? runTime : runTime + 1e9; const __ft = Math.floor(dist / 15.24); nextCoinFt = o.coinDue ? __ft : 1e9; nextWingFt = o.wingDue ? __ft : 1e9; nextBWingFt = o.bwingDue ? __ft : 1e9; nextMagFt = o.magDue ? __ft : 1e9; nextGWingFt = 1e9; } };   /* DEV FORK 91: the clearance audit's hands (forkcheck S79) — synthetic stacks in, the REAL drip and spawns driven over them, every landing checked against every deck's drawn body */
 /* DEV FORK 56: CHARACTER LOCKS + PURCHASING (Keith, 2026-11-13 — roster ruled: 6lade + Sayori free; LaShmoove, Yorokobi, Ivey locked at 3,000 notes or $0.99). Ownership lives in sixloudrc1_ent, the record Restore Purchases reads. */
 const LOCKED_CHARS = ['lash', 'yoro', 'ivey'];
