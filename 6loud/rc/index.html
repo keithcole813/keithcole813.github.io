@@ -810,6 +810,8 @@ const musV = () => MUSIC_VOL;   /* audio is simply ON (Keith v0.69: the sound co
 const stpV = () => STEPS_VOL;
 const GALLOP_VOL = 0.5;   /* RC1.36: the alicorn hoofbeat loop's level — under the music (MUSIC_VOL 0.35 on the music bus, the steps at 0.65 on this one): a texture you feel, not a track */
 const galV = () => GALLOP_VOL;
+const ZEUS_RUN_VOL = 0.5;   /* RC1.37: the Zeus run loop's level — the gallop's own family (GALLOP_VOL 0.5 on this same SFX bus): paws under the music, a texture you feel, not a track */
+const zrV = () => ZEUS_RUN_VOL;
 let pendingSave = null;   /* set by gameOver: saves a qualifying score before EITHER exit from the board screen (v0.64) */
 let pendingCharBest = 0;   /* v0.99.7: a qualifying run's per-runner best, held un-stamped until initials are entered (no initials, no save anywhere) */
 let pubState = 'none';   /* DEV FORK (Keith, 2026-11-11): the world post is a CHOICE — 'none' until the player taps PUBLISH ('posted') or SKIP ('skipped'); leaving without choosing keeps the run on this device only */
@@ -827,7 +829,8 @@ let rawTh = null, bufTh = null, decTh = null, gainTh = null, rainHeard = false; 
 let rawW = null, bufW = null, decW = null, gainW = null, srcW = null;   /* the wings loop (Keith's trippin instrumental, v0.86) */
 let rawMg = null, bufMg = null, decMg = null, gainMg = null, srcMg = null;   /* the magnet loop (Keith's pick, v0.94): 'Best Intentions' — LaShmoove, 161.8 BPM, 6 bars, A minor */
 let rawDk = null, bufDk = null, decDk = null, gainDk = null, srcDk = null, darkGateOn = null;   /* the dark-cloud water walk (Keith's pick, v0.91): sounds ONLY while your feet are on a dark cloud */
-let rawGal = null, bufGal = null, decGal = null, gainGal = null, srcGal = null, galGateOn = null;   /* RC1.36: the alicorn GALLOP loop (Keith's pick, 2026-11-27: 'Horse Gallop Sound Effect' by wdylj, youtu.be/CqFOZhbvRV4, 5 s trimmed) — hoofbeats under the music ONLY while the pair gallops on a deck; a LOCAL side file like checkpoint.mp3/levelup.mp3 (his earlier YouTube picks), so it lands beside index.html as gallop-loop.mp3 and this chain wakes the moment the file exists */
+let rawGal = null, bufGal = null, decGal = null, gainGal = null, srcGal = null, galGateOn = null;
+let rawZr = null, bufZr = null, decZr = null, gainZr = null, srcZr = null, zeusGateOn = null;   /* RC1.37: the ZEUS RUN loop (Keith's pick, 2026-11-27: 'Dog Runs Left Then Right Sound Effect' by SM SOUNDFX, youtu.be/HpQ3-CfUsw4 — the first running pass cut to 4.0 s and loudnorm-lifted, the upload was very quiet) — paws under the music ONLY while Zeus gallops the decks beside Ivey; a LOCAL side file like gallop-loop.mp3, so it lands beside index.html as zeus-run-loop.mp3 and this chain wakes the moment the file exists */   /* RC1.36: the alicorn GALLOP loop (Keith's pick, 2026-11-27: 'Horse Gallop Sound Effect' by wdylj, youtu.be/CqFOZhbvRV4, 5 s trimmed) — hoofbeats under the music ONLY while the pair gallops on a deck; a LOCAL side file like checkpoint.mp3/levelup.mp3 (his earlier YouTube picks), so it lands beside index.html as gallop-loop.mp3 and this chain wakes the moment the file exists */
 function playNote() {   /* Keith's note pick (v0.83): each successive note in a run climbs in pitch; a new note CUTS the last — they never overlap */
   noteStreak = (time - lastNoteT < NOTE_STREAK_WINDOW) ? Math.min(noteStreak + 1, 12) : 0;   /* RC1.34: the streak is GAME STATE, so it is booked before the audio gate — the ladder climbs and resets identically whether or not the sound stack is live */
   lastNoteT = time;
@@ -882,6 +885,7 @@ if (window.fetch) {
   fetch('../play/assets/magnet-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawMg = b; }).catch(() => {});   /* Keith's magnet pick (v0.94): 'Best Intentions', for while you are magnetized */
   fetch('../play/assets/dark-walk.mp3').then(r => r.arrayBuffer()).then(b => { rawDk = b; }).catch(() => {});   /* Keith's dark-cloud pick (v0.91): the water walk, feet on a dark cloud only */
   fetch('gallop-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawGal = b; }).catch(() => {});   /* RC1.36: Keith's gallop pick — fetched BARE from beside index.html (the checkpoint.mp3/levelup.mp3 pattern for his trimmed YouTube picks); until the 5 s trim is dropped in, this 404s into the catch and the gallop chain stays silent */
+  fetch('zeus-run-loop.mp3').then(r => r.arrayBuffer()).then(b => { rawZr = b; }).catch(() => {});   /* RC1.37: Keith's Zeus pick — fetched BARE from beside index.html, the same pattern; if the file is ever missing this 404s into the catch and the run chain stays silent */
   fetch('../play/assets/steps.mp3').then(r => r.arrayBuffer()).then(b => { rawS = b; }).catch(() => {});
 }
 /* v0.17.1 — the silent-first-run fix, second attempt (Keith: "audio
@@ -912,6 +916,7 @@ function kickDecode() {
   if (!decMg && rawMg && actx.decodeAudioData) decMg = actx.decodeAudioData(rawMg.slice(0)).then(b => { bufMg = b; }).catch(() => { decMg = null; });
   if (!decDk && rawDk && actx.decodeAudioData) decDk = actx.decodeAudioData(rawDk.slice(0)).then(b => { bufDk = b; }).catch(() => { decDk = null; });
   if (!decGal && rawGal && actx.decodeAudioData) decGal = actx.decodeAudioData(rawGal.slice(0)).then(b => { bufGal = b; }).catch(() => { decGal = null; });   /* RC1.36: the gallop clip decodes with the rest; a failed decode frees its slot so the next tap retries (v0.66) */
+  if (!decZr && rawZr && actx.decodeAudioData) decZr = actx.decodeAudioData(rawZr.slice(0)).then(b => { bufZr = b; }).catch(() => { decZr = null; });   /* RC1.37: the Zeus clip decodes with the rest; a failed decode frees its slot so the next tap retries (v0.66) */
   if (!decS && rawS && actx.decodeAudioData) decS = actx.decodeAudioData(rawS.slice(0)).then(b => { bufS = b; }).catch(() => { decS = null; });   /* a failed decode frees its slot so the next tap retries (v0.66) */
 }
 function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab return); the heartbeat calls without it */
@@ -937,6 +942,7 @@ function playTrack(force) {   /* DEV FORK: force = an event poke (title tap, tab
     if (bufS && !srcS) { gainS = actx.createGain(); gainS.gain.value = 0; gainS.connect(audBusS()); srcS = actx.createBufferSource(); srcS.buffer = bufS; srcS.loop = true; srcS.connect(gainS); srcS.start(); }
     if (bufDk && !srcDk) { gainDk = actx.createGain(); gainDk.gain.value = 0; gainDk.connect(audBusS()); srcDk = actx.createBufferSource(); srcDk.buffer = bufDk; srcDk.loop = true; srcDk.connect(gainDk); srcDk.start(); }   /* the water walk runs silent behind its gate (v0.91), like the steps chain */
     if (bufGal && !srcGal) { gainGal = actx.createGain(); gainGal.gain.value = 0; gainGal.connect(audBusS()); srcGal = actx.createBufferSource(); srcGal.buffer = bufGal; srcGal.loop = true; srcGal.connect(gainGal); srcGal.start(); }   /* RC1.36: the gallop loop runs silent behind ITS gate too — gateGallop opens it only while the alicorns are up and galloping */
+    if (bufZr && !srcZr) { gainZr = actx.createGain(); gainZr.gain.value = 0; gainZr.connect(audBusS()); srcZr = actx.createBufferSource(); srcZr.buffer = bufZr; srcZr.loop = true; srcZr.connect(gainZr); srcZr.start(); }   /* RC1.37: the Zeus run loop runs silent behind ITS gate too — gateZeusRun opens it only while he gallops the decks beside her */
     if (bufMg && !srcMg) { gainMg = actx.createGain(); gainMg.gain.value = 0; gainMg.connect(audBusM()); srcMg = actx.createBufferSource(); srcMg.buffer = bufMg; srcMg.loop = true; srcMg.connect(gainMg); srcMg.start(); }   /* the magnet loop runs silent behind its scene too (v0.94) */
     const t = actx.currentTime;
     gainD.gain.cancelScheduledValues(t); gainD.gain.setTargetAtTime(sc === 'day' ? musV() : 0, t, 0.18);
@@ -975,6 +981,13 @@ function gateGallop() {   /* hoofbeats while the alicorns are up — checked eve
   if (actx && gainGal && actx.state === 'running') gainGal.gain.setTargetAtTime(on ? galV() : 0, actx.currentTime, 0.045);
 }
 window.__galState = function () { return { gate: galGate(), applied: galGateOn, buf: !!bufGal, src: !!srcGal, vol: GALLOP_VOL }; };   /* RC1.36: the checks' + proofs' eyes on the gallop sound — buf stays false until gallop-loop.mp3 sits beside index.html and decodes */
+function zrGate() { return mode === 'run' && ZS.on && ZS.mode === 'gallop'; }   /* RC1.37: THE ZEUS RUN GATE (Keith, 2026-11-27: 'Lets try this for zeus') — a run is live AND Zeus is present (ZS.on is __zeusTick's own verdict: Zeus equipped, Ivey the runner, mode 'run') AND he is in his GROUNDED GHOST-GALLOP state: ZS.mode 'gallop' is the mirror tick's deck branch, the only branch that rides his planeY on zeusSurf of the deck under him. His leap replay (ZS.mode 'leap'), both sits (ZS.mode 'sit' — before the cloud facing right, after it facing left), the title and customize (ZS.on never wakes there), any other runner (the tick's act gate holds ZS.on false) and a finished run all close it */
+function gateZeusRun() {   /* paws while Zeus runs beside her — checked every frame next to gateGallop, acts on change, fades at the steps' own snappy rate; the level rides a GainNode (the iOS law: an <audio> element's volume is not settable there) */
+  const on = zrGate();
+  if (on === zeusGateOn) return; zeusGateOn = on;
+  if (actx && gainZr && actx.state === 'running') gainZr.gain.setTargetAtTime(on ? zrV() : 0, actx.currentTime, 0.045);
+}
+window.__zeusSndState = function () { return { gate: zrGate(), applied: zeusGateOn, buf: !!bufZr, src: !!srcZr, vol: ZEUS_RUN_VOL }; };   /* RC1.37: the checks' + proofs' eyes on the Zeus run sound — buf stays false until zeus-run-loop.mp3 sits beside index.html and decodes */
 function xfade(toHeat) { playTrack(); }
 
 /* ---------- assets ---------- */
@@ -3855,10 +3868,11 @@ function audUI() {
 function audApply() {
   if (actx) { const t = actx.currentTime; if (busM) busM.gain.setTargetAtTime(window.__musOff ? 0 : 1, t, 0.05); if (busS) busS.gain.setTargetAtTime(window.__sfxOff ? 0 : 1, t, 0.05); }
   if (typeof playTrack === 'function') playTrack(true);   /* one forced routing pass: a live element stops (or resumes) NOW, and the WebAudio scenes re-assert behind the buses */
-  stepsGateOn = null; darkGateOn = null; galGateOn = null;   /* the element-carried gates re-decide under the new bus state */
+  stepsGateOn = null; darkGateOn = null; galGateOn = null; zeusGateOn = null;   /* the element-carried gates re-decide under the new bus state */
   if (typeof gateSteps === 'function') gateSteps();
   if (typeof gateDark === 'function') gateDark();
   if (typeof gateGallop === 'function') gateGallop();   /* RC1.36: the gallop gate re-decides under the new bus state too */
+  if (typeof gateZeusRun === 'function') gateZeusRun();   /* RC1.37: the Zeus run gate re-decides under the new bus state too */
   audUI();
 }
 function audToggle(which) {
@@ -3898,7 +3912,7 @@ function loop(ts) { if (window.__forkFrame) window.__forkFrame();   /* DEV FORK 
   if (sbK !== sbShown) { sbShown = sbK; $('startBtn').style.display = sb ? 'block' : 'none'; const ar = $('audRow'); if (ar) ar.style.display = sb ? 'flex' : 'none'; const mb = $('mapBtn'); if (mb) mb.style.display = (sb && !window.__reviveArmed) ? 'block' : 'none';   /* RC1.9 (Keith, 2026-11-21: 'We need it back, but if not in dev mode lock the ones not earned or bought'): the level select rides the title chrome for EVERYONE — the Map-2 gate is gone; the locks live in the pick, not the button (a locked selection wears its lock on the button + START and opens only earned or bought; dev mode lifts them as always) */ const ob = $('optBtn'); if (ob) ob.style.display = (sb && !window.__reviveArmed) ? 'block' : 'none'; const cb9 = $('custBtn'); if (cb9) cb9.style.display = (sb && !window.__reviveArmed) ? 'block' : 'none';   /* RC1.9: CUSTOMIZE rides the same chrome flag as OPTIONS — and the revive start hides it on the same FORK 72 rule */   /* DEV FORK 72: no map picker, no options on the revive start (Keith) — a mid-run resume is START and nothing else */ const vr = $('ver'); if (vr) vr.style.display = sb ? 'block' : 'none'; }   /* DEV FORK 60: OPTIONS + the version line ride the title-chrome flag too — the gameplay screen stays clean (Keith) */   /* DEV FORK 26: the MAP toggle rides START's flag too — RC1.9: the 'only once Map 2 is unlocked' condition is retired (Keith, 2026-11-21) */   /* DEV FORK 13: the title toggle pair rides START's visibility flag (Keith: FORK 12's pair stayed on during gameplay and doubled at the end) */
   const hd = mode !== 'over';   /* the DISTANCE plaque hides while the wipeout board is up (Keith 2026-11-07: it bled through behind WIPEOUT) */
   if (hd !== hudShown) { hudShown = hd; $('dist').style.display = hd ? 'block' : 'none'; const hn2 = $('hudNotes'); if (hn2) hn2.style.display = hd ? 'block' : 'none'; }   /* DEV FORK 54: the notes box rides the same visibility gate as the distance box */
-  if ((!window.__AD || !window.__AD.busy) && mode !== 'debug') ghostUpdate(dt);   /* DEV FORK 73: no ghosts in the review either */   /* DEV FORK 13: the ghost freezes with the world while an ad is up */   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark(); gateGallop();   /* RC1.36: the hoofbeat gate rides the same every-frame pass */
+  if ((!window.__AD || !window.__AD.busy) && mode !== 'debug') ghostUpdate(dt);   /* DEV FORK 73: no ghosts in the review either */   /* DEV FORK 13: the ghost freezes with the world while an ad is up */   /* every mode: LaShmoove keeps his own time (v0.22) */ gateSteps(); gateDark(); gateGallop(); gateZeusRun();   /* RC1.37: the paw gate rides the same every-frame pass */   /* RC1.36: the hoofbeat gate rides the same every-frame pass */
   { let rainOn = false; if (window.__map !== 'mnt' && window.__map !== 'mnt2' && window.__map !== 'gold') for (const p of plats) {   /* DEV FORK 98: THUNDER GATE (Keith) — the group-arrival watch stands down in DAY BREAK (mnt/mnt2), where FORK 96 made these decks plain: no crack with nothing stormy on screen */ if ((p.dark || p.storm) && !p.gone && (p.sink || 0) <= 640 && p.x + p.len > camX && p.x < camX + viewW / zoom) { rainOn = true; break; }   /* v0.98: the storm decks count too — the watch used to wait for a true DARK deck only, so a run through storm banks (Keith's 1,846-3,321 FT runs) never cracked once */ } if (rainOn && !rainHeard) { playThunder(); rainHeard = true; } else if (!rainOn) rainHeard = false; }   /* v0.95 (Keith): 'when rain clouds show up on screen play this once for the group' — one crack when the dark clouds arrive in view, never per cloud, and the next group cracks again */   /* DEV FORK 98: gated above — MIDNIGHT RUN and STORM SEASON keep the crack; the step-on strike (p.thunder) and playThunder itself are untouched */
   audioBeat += dt;   /* THE AUDIO HEARTBEAT (v0.67, Keith: "after you die and come back the audio is muted even with it set to play"): every half second the live scene re-asserts its routing. Death, the initials keyboard, an app switch, a suspended context resuming a beat late — every one of those could strand the gains or the element on the wrong side of a boundary, and a boundary-only design stays stranded until the NEXT boundary. playTrack is idempotent, so re-asserting it twice a second costs nothing and no stuck state survives longer than half a second. */
   if (audioBeat > 0.5) { audioBeat = 0; if ((mode !== 'title' || titleMusicOn) && animLoaded >= animTotal) playTrack(); }   /* DEV FORK: the heartbeat also stands down while assets stream — the load window is where the chop was heard */
